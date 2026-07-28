@@ -247,7 +247,7 @@ export const getCards = (): CardItem[] => {
     const year = row['Ano'] || 'Não informado';
     const type = row['Tipo'] || 'Não informado';
     const quantity = parseQuantity(row['Quantidade']);
-    const price = parseDecimal(row['Preço']);
+    const price = parseDecimal(row['Menor Liga']);
     const slug = createUniqueSlug(slugify(`${name}-${number}`), usedSlugs, language);
     const imageKey = normalizeText(`${name} ${number}`);
     const duplicateIndex = usedImages.get(imageKey) ?? 0;

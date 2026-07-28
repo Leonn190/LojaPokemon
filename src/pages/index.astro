@@ -20,7 +20,9 @@ const featuredBoosters = [...boosters]
   .filter((item) => item.price !== null)
   .sort((a, b) => (b.price ?? 0) - (a.price ?? 0))
   .slice(0, 14);
-const heroCard = featuredCards[0] ?? cards[0];
+const heroCard = cards.find((item) => item.name === 'Giratina V' && item.number === '186/196')
+  ?? featuredCards[0]
+  ?? cards[0];
 ---
 
 <BaseLayout active="home">
@@ -28,7 +30,7 @@ const heroCard = featuredCards[0] ?? cards[0];
     <div class="shell hero-grid">
       <div class="hero-copy" data-reveal>
         <span class="hero-badge"><i></i> Inventário organizado e pesquisável</span>
-        <h1>Seu próximo destaque está <em>no acervo.</em></h1>
+        <h1>Seu próximo destaque está <em>na coleção.</em></h1>
         <p>{siteConfig.tagline} Explore imagens, informações completas e valores sem sair do catálogo.</p>
         <div class="hero-actions">
           <a class="primary-cta" href={`${base}cartas/`}><span>Explorar cartas</span><b>↗</b></a>
@@ -73,8 +75,8 @@ const heroCard = featuredCards[0] ?? cards[0];
 
   <Carousel
     eyebrow="Cartas em destaque"
-    title="Peças que comandam o acervo"
-    description="Seleção automática das cartas com maior preço registrado no inventário."
+    title="Cartas que se destacam na coleção"
+    description="Uma seleção de cartas em movimento contínuo, com os preços definidos no catálogo."
     items={featuredCards}
     viewAllHref={`${base}cartas/`}
     viewAllLabel="Ver todas as cartas"
@@ -83,7 +85,7 @@ const heroCard = featuredCards[0] ?? cards[0];
   <Carousel
     eyebrow="Boosters disponíveis"
     title="Pacotes para todos os estilos de coleção"
-    description="Os boosters aparecem com somente o preço final definido na coluna Preço do inventário."
+    description="Pacotes disponíveis passando automaticamente, com o preço final definido no catálogo."
     items={featuredBoosters}
     viewAllHref={`${base}boosters/`}
     viewAllLabel="Ver todos os boosters"

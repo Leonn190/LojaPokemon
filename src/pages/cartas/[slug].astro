@@ -17,14 +17,14 @@ const related = allCards
   .sort((a, b) => {
     const scoreA = Number(a.collection === card.collection) * 3 + Number(a.type === card.type) * 2;
     const scoreB = Number(b.collection === card.collection) * 3 + Number(b.type === card.type) * 2;
-    return scoreB - scoreA || (b.ligaPrice ?? 0) - (a.ligaPrice ?? 0);
+    return scoreB - scoreA || (b.price ?? 0) - (a.price ?? 0);
   })
   .slice(0, 4);
 ---
 
 <BaseLayout
   title={`${card.name} ${card.number}`}
-  description={`${card.name} ${card.number}, da coleção ${card.collection}. Veja imagem, estado, idioma, ano, tipo e preço registrado na Liga.`}
+  description={`${card.name} ${card.number}, da coleção ${card.collection}. Veja imagem, estado, idioma, ano, tipo e preço registrado no catálogo.`}
   active="cards"
   bodyClass="detail-page"
 >
@@ -47,10 +47,10 @@ const related = allCards
         </div>
         <span class="detail-number">{card.number}</span>
         <h1>{card.name}</h1>
-        <p class="detail-lead">Uma página exclusiva para esta variação, com os dados do inventário organizados sem links externos ou valores paralelos.</p>
+        <p class="detail-lead">Visualização desta variação com os dados do inventário organizados sem links externos ou valores paralelos.</p>
 
         <div class="detail-price-panel">
-          <div><small>Preço de referência na Liga</small><strong>{formatBRL(card.ligaPrice)}</strong></div>
+          <div><small>Preço</small><strong>{formatBRL(card.price)}</strong></div>
           <span>Valor registrado no inventário</span>
         </div>
 
