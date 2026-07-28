@@ -11,7 +11,8 @@ const { item, detail = false, eager = false } = Astro.props;
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 const encodeFilename = (filename: string) => filename.split('/').map(encodeURIComponent).join('/');
-const toImageUrl = (filename: string) => `${base}imagens/${encodeFilename(filename)}`;
+const imageFolder = item.kind === 'booster' ? 'imagensboosters' : 'imagens';
+const toImageUrl = (filename: string) => `${base}${imageFolder}/${encodeFilename(filename)}`;
 const imageUrls = item.imageCandidates.map(toImageUrl);
 const primaryImage = imageUrls[0];
 const fallbackImages = imageUrls.slice(1);
@@ -22,27 +23,29 @@ const initials = item.name
   .map((word) => word[0])
   .join('')
   .toUpperCase();
+const isCard = item.kind === 'card';
 ---
 
 <div
   class:list={['collectible-visual', item.kind === 'booster' && 'booster-visual', detail && 'detail-visual']}
-  data-tilt
-  data-tilt-strength={detail ? '11' : '5'}
+  data-tilt={isCard ? '' : undefined}
+  data-tilt-strength={isCard ? (detail ? '11' : '5') : undefined}
 >
   <div class="image-stage">
     <span class="image-fallback" aria-hidden="true">
       <b>{initials}</b>
-      <small>{item.kind === 'card' ? 'Carta Pokémon' : 'Booster Pokémon'}</small>
+      <small>{isCard ? 'Carta Pokémon' : 'Booster Pokémon'}</small>
     </span>
     <img
       src={primaryImage}
-      alt={item.kind === 'card' ? `${item.name}, ${item.number}` : `Booster ${item.name}`}
+      alt={isCard ? `${item.name}, ${item.number}` : `Booster ${item.name}`}
       loading={eager ? 'eager' : 'lazy'}
       decoding="async"
       fetchpriority={eager ? 'high' : 'auto'}
       data-image-candidates={JSON.stringify(fallbackImages)}
+      data-image-gallery={!isCard ? JSON.stringify(imageUrls) : undefined}
     />
-    <span class="foil-spectrum" aria-hidden="true"></span>
-    <span class="glare" aria-hidden="true"></span>
+    {isCard && <span class="foil-spectrum" aria-hidden="true"></span>}
+    {isCard && <span class="glare" aria-hidden="true"></span>}
   </div>
 </div>

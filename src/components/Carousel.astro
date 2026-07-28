@@ -14,7 +14,7 @@ interface Props {
 const { eyebrow, title, description, items, viewAllHref, viewAllLabel } = Astro.props;
 ---
 
-<section class="shell showcase-section" data-carousel data-reveal>
+<section class="shell showcase-section" data-reveal>
   <div class="section-heading carousel-heading">
     <div>
       <span class="section-eyebrow">{eyebrow}</span>
@@ -25,9 +25,15 @@ const { eyebrow, title, description, items, viewAllHref, viewAllLabel } = Astro.
       <a class="text-link" href={viewAllHref}>{viewAllLabel}<span aria-hidden="true">↗</span></a>
     </div>
   </div>
-  <div class="carousel-track" data-carousel-track aria-label={`${title}: itens passando automaticamente`}>
-    <div class="carousel-sequence" data-carousel-sequence>
-      {items.map((item) => <ProductCard item={item} compact />)}
+
+  <div class="carousel-track" aria-label={`${title}: itens passando automaticamente`}>
+    <div class="carousel-belt">
+      <div class="carousel-sequence">
+        {items.map((item) => <ProductCard item={item} compact />)}
+      </div>
+      <div class="carousel-sequence">
+        {items.map((item) => <ProductCard item={item} compact />)}
+      </div>
     </div>
   </div>
 </section>
