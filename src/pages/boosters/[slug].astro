@@ -1,0 +1,69 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductImage from '../../components/ProductImage.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { formatBRL, getBoosters, type BoosterItem } from '../../lib/catalog';
+
+export function getStaticPaths() {
+  return getBoosters().map((booster) => ({ params: { slug: booster.slug }, props: { booster } }));
+}
+
+interface Props { booster: BoosterItem; }
+const { booster } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const related = getBoosters()
+  .filter((item) => item.slug !== booster.slug)
+  .sort((a, b) => Math.abs((a.price ?? 0) - (booster.price ?? 0)) - Math.abs((b.price ?? 0) - (booster.price ?? 0)))
+  .slice(0, 4);
+---
+
+<BaseLayout
+  title={booster.name}
+  description={`Booster ${booster.name}: veja imagem, quantidade disponível e preço final registrado no inventário.`}
+  active="boosters"
+  bodyClass="detail-page"
+>
+  <section class="shell detail-section booster-detail-section">
+    <nav class="breadcrumbs" aria-label="Navegação estrutural">
+      <a href={base}>Início</a><span>/</span><a href={`${base}boosters/`}>Boosters</a><span>/</span><strong>{booster.name}</strong>
+    </nav>
+
+    <div class="detail-grid booster-detail-grid">
+      <div class="detail-media-column" data-reveal>
+        <ProductImage item={booster} detail eager />
+        <p class="tilt-hint"><span>✦</span> Passe o mouse sobre o pacote para ativar o efeito de profundidade.</p>
+      </div>
+
+      <article class="detail-content" data-reveal>
+        <div class="detail-tags"><span>Booster avulso</span><span>{booster.quantity} {booster.quantity === 1 ? 'unidade' : 'unidades'}</span></div>
+        <span class="detail-number">Pacote lacrado</span>
+        <h1>{booster.name}</h1>
+        <p class="detail-lead">Visualização direta do booster com somente o preço final definido no inventário.</p>
+
+        <div class="detail-price-panel booster-price-panel">
+          <div><small>Preço</small><strong>{formatBRL(booster.price)}</strong></div>
+          <span>Preço final registrado</span>
+        </div>
+
+        <dl class="detail-specs booster-specs">
+          <div><dt>Produto</dt><dd>Booster avulso</dd></div>
+          <div><dt>Coleção</dt><dd>{booster.name}</dd></div>
+          <div><dt>Quantidade</dt><dd>{booster.quantity}</dd></div>
+          <div><dt>Preço exibido</dt><dd>Somente o preço final</dd></div>
+        </dl>
+
+        <a class="back-catalog-button" href={`${base}boosters/`}><span>←</span> Voltar para todos os boosters</a>
+      </article>
+    </div>
+  </section>
+
+  <section class="shell related-section" data-reveal>
+    <div class="section-heading">
+      <div><span class="section-eyebrow">Outros pacotes</span><h2>Boosters próximos</h2></div>
+      <a class="text-link" href={`${base}boosters/`}>Catálogo completo <span>↗</span></a>
+    </div>
+    <div class="related-grid">
+      {related.map((item) => <ProductCard item={item} />)}
+    </div>
+  </section>
+</BaseLayout>

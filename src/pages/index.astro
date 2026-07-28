@@ -1,503 +1,104 @@
 ---
-import cartasRaw from '../data/cartas.json';
-import { storeConfig } from '../config';
-import '../styles/global.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Carousel from '../components/Carousel.astro';
+import ProductImage from '../components/ProductImage.astro';
+import { formatBRL, getBoosters, getCards, getItemPrice } from '../lib/catalog';
+import { siteConfig } from '../config';
 
-const parseMoney = (value) => {
-  if (typeof value === 'number') return value;
-  const text = String(value ?? '');
-  if (!text.includes('R$')) return null;
-  const clean = text.replace(/[^0-9,.-]/g, '').replace(/\./g, '').replace(',', '.');
-  const number = Number(clean);
-  return Number.isFinite(number) ? number : null;
-};
-
-const parseQuantity = (value) => {
-  if (typeof value === 'number') return value;
-  const match = String(value ?? '').match(/\d+/);
-  return match ? Number(match[0]) : 1;
-};
-
-const formatBRL = (value) => new Intl.NumberFormat('pt-BR', {
-  style: 'currency',
-  currency: 'BRL',
-}).format(value ?? 0);
-
-const cards = cartasRaw.map((card, index) => {
-  const priceNumber = parseMoney(card['Preço']);
-  const quickPriceNumber = parseMoney(card['Venda Rápida']);
-  const marketNumber = parseMoney(card['Mercado']);
-  const quantityNumber = parseQuantity(card['Quantidade']);
-  return {
-    index,
-    name: card['Nome'] ?? 'Carta sem nome',
-    id: card['ID'] ?? '',
-    collection: card['Coleção'] ?? 'Sem coleção',
-    locality: card['Localidade'] ?? '',
-    quickSale: card['Venda Rápida'] ?? 'Consultar',
-    price: card['Preço'] ?? 'Consultar',
-    market: card['Mercado'] ?? 'Consultar',
-    quantity: card['Quantidade'] ?? 1,
-    condition: card['Estado'] ?? 'Consultar',
-    priceNumber,
-    quickPriceNumber,
-    marketNumber,
-    quantityNumber,
-    cartPrice: priceNumber ?? quickPriceNumber ?? 0,
-  };
-});
-
-const totalEntries = cards.length;
-const totalUnits = cards.reduce((sum, card) => sum + card.quantityNumber, 0);
-const totalCatalogValue = cards.reduce((sum, card) => sum + card.cartPrice * card.quantityNumber, 0);
-const collectionsCount = new Set(cards.map((card) => card.collection)).size;
-const topCard = [...cards].sort((a, b) => (b.cartPrice * b.quantityNumber) - (a.cartPrice * a.quantityNumber))[0];
-const cardsJson = JSON.stringify(cards).replace(/</g, '\\u003c');
-const configJson = JSON.stringify(storeConfig).replace(/</g, '\\u003c');
+const base = import.meta.env.BASE_URL;
+const cards = getCards();
+const boosters = getBoosters();
+const cardUnits = cards.reduce((total, item) => total + item.quantity, 0);
+const boosterUnits = boosters.reduce((total, item) => total + item.quantity, 0);
+const collections = new Set(cards.map((item) => item.collection)).size;
+const featuredCards = [...cards]
+  .filter((item) => item.ligaPrice !== null)
+  .sort((a, b) => (b.ligaPrice ?? 0) - (a.ligaPrice ?? 0))
+  .slice(0, 14);
+const featuredBoosters = [...boosters]
+  .filter((item) => item.price !== null)
+  .sort((a, b) => (b.price ?? 0) - (a.price ?? 0))
+  .slice(0, 14);
+const heroCard = featuredCards[0] ?? cards[0];
 ---
 
-<html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="generator" content={Astro.generator} />
-    <meta name="description" content="Catálogo de cartas Pokémon avulsas para venda, com busca, filtros por coleção, estado e carrinho para pedido." />
-    <title>{storeConfig.storeName} | Cartas Pokémon</title>
-    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} />
-  </head>
-  <body>
-    <header class="topbar">
-      <nav class="site-shell nav" aria-label="Navegação principal">
-        <a class="brand" href={import.meta.env.BASE_URL} aria-label="Início">
-          <span class="brand-mark">DC</span>
-          <span>{storeConfig.storeName}</span>
-        </a>
-        <div class="nav-links">
-          <a href="#destaques">Destaques</a>
-          <a href="#catalogo">Catálogo</a>
-          <a href="#como-comprar">Como comprar</a>
-          <button class="small-button" id="open-cart-top" type="button">Ver pedido</button>
+<BaseLayout active="home">
+  <section class="home-hero">
+    <div class="shell hero-grid">
+      <div class="hero-copy" data-reveal>
+        <span class="hero-badge"><i></i> Inventário organizado e pesquisável</span>
+        <h1>Seu próximo destaque está <em>no acervo.</em></h1>
+        <p>{siteConfig.tagline} Explore imagens, informações completas e valores sem sair do catálogo.</p>
+        <div class="hero-actions">
+          <a class="primary-cta" href={`${base}cartas/`}><span>Explorar cartas</span><b>↗</b></a>
+          <a class="secondary-cta" href={`${base}boosters/`}><span>Ver boosters</span><b>→</b></a>
         </div>
-      </nav>
-    </header>
-
-    <main>
-      <section class="site-shell hero">
-        <div>
-          <span class="eyebrow">⚡ {storeConfig.catalogUpdatedLabel}</span>
-          <h1>Venda seu depósito Pokémon como vitrine premium.</h1>
-          <p>
-            Catálogo rápido para comprador filtrar por nome, coleção, idioma/localidade, estado e preço. O carrinho monta uma mensagem pronta para fechar pedido por WhatsApp ou email.
-          </p>
-          <div class="hero-actions">
-            <a class="primary-button" href="#catalogo">Ver cartas à venda</a>
-            <button class="ghost-button" id="copy-link" type="button">Copiar link do site</button>
-          </div>
+        <div class="hero-metrics">
+          <div><strong>{cards.length}</strong><span>cartas catalogadas</span></div>
+          <div><strong>{boosterUnits}</strong><span>boosters em estoque</span></div>
+          <div><strong>{collections}</strong><span>coleções de cartas</span></div>
         </div>
-        <aside class="hero-panel" aria-label="Resumo do depósito">
-          <div class="stats-grid">
-            <div class="stat"><strong>{totalEntries}</strong><span>entradas no catálogo</span></div>
-            <div class="stat"><strong>{totalUnits}</strong><span>unidades/conjuntos</span></div>
-            <div class="stat"><strong>{collectionsCount}</strong><span>coleções diferentes</span></div>
-            <div class="stat"><strong>{formatBRL(totalCatalogValue)}</strong><span>valor estimado pelo preço do catálogo</span></div>
-          </div>
-          <div class="hero-card-note">
-            <strong>Maior destaque:</strong> {topCard?.name} — {formatBRL(topCard?.cartPrice)} • {topCard?.condition} • {topCard?.collection}
-          </div>
-        </aside>
-      </section>
-
-      <section class="site-shell section" id="destaques">
-        <div class="section-head">
-          <div>
-            <h2>Cartas de maior valor</h2>
-            <p>Ordenadas automaticamente pelo preço principal do seu JSON.</p>
-          </div>
-        </div>
-        <div class="featured-grid" id="featured-grid"></div>
-      </section>
-
-      <section class="site-shell section" id="catalogo">
-        <div class="section-head">
-          <div>
-            <h2>Catálogo completo</h2>
-            <p><span id="result-count">0</span> cartas encontradas.</p>
-          </div>
-          <button class="ghost-button" id="clear-filters" type="button">Limpar filtros</button>
-        </div>
-
-        <div class="filters" aria-label="Filtros do catálogo">
-          <div class="control">
-            <label for="search">Buscar</label>
-            <input id="search" type="search" placeholder="Charizard, Giratina, TG29..." autocomplete="off" />
-          </div>
-          <div class="control">
-            <label for="collection">Coleção</label>
-            <select id="collection"></select>
-          </div>
-          <div class="control">
-            <label for="condition">Estado</label>
-            <select id="condition"></select>
-          </div>
-          <div class="control">
-            <label for="locality">Localidade</label>
-            <select id="locality"></select>
-          </div>
-          <div class="control">
-            <label for="sort">Ordenar</label>
-            <select id="sort">
-              <option value="price-desc">Maior preço</option>
-              <option value="price-asc">Menor preço</option>
-              <option value="name-asc">Nome A-Z</option>
-              <option value="collection-asc">Coleção A-Z</option>
-              <option value="quantity-desc">Maior quantidade</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="empty" id="empty-state">Nenhuma carta encontrada com esses filtros.</div>
-        <div class="grid" id="catalog-grid"></div>
-      </section>
-
-      <section class="site-shell section" id="como-comprar">
-        <div class="section-head">
-          <div>
-            <h2>Como comprar</h2>
-            <p>Fluxo pensado para venda rápida sem precisar de backend.</p>
-          </div>
-        </div>
-        <div class="notice">
-          <div class="notice-card">
-            <strong>1. Escolha as cartas</strong>
-            Use os filtros, adicione ao pedido e ajuste a quantidade no carrinho. O total é estimado com o preço do catálogo.
-          </div>
-          <div class="notice-card">
-            <strong>2. Envie o pedido</strong>
-            O site copia a lista ou abre WhatsApp/email. Depois você confirma fotos, estado real, frete e forma de pagamento.
-          </div>
-          <div class="notice-card">
-            <strong>Observação de envio</strong>
-            {storeConfig.shippingNote}
-          </div>
-          <div class="notice-card">
-            <strong>Política de preço</strong>
-            {storeConfig.pricePolicy}
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <aside class="cart-dock" id="cart" aria-live="polite">
-      <div class="cart-head">
-        <strong>Pedido • <span id="cart-count">0</span> item(ns)</strong>
-        <button class="cart-toggle" id="cart-toggle" type="button">Abrir</button>
       </div>
-      <div class="cart-body">
-        <div class="cart-items" id="cart-items"></div>
-        <div class="cart-total">
-          <span>Total estimado</span>
-          <strong id="cart-total">R$ 0,00</strong>
+
+      <div class="hero-showcase" data-reveal>
+        <div class="hero-orbit orbit-one" aria-hidden="true"></div>
+        <div class="hero-orbit orbit-two" aria-hidden="true"></div>
+        <div class="hero-product">
+          <ProductImage item={heroCard} detail eager />
         </div>
-        <div class="cart-actions">
-          <button class="ghost-button" id="copy-order" type="button">Copiar pedido</button>
-          <a class="primary-button" id="send-order" href="#" rel="nofollow">Enviar</a>
+        <div class="hero-price-card">
+          <small>Destaque do catálogo</small>
+          <strong>{heroCard.name}</strong>
+          <span>{formatBRL(getItemPrice(heroCard))}</span>
         </div>
-        <p class="cart-note">Valores com “Consultar” não entram no total. Confirme disponibilidade, estado e frete antes de fechar.</p>
+        <div class="floating-chip chip-top">Efeito holográfico 3D</div>
+        <div class="floating-chip chip-bottom">Passe o mouse na carta</div>
       </div>
-    </aside>
+    </div>
+  </section>
 
-    <footer class="footer">
-      <div class="site-shell">
-        <span>{storeConfig.storeName} — cartas Pokémon avulsas</span>
-        <span>Feito em Astro • pronto para GitHub Pages</span>
-      </div>
-    </footer>
+  <section class="shell navigation-cards" aria-label="Áreas do catálogo" data-reveal>
+    <a class="navigation-card cards-navigation" href={`${base}cartas/`}>
+      <div class="navigation-icon" aria-hidden="true"><span>◆</span></div>
+      <div><small>Catálogo completo</small><h2>Cartas avulsas</h2><p>Pesquise por nome, numeração, coleção, tipo, idioma e estado.</p></div>
+      <span class="navigation-arrow">↗</span>
+    </a>
+    <a class="navigation-card boosters-navigation" href={`${base}boosters/`}>
+      <div class="navigation-icon" aria-hidden="true"><span>▰</span></div>
+      <div><small>Pacotes lacrados</small><h2>Boosters avulsos</h2><p>Consulte as coleções disponíveis, estoque e o preço definido no inventário.</p></div>
+      <span class="navigation-arrow">↗</span>
+    </a>
+  </section>
 
-    <script type="application/json" id="cards-data" set:html={cardsJson}></script>
-    <script type="application/json" id="store-config" set:html={configJson}></script>
+  <Carousel
+    eyebrow="Cartas em destaque"
+    title="Peças que comandam o acervo"
+    description="Seleção automática das cartas com maior preço de referência registrado na Liga Pokémon."
+    items={featuredCards}
+    viewAllHref={`${base}cartas/`}
+    viewAllLabel="Ver todas as cartas"
+  />
 
-    <script is:inline>
-      const cards = JSON.parse(document.getElementById('cards-data').textContent);
-      const config = JSON.parse(document.getElementById('store-config').textContent);
+  <Carousel
+    eyebrow="Boosters disponíveis"
+    title="Pacotes para todos os estilos de coleção"
+    description="Os boosters aparecem com somente o preço final definido na coluna Preço do inventário."
+    items={featuredBoosters}
+    viewAllHref={`${base}boosters/`}
+    viewAllLabel="Ver todos os boosters"
+  />
 
-      const $ = (selector) => document.querySelector(selector);
-      const catalogGrid = $('#catalog-grid');
-      const featuredGrid = $('#featured-grid');
-      const resultCount = $('#result-count');
-      const emptyState = $('#empty-state');
-      const cartDock = $('#cart');
-      const cartItems = $('#cart-items');
-      const cartCount = $('#cart-count');
-      const cartTotal = $('#cart-total');
-      const sendOrder = $('#send-order');
-
-      const state = {
-        search: '',
-        collection: '',
-        condition: '',
-        locality: '',
-        sort: 'price-desc',
-      };
-
-      let cart = JSON.parse(localStorage.getItem('diva-cards-cart') || '{}');
-
-      const esc = (value) => String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-
-      const formatBRL = (value) => new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-      }).format(value || 0);
-
-      const priceLabel = (card) => card.cartPrice ? formatBRL(card.cartPrice) : 'Consultar';
-      const normalize = (value) => String(value ?? '').toLocaleLowerCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
-      function fillSelect(selector, values, label) {
-        const select = $(selector);
-        select.innerHTML = `<option value="">${label}</option>` + values
-          .map((value) => `<option value="${esc(value)}">${esc(value)}</option>`)
-          .join('');
-      }
-
-      function setupFilters() {
-        fillSelect('#collection', [...new Set(cards.map((card) => card.collection))].sort((a, b) => a.localeCompare(b, 'pt-BR')), 'Todas');
-        fillSelect('#condition', [...new Set(cards.map((card) => card.condition))].sort((a, b) => a.localeCompare(b, 'pt-BR')), 'Todos');
-        fillSelect('#locality', [...new Set(cards.map((card) => card.locality))].sort((a, b) => a.localeCompare(b, 'pt-BR')), 'Todas');
-
-        ['search', 'collection', 'condition', 'locality', 'sort'].forEach((id) => {
-          $(`#${id}`).addEventListener('input', (event) => {
-            state[id] = event.target.value;
-            renderCatalog();
-          });
-        });
-
-        $('#clear-filters').addEventListener('click', () => {
-          Object.assign(state, { search: '', collection: '', condition: '', locality: '', sort: 'price-desc' });
-          ['search', 'collection', 'condition', 'locality', 'sort'].forEach((id) => $(`#${id}`).value = state[id]);
-          renderCatalog();
-        });
-      }
-
-      function filteredCards() {
-        const query = normalize(state.search);
-        return cards
-          .filter((card) => {
-            const haystack = normalize(`${card.name} ${card.id} ${card.collection} ${card.condition} ${card.locality}`);
-            return (!query || haystack.includes(query))
-              && (!state.collection || card.collection === state.collection)
-              && (!state.condition || card.condition === state.condition)
-              && (!state.locality || card.locality === state.locality);
-          })
-          .sort((a, b) => {
-            if (state.sort === 'price-asc') return (a.cartPrice || 0) - (b.cartPrice || 0);
-            if (state.sort === 'name-asc') return a.name.localeCompare(b.name, 'pt-BR');
-            if (state.sort === 'collection-asc') return a.collection.localeCompare(b.collection, 'pt-BR');
-            if (state.sort === 'quantity-desc') return b.quantityNumber - a.quantityNumber;
-            return (b.cartPrice || 0) - (a.cartPrice || 0);
-          });
-      }
-
-      function rarityTag(card) {
-        const text = normalize(card.id);
-        if (text.includes('alt art') || text.includes('alternativa') || text.includes('ilustracao rara especial') || text.includes('sar')) return 'Especial';
-        if (text.includes('ilustracao rara') || text.includes('trainer gallery') || text.includes('galeria')) return 'Arte rara';
-        if (text.includes('mega') || text.includes('ex') || text.includes('gx') || text.includes('vmax') || text.includes('v-astro') || text.includes('vstar')) return 'Ultra';
-        if (text.includes('promo')) return 'Promo';
-        return 'Carta';
-      }
-
-      function cardTemplate(card) {
-        return `
-          <article class="catalog-card">
-            <div class="card-art">
-              <span class="letter">${esc(card.name.trim().charAt(0) || '?')}</span>
-              <div class="badge-row">
-                <span class="badge good">${esc(card.condition)}</span>
-                <span class="badge">${esc(card.locality)}</span>
-              </div>
-            </div>
-            <div class="card-body">
-              <div>
-                <h3 class="card-title">${esc(card.name)}</h3>
-                <div class="card-id">${esc(card.id)}</div>
-              </div>
-              <div class="badge-row">
-                <span class="badge">${esc(rarityTag(card))}</span>
-                <span class="badge">Qtd: ${esc(card.quantity)}</span>
-              </div>
-              <div class="meta-list">
-                <div class="meta-item"><span>Coleção</span><strong>${esc(card.collection)}</strong></div>
-                <div class="meta-item"><span>Venda rápida</span><strong>${esc(card.quickSale)}</strong></div>
-                <div class="meta-item"><span>Mercado</span><strong>${esc(card.market)}</strong></div>
-                <div class="meta-item"><span>Estado</span><strong>${esc(card.condition)}</strong></div>
-              </div>
-              <div class="price-row">
-                <div class="price"><small>Preço</small>${esc(priceLabel(card))}</div>
-              </div>
-              <button class="card-button" type="button" data-add="${card.index}">Adicionar ao pedido</button>
-            </div>
-          </article>
-        `;
-      }
-
-      function renderCatalog() {
-        const list = filteredCards();
-        resultCount.textContent = list.length;
-        emptyState.classList.toggle('show', list.length === 0);
-        catalogGrid.innerHTML = list.map(cardTemplate).join('');
-      }
-
-      function renderFeatured() {
-        const top = [...cards]
-          .filter((card) => card.cartPrice)
-          .sort((a, b) => (b.cartPrice * b.quantityNumber) - (a.cartPrice * a.quantityNumber))
-          .slice(0, 6);
-
-        featuredGrid.innerHTML = top.map((card, index) => `
-          <article class="featured-card">
-            <span class="featured-rank">${index + 1}</span>
-            <h3>${esc(card.name)}</h3>
-            <div class="mini-price">${esc(priceLabel(card))}</div>
-            <p>${esc(card.collection)} • ${esc(card.condition)} • Qtd ${esc(card.quantity)}</p>
-            <p>${esc(card.id)}</p>
-          </article>
-        `).join('');
-      }
-
-      function saveCart() {
-        localStorage.setItem('diva-cards-cart', JSON.stringify(cart));
-      }
-
-      function addToCart(index) {
-        const card = cards.find((item) => item.index === index);
-        if (!card) return;
-        const current = cart[index]?.qty || 0;
-        const max = card.quantityNumber || 1;
-        cart[index] = { qty: Math.min(current + 1, max) };
-        saveCart();
-        renderCart();
-        cartDock.classList.add('open');
-        $('#cart-toggle').textContent = 'Fechar';
-      }
-
-      function changeQty(index, delta) {
-        if (!cart[index]) return;
-        const card = cards.find((item) => item.index === Number(index));
-        const max = card?.quantityNumber || 1;
-        const next = (cart[index].qty || 0) + delta;
-        if (next <= 0) delete cart[index];
-        else cart[index].qty = Math.min(next, max);
-        saveCart();
-        renderCart();
-      }
-
-      function selectedItems() {
-        return Object.entries(cart)
-          .map(([index, item]) => ({ card: cards.find((card) => card.index === Number(index)), qty: item.qty }))
-          .filter((item) => item.card && item.qty > 0);
-      }
-
-      function orderText() {
-        const items = selectedItems();
-        const total = items.reduce((sum, item) => sum + (item.card.cartPrice || 0) * item.qty, 0);
-        const lines = [
-          `Olá! Quero comprar estas cartas do catálogo ${config.storeName}:`,
-          '',
-          ...items.map((item) => `- ${item.qty}x ${item.card.name} | ${item.card.id} | ${item.card.collection} | Estado ${item.card.condition} | ${priceLabel(item.card)}`),
-          '',
-          `Total estimado: ${formatBRL(total)}`,
-          'Pode confirmar disponibilidade, fotos, frete e forma de pagamento?',
-        ];
-        return lines.join('\n');
-      }
-
-      function updateSendLink() {
-        const text = orderText();
-        if (config.whatsappNumber) {
-          sendOrder.href = `https://wa.me/${config.whatsappNumber}?text=${encodeURIComponent(text)}`;
-          sendOrder.textContent = 'WhatsApp';
-          return;
-        }
-        const subject = encodeURIComponent(`Pedido de cartas - ${config.storeName}`);
-        const body = encodeURIComponent(text);
-        sendOrder.href = `mailto:${config.contactEmail || ''}?subject=${subject}&body=${body}`;
-        sendOrder.textContent = config.contactEmail ? 'Email' : 'Email';
-      }
-
-      function renderCart() {
-        const items = selectedItems();
-        const totalItems = items.reduce((sum, item) => sum + item.qty, 0);
-        const total = items.reduce((sum, item) => sum + (item.card.cartPrice || 0) * item.qty, 0);
-
-        cartCount.textContent = totalItems;
-        cartTotal.textContent = formatBRL(total);
-        cartItems.innerHTML = items.length ? items.map((item) => `
-          <div class="cart-line">
-            <div>
-              <strong>${esc(item.card.name)}</strong>
-              <small>${esc(item.card.condition)} • ${esc(priceLabel(item.card))} • ${esc(item.card.collection)}</small>
-            </div>
-            <div class="qty-controls">
-              <button type="button" data-qty="${item.card.index}" data-delta="-1">−</button>
-              <strong>${item.qty}</strong>
-              <button type="button" data-qty="${item.card.index}" data-delta="1">+</button>
-            </div>
-          </div>
-        `).join('') : '<p class="cart-note">Seu pedido ainda está vazio. Adicione cartas no catálogo.</p>';
-        updateSendLink();
-      }
-
-      catalogGrid.addEventListener('click', (event) => {
-        const button = event.target.closest('[data-add]');
-        if (!button) return;
-        addToCart(Number(button.dataset.add));
-      });
-
-      cartItems.addEventListener('click', (event) => {
-        const button = event.target.closest('[data-qty]');
-        if (!button) return;
-        changeQty(button.dataset.qty, Number(button.dataset.delta));
-      });
-
-      $('#cart-toggle').addEventListener('click', () => {
-        cartDock.classList.toggle('open');
-        $('#cart-toggle').textContent = cartDock.classList.contains('open') ? 'Fechar' : 'Abrir';
-      });
-
-      $('#open-cart-top').addEventListener('click', () => {
-        cartDock.classList.add('open');
-        $('#cart-toggle').textContent = 'Fechar';
-      });
-
-      $('#copy-order').addEventListener('click', async () => {
-        const text = orderText();
-        try {
-          await navigator.clipboard.writeText(text);
-          $('#copy-order').textContent = 'Copiado!';
-          setTimeout(() => $('#copy-order').textContent = 'Copiar pedido', 1400);
-        } catch {
-          alert(text);
-        }
-      });
-
-      $('#copy-link').addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(location.href);
-          $('#copy-link').textContent = 'Link copiado!';
-          setTimeout(() => $('#copy-link').textContent = 'Copiar link do site', 1400);
-        } catch {
-          alert(location.href);
-        }
-      });
-
-      setupFilters();
-      renderFeatured();
-      renderCatalog();
-      renderCart();
-    </script>
-  </body>
-</html>
+  <section class="shell inventory-note" data-reveal>
+    <div>
+      <span class="section-eyebrow">Informação clara</span>
+      <h2>Um catálogo feito para decidir sem ruído.</h2>
+    </div>
+    <p>
+      Nas cartas, o site usa somente o preço da Liga e os dados de identificação. Nos boosters, usa apenas o preço final do inventário. Os demais campos de precificação e todos os links externos ficam fora da interface.
+    </p>
+    <div class="inventory-totals">
+      <div><span>Unidades de cartas</span><strong>{cardUnits}</strong></div>
+      <div><span>Tipos de boosters</span><strong>{boosters.length}</strong></div>
+    </div>
+  </section>
+</BaseLayout>

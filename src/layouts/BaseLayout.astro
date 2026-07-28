@@ -1,0 +1,252 @@
+---
+import { siteConfig } from '../config';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  active?: 'home' | 'cards' | 'boosters';
+  bodyClass?: string;
+}
+
+const {
+  title = siteConfig.siteName,
+  description = siteConfig.description,
+  active = 'home',
+  bodyClass = '',
+} = Astro.props;
+
+const base = import.meta.env.BASE_URL;
+const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConfig.siteName}`;
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#07111f" />
+    <meta name="color-scheme" content="dark" />
+    <title>{pageTitle}</title>
+  </head>
+  <body class={bodyClass}>
+    <div class="page-noise" aria-hidden="true"></div>
+    <header class="site-header">
+      <nav class="shell nav-shell" aria-label="Navegação principal">
+        <a class="brand" href={base} aria-label={`Ir para a página inicial da ${siteConfig.siteName}`}>
+          <span class="brand-emblem" aria-hidden="true"><i></i></span>
+          <span class="brand-copy">
+            <strong>{siteConfig.siteName}</strong>
+            <small>Coleção Pokémon</small>
+          </span>
+        </a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+          <span></span><span></span><span></span>
+          <span class="sr-only">Abrir menu</span>
+        </button>
+
+        <div class="nav-links" id="primary-navigation">
+          <a class:list={[{ active: active === 'home' }]} href={base}>Início</a>
+          <a class:list={[{ active: active === 'cards' }]} href={`${base}cartas/`}>Cartas avulsas</a>
+          <a class:list={[{ active: active === 'boosters' }]} href={`${base}boosters/`}>Boosters</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-grid">
+        <div>
+          <a class="brand footer-brand" href={base}>
+            <span class="brand-emblem" aria-hidden="true"><i></i></span>
+            <span class="brand-copy"><strong>{siteConfig.siteName}</strong><small>Catálogo de coleção</small></span>
+          </a>
+          <p>{siteConfig.inventoryNote}</p>
+        </div>
+        <div class="footer-nav" aria-label="Links do rodapé">
+          <a href={base}>Página inicial</a>
+          <a href={`${base}cartas/`}>Todas as cartas</a>
+          <a href={`${base}boosters/`}>Todos os boosters</a>
+        </div>
+      </div>
+      <div class="shell footer-bottom">
+        <span>© {new Date().getFullYear()} {siteConfig.siteName}</span>
+        <span>Construído em Astro para carregamento rápido.</span>
+      </div>
+    </footer>
+
+    <script is:inline>
+      (() => {
+        const normalize = (value) => String(value || '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLocaleLowerCase('pt-BR')
+          .trim();
+
+        const menuButton = document.querySelector('.nav-toggle');
+        const menu = document.querySelector('.nav-links');
+        menuButton?.addEventListener('click', () => {
+          const open = menuButton.getAttribute('aria-expanded') === 'true';
+          menuButton.setAttribute('aria-expanded', String(!open));
+          menu?.classList.toggle('open', !open);
+        });
+
+        document.querySelectorAll('img[data-image-candidates]').forEach((image) => {
+          let candidates = [];
+          try { candidates = JSON.parse(image.dataset.imageCandidates || '[]'); } catch (_) {}
+          let nextIndex = 0;
+          const tryNext = () => {
+            if (nextIndex < candidates.length) {
+              image.src = candidates[nextIndex];
+              nextIndex += 1;
+              return;
+            }
+            image.hidden = true;
+            image.closest('.image-stage')?.classList.add('no-image');
+          };
+          image.addEventListener('error', tryNext);
+          if (image.complete && image.naturalWidth === 0) tryNext();
+        });
+
+        const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (finePointer && !reducedMotion) {
+          document.querySelectorAll('[data-tilt]').forEach((element) => {
+            let frame = 0;
+            const update = (event) => {
+              cancelAnimationFrame(frame);
+              frame = requestAnimationFrame(() => {
+                const bounds = element.getBoundingClientRect();
+                const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
+                const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
+                const strength = Number(element.dataset.tiltStrength || 8);
+                element.style.setProperty('--mx', `${x * 100}%`);
+                element.style.setProperty('--my', `${y * 100}%`);
+                element.style.setProperty('--ry', `${(x - 0.5) * strength * 2}deg`);
+                element.style.setProperty('--rx', `${(0.5 - y) * strength * 2}deg`);
+                element.classList.add('is-tilting');
+              });
+            };
+            const reset = () => {
+              cancelAnimationFrame(frame);
+              element.style.setProperty('--rx', '0deg');
+              element.style.setProperty('--ry', '0deg');
+              element.style.setProperty('--mx', '50%');
+              element.style.setProperty('--my', '50%');
+              element.classList.remove('is-tilting');
+            };
+            element.addEventListener('pointermove', update);
+            element.addEventListener('pointerleave', reset);
+          });
+        }
+
+        document.querySelectorAll('[data-carousel]').forEach((carousel) => {
+          const track = carousel.querySelector('[data-carousel-track]');
+          const previous = carousel.querySelector('[data-carousel-prev]');
+          const next = carousel.querySelector('[data-carousel-next]');
+          const scroll = (direction) => {
+            const card = track?.querySelector('.product-card');
+            const distance = card ? card.getBoundingClientRect().width + 18 : 320;
+            track?.scrollBy({ left: distance * direction, behavior: 'smooth' });
+          };
+          previous?.addEventListener('click', () => scroll(-1));
+          next?.addEventListener('click', () => scroll(1));
+        });
+
+        document.querySelectorAll('[data-catalog-root]').forEach((root) => {
+          const grid = root.querySelector('[data-catalog-grid]');
+          const items = Array.from(root.querySelectorAll('[data-catalog-item]'));
+          const search = root.querySelector('[data-filter-search]');
+          const collection = root.querySelector('[data-filter-collection]');
+          const condition = root.querySelector('[data-filter-condition]');
+          const type = root.querySelector('[data-filter-type]');
+          const sort = root.querySelector('[data-filter-sort]');
+          const clear = root.querySelector('[data-filter-clear]');
+          const count = root.querySelector('[data-result-count]');
+          const empty = root.querySelector('[data-empty-state]');
+
+          const compare = (a, b, mode) => {
+            const priceA = Number(a.dataset.price || -1);
+            const priceB = Number(b.dataset.price || -1);
+            const nameA = normalize(a.dataset.name);
+            const nameB = normalize(b.dataset.name);
+            if (mode === 'price-asc') return priceA - priceB || nameA.localeCompare(nameB, 'pt-BR');
+            if (mode === 'name-asc') return nameA.localeCompare(nameB, 'pt-BR');
+            if (mode === 'quantity-desc') return Number(b.dataset.quantity || 0) - Number(a.dataset.quantity || 0) || nameA.localeCompare(nameB, 'pt-BR');
+            return priceB - priceA || nameA.localeCompare(nameB, 'pt-BR');
+          };
+
+          const apply = () => {
+            const query = normalize(search?.value);
+            const selectedCollection = collection?.value || '';
+            const selectedCondition = condition?.value || '';
+            const selectedType = type?.value || '';
+            const mode = sort?.value || 'price-desc';
+            let visible = 0;
+
+            items.sort((a, b) => compare(a, b, mode)).forEach((item) => {
+              grid?.appendChild(item);
+              const matches = (!query || normalize(item.dataset.search).includes(query))
+                && (!selectedCollection || item.dataset.collection === selectedCollection)
+                && (!selectedCondition || item.dataset.condition === selectedCondition)
+                && (!selectedType || item.dataset.type === selectedType);
+              item.hidden = !matches;
+              if (matches) visible += 1;
+            });
+
+            if (count) count.textContent = String(visible);
+            empty?.classList.toggle('show', visible === 0);
+          };
+
+          [search, collection, condition, type, sort].forEach((control) => {
+            control?.addEventListener(control === search ? 'input' : 'change', apply);
+          });
+          clear?.addEventListener('click', () => {
+            if (search) search.value = '';
+            if (collection) collection.value = '';
+            if (condition) condition.value = '';
+            if (type) type.value = '';
+            if (sort) sort.value = 'price-desc';
+            apply();
+            search?.focus();
+          });
+
+          const params = new URLSearchParams(window.location.search);
+          if (search && params.get('q')) search.value = params.get('q');
+          apply();
+        });
+
+        document.addEventListener('keydown', (event) => {
+          if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName || '')) {
+            const search = document.querySelector('[data-filter-search]');
+            if (search) {
+              event.preventDefault();
+              search.focus();
+            }
+          }
+        });
+
+        document.querySelectorAll('[data-reveal]').forEach((element) => element.classList.add('reveal-ready'));
+        if ('IntersectionObserver' in window && !reducedMotion) {
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                observer.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.08 });
+          document.querySelectorAll('.reveal-ready').forEach((element) => observer.observe(element));
+        } else {
+          document.querySelectorAll('.reveal-ready').forEach((element) => element.classList.add('revealed'));
+        }
+      })();
+    </script>
+  </body>
+</html>

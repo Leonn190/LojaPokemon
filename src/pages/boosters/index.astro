@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CatalogBrowser from '../../components/CatalogBrowser.astro';
+import { getBoosters } from '../../lib/catalog';
+
+const boosters = getBoosters();
+const totalUnits = boosters.reduce((total, item) => total + item.quantity, 0);
+---
+
+<BaseLayout
+  title="Boosters avulsos"
+  description="Pesquise boosters Pokémon avulsos e consulte o preço final e a quantidade disponível no inventário."
+  active="boosters"
+>
+  <section class="catalog-hero booster-catalog-hero">
+    <div class="shell catalog-hero-grid">
+      <div data-reveal>
+        <span class="hero-badge"><i></i> {totalUnits} pacotes em estoque</span>
+        <h1>Boosters avulsos</h1>
+        <p>Pesquise rapidamente entre as coleções disponíveis. Cada booster abre uma página individual e exibe somente o preço final definido no inventário.</p>
+      </div>
+      <div class="catalog-hero-stats" data-reveal>
+        <div><strong>{boosters.length}</strong><span>tipos de pacote</span></div>
+        <div><strong>{totalUnits}</strong><span>unidades totais</span></div>
+        <div><strong>1</strong><span>preço exibido</span></div>
+      </div>
+    </div>
+  </section>
+
+  <CatalogBrowser kind="booster" items={boosters} />
+</BaseLayout>

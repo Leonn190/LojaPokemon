@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CatalogBrowser from '../../components/CatalogBrowser.astro';
+import { getCards } from '../../lib/catalog';
+
+const cards = getCards();
+const collections = new Set(cards.map((item) => item.collection)).size;
+---
+
+<BaseLayout
+  title="Cartas avulsas"
+  description="Pesquise todas as cartas avulsas do catálogo por nome, número, coleção, tipo, idioma e estado."
+  active="cards"
+>
+  <section class="catalog-hero">
+    <div class="shell catalog-hero-grid">
+      <div data-reveal>
+        <span class="hero-badge"><i></i> {cards.length} cartas no inventário</span>
+        <h1>Cartas avulsas</h1>
+        <p>Encontre a variação exata por nome, número ou coleção. Cada item abre uma página própria com imagem, preço da Liga e todos os dados relevantes.</p>
+      </div>
+      <div class="catalog-hero-stats" data-reveal>
+        <div><strong>{collections}</strong><span>coleções</span></div>
+        <div><strong>{new Set(cards.map((item) => item.type)).size}</strong><span>tipos de carta</span></div>
+        <div><strong>{new Set(cards.map((item) => item.year)).size}</strong><span>anos no acervo</span></div>
+      </div>
+    </div>
+  </section>
+
+  <CatalogBrowser kind="card" items={cards} />
+</BaseLayout>

@@ -1,0 +1,46 @@
+---
+import type { CatalogItem } from '../lib/catalog';
+
+interface Props {
+  item: CatalogItem;
+  detail?: boolean;
+  eager?: boolean;
+}
+
+const { item, detail = false, eager = false } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const toImageUrl = (filename: string) => `${base}imagens/${encodeURIComponent(filename)}`;
+const imageUrls = item.imageCandidates.map(toImageUrl);
+const primaryImage = imageUrls[0];
+const fallbackImages = imageUrls.slice(1);
+const initials = item.name
+  .split(/\s+/)
+  .filter(Boolean)
+  .slice(0, 2)
+  .map((word) => word[0])
+  .join('')
+  .toUpperCase();
+---
+
+<div
+  class:list={['collectible-visual', item.kind === 'booster' && 'booster-visual', detail && 'detail-visual']}
+  data-tilt
+  data-tilt-strength={detail ? '11' : '5'}
+>
+  <div class="image-stage">
+    <span class="image-fallback" aria-hidden="true">
+      <b>{initials}</b>
+      <small>{item.kind === 'card' ? 'Carta Pokémon' : 'Booster Pokémon'}</small>
+    </span>
+    <img
+      src={primaryImage}
+      alt={item.kind === 'card' ? `${item.name}, ${item.number}` : `Booster ${item.name}`}
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+      fetchpriority={eager ? 'high' : 'auto'}
+      data-image-candidates={JSON.stringify(fallbackImages)}
+    />
+    <span class="foil-spectrum" aria-hidden="true"></span>
+    <span class="glare" aria-hidden="true"></span>
+  </div>
+</div>

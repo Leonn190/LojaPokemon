@@ -1,0 +1,88 @@
+---
+import ProductCard from './ProductCard.astro';
+import type { BoosterItem, CardItem, CatalogItem } from '../lib/catalog';
+
+interface Props {
+  kind: 'card' | 'booster';
+  items: CatalogItem[];
+}
+
+const { kind, items } = Astro.props;
+const cards = kind === 'card' ? (items as CardItem[]) : [];
+const collections = [...new Set(cards.map((item) => item.collection))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+const conditions = [...new Set(cards.map((item) => item.condition))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+const types = [...new Set(cards.map((item) => item.type))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+const noun = kind === 'card' ? 'cartas' : 'boosters';
+---
+
+<section class="shell catalog-section" data-catalog-root>
+  <div class="filter-panel" data-reveal>
+    <div class="search-control">
+      <label for={`${kind}-search`}>Pesquisar {noun}</label>
+      <div class="search-input-wrap">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg>
+        <input
+          id={`${kind}-search`}
+          type="search"
+          placeholder={kind === 'card' ? 'Nome, número, coleção, tipo...' : 'Nome da coleção ou do booster...'}
+          autocomplete="off"
+          data-filter-search
+        />
+        <kbd>/</kbd>
+      </div>
+    </div>
+
+    {kind === 'card' && (
+      <>
+        <div class="select-control">
+          <label for="collection-filter">Coleção</label>
+          <select id="collection-filter" data-filter-collection>
+            <option value="">Todas</option>
+            {collections.map((value) => <option value={value}>{value}</option>)}
+          </select>
+        </div>
+        <div class="select-control">
+          <label for="type-filter">Tipo</label>
+          <select id="type-filter" data-filter-type>
+            <option value="">Todos</option>
+            {types.map((value) => <option value={value}>{value}</option>)}
+          </select>
+        </div>
+        <div class="select-control">
+          <label for="condition-filter">Estado</label>
+          <select id="condition-filter" data-filter-condition>
+            <option value="">Todos</option>
+            {conditions.map((value) => <option value={value}>{value}</option>)}
+          </select>
+        </div>
+      </>
+    )}
+
+    <div class="select-control sort-control">
+      <label for={`${kind}-sort`}>Ordenar</label>
+      <select id={`${kind}-sort`} data-filter-sort>
+        <option value="price-desc">Maior preço</option>
+        <option value="price-asc">Menor preço</option>
+        <option value="name-asc">Nome A–Z</option>
+        <option value="quantity-desc">Maior quantidade</option>
+      </select>
+    </div>
+
+    <button class="clear-button" type="button" data-filter-clear>Limpar</button>
+  </div>
+
+  <div class="catalog-summary">
+    <p><strong data-result-count>{items.length}</strong> {noun} encontrados</p>
+    <span>Selecione um item para abrir sua página completa.</span>
+  </div>
+
+  <div class="empty-state" data-empty-state>
+    <span>◇</span>
+    <h2>Nenhum resultado encontrado</h2>
+    <p>Tente remover um filtro ou pesquisar por outro termo.</p>
+  </div>
+
+  <div class="catalog-grid" data-catalog-grid>
+    {items.map((item) => <ProductCard item={item} catalog />)}
+  </div>
+</section>
