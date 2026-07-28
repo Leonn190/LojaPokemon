@@ -1,5 +1,7 @@
 import cardsCsv from '../data/inventario-cartas.csv?raw';
 import boostersCsv from '../data/inventario-boosters.csv?raw';
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
 
 export type CatalogKind = 'card' | 'booster';
 
@@ -13,7 +15,7 @@ export interface CardItem {
   year: string;
   type: string;
   quantity: number;
-  ligaPrice: number | null;
+  price: number | null;
   slug: string;
   imageCandidates: string[];
   searchText: string;
@@ -117,13 +119,58 @@ const cleanFilePart = (value: string): string =>
     .replace(/[–—]/g, '-')
     .replace(/[\\/:*?"<>|]/g, '-')
     .replace(/\s+/g, ' ')
-    .replace(/-+/g, '-')
     .trim();
 
-const unique = <T>(values: T[]): T[] => [...new Set(values)];
+const asciiFilePart = (value: string): string =>
+  cleanFilePart(value.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+
+const unique = <T>(values: T[]): T[] => [...new Set(values.filter(Boolean))];
+
+const supportedImage = /\.(?:jpe?g|png|webp)$/i;
+const availableImageFiles = (() => {
+  try {
+    return readdirSync(join(process.cwd(), 'public', 'imagens'), { withFileTypes: true })
+      .filter((entry) => entry.isFile() && supportedImage.test(entry.name))
+      .map((entry) => entry.name);
+  } catch (_) {
+    return [] as string[];
+  }
+})();
+
+const imagesByNormalizedStem = new Map<string, string[]>();
+availableImageFiles.forEach((filename) => {
+  const stem = filename.replace(/\.[^.]+$/, '');
+  const key = normalizeText(stem);
+  const current = imagesByNormalizedStem.get(key) ?? [];
+  current.push(filename);
+  imagesByNormalizedStem.set(key, current);
+});
+
+const findExistingImages = (name: string, number?: string): string[] => {
+  const exactKeys = number
+    ? [normalizeText(`${name} ${number}`)]
+    : [normalizeText(name), normalizeText(`${name} booster`), normalizeText(`booster ${name}`)];
+  const exact = unique(exactKeys.flatMap((key) => imagesByNormalizedStem.get(key) ?? []));
+  if (exact.length > 0) return exact;
+
+  const normalizedName = normalizeText(name);
+  const normalizedNumber = normalizeText(number ?? '');
+  return availableImageFiles.filter((filename) => {
+    const key = normalizeText(filename.replace(/\.[^.]+$/, ''));
+    if (number) return key.includes(normalizedName) && key.includes(normalizedNumber);
+    return key.includes(normalizedName);
+  });
+};
 
 const addExtensions = (stems: string[]): string[] =>
   unique(stems.flatMap((stem) => ['jpg', 'jpeg', 'png', 'webp'].map((extension) => `${stem}.${extension}`)));
+
+const joinFileParts = (left: string, right: string): string[] =>
+  unique([
+    `${left}_${right}`,
+    `${left}-${right}`,
+    `${left} ${right}`,
+  ]);
 
 const cardImageCandidates = (
   name: string,
@@ -131,50 +178,49 @@ const cardImageCandidates = (
   language: string,
   duplicateIndex: number,
 ): string[] => {
-  const cleanName = cleanFilePart(name);
-  const cleanNumber = cleanFilePart(number);
-  const cleanLanguage = cleanFilePart(language);
-  const asciiName = cleanFilePart(name.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
-  const asciiNumber = cleanFilePart(number.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
-  const asciiLanguage = cleanFilePart(language.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
-  const canonical = `${cleanName}_${cleanNumber}`;
-  const asciiCanonical = `${asciiName}_${asciiNumber}`;
+  const names = unique([cleanFilePart(name), asciiFilePart(name)]);
+  const numbers = unique([
+    cleanFilePart(number),
+    asciiFilePart(number),
+    cleanFilePart(number).replace(/\s+/g, ''),
+    asciiFilePart(number).replace(/\s+/g, ''),
+  ]);
+  const languages = unique([cleanFilePart(language), asciiFilePart(language)]);
   const duplicateNumber = duplicateIndex + 1;
 
-  const stems = unique([
-    canonical,
-    asciiCanonical,
-    `${cleanName}-${cleanNumber}`,
-    `${asciiName}-${asciiNumber}`,
-    `${canonical}_${cleanLanguage}`,
-    `${asciiCanonical}_${asciiLanguage}`,
-    ...(duplicateIndex > 0
-      ? [
-          `${canonical} (${duplicateIndex})`,
-          `${asciiCanonical} (${duplicateIndex})`,
-          `${canonical}_${duplicateNumber}`,
-          `${asciiCanonical}_${duplicateNumber}`,
-          `${canonical}-${duplicateNumber}`,
-          `${asciiCanonical}-${duplicateNumber}`,
-        ]
-      : []),
-  ]);
-  return addExtensions(stems);
+  const canonical = unique(names.flatMap((cardName) => numbers.flatMap((cardNumber) => joinFileParts(cardName, cardNumber))));
+  const languageVariants = duplicateIndex > 0
+    ? canonical.flatMap((stem) => languages.map((languageName) => `${stem}_${languageName}`))
+    : [];
+  const duplicateVariants = duplicateIndex > 0
+    ? canonical.flatMap((stem) => [
+        `${stem} (${duplicateIndex})`,
+        `${stem} (${duplicateNumber})`,
+        `${stem}_${duplicateNumber}`,
+        `${stem}-${duplicateNumber}`,
+      ])
+    : [];
+
+  const generated = addExtensions(unique([...canonical, ...duplicateVariants, ...languageVariants]));
+  const existing = findExistingImages(name, number);
+  const preferredExisting = existing.length > 1 ? [existing[duplicateIndex] ?? existing[0], ...existing] : existing;
+  return unique([...preferredExisting, ...generated]);
 };
 
 const boosterImageCandidates = (name: string): string[] => {
-  const cleanName = cleanFilePart(name);
-  const asciiName = cleanFilePart(name.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
-  return addExtensions(
-    unique([
-      cleanName,
-      asciiName,
-      `${cleanName}_Booster`,
-      `${asciiName}_Booster`,
-      `Booster_${cleanName}`,
-      `Booster_${asciiName}`,
-    ]),
-  );
+  const names = unique([cleanFilePart(name), asciiFilePart(name)]);
+  const stems = names.flatMap((boosterName) => [
+    boosterName,
+    `${boosterName}_Booster`,
+    `${boosterName}-Booster`,
+    `${boosterName} Booster`,
+    `Booster_${boosterName}`,
+    `Booster-${boosterName}`,
+    `Booster ${boosterName}`,
+    boosterName.replace(/\s+/g, '_'),
+    boosterName.replace(/\s+/g, '-'),
+  ]);
+  return unique([...findExistingImages(name), ...addExtensions(unique(stems))]);
 };
 
 const createUniqueSlug = (base: string, used: Map<string, number>, suffix: string): string => {
@@ -201,7 +247,7 @@ export const getCards = (): CardItem[] => {
     const year = row['Ano'] || 'Não informado';
     const type = row['Tipo'] || 'Não informado';
     const quantity = parseQuantity(row['Quantidade']);
-    const ligaPrice = parseDecimal(row['Menor Liga']);
+    const price = parseDecimal(row['Preço']);
     const slug = createUniqueSlug(slugify(`${name}-${number}`), usedSlugs, language);
     const imageKey = normalizeText(`${name} ${number}`);
     const duplicateIndex = usedImages.get(imageKey) ?? 0;
@@ -217,7 +263,7 @@ export const getCards = (): CardItem[] => {
       year,
       type,
       quantity,
-      ligaPrice,
+      price,
       slug,
       imageCandidates: cardImageCandidates(name, number, language, duplicateIndex),
       searchText: normalizeText(`${name} ${number} ${collection} ${language} ${condition} ${year} ${type}`),
@@ -253,8 +299,7 @@ export const getBoosters = (): BoosterItem[] => {
   return boostersCache;
 };
 
-export const getItemPrice = (item: CatalogItem): number | null =>
-  item.kind === 'card' ? item.ligaPrice : item.price;
+export const getItemPrice = (item: CatalogItem): number | null => item.price;
 
 export const formatBRL = (value: number | null): string => {
   if (value === null) return 'Consultar';

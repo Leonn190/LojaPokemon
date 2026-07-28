@@ -8,8 +8,10 @@ interface Props {
 }
 
 const { item, detail = false, eager = false } = Astro.props;
-const base = import.meta.env.BASE_URL;
-const toImageUrl = (filename: string) => `${base}imagens/${encodeURIComponent(filename)}`;
+const rawBase = import.meta.env.BASE_URL || '/';
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const encodeFilename = (filename: string) => filename.split('/').map(encodeURIComponent).join('/');
+const toImageUrl = (filename: string) => `${base}imagens/${encodeFilename(filename)}`;
 const imageUrls = item.imageCandidates.map(toImageUrl);
 const primaryImage = imageUrls[0];
 const fallbackImages = imageUrls.slice(1);

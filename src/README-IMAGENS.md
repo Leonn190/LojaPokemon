@@ -1,6 +1,6 @@
 # Pasta de imagens
 
-Coloque a pasta `imagens` dentro de `public`, ficando assim:
+A pasta deve continuar em `public/imagens`, exatamente assim:
 
 ```text
 public/
@@ -10,8 +10,8 @@ public/
     └── ...
 ```
 
-Para cartas, o site procura automaticamente pelo padrão `Nome_Número.jpg`, trocando `/`, `–` e `—` por `-`, exatamente como no exemplo enviado. Também tenta `.jpeg`, `.png`, `.webp` e versões sem acentos.
+Durante o build, o catálogo lê os nomes reais existentes em `public/imagens` e associa primeiro os arquivos cujo nome e numeração correspondem aos dados do inventário. Como segurança, também tenta automaticamente variações com `_`, `-` ou espaço, extensões `.jpg`, `.jpeg`, `.png` e `.webp`, além de nomes sem acentos.
 
-Para boosters, o site tenta `Nome do booster.jpg`, `Nome do booster_Booster.jpg` e `Booster_Nome do booster.jpg`.
+O caminho das imagens respeita automaticamente o `base` configurado no Astro/GitHub Pages, inclusive quando o repositório é publicado em uma subpasta.
 
-Os dois CSVs usados pelo site estão em `src/data/` e são lidos diretamente durante o build.
+Os dois CSVs usados pelo site estão em `src/data/` e são lidos durante o build.

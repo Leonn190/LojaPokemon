@@ -9,51 +9,71 @@ interface Props {
 }
 
 const { item, compact = false, catalog = false } = Astro.props;
-const base = import.meta.env.BASE_URL;
-const href = item.kind === 'card'
-  ? `${base}cartas/${item.slug}/`
-  : `${base}boosters/${item.slug}/`;
 const price = getItemPrice(item);
 const search = item.searchText;
 ---
 
-<a
+<article
   class:list={['product-card', compact && 'compact-card']}
-  href={href}
+  data-product-card
+  data-product-id={`${item.kind}:${item.slug}`}
+  data-kind={item.kind}
+  data-name={item.name}
+  data-number={item.kind === 'card' ? item.number : ''}
+  data-collection={item.kind === 'card' ? item.collection : item.name}
+  data-language={item.kind === 'card' ? item.language : ''}
+  data-condition={item.kind === 'card' ? item.condition : ''}
+  data-year={item.kind === 'card' ? item.year : ''}
+  data-type={item.kind === 'card' ? item.type : 'Booster avulso'}
+  data-price-value={price === null ? '' : String(price)}
+  data-price-label={formatBRL(price)}
+  data-stock={String(item.quantity)}
   data-catalog-item={catalog ? '' : undefined}
-  data-name={catalog ? item.name : undefined}
   data-search={catalog ? search : undefined}
   data-price={catalog ? String(price ?? -1) : undefined}
   data-quantity={catalog ? String(item.quantity) : undefined}
-  data-collection={catalog && item.kind === 'card' ? item.collection : undefined}
-  data-condition={catalog && item.kind === 'card' ? item.condition : undefined}
-  data-type={catalog && item.kind === 'card' ? item.type : undefined}
+  data-filter-collection={catalog && item.kind === 'card' ? item.collection : undefined}
+  data-filter-condition={catalog && item.kind === 'card' ? item.condition : undefined}
+  data-filter-type={catalog && item.kind === 'card' ? item.type : undefined}
 >
-  <div class="product-card-media">
-    <ProductImage item={item} />
-    <span class="quantity-chip">{item.quantity} {item.quantity === 1 ? 'unidade' : 'unidades'}</span>
-  </div>
-  <div class="product-card-body">
-    <div class="product-card-heading">
-      <div>
-        <span class="product-kicker">{item.kind === 'card' ? item.type : 'Booster avulso'}</span>
-        <h3>{item.name}</h3>
-      </div>
-      <span class="open-arrow" aria-hidden="true">↗</span>
+  <button
+    class="product-open-button"
+    type="button"
+    data-open-product
+    aria-label={`Ver detalhes de ${item.name}`}
+  >
+    <div class="product-card-media">
+      <ProductImage item={item} />
+      <span class="quantity-chip">{item.quantity} {item.quantity === 1 ? 'unidade' : 'unidades'}</span>
     </div>
 
-    {item.kind === 'card' ? (
-      <p class="product-description"><strong>{item.number}</strong><span>•</span>{item.collection}</p>
-    ) : (
-      <p class="product-description">Pacote lacrado disponível no inventário.</p>
-    )}
-
-    <div class="product-card-footer">
-      <div class="price-block">
-        <small>{item.kind === 'card' ? 'Preço da Liga' : 'Preço'}</small>
-        <strong>{formatBRL(price)}</strong>
+    <div class="product-card-body">
+      <div class="product-card-heading">
+        <div>
+          <span class="product-kicker">{item.kind === 'card' ? item.type : 'Booster avulso'}</span>
+          <h3>{item.name}</h3>
+        </div>
+        <span class="open-arrow" aria-hidden="true">⌗</span>
       </div>
-      {item.kind === 'card' && <span class={`condition-badge condition-${item.condition.toLowerCase()}`}>{item.condition}</span>}
+
+      {item.kind === 'card' ? (
+        <p class="product-description"><strong>{item.number}</strong><span>•</span>{item.collection}</p>
+      ) : (
+        <p class="product-description">Pacote lacrado disponível no inventário.</p>
+      )}
+
+      <div class="product-card-footer">
+        <div class="price-block">
+          <small>Preço</small>
+          <strong>{formatBRL(price)}</strong>
+        </div>
+        {item.kind === 'card' && <span class={`condition-badge condition-${item.condition.toLowerCase()}`}>{item.condition}</span>}
+      </div>
     </div>
-  </div>
-</a>
+  </button>
+
+  <button class="add-cart-button" type="button" data-add-cart>
+    <span aria-hidden="true">＋</span>
+    Adicionar ao carrinho
+  </button>
+</article>

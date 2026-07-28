@@ -1,6 +1,6 @@
 ---
 import ProductCard from './ProductCard.astro';
-import type { BoosterItem, CardItem, CatalogItem } from '../lib/catalog';
+import type { CardItem, CatalogItem } from '../lib/catalog';
 
 interface Props {
   kind: 'card' | 'booster';
@@ -73,7 +73,7 @@ const noun = kind === 'card' ? 'cartas' : 'boosters';
 
   <div class="catalog-summary">
     <p><strong data-result-count>{items.length}</strong> {noun} encontrados</p>
-    <span>Selecione um item para abrir sua página completa.</span>
+    <span>Selecione um item para abrir os detalhes sobre o catálogo.</span>
   </div>
 
   <div class="empty-state" data-empty-state>

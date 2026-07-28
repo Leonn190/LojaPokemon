@@ -5,15 +5,16 @@ import ProductImage from '../components/ProductImage.astro';
 import { formatBRL, getBoosters, getCards, getItemPrice } from '../lib/catalog';
 import { siteConfig } from '../config';
 
-const base = import.meta.env.BASE_URL;
+const rawBase = import.meta.env.BASE_URL || '/';
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 const cards = getCards();
 const boosters = getBoosters();
 const cardUnits = cards.reduce((total, item) => total + item.quantity, 0);
 const boosterUnits = boosters.reduce((total, item) => total + item.quantity, 0);
 const collections = new Set(cards.map((item) => item.collection)).size;
 const featuredCards = [...cards]
-  .filter((item) => item.ligaPrice !== null)
-  .sort((a, b) => (b.ligaPrice ?? 0) - (a.ligaPrice ?? 0))
+  .filter((item) => item.price !== null)
+  .sort((a, b) => (b.price ?? 0) - (a.price ?? 0))
   .slice(0, 14);
 const featuredBoosters = [...boosters]
   .filter((item) => item.price !== null)
@@ -73,7 +74,7 @@ const heroCard = featuredCards[0] ?? cards[0];
   <Carousel
     eyebrow="Cartas em destaque"
     title="Peças que comandam o acervo"
-    description="Seleção automática das cartas com maior preço de referência registrado na Liga Pokémon."
+    description="Seleção automática das cartas com maior preço registrado no inventário."
     items={featuredCards}
     viewAllHref={`${base}cartas/`}
     viewAllLabel="Ver todas as cartas"
@@ -94,7 +95,7 @@ const heroCard = featuredCards[0] ?? cards[0];
       <h2>Um catálogo feito para decidir sem ruído.</h2>
     </div>
     <p>
-      Nas cartas, o site usa somente o preço da Liga e os dados de identificação. Nos boosters, usa apenas o preço final do inventário. Os demais campos de precificação e todos os links externos ficam fora da interface.
+      Cartas e boosters exibem somente o preço final do inventário. Ao selecionar um produto, os detalhes aparecem em uma subtela sobre o catálogo, sem redirecionamento.
     </p>
     <div class="inventory-totals">
       <div><span>Unidades de cartas</span><strong>{cardUnits}</strong></div>

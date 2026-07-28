@@ -1,13 +1,14 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-const base = import.meta.env.BASE_URL;
+const rawBase = import.meta.env.BASE_URL || '/';
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 ---
 
 <BaseLayout title="Página não encontrada">
   <section class="shell not-found-section">
     <span class="section-eyebrow">Erro 404</span>
     <h1>Essa peça não está no acervo.</h1>
-    <p>O endereço pode ter mudado ou o item não existe mais no catálogo atual.</p>
+    <p>O endereço pode ter mudado. As cartas e os boosters agora abrem em uma subtela dentro das páginas de pesquisa.</p>
     <div class="hero-actions">
       <a class="primary-cta" href={base}><span>Voltar ao início</span><b>←</b></a>
       <a class="secondary-cta" href={`${base}cartas/`}><span>Explorar cartas</span><b>↗</b></a>
