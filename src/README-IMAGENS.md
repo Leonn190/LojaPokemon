@@ -1,17 +1,53 @@
-# Pasta de imagens
+# Estrutura das coleções e imagens
 
-A pasta deve continuar em `public/imagens`, exatamente assim:
+Cada colecionador possui uma pasta própria em `src/coleções/`:
+
+```text
+src/
+└── coleções/
+    └── Leon19/
+        ├── perfil.json
+        ├── inventario-cartas.csv
+        ├── inventario-boosters.csv
+        └── inventario-kits.csv
+```
+
+Para adicionar outro colecionador, duplique a pasta `Leon19`, altere o nome da nova pasta e edite os quatro arquivos. O site encontra todas as pastas automaticamente durante o build e reúne os itens nas páginas gerais.
+
+## Imagens atuais
+
+As imagens existentes podem continuar nas pastas globais:
 
 ```text
 public/
-└── imagens/
-    ├── Aegislash ex_135-182.jpg
-    ├── Aerodactyl EX_XY97.jpg
-    └── ...
+├── imagens/
+├── imagensboosters/
+└── imagenskits/
 ```
 
-Durante o build, o catálogo lê os nomes reais existentes em `public/imagens` e associa primeiro os arquivos cujo nome e numeração correspondem aos dados do inventário. Como segurança, também tenta automaticamente variações com `_`, `-` ou espaço, extensões `.jpg`, `.jpeg`, `.png` e `.webp`, além de nomes sem acentos.
+O catálogo mantém a associação automática por nome e numeração, aceita `.jpg`, `.jpeg`, `.png`, `.webp` e `.avif` e respeita o `base` configurado para o GitHub Pages.
 
-O caminho das imagens respeita automaticamente o `base` configurado no Astro/GitHub Pages, inclusive quando o repositório é publicado em uma subpasta.
+## Imagens por colecionador
 
-Os dois CSVs usados pelo site estão em `src/data/` e são lidos durante o build.
+Também é possível separar imagens de futuros usuários:
+
+```text
+public/
+└── colecoes/
+    └── nome-da-pasta-normalizado/
+        ├── imagens/
+        ├── imagensboosters/
+        └── imagenskits/
+```
+
+O sistema procura primeiro as imagens específicas da coleção e depois usa as pastas globais como alternativa.
+
+## Formato de kits
+
+O arquivo `inventario-kits.csv` usa as colunas:
+
+```text
+Nome,Descrição,Preço,Quantidade,Conteúdo,Imagem
+```
+
+A coluna `Imagem` é opcional. Quando estiver vazia, o site exibe uma arte de fallback própria para kits.

@@ -6,11 +6,18 @@ interface Props {
   item: CatalogItem;
   compact?: boolean;
   catalog?: boolean;
+  hideOwner?: boolean;
 }
 
-const { item, compact = false, catalog = false } = Astro.props;
+const { item, compact = false, catalog = false, hideOwner = false } = Astro.props;
 const price = getItemPrice(item);
-const search = item.searchText;
+const rawBase = import.meta.env.BASE_URL || '/';
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const itemType = item.kind === 'card' ? item.type : item.kind === 'booster' ? 'Booster avulso' : 'Kit personalizado';
+const number = item.kind === 'card' ? item.number : '';
+const pokemonCollection = item.kind === 'card' ? item.collection : item.name;
+const description = item.kind === 'kit' ? item.description : '';
+const contents = item.kind === 'kit' ? item.contents : '';
 ---
 
 <article
@@ -19,29 +26,30 @@ const search = item.searchText;
   data-product-id={`${item.kind}:${item.slug}`}
   data-kind={item.kind}
   data-name={item.name}
-  data-number={item.kind === 'card' ? item.number : ''}
-  data-collection={item.kind === 'card' ? item.collection : item.name}
+  data-number={number}
+  data-collection={pokemonCollection}
   data-language={item.kind === 'card' ? item.language : ''}
   data-condition={item.kind === 'card' ? item.condition : ''}
   data-year={item.kind === 'card' ? item.year : ''}
-  data-type={item.kind === 'card' ? item.type : 'Booster avulso'}
+  data-type={itemType}
+  data-description={description}
+  data-contents={contents}
+  data-owner={item.ownerName}
+  data-owner-collection={item.ownerCollectionName}
+  data-owner-slug={item.ownerCollectionSlug}
   data-price-value={price === null ? '' : String(price)}
   data-price-label={formatBRL(price)}
   data-stock={String(item.quantity)}
   data-catalog-item={catalog ? '' : undefined}
-  data-search={catalog ? search : undefined}
+  data-search={catalog ? item.searchText : undefined}
   data-price={catalog ? String(price ?? -1) : undefined}
   data-quantity={catalog ? String(item.quantity) : undefined}
   data-filter-collection={catalog && item.kind === 'card' ? item.collection : undefined}
   data-filter-condition={catalog && item.kind === 'card' ? item.condition : undefined}
   data-filter-type={catalog && item.kind === 'card' ? item.type : undefined}
+  data-filter-owner={catalog ? item.ownerCollectionSlug : undefined}
 >
-  <button
-    class="product-open-button"
-    type="button"
-    data-open-product
-    aria-label={`Ver detalhes de ${item.name}`}
-  >
+  <button class="product-open-button" type="button" data-open-product aria-label={`Ver detalhes de ${item.name}`}>
     <div class="product-card-media">
       <ProductImage item={item} />
       <span class="quantity-chip">{item.quantity} {item.quantity === 1 ? 'unidade' : 'unidades'}</span>
@@ -50,7 +58,7 @@ const search = item.searchText;
     <div class="product-card-body">
       <div class="product-card-heading">
         <div>
-          <span class="product-kicker">{item.kind === 'card' ? item.type : 'Booster avulso'}</span>
+          <span class="product-kicker">{itemType}</span>
           <h3>{item.name}</h3>
         </div>
         <span class="open-arrow" aria-hidden="true">⌗</span>
@@ -58,8 +66,10 @@ const search = item.searchText;
 
       {item.kind === 'card' ? (
         <p class="product-description"><strong>{item.number}</strong><span>•</span>{item.collection}</p>
+      ) : item.kind === 'kit' ? (
+        <p class="product-description">{item.description}</p>
       ) : (
-        <p class="product-description">Pacote lacrado disponível no inventário.</p>
+        <p class="product-description">Pacote lacrado publicado pelo colecionador.</p>
       )}
 
       <div class="product-card-footer">
@@ -71,6 +81,14 @@ const search = item.searchText;
       </div>
     </div>
   </button>
+
+  {!hideOwner && (
+    <a class="collection-origin" href={`${base}colecoes/${item.ownerCollectionSlug}/`}>
+      <span class="origin-avatar">{item.ownerName.slice(0, 2).toUpperCase()}</span>
+      <span><small>Publicado por</small><strong>{item.ownerName}</strong></span>
+      <b aria-hidden="true">↗</b>
+    </a>
+  )}
 
   <button class="add-cart-button" type="button" data-add-cart>
     <span aria-hidden="true">＋</span>

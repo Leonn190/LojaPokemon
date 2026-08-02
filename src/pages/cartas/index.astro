@@ -1,28 +1,29 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CatalogBrowser from '../../components/CatalogBrowser.astro';
-import { getCards } from '../../lib/catalog';
+import { getCards, getCollections } from '../../lib/catalog';
 
 const cards = getCards();
-const collections = new Set(cards.map((item) => item.collection)).size;
+const collections = getCollections();
+const pokemonSets = new Set(cards.map((item) => item.collection)).size;
 ---
 
 <BaseLayout
-  title="Cartas avulsas"
-  description="Pesquise todas as cartas avulsas do catálogo por nome, número, coleção, tipo, idioma e estado."
+  title="Cartas da comunidade"
+  description="Pesquise cartas Pokémon publicadas por todos os colecionadores do Nexus TCG."
   active="cards"
 >
   <section class="catalog-hero">
     <div class="shell catalog-hero-grid">
       <div data-reveal>
-        <span class="hero-badge"><i></i> {cards.length} cartas no inventário</span>
-        <h1>Cartas avulsas</h1>
-        <p>Encontre a variação exata por nome, número ou coleção. Ao selecionar uma carta, os detalhes aparecem em uma subtela sem sair desta página.</p>
+        <span class="hero-badge"><i></i> {cards.length} cartas publicadas</span>
+        <h1>Cartas da comunidade</h1>
+        <p>Explore cartas de todas as coleções cadastradas. Cada item mostra o perfil responsável, a quantidade disponível e o preço definido pelo colecionador.</p>
       </div>
       <div class="catalog-hero-stats" data-reveal>
-        <div><strong>{collections}</strong><span>coleções</span></div>
+        <div><strong>{collections.length}</strong><span>colecionadores</span></div>
+        <div><strong>{pokemonSets}</strong><span>coleções Pokémon</span></div>
         <div><strong>{new Set(cards.map((item) => item.type)).size}</strong><span>tipos de carta</span></div>
-        <div><strong>{new Set(cards.map((item) => item.year)).size}</strong><span>anos representados</span></div>
       </div>
     </div>
   </section>

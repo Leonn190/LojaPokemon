@@ -3,31 +3,35 @@ import ProductCard from './ProductCard.astro';
 import type { CardItem, CatalogItem } from '../lib/catalog';
 
 interface Props {
-  kind: 'card' | 'booster';
+  kind: 'card' | 'booster' | 'kit';
   items: CatalogItem[];
+  showOwnerFilter?: boolean;
+  hideOwnerOnCards?: boolean;
 }
 
-const { kind, items } = Astro.props;
+const { kind, items, showOwnerFilter = true, hideOwnerOnCards = false } = Astro.props;
 const cards = kind === 'card' ? (items as CardItem[]) : [];
-const collections = [...new Set(cards.map((item) => item.collection))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+const pokemonCollections = [...new Set(cards.map((item) => item.collection))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 const conditions = [...new Set(cards.map((item) => item.condition))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 const types = [...new Set(cards.map((item) => item.type))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-const noun = kind === 'card' ? 'cartas' : 'boosters';
+const owners = [...new Map(items.map((item) => [item.ownerCollectionSlug, item.ownerCollectionName])).entries()]
+  .sort((a, b) => a[1].localeCompare(b[1], 'pt-BR'));
+const noun = kind === 'card' ? 'cartas' : kind === 'booster' ? 'boosters' : 'kits';
+const nounSingular = kind === 'card' ? 'carta' : kind === 'booster' ? 'booster' : 'kit';
+const placeholder = kind === 'card'
+  ? 'Nome, número, coleção, tipo...'
+  : kind === 'booster'
+    ? 'Nome da coleção ou do booster...'
+    : 'Nome, descrição ou conteúdo do kit...';
 ---
 
 <section class="shell catalog-section" data-catalog-root>
-  <div class="filter-panel" data-reveal>
+  <div class:list={['filter-panel', kind !== 'card' && 'compact-filter-panel']} data-reveal>
     <div class="search-control">
       <label for={`${kind}-search`}>Pesquisar {noun}</label>
       <div class="search-input-wrap">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg>
-        <input
-          id={`${kind}-search`}
-          type="search"
-          placeholder={kind === 'card' ? 'Nome, número, coleção, tipo...' : 'Nome da coleção ou do booster...'}
-          autocomplete="off"
-          data-filter-search
-        />
+        <input id={`${kind}-search`} type="search" placeholder={placeholder} autocomplete="off" data-filter-search />
         <kbd>/</kbd>
       </div>
     </div>
@@ -35,22 +39,22 @@ const noun = kind === 'card' ? 'cartas' : 'boosters';
     {kind === 'card' && (
       <>
         <div class="select-control">
-          <label for="collection-filter">Coleção</label>
+          <label for={`${kind}-collection-filter`}>Coleção Pokémon</label>
           <div class="select-input-wrap">
             <span class="select-symbol" aria-hidden="true">▦</span>
-            <select id="collection-filter" data-filter-collection>
+            <select id={`${kind}-collection-filter`} data-filter-collection>
               <option value="">Todas</option>
-              {collections.map((value) => <option value={value}>{value}</option>)}
+              {pokemonCollections.map((value) => <option value={value}>{value}</option>)}
             </select>
             <svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg>
           </div>
         </div>
 
         <div class="select-control">
-          <label for="type-filter">Tipo</label>
+          <label for={`${kind}-type-filter`}>Tipo</label>
           <div class="select-input-wrap">
             <span class="select-symbol" aria-hidden="true">◆</span>
-            <select id="type-filter" data-filter-type>
+            <select id={`${kind}-type-filter`} data-filter-type>
               <option value="">Todos</option>
               {types.map((value) => <option value={value}>{value}</option>)}
             </select>
@@ -59,10 +63,10 @@ const noun = kind === 'card' ? 'cartas' : 'boosters';
         </div>
 
         <div class="select-control">
-          <label for="condition-filter">Estado</label>
+          <label for={`${kind}-condition-filter`}>Estado</label>
           <div class="select-input-wrap">
             <span class="select-symbol" aria-hidden="true">✓</span>
-            <select id="condition-filter" data-filter-condition>
+            <select id={`${kind}-condition-filter`} data-filter-condition>
               <option value="">Todos</option>
               {conditions.map((value) => <option value={value}>{value}</option>)}
             </select>
@@ -70,6 +74,20 @@ const noun = kind === 'card' ? 'cartas' : 'boosters';
           </div>
         </div>
       </>
+    )}
+
+    {showOwnerFilter && owners.length > 1 && (
+      <div class="select-control">
+        <label for={`${kind}-owner-filter`}>Colecionador</label>
+        <div class="select-input-wrap">
+          <span class="select-symbol" aria-hidden="true">◎</span>
+          <select id={`${kind}-owner-filter`} data-filter-owner>
+            <option value="">Todos</option>
+            {owners.map(([slug, title]) => <option value={slug}>{title}</option>)}
+          </select>
+          <svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg>
+        </div>
+      </div>
     )}
 
     <div class="select-control sort-control">
@@ -90,8 +108,8 @@ const noun = kind === 'card' ? 'cartas' : 'boosters';
   </div>
 
   <div class="catalog-summary">
-    <p><strong data-result-count>{items.length}</strong> {noun} encontrados</p>
-    <span>Selecione um item para abrir os detalhes sobre o catálogo.</span>
+    <p><strong data-result-count>{items.length}</strong> {items.length === 1 ? nounSingular : noun} {items.length === 1 ? 'encontrado' : 'encontrados'}</p>
+    <span>Selecione um item para abrir os detalhes e ver quem publicou.</span>
   </div>
 
   <div class="empty-state" data-empty-state>
@@ -101,6 +119,6 @@ const noun = kind === 'card' ? 'cartas' : 'boosters';
   </div>
 
   <div class="catalog-grid" data-catalog-grid>
-    {items.map((item) => <ProductCard item={item} catalog />)}
+    {items.map((item) => <ProductCard item={item} catalog hideOwner={hideOwnerOnCards} />)}
   </div>
 </section>

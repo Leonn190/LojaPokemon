@@ -1,8 +1,8 @@
 export const siteConfig = {
-  siteName: 'Nexo TCG',
-  shortName: 'NT',
-  tagline: 'Cartas e boosters Pokémon em um catálogo direto, visual e organizado.',
+  siteName: 'Nexus TCG',
+  shortName: 'NX',
+  tagline: 'Organize sua coleção Pokémon, publique seus itens e encontre outros colecionadores.',
   description:
-    'Catálogo Nexo TCG com cartas avulsas e boosters Pokémon, pesquisa rápida, visualização em subtela, carrinho e preços registrados no inventário.',
-  inventoryNote: 'Preços e quantidades são os valores registrados nos arquivos de inventário.',
+    'Nexus TCG é uma plataforma para colecionadores organizarem cartas e boosters, criarem kits e publicarem suas coleções online.',
+  inventoryNote: 'Cada coleção é administrada pelo próprio colecionador, que define itens, quantidades e preços publicados.',
 };

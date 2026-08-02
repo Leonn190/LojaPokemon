@@ -1,107 +1,137 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Carousel from '../components/Carousel.astro';
+import CollectionCarousel from '../components/CollectionCarousel.astro';
 import ProductImage from '../components/ProductImage.astro';
-import { formatBRL, getBoosters, getCards, getItemPrice } from '../lib/catalog';
+import { getBoosters, getCards, getCollections, getKits, shuffleItems } from '../lib/catalog';
 import { siteConfig } from '../config';
 
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 const cards = getCards();
 const boosters = getBoosters();
-const cardUnits = cards.reduce((total, item) => total + item.quantity, 0);
-const boosterUnits = boosters.reduce((total, item) => total + item.quantity, 0);
-const collections = new Set(cards.map((item) => item.collection)).size;
-const featuredCards = [...cards]
-  .filter((item) => item.price !== null)
-  .sort((a, b) => (b.price ?? 0) - (a.price ?? 0))
-  .slice(0, 14);
-const featuredBoosters = [...boosters]
-  .filter((item) => item.price !== null)
-  .sort((a, b) => (b.price ?? 0) - (a.price ?? 0))
-  .slice(0, 14);
-const heroCard = cards.find((item) => item.name === 'Giratina V' && item.number === '186/196')
-  ?? featuredCards[0]
-  ?? cards[0];
+const kits = getKits();
+const collections = getCollections();
+const featuredCards = shuffleItems(cards).slice(0, 14);
+const featuredBoosters = shuffleItems(boosters).slice(0, 14);
+const featuredKits = shuffleItems(kits).slice(0, 14);
+const featuredCollections = [...collections].sort((a, b) => Number(b.featured) - Number(a.featured));
+const totalUnits = [...cards, ...boosters, ...kits].reduce((total, item) => total + item.quantity, 0);
+const heroItems = collections.flatMap((collection) => collection.coverItems).slice(0, 3);
 ---
 
 <BaseLayout active="home">
-  <section class="home-hero">
-    <div class="shell hero-grid">
+  <section class="home-hero community-hero">
+    <div class="shell hero-grid community-hero-grid">
       <div class="hero-copy" data-reveal>
-        <span class="hero-badge"><i></i> Inventário organizado e pesquisável</span>
-        <h1>Seu próximo destaque está <em>na coleção.</em></h1>
-        <p>{siteConfig.tagline} Explore imagens, informações completas e valores sem sair do catálogo.</p>
+        <span class="hero-badge"><i></i> Coleções Pokémon em um só lugar</span>
+        <h1>Seu acervo.<br /><em>Sua vitrine.</em></h1>
+        <p>{siteConfig.tagline} Use o Nexus para guardar sua coleção online ou transformar itens selecionados em uma vitrine de venda.</p>
         <div class="hero-actions">
-          <a class="primary-cta" href={`${base}cartas/`}><span>Explorar cartas</span><b>↗</b></a>
-          <a class="secondary-cta" href={`${base}boosters/`}><span>Ver boosters</span><b>→</b></a>
+          <a class="primary-cta" href={`${base}colecoes/`}><span>Explorar coleções</span><b>↗</b></a>
+          <a class="secondary-cta" href={`${base}cadastro/`}><span>Criar minha coleção</span><b>＋</b></a>
         </div>
         <div class="hero-metrics">
-          <div><strong>{cards.length}</strong><span>cartas catalogadas</span></div>
-          <div><strong>{boosterUnits}</strong><span>boosters em estoque</span></div>
-          <div><strong>{collections}</strong><span>coleções de cartas</span></div>
+          <div><strong>{collections.length}</strong><span>{collections.length === 1 ? 'coleção publicada' : 'coleções publicadas'}</span></div>
+          <div><strong>{cards.length}</strong><span>cartas cadastradas</span></div>
+          <div><strong>{totalUnits}</strong><span>itens na comunidade</span></div>
         </div>
       </div>
 
-      <div class="hero-showcase" data-reveal>
-        <div class="hero-orbit orbit-one" aria-hidden="true"></div>
-        <div class="hero-orbit orbit-two" aria-hidden="true"></div>
-        <div class="hero-product">
-          <ProductImage item={heroCard} detail eager />
+      <div class="community-showcase" data-reveal>
+        <div class="community-orbit orbit-a" aria-hidden="true"></div>
+        <div class="community-orbit orbit-b" aria-hidden="true"></div>
+        <div class="showcase-label label-collection"><span>01</span><strong>Colecione</strong><small>Organize tudo em um perfil</small></div>
+        <div class="showcase-label label-sell"><span>02</span><strong>Publique</strong><small>Escolha o que deseja vender</small></div>
+        <div class="showcase-label label-connect"><span>03</span><strong>Conecte</strong><small>Descubra outros acervos</small></div>
+        <div class="hero-stack" aria-label="Prévia dos itens da comunidade">
+          {heroItems.map((item, index) => (
+            <div class={`hero-stack-item stack-${index + 1}`}><ProductImage item={item} eager={index === 0} /></div>
+          ))}
+          {heroItems.length === 0 && <div class="hero-stack-empty">NX</div>}
         </div>
-        <div class="hero-price-card">
-          <small>Destaque do catálogo</small>
-          <strong>{heroCard.name}</strong>
-          <span>{formatBRL(getItemPrice(heroCard))}</span>
+        <div class="community-card">
+          <span class="collection-avatar">L1</span>
+          <div><small>Coleção em destaque</small><strong>{featuredCollections[0]?.title ?? 'Sua coleção pode estar aqui'}</strong></div>
+          <b>↗</b>
         </div>
-        <div class="floating-chip chip-top">Efeito holográfico 3D</div>
-        <div class="floating-chip chip-bottom">Passe o mouse na carta</div>
       </div>
     </div>
   </section>
 
-  <section class="shell navigation-cards" aria-label="Áreas do catálogo" data-reveal>
+  <section class="shell platform-intro" data-reveal>
+    <div class="platform-intro-copy">
+      <span class="section-eyebrow">Uma plataforma para colecionadores</span>
+      <h2>Guarde para você.<br />Venda quando quiser.</h2>
+      <p>O perfil de cada colecionador funciona como uma coleção digital completa. Cartas e boosters podem ficar apenas catalogados ou ser publicados com preço, e os kits permitem combinar vários itens em uma única oferta.</p>
+    </div>
+    <div class="platform-features">
+      <article><span>◆</span><div><strong>Coleção online</strong><p>Registre cartas e boosters mesmo quando eles não estiverem à venda.</p></div></article>
+      <article><span>↗</span><div><strong>Vitrine pessoal</strong><p>Mostre seus itens em uma página exclusiva com seu nome e seus dados.</p></div></article>
+      <article><span>▦</span><div><strong>Kits personalizados</strong><p>Combine cartas e boosters e defina um preço para o conjunto inteiro.</p></div></article>
+    </div>
+  </section>
+
+  <section class="shell navigation-cards marketplace-navigation" aria-label="Áreas do Nexus TCG" data-reveal>
     <a class="navigation-card cards-navigation" href={`${base}cartas/`}>
       <div class="navigation-icon" aria-hidden="true"><span>◆</span></div>
-      <div><small>Catálogo completo</small><h2>Cartas avulsas</h2><p>Pesquise por nome, numeração, coleção, tipo, idioma e estado.</p></div>
+      <div><small>Todos os colecionadores</small><h2>Cartas</h2><p>Explore cartas publicadas em todas as coleções e descubra quem possui cada item.</p></div>
       <span class="navigation-arrow">↗</span>
     </a>
     <a class="navigation-card boosters-navigation" href={`${base}boosters/`}>
       <div class="navigation-icon" aria-hidden="true"><span>▰</span></div>
-      <div><small>Pacotes lacrados</small><h2>Boosters avulsos</h2><p>Consulte as coleções disponíveis, estoque e o preço definido no inventário.</p></div>
+      <div><small>Pacotes da comunidade</small><h2>Boosters</h2><p>Veja boosters lacrados de diferentes colecionadores em um catálogo unificado.</p></div>
+      <span class="navigation-arrow">↗</span>
+    </a>
+    <a class="navigation-card kits-navigation" href={`${base}kits/`}>
+      <div class="navigation-icon" aria-hidden="true"><span>▦</span></div>
+      <div><small>Ofertas combinadas</small><h2>Kits</h2><p>Encontre conjuntos personalizados de cartas e boosters por um preço único.</p></div>
+      <span class="navigation-arrow">↗</span>
+    </a>
+    <a class="navigation-card collections-navigation" href={`${base}colecoes/`}>
+      <div class="navigation-icon" aria-hidden="true"><span>◎</span></div>
+      <div><small>Perfis de colecionador</small><h2>Coleções</h2><p>Entre na página de cada usuário e navegue apenas pelos itens daquele acervo.</p></div>
       <span class="navigation-arrow">↗</span>
     </a>
   </section>
 
   <Carousel
-    eyebrow="Cartas em destaque"
-    title="Cartas que se destacam na coleção"
-    description="Uma seleção de cartas em movimento contínuo, com os preços definidos no catálogo."
+    eyebrow="Cartas da comunidade"
+    title="Descobertas de várias coleções."
+    description="Uma seleção aleatória de cartas publicadas por todos os colecionadores do Nexus."
     items={featuredCards}
     viewAllHref={`${base}cartas/`}
     viewAllLabel="Ver todas as cartas"
   />
 
   <Carousel
-    eyebrow="Boosters disponíveis"
-    title="Pacotes para todos os estilos de coleção"
-    description="Pacotes disponíveis passando automaticamente, com o preço final definido no catálogo."
+    eyebrow="Boosters publicados"
+    title="Pacotes lacrados em movimento."
+    description="Boosters de diferentes coleções aparecem juntos para facilitar novas descobertas."
     items={featuredBoosters}
     viewAllHref={`${base}boosters/`}
     viewAllLabel="Ver todos os boosters"
   />
 
-  <section class="shell inventory-note" data-reveal>
+  <Carousel
+    eyebrow="Kits dos colecionadores"
+    title="Combinações feitas pela comunidade."
+    description="Kits podem reunir cartas, boosters ou os dois, com quantidade e preço definidos pelo dono da coleção."
+    items={featuredKits}
+    viewAllHref={`${base}kits/`}
+    viewAllLabel="Explorar kits"
+    emptyTitle="O primeiro kit ainda não foi publicado"
+    emptyDescription="Leon19 já pode combinar cartas e boosters da coleção e criar a primeira oferta do Nexus."
+  />
+
+  <CollectionCarousel collections={featuredCollections} viewAllHref={`${base}colecoes/`} />
+
+  <section class="shell collector-cta" data-reveal>
     <div>
-      <span class="section-eyebrow">Informação clara</span>
-      <h2>Um catálogo feito para decidir sem ruído.</h2>
+      <span class="section-eyebrow">Comece sua coleção digital</span>
+      <h2>O próximo perfil pode ser o seu.</h2>
+      <p>Cadastre seu nome, escolha se terá cartas, boosters ou os dois e decida quais itens ficarão apenas no acervo e quais estarão disponíveis para venda.</p>
     </div>
-    <p>
-      Cartas e boosters exibem somente o preço final do inventário. Ao selecionar um produto, os detalhes aparecem em uma subtela sobre o catálogo, sem redirecionamento.
-    </p>
-    <div class="inventory-totals">
-      <div><span>Unidades de cartas</span><strong>{cardUnits}</strong></div>
-      <div><span>Tipos de boosters</span><strong>{boosters.length}</strong></div>
-    </div>
+    <a class="primary-cta" href={`${base}cadastro/`}><span>Criar perfil de colecionador</span><b>↗</b></a>
   </section>
 </BaseLayout>

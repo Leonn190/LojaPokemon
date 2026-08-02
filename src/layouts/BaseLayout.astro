@@ -5,7 +5,7 @@ import '../styles/global.css';
 interface Props {
   title?: string;
   description?: string;
-  active?: 'home' | 'cards' | 'boosters';
+  active?: 'home' | 'cards' | 'boosters' | 'kits' | 'collections' | 'signup';
   bodyClass?: string;
 }
 
@@ -40,16 +40,20 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           <span class="brand-emblem" aria-hidden="true"><i></i></span>
           <span class="brand-copy">
             <strong>{siteConfig.siteName}</strong>
-            <small>Coleção Pokémon</small>
+            <small>Comunidade de colecionadores</small>
           </span>
         </a>
 
         <div class="nav-actions">
           <div class="nav-links" id="primary-navigation">
             <a class:list={[{ active: active === 'home' }]} href={base}>Início</a>
-            <a class:list={[{ active: active === 'cards' }]} href={`${base}cartas/`}>Cartas avulsas</a>
+            <a class:list={[{ active: active === 'collections' }]} href={`${base}colecoes/`}>Coleções</a>
+            <a class:list={[{ active: active === 'cards' }]} href={`${base}cartas/`}>Cartas</a>
             <a class:list={[{ active: active === 'boosters' }]} href={`${base}boosters/`}>Boosters</a>
+            <a class:list={[{ active: active === 'kits' }]} href={`${base}kits/`}>Kits</a>
           </div>
+
+          <a class:list={['collector-nav-cta', { active: active === 'signup' }]} href={`${base}cadastro/`}>Criar coleção</a>
 
           <button class="cart-trigger" type="button" data-cart-open aria-label="Abrir carrinho">
             <span class="cart-trigger-icon" aria-hidden="true">▱</span>
@@ -65,34 +69,34 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
       </nav>
     </header>
 
-    <main>
-      <slot />
-    </main>
+    <main><slot /></main>
 
     <footer class="site-footer">
       <div class="shell footer-grid">
         <div>
           <a class="brand footer-brand" href={base}>
             <span class="brand-emblem" aria-hidden="true"><i></i></span>
-            <span class="brand-copy"><strong>{siteConfig.siteName}</strong><small>Catálogo de coleção</small></span>
+            <span class="brand-copy"><strong>{siteConfig.siteName}</strong><small>Coleções Pokémon online</small></span>
           </a>
           <p>{siteConfig.inventoryNote}</p>
         </div>
         <div class="footer-nav" aria-label="Links do rodapé">
-          <a href={base}>Página inicial</a>
-          <a href={`${base}cartas/`}>Todas as cartas</a>
-          <a href={`${base}boosters/`}>Todos os boosters</a>
+          <a href={`${base}colecoes/`}>Coleções</a>
+          <a href={`${base}cartas/`}>Cartas</a>
+          <a href={`${base}boosters/`}>Boosters</a>
+          <a href={`${base}kits/`}>Kits</a>
+          <a href={`${base}cadastro/`}>Criar coleção</a>
         </div>
       </div>
       <div class="shell footer-bottom">
         <span>© {new Date().getFullYear()} {siteConfig.siteName}</span>
-        <span>Construído em Astro para carregamento rápido.</span>
+        <span>Um espaço para organizar, mostrar e negociar coleções.</span>
       </div>
     </footer>
 
     <div class="product-modal" data-product-modal hidden>
       <button class="product-modal-backdrop" type="button" data-modal-close aria-label="Fechar detalhes"></button>
-      <section class="product-modal-panel" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+      <section class="product-modal-panel" role="dialog" aria-modal="true" aria-labelledby="product-modal-title" tabindex="-1">
         <button class="modal-close-button" type="button" data-modal-close aria-label="Fechar detalhes">×</button>
         <div class="product-modal-grid">
           <div class="product-modal-media" data-modal-media></div>
@@ -106,18 +110,25 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             <h2 id="product-modal-title" data-modal-name></h2>
             <p class="detail-lead" data-modal-description></p>
 
+            <a class="modal-owner-card" data-modal-owner-link href="#">
+              <span class="origin-avatar" data-modal-owner-avatar></span>
+              <span><small>Publicado na coleção</small><strong data-modal-owner-collection></strong><em data-modal-owner></em></span>
+              <b aria-hidden="true">↗</b>
+            </a>
+
             <div class="detail-price-panel" data-modal-price-panel>
-              <div><small>Preço</small><strong data-modal-price></strong></div>
-              <span>Valor registrado no inventário</span>
+              <div><small>Preço publicado</small><strong data-modal-price></strong></div>
+              <span>Definido pelo colecionador</span>
             </div>
 
             <dl class="detail-specs" data-modal-specs>
-              <div data-spec-collection><dt>Coleção</dt><dd></dd></div>
+              <div data-spec-pokemon-collection><dt>Coleção Pokémon</dt><dd></dd></div>
               <div data-spec-number><dt>Número</dt><dd></dd></div>
               <div data-spec-language><dt>Idioma</dt><dd></dd></div>
               <div data-spec-condition><dt>Estado</dt><dd></dd></div>
               <div data-spec-year><dt>Ano</dt><dd></dd></div>
               <div data-spec-type><dt>Tipo</dt><dd></dd></div>
+              <div data-spec-contents><dt>Conteúdo do kit</dt><dd></dd></div>
               <div data-spec-quantity><dt>Quantidade</dt><dd></dd></div>
             </dl>
 
@@ -132,34 +143,35 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
     <button class="cart-backdrop" type="button" data-cart-backdrop hidden aria-label="Fechar carrinho"></button>
     <aside class="cart-drawer" data-cart-drawer aria-hidden="true" aria-label="Carrinho de compras">
       <header class="cart-drawer-header">
-        <div><span class="section-eyebrow">Sua seleção</span><h2>Carrinho</h2></div>
+        <div><span class="section-eyebrow">Itens de colecionadores</span><h2>Carrinho</h2></div>
         <button class="modal-close-button" type="button" data-cart-close aria-label="Fechar carrinho">×</button>
       </header>
       <div class="cart-items" data-cart-items></div>
       <div class="cart-empty" data-cart-empty>
         <span aria-hidden="true">◇</span>
         <h3>Seu carrinho está vazio</h3>
-        <p>Adicione cartas ou boosters para montar sua seleção.</p>
+        <p>Adicione cartas, boosters ou kits publicados pelos colecionadores.</p>
       </div>
       <footer class="cart-drawer-footer">
-        <div><span>Total</span><strong data-cart-total>R$ 0,00</strong></div>
+        <div><span>Total publicado</span><strong data-cart-total>R$ 0,00</strong></div>
+        <p class="cart-seller-note">Cada item continua vinculado ao colecionador que o publicou.</p>
         <button class="clear-cart-button" type="button" data-cart-clear>Limpar carrinho</button>
       </footer>
     </aside>
 
     <script is:inline>
       (() => {
+        const base = document.body.dataset.siteBase || '/';
         const normalize = (value) => String(value || '')
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '')
           .toLocaleLowerCase('pt-BR')
           .trim();
-
         const formatBRL = (value) => new Intl.NumberFormat('pt-BR', {
-          style: 'currency',
-          currency: 'BRL',
-          minimumFractionDigits: 2,
+          style: 'currency', currency: 'BRL', minimumFractionDigits: 2,
         }).format(Number(value) || 0);
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
         const menuButton = document.querySelector('.nav-toggle');
         const menu = document.querySelector('.nav-links');
@@ -169,95 +181,86 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           menu?.classList.toggle('open', !open);
         });
 
+        document.querySelectorAll('[data-random-carousel]').forEach((track) => {
+          const sequences = [...track.querySelectorAll('.carousel-sequence')];
+          if (sequences.length < 2) return;
+          const firstItems = [...sequences[0].children];
+          for (let index = firstItems.length - 1; index > 0; index -= 1) {
+            const swap = Math.floor(Math.random() * (index + 1));
+            [firstItems[index], firstItems[swap]] = [firstItems[swap], firstItems[index]];
+          }
+          firstItems.forEach((item) => sequences[0].appendChild(item));
+          const keyOf = (item) => item.dataset.productId || item.getAttribute('href') || item.textContent;
+          const secondItems = [...sequences[1].children];
+          const buckets = new Map();
+          secondItems.forEach((item) => {
+            const key = keyOf(item);
+            const list = buckets.get(key) || [];
+            list.push(item);
+            buckets.set(key, list);
+          });
+          firstItems.forEach((item) => {
+            const match = buckets.get(keyOf(item))?.shift();
+            if (match) sequences[1].appendChild(match);
+          });
+        });
+
         const parseImageList = (value) => {
           try {
             const parsed = JSON.parse(value || '[]');
             return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
-          } catch (_) {
-            return [];
-          }
+          } catch (_) { return []; }
         };
 
         const initImage = (image) => {
           if (!image || image.dataset.fallbackReady === 'true') return;
           image.dataset.fallbackReady = 'true';
-
           const candidates = parseImageList(image.dataset.imageCandidates);
           const gallery = parseImageList(image.dataset.imageGallery);
           let nextIndex = 0;
           const stage = image.closest('.image-stage');
-
-          const showImage = () => {
-            image.hidden = false;
-            stage?.classList.remove('no-image');
-          };
-
+          const showImage = () => { image.hidden = false; stage?.classList.remove('no-image'); };
           const tryNext = () => {
             if (nextIndex < candidates.length) {
               showImage();
-              image.src = candidates[nextIndex];
-              nextIndex += 1;
+              image.src = candidates[nextIndex++];
               return;
             }
             image.hidden = true;
             stage?.classList.add('no-image');
           };
-
           const startGallery = () => {
             if (gallery.length < 2 || gallery.length > 12 || image.dataset.galleryReady === 'true') return;
             image.dataset.galleryReady = 'true';
-
             Promise.all(gallery.map((url) => new Promise((resolve) => {
               const probe = new Image();
-              probe.decoding = 'async';
               probe.onload = () => resolve(url);
               probe.onerror = () => resolve(null);
               probe.src = url;
             }))).then((loaded) => {
               const valid = [...new Set(loaded.filter(Boolean))];
               if (valid.length < 2) return;
-
-              const absolute = (url) => new URL(url, document.baseURI).href;
-              let currentIndex = valid.findIndex((url) => absolute(url) === image.currentSrc);
-              if (currentIndex < 0) currentIndex = 0;
-              image.src = valid[currentIndex];
-              showImage();
-
-              const seed = [...(image.alt || '')].reduce((total, char) => total + char.charCodeAt(0), 0);
-              const delay = 2600 + (seed % 900);
+              let index = Math.max(0, valid.findIndex((url) => new URL(url, document.baseURI).href === image.currentSrc));
+              image.src = valid[index];
+              const seed = [...(image.alt || '')].reduce((sum, char) => sum + char.charCodeAt(0), 0);
               window.setInterval(() => {
                 if (document.hidden) return;
-                currentIndex = (currentIndex + 1) % valid.length;
-                image.src = valid[currentIndex];
-              }, delay);
+                index = (index + 1) % valid.length;
+                image.src = valid[index];
+              }, 2600 + (seed % 900));
             });
           };
-
-          image.addEventListener('load', () => {
-            showImage();
-            startGallery();
-          });
+          image.addEventListener('load', () => { showImage(); startGallery(); });
           image.addEventListener('error', tryNext);
-
-          if (image.complete) {
-            if (image.naturalWidth > 0) {
-              showImage();
-              startGallery();
-            } else {
-              tryNext();
-            }
-          }
+          if (image.complete) image.naturalWidth > 0 ? (showImage(), startGallery()) : tryNext();
         };
-
         document.querySelectorAll('img[data-image-candidates]').forEach(initImage);
 
-        const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const initTilt = (element) => {
           if (!finePointer || reducedMotion || !element || element.dataset.tiltReady === 'true') return;
           element.dataset.tiltReady = 'true';
           let frame = 0;
-          const update = (event) => {
+          element.addEventListener('pointermove', (event) => {
             cancelAnimationFrame(frame);
             frame = requestAnimationFrame(() => {
               const bounds = element.getBoundingClientRect();
@@ -266,23 +269,20 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
               const strength = Number(element.dataset.tiltStrength || 8);
               element.style.setProperty('--mx', `${x * 100}%`);
               element.style.setProperty('--my', `${y * 100}%`);
-              element.style.setProperty('--ry', `${(x - 0.5) * strength * 2}deg`);
-              element.style.setProperty('--rx', `${(0.5 - y) * strength * 2}deg`);
+              element.style.setProperty('--ry', `${(x - .5) * strength * 2}deg`);
+              element.style.setProperty('--rx', `${(.5 - y) * strength * 2}deg`);
               element.classList.add('is-tilting');
             });
-          };
-          const reset = () => {
+          });
+          element.addEventListener('pointerleave', () => {
             cancelAnimationFrame(frame);
             element.style.setProperty('--rx', '0deg');
             element.style.setProperty('--ry', '0deg');
             element.style.setProperty('--mx', '50%');
             element.style.setProperty('--my', '50%');
             element.classList.remove('is-tilting');
-          };
-          element.addEventListener('pointermove', update);
-          element.addEventListener('pointerleave', reset);
+          });
         };
-
         document.querySelectorAll('[data-tilt]').forEach(initTilt);
 
         document.querySelectorAll('[data-catalog-root]').forEach((root) => {
@@ -292,6 +292,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           const collection = root.querySelector('[data-filter-collection]');
           const condition = root.querySelector('[data-filter-condition]');
           const type = root.querySelector('[data-filter-type]');
+          const owner = root.querySelector('[data-filter-owner]');
           const sort = root.querySelector('[data-filter-sort]');
           const clear = root.querySelector('[data-filter-clear]');
           const count = root.querySelector('[data-result-count]');
@@ -313,36 +314,31 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             const selectedCollection = collection?.value || '';
             const selectedCondition = condition?.value || '';
             const selectedType = type?.value || '';
+            const selectedOwner = owner?.value || '';
             const mode = sort?.value || 'price-desc';
             let visible = 0;
-
             items.sort((a, b) => compare(a, b, mode)).forEach((item) => {
               grid?.appendChild(item);
               const matches = (!query || normalize(item.dataset.search).includes(query))
                 && (!selectedCollection || item.dataset.filterCollection === selectedCollection)
                 && (!selectedCondition || item.dataset.filterCondition === selectedCondition)
-                && (!selectedType || item.dataset.filterType === selectedType);
+                && (!selectedType || item.dataset.filterType === selectedType)
+                && (!selectedOwner || item.dataset.filterOwner === selectedOwner);
               item.hidden = !matches;
               if (matches) visible += 1;
             });
-
             if (count) count.textContent = String(visible);
             empty?.classList.toggle('show', visible === 0);
           };
 
-          [search, collection, condition, type, sort].forEach((control) => {
-            control?.addEventListener(control === search ? 'input' : 'change', apply);
-          });
+          [search, collection, condition, type, owner, sort].forEach((control) =>
+            control?.addEventListener(control === search ? 'input' : 'change', apply));
           clear?.addEventListener('click', () => {
-            if (search) search.value = '';
-            if (collection) collection.value = '';
-            if (condition) condition.value = '';
-            if (type) type.value = '';
+            [search, collection, condition, type, owner].forEach((control) => { if (control) control.value = ''; });
             if (sort) sort.value = 'price-desc';
             apply();
             search?.focus();
           });
-
           const params = new URLSearchParams(window.location.search);
           if (search && params.get('q')) search.value = params.get('q');
           apply();
@@ -360,6 +356,10 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         const modalPrice = modal?.querySelector('[data-modal-price]');
         const modalPricePanel = modal?.querySelector('[data-modal-price-panel]');
         const modalAdd = modal?.querySelector('[data-modal-add-cart]');
+        const modalOwner = modal?.querySelector('[data-modal-owner]');
+        const modalOwnerCollection = modal?.querySelector('[data-modal-owner-collection]');
+        const modalOwnerAvatar = modal?.querySelector('[data-modal-owner-avatar]');
+        const modalOwnerLink = modal?.querySelector('[data-modal-owner-link]');
         let activeProductCard = null;
         let modalReturnFocus = null;
 
@@ -367,10 +367,9 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           const row = modal?.querySelector(selector);
           if (!row) return;
           row.hidden = !visible;
-          const valueNode = row.querySelector('dd');
-          if (valueNode) valueNode.textContent = value || 'Não informado';
+          const node = row.querySelector('dd');
+          if (node) node.textContent = value || 'Não informado';
         };
-
         const closeModal = () => {
           if (!modal || modal.hidden) return;
           modal.classList.remove('open');
@@ -378,12 +377,13 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           document.body.classList.remove('modal-open');
           modalReturnFocus?.focus?.();
         };
-
         const openModal = (card, trigger) => {
           if (!modal || !modalMedia) return;
           activeProductCard = card;
           modalReturnFocus = trigger;
-          const isCard = card.dataset.kind === 'card';
+          const kind = card.dataset.kind || 'card';
+          const isCard = kind === 'card';
+          const isBooster = kind === 'booster';
           const visual = card.querySelector('.collectible-visual');
           modalMedia.innerHTML = visual ? visual.outerHTML : '';
           const clonedVisual = modalMedia.querySelector('[data-tilt]');
@@ -394,34 +394,38 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             initTilt(clonedVisual);
           }
           const clonedImage = modalMedia.querySelector('img[data-image-candidates]');
-          if (clonedImage) {
-            delete clonedImage.dataset.fallbackReady;
-            initImage(clonedImage);
-          }
+          if (clonedImage) { delete clonedImage.dataset.fallbackReady; initImage(clonedImage); }
 
-          modal?.classList.toggle('booster-modal', !isCard);
+          modal.classList.toggle('booster-modal', isBooster);
+          modal.classList.toggle('kit-modal', kind === 'kit');
           if (modalName) modalName.textContent = card.dataset.name || '';
-          if (modalNumber) modalNumber.textContent = isCard ? (card.dataset.number || '') : 'Pacote lacrado';
+          if (modalNumber) modalNumber.textContent = isCard ? (card.dataset.number || '') : isBooster ? 'Pacote lacrado' : 'Kit personalizado';
           if (modalType) modalType.textContent = card.dataset.type || '';
           if (modalStock) modalStock.textContent = `${card.dataset.stock || '0'} ${card.dataset.stock === '1' ? 'unidade' : 'unidades'}`;
-          if (modalDescription) modalDescription.textContent = isCard
-            ? 'Visualização da carta com os dados do inventário, sem abrir outra página.'
-            : 'Visualização do booster com os dados do inventário, sem abrir outra página.';
+          if (modalDescription) modalDescription.textContent = card.dataset.description || (isCard
+            ? 'Carta publicada por um colecionador da comunidade Nexus TCG.'
+            : isBooster ? 'Booster lacrado publicado por um colecionador da comunidade.' : 'Conjunto personalizado pelo dono da coleção.');
           if (modalPrice) modalPrice.textContent = card.dataset.priceLabel || 'Consultar';
-          modalPricePanel?.classList.toggle('booster-price-panel', !isCard);
+          modalPricePanel?.classList.toggle('booster-price-panel', isBooster);
 
           if (modalCondition) {
             modalCondition.hidden = !isCard;
             modalCondition.textContent = card.dataset.condition || '';
             modalCondition.className = `condition-badge condition-${normalize(card.dataset.condition).replace(/\s+/g, '-')}`;
           }
+          const ownerName = card.dataset.owner || 'Colecionador';
+          if (modalOwner) modalOwner.textContent = ownerName;
+          if (modalOwnerCollection) modalOwnerCollection.textContent = card.dataset.ownerCollection || '';
+          if (modalOwnerAvatar) modalOwnerAvatar.textContent = ownerName.slice(0, 2).toUpperCase();
+          if (modalOwnerLink) modalOwnerLink.href = `${base}colecoes/${card.dataset.ownerSlug || ''}/`;
 
-          setSpec('[data-spec-collection]', card.dataset.collection || '', true);
+          setSpec('[data-spec-pokemon-collection]', card.dataset.collection || '', isCard || isBooster);
           setSpec('[data-spec-number]', card.dataset.number || '', isCard);
           setSpec('[data-spec-language]', card.dataset.language || '', isCard);
           setSpec('[data-spec-condition]', card.dataset.condition || '', isCard);
           setSpec('[data-spec-year]', card.dataset.year || '', isCard);
           setSpec('[data-spec-type]', card.dataset.type || '', true);
+          setSpec('[data-spec-contents]', card.dataset.contents || '', kind === 'kit');
           setSpec('[data-spec-quantity]', card.dataset.stock || '0', true);
 
           modal.hidden = false;
@@ -429,16 +433,14 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           requestAnimationFrame(() => modal.classList.add('open'));
           modalPanel?.focus?.();
         };
-
         modal?.querySelectorAll('[data-modal-close]').forEach((button) => button.addEventListener('click', closeModal));
 
-        const storageKey = 'nexo-tcg-cart-v2';
+        const storageKey = 'nexus-tcg-cart-v1';
         let cart = [];
         try {
           const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
           if (Array.isArray(saved)) cart = saved;
         } catch (_) {}
-
         const cartDrawer = document.querySelector('[data-cart-drawer]');
         const cartBackdrop = document.querySelector('[data-cart-backdrop]');
         const cartItems = document.querySelector('[data-cart-items]');
@@ -449,89 +451,53 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         const productFromCard = (card) => {
           const image = card.querySelector('.image-stage img');
           return {
-            id: card.dataset.productId || '',
-            kind: card.dataset.kind || 'card',
-            name: card.dataset.name || 'Produto',
-            number: card.dataset.number || '',
+            id: card.dataset.productId || '', kind: card.dataset.kind || 'card', name: card.dataset.name || 'Produto',
+            number: card.dataset.number || '', owner: card.dataset.owner || 'Colecionador',
+            ownerCollection: card.dataset.ownerCollection || '', ownerSlug: card.dataset.ownerSlug || '',
             price: card.dataset.priceValue === '' ? null : Number(card.dataset.priceValue),
             priceLabel: card.dataset.priceLabel || 'Consultar',
             image: image && !image.hidden ? (image.currentSrc || image.src || '') : '',
-            quantity: 1,
-            stock: Math.max(1, Number(card.dataset.stock || 1)),
+            quantity: 1, stock: Math.max(1, Number(card.dataset.stock || 1)),
           };
         };
-
-        const saveCart = () => {
-          localStorage.setItem(storageKey, JSON.stringify(cart));
-        };
-
+        const saveCart = () => localStorage.setItem(storageKey, JSON.stringify(cart));
         const renderCart = () => {
           if (!cartItems) return;
           cartItems.replaceChildren();
           let total = 0;
           let amount = 0;
-
           cart.forEach((item) => {
             amount += item.quantity;
             if (Number.isFinite(item.price)) total += item.price * item.quantity;
-
             const article = document.createElement('article');
             article.className = 'cart-item';
             article.dataset.cartId = item.id;
-
             const thumb = document.createElement('div');
             thumb.className = 'cart-item-thumb';
             if (item.image) {
-              const image = document.createElement('img');
-              image.src = item.image;
-              image.alt = '';
-              thumb.appendChild(image);
-            } else {
-              thumb.textContent = (item.name || '?').slice(0, 2).toUpperCase();
-            }
-
+              const image = document.createElement('img'); image.src = item.image; image.alt = ''; thumb.appendChild(image);
+            } else thumb.textContent = (item.name || '?').slice(0, 2).toUpperCase();
             const content = document.createElement('div');
             content.className = 'cart-item-content';
-            const title = document.createElement('strong');
-            title.textContent = item.name;
-            const meta = document.createElement('span');
-            meta.textContent = item.number || (item.kind === 'card' ? 'Carta avulsa' : 'Booster avulso');
-            const price = document.createElement('b');
-            price.textContent = item.priceLabel;
+            const title = document.createElement('strong'); title.textContent = item.name;
+            const meta = document.createElement('span'); meta.textContent = `${item.number || (item.kind === 'kit' ? 'Kit' : item.kind === 'card' ? 'Carta avulsa' : 'Booster avulso')} · ${item.owner}`;
+            const price = document.createElement('b'); price.textContent = item.priceLabel;
             content.append(title, meta, price);
-
-            const controls = document.createElement('div');
-            controls.className = 'cart-item-controls';
-            const decrease = document.createElement('button');
-            decrease.type = 'button';
-            decrease.dataset.cartAction = 'decrease';
-            decrease.textContent = '−';
-            decrease.setAttribute('aria-label', `Diminuir quantidade de ${item.name}`);
-            const quantity = document.createElement('span');
-            quantity.textContent = String(item.quantity);
-            const increase = document.createElement('button');
-            increase.type = 'button';
-            increase.dataset.cartAction = 'increase';
-            increase.textContent = '+';
-            increase.setAttribute('aria-label', `Aumentar quantidade de ${item.name}`);
-            const remove = document.createElement('button');
-            remove.type = 'button';
-            remove.dataset.cartAction = 'remove';
-            remove.className = 'cart-remove-button';
-            remove.textContent = 'Remover';
+            const controls = document.createElement('div'); controls.className = 'cart-item-controls';
+            const decrease = document.createElement('button'); decrease.type = 'button'; decrease.dataset.cartAction = 'decrease'; decrease.textContent = '−';
+            const quantity = document.createElement('span'); quantity.textContent = String(item.quantity);
+            const increase = document.createElement('button'); increase.type = 'button'; increase.dataset.cartAction = 'increase'; increase.textContent = '+';
+            const remove = document.createElement('button'); remove.type = 'button'; remove.dataset.cartAction = 'remove'; remove.className = 'cart-remove-button'; remove.textContent = 'Remover';
             controls.append(decrease, quantity, increase, remove);
-
             article.append(thumb, content, controls);
             cartItems.appendChild(article);
           });
-
           if (cartCount) cartCount.textContent = String(amount);
           if (cartTotal) cartTotal.textContent = formatBRL(total);
           if (cartEmpty) cartEmpty.hidden = cart.length > 0;
           document.querySelector('[data-cart-clear]')?.toggleAttribute('disabled', cart.length === 0);
           saveCart();
         };
-
         const addToCart = (card, button) => {
           const product = productFromCard(card);
           const current = cart.find((item) => item.id === product.id);
@@ -542,55 +508,38 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           if (button) {
             button.innerHTML = '<span aria-hidden="true">✓</span> Adicionado';
             button.classList.add('added');
-            window.setTimeout(() => {
-              button.innerHTML = original;
-              button.classList.remove('added');
-            }, 1100);
+            window.setTimeout(() => { button.innerHTML = original; button.classList.remove('added'); }, 1100);
           }
         };
-
         const openCart = () => {
           closeModal();
           if (!cartDrawer || !cartBackdrop) return;
           cartBackdrop.hidden = false;
           cartDrawer.setAttribute('aria-hidden', 'false');
           document.body.classList.add('cart-open');
-          requestAnimationFrame(() => {
-            cartBackdrop.classList.add('open');
-            cartDrawer.classList.add('open');
-          });
+          requestAnimationFrame(() => { cartBackdrop.classList.add('open'); cartDrawer.classList.add('open'); });
         };
-
         const closeCart = () => {
           if (!cartDrawer || !cartBackdrop) return;
-          cartBackdrop.classList.remove('open');
-          cartDrawer.classList.remove('open');
-          cartDrawer.setAttribute('aria-hidden', 'true');
-          document.body.classList.remove('cart-open');
+          cartBackdrop.classList.remove('open'); cartDrawer.classList.remove('open');
+          cartDrawer.setAttribute('aria-hidden', 'true'); document.body.classList.remove('cart-open');
           window.setTimeout(() => { cartBackdrop.hidden = true; }, reducedMotion ? 0 : 180);
         };
-
         document.querySelectorAll('[data-cart-open]').forEach((button) => button.addEventListener('click', openCart));
         document.querySelectorAll('[data-cart-close]').forEach((button) => button.addEventListener('click', closeCart));
         cartBackdrop?.addEventListener('click', closeCart);
-        document.querySelector('[data-cart-clear]')?.addEventListener('click', () => {
-          cart = [];
-          renderCart();
-        });
-
+        document.querySelector('[data-cart-clear]')?.addEventListener('click', () => { cart = []; renderCart(); });
         cartItems?.addEventListener('click', (event) => {
           const button = event.target.closest('[data-cart-action]');
           const itemElement = event.target.closest('[data-cart-id]');
           if (!button || !itemElement) return;
           const index = cart.findIndex((item) => item.id === itemElement.dataset.cartId);
           if (index < 0) return;
-          const action = button.dataset.cartAction;
-          if (action === 'increase') cart[index].quantity = Math.min(cart[index].stock, cart[index].quantity + 1);
-          if (action === 'decrease') cart[index].quantity -= 1;
-          if (action === 'remove' || cart[index].quantity <= 0) cart.splice(index, 1);
+          if (button.dataset.cartAction === 'increase') cart[index].quantity = Math.min(cart[index].stock, cart[index].quantity + 1);
+          if (button.dataset.cartAction === 'decrease') cart[index].quantity -= 1;
+          if (button.dataset.cartAction === 'remove' || cart[index].quantity <= 0) cart.splice(index, 1);
           renderCart();
         });
-
         document.addEventListener('click', (event) => {
           const openButton = event.target.closest('[data-open-product]');
           if (openButton) {
@@ -598,48 +547,29 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             if (card) openModal(card, openButton);
             return;
           }
-
           const addButton = event.target.closest('[data-add-cart]');
           if (addButton) {
             const card = addButton.closest('[data-product-card]');
             if (card) addToCart(card, addButton);
           }
         });
-
-        modalAdd?.addEventListener('click', () => {
-          if (activeProductCard) addToCart(activeProductCard, modalAdd);
-        });
-
+        modalAdd?.addEventListener('click', () => { if (activeProductCard) addToCart(activeProductCard, modalAdd); });
         document.addEventListener('keydown', (event) => {
-          if (event.key === 'Escape') {
-            closeModal();
-            closeCart();
-          }
+          if (event.key === 'Escape') { closeModal(); closeCart(); }
           if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName || '')) {
             const search = document.querySelector('[data-filter-search]');
-            if (search) {
-              event.preventDefault();
-              search.focus();
-            }
+            if (search) { event.preventDefault(); search.focus(); }
           }
         });
-
         renderCart();
 
         document.querySelectorAll('[data-reveal]').forEach((element) => element.classList.add('reveal-ready'));
         if ('IntersectionObserver' in window && !reducedMotion) {
-          const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                entry.target.classList.add('revealed');
-                observer.unobserve(entry.target);
-              }
-            });
-          }, { threshold: 0.08 });
+          const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
+            if (entry.isIntersecting) { entry.target.classList.add('revealed'); observer.unobserve(entry.target); }
+          }), { threshold: .08 });
           document.querySelectorAll('.reveal-ready').forEach((element) => observer.observe(element));
-        } else {
-          document.querySelectorAll('.reveal-ready').forEach((element) => element.classList.add('revealed'));
-        }
+        } else document.querySelectorAll('.reveal-ready').forEach((element) => element.classList.add('revealed'));
       })();
     </script>
   </body>

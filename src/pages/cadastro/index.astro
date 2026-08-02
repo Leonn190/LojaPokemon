@@ -1,0 +1,179 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const rawBase = import.meta.env.BASE_URL || '/';
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+---
+
+<BaseLayout
+  title="Criar coleção"
+  description="Crie seu perfil de colecionador e prepare uma coleção digital no Nexus TCG."
+  active="signup"
+  bodyClass="signup-page"
+>
+  <section class="signup-hero">
+    <div class="shell signup-hero-grid">
+      <div data-reveal>
+        <span class="hero-badge"><i></i> Novo perfil de colecionador</span>
+        <h1>Sua coleção começa com um perfil.</h1>
+        <p>Defina como sua coleção aparecerá no Nexus. Depois, ela poderá receber cartas, boosters e kits, com itens apenas catalogados ou disponíveis para venda.</p>
+      </div>
+      <div class="signup-steps" data-reveal>
+        <article><span>01</span><div><strong>Crie sua identidade</strong><p>Nome do colecionador e apresentação da coleção.</p></div></article>
+        <article><span>02</span><div><strong>Escolha o conteúdo</strong><p>Cartas, boosters ou os dois, além de kits personalizados.</p></div></article>
+        <article><span>03</span><div><strong>Publique seu acervo</strong><p>Decida o que ficará exposto e o que terá preço de venda.</p></div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="shell signup-workspace" data-signup-root>
+    <form class="collector-form" data-collector-form data-reveal>
+      <div class="form-section-heading">
+        <span class="section-eyebrow">Informações principais</span>
+        <h2>Monte o perfil da coleção</h2>
+        <p>Este formulário cria um rascunho local do perfil para a estrutura atual do site.</p>
+      </div>
+
+      <div class="form-grid">
+        <label class="form-field">
+          <span>Nome do colecionador</span>
+          <input name="owner" type="text" placeholder="Ex.: Leon19" minlength="3" maxlength="30" required />
+          <small>Será exibido em todos os itens publicados.</small>
+        </label>
+        <label class="form-field">
+          <span>Nome da coleção</span>
+          <input name="title" type="text" placeholder="Ex.: Coleção do Leon19" minlength="3" maxlength="60" required />
+          <small>Este será o título da página exclusiva.</small>
+        </label>
+        <label class="form-field form-field-wide">
+          <span>Descrição</span>
+          <textarea name="description" rows="4" maxlength="240" placeholder="Conte um pouco sobre o foco da sua coleção..." required></textarea>
+          <small><b data-description-count>0</b>/240 caracteres</small>
+        </label>
+      </div>
+
+      <fieldset class="content-choice">
+        <legend>O que sua coleção terá?</legend>
+        <label><input type="checkbox" name="content" value="cards" checked /><span>◆</span><div><strong>Cartas</strong><small>Cadastre nome, número, estado, quantidade e preço.</small></div></label>
+        <label><input type="checkbox" name="content" value="boosters" checked /><span>▰</span><div><strong>Boosters</strong><small>Organize pacotes lacrados e as diferentes artes.</small></div></label>
+        <label><input type="checkbox" name="content" value="kits" checked /><span>▦</span><div><strong>Kits</strong><small>Combine itens da coleção em ofertas personalizadas.</small></div></label>
+      </fieldset>
+
+      <fieldset class="sale-choice">
+        <legend>Como você pretende usar o perfil?</legend>
+        <label><input type="radio" name="mode" value="selling" checked /><span><strong>Colecionar e vender</strong><small>Alguns itens poderão ter preço e entrar no carrinho.</small></span></label>
+        <label><input type="radio" name="mode" value="showcase" /><span><strong>Somente coleção online</strong><small>O perfil funciona como catálogo pessoal sem ofertas.</small></span></label>
+      </fieldset>
+
+      <div class="form-actions">
+        <button class="primary-cta form-submit" type="submit"><span>Salvar rascunho da coleção</span><b>↗</b></button>
+        <button class="secondary-cta" type="button" data-download-profile disabled><span>Baixar perfil.json</span><b>↓</b></button>
+      </div>
+      <p class="static-version-note">Como esta versão é publicada no GitHub Pages, o rascunho fica salvo somente neste navegador. A estrutura gerada já segue o formato usado pelas pastas de coleções.</p>
+    </form>
+
+    <aside class="profile-live-preview" data-profile-preview data-reveal>
+      <span class="section-eyebrow">Prévia em tempo real</span>
+      <div class="preview-profile-card">
+        <div class="preview-cover-grid"><span>◆</span><span>▰</span><span>▦</span></div>
+        <div class="preview-owner-row"><span data-preview-avatar>NX</span><div><small>Colecionador</small><strong data-preview-owner>Seu nome</strong></div></div>
+        <h2 data-preview-title>Sua coleção no Nexus</h2>
+        <p data-preview-description>A descrição da sua coleção aparecerá aqui.</p>
+        <div class="preview-content-tags" data-preview-tags><span>Cartas</span><span>Boosters</span><span>Kits</span></div>
+        <div class="preview-mode" data-preview-mode>Itens selecionados à venda</div>
+      </div>
+      <div class="saved-draft-message" data-saved-message hidden><span>✓</span><div><strong>Rascunho salvo</strong><p>Você pode fechar a página e continuar depois neste navegador.</p></div></div>
+      <a class="text-link" href={`${base}colecoes/`}>Ver coleções publicadas <span>↗</span></a>
+    </aside>
+  </section>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-signup-root]');
+      const form = root?.querySelector('[data-collector-form]');
+      if (!form) return;
+      const owner = form.elements.owner;
+      const title = form.elements.title;
+      const description = form.elements.description;
+      const downloadButton = root.querySelector('[data-download-profile]');
+      const savedMessage = root.querySelector('[data-saved-message]');
+      const storageKey = 'nexus-tcg-collector-draft-v1';
+      let currentProfile = null;
+
+      const getContents = () => [...form.querySelectorAll('input[name="content"]:checked')].map((input) => input.value);
+      const getMode = () => form.querySelector('input[name="mode"]:checked')?.value || 'selling';
+      const buildProfile = () => ({
+        owner: owner.value.trim(),
+        title: title.value.trim(),
+        description: description.value.trim(),
+        selling: getMode() === 'selling',
+        featured: false,
+        contents: getContents(),
+      });
+      const updatePreview = () => {
+        const profile = buildProfile();
+        root.querySelector('[data-preview-owner]').textContent = profile.owner || 'Seu nome';
+        root.querySelector('[data-preview-title]').textContent = profile.title || 'Sua coleção no Nexus';
+        root.querySelector('[data-preview-description]').textContent = profile.description || 'A descrição da sua coleção aparecerá aqui.';
+        root.querySelector('[data-preview-avatar]').textContent = (profile.owner || 'NX').slice(0, 2).toUpperCase();
+        root.querySelector('[data-preview-mode]').textContent = profile.selling ? 'Itens selecionados à venda' : 'Somente coleção online';
+        const tags = root.querySelector('[data-preview-tags]');
+        tags.replaceChildren(...profile.contents.map((value) => {
+          const tag = document.createElement('span');
+          tag.textContent = value === 'cards' ? 'Cartas' : value === 'boosters' ? 'Boosters' : 'Kits';
+          return tag;
+        }));
+        root.querySelector('[data-description-count]').textContent = String(description.value.length);
+      };
+
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
+        if (saved) {
+          owner.value = saved.owner || '';
+          title.value = saved.title || '';
+          description.value = saved.description || '';
+          form.querySelectorAll('input[name="content"]').forEach((input) => { input.checked = (saved.contents || []).includes(input.value); });
+          const mode = form.querySelector(`input[name="mode"][value="${saved.selling === false ? 'showcase' : 'selling'}"]`);
+          if (mode) mode.checked = true;
+          currentProfile = saved;
+          downloadButton.disabled = false;
+          savedMessage.hidden = false;
+        }
+      } catch (_) {}
+
+      form.addEventListener('input', updatePreview);
+      form.addEventListener('change', updatePreview);
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+        const contents = getContents();
+        if (contents.length === 0) {
+          alert('Selecione pelo menos um tipo de conteúdo para a coleção.');
+          return;
+        }
+        currentProfile = buildProfile();
+        localStorage.setItem(storageKey, JSON.stringify(currentProfile));
+        downloadButton.disabled = false;
+        savedMessage.hidden = false;
+        savedMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+      downloadButton.addEventListener('click', () => {
+        if (!currentProfile) return;
+        const exportProfile = {
+          owner: currentProfile.owner,
+          title: currentProfile.title,
+          description: currentProfile.description,
+          selling: currentProfile.selling,
+          featured: false,
+        };
+        const blob = new Blob([JSON.stringify(exportProfile, null, 2)], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'perfil.json';
+        link.click();
+        URL.revokeObjectURL(link.href);
+      });
+      updatePreview();
+    })();
+  </script>
+</BaseLayout>

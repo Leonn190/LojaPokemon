@@ -10,41 +10,50 @@ interface Props {
 const { item, detail = false, eager = false } = Astro.props;
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
-const encodeFilename = (filename: string) => filename.split('/').map(encodeURIComponent).join('/');
-const imageFolder = item.kind === 'booster' ? 'imagensboosters' : 'imagens';
-const toImageUrl = (filename: string) => `${base}${imageFolder}/${encodeFilename(filename)}`;
+const encodePath = (path: string) => path.split('/').map(encodeURIComponent).join('/');
+const toImageUrl = (path: string) => `${base}${encodePath(path)}`;
 const imageUrls = item.imageCandidates.map(toImageUrl);
-const primaryImage = imageUrls[0];
+const primaryImage = imageUrls[0] || '';
 const fallbackImages = imageUrls.slice(1);
-const initials = item.name
-  .split(/\s+/)
-  .filter(Boolean)
-  .slice(0, 2)
-  .map((word) => word[0])
-  .join('')
-  .toUpperCase();
+const initials = item.kind === 'kit'
+  ? 'KIT'
+  : item.name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word[0])
+      .join('')
+      .toUpperCase();
 const isCard = item.kind === 'card';
+const fallbackLabel = isCard ? 'Carta Pokémon' : item.kind === 'booster' ? 'Booster Pokémon' : 'Kit personalizado';
 ---
 
 <div
-  class:list={['collectible-visual', item.kind === 'booster' && 'booster-visual', detail && 'detail-visual']}
+  class:list={[
+    'collectible-visual',
+    item.kind === 'booster' && 'booster-visual',
+    item.kind === 'kit' && 'kit-visual',
+    detail && 'detail-visual',
+  ]}
   data-tilt={isCard ? '' : undefined}
   data-tilt-strength={isCard ? (detail ? '11' : '5') : undefined}
 >
   <div class="image-stage">
     <span class="image-fallback" aria-hidden="true">
       <b>{initials}</b>
-      <small>{isCard ? 'Carta Pokémon' : 'Booster Pokémon'}</small>
+      <small>{fallbackLabel}</small>
     </span>
-    <img
-      src={primaryImage}
-      alt={isCard ? `${item.name}, ${item.number}` : `Booster ${item.name}`}
-      loading={eager ? 'eager' : 'lazy'}
-      decoding="async"
-      fetchpriority={eager ? 'high' : 'auto'}
-      data-image-candidates={JSON.stringify(fallbackImages)}
-      data-image-gallery={!isCard ? JSON.stringify(imageUrls) : undefined}
-    />
+    {primaryImage && (
+      <img
+        src={primaryImage}
+        alt={isCard ? `${item.name}, ${item.number}` : item.kind === 'booster' ? `Booster ${item.name}` : `Kit ${item.name}`}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchpriority={eager ? 'high' : 'auto'}
+        data-image-candidates={JSON.stringify(fallbackImages)}
+        data-image-gallery={item.kind === 'booster' ? JSON.stringify(imageUrls) : undefined}
+      />
+    )}
     {isCard && <span class="foil-spectrum" aria-hidden="true"></span>}
     {isCard && <span class="glare" aria-hidden="true"></span>}
   </div>

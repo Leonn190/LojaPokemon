@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CatalogBrowser from '../../components/CatalogBrowser.astro';
+import { getCollections, getKits } from '../../lib/catalog';
+
+const kits = getKits();
+const collections = getCollections();
+const totalUnits = kits.reduce((total, item) => total + item.quantity, 0);
+const rawBase = import.meta.env.BASE_URL || '/';
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+---
+
+<BaseLayout
+  title="Kits personalizados"
+  description="Conjuntos de cartas e boosters montados pelos colecionadores do Nexus TCG."
+  active="kits"
+>
+  <section class="catalog-hero kit-catalog-hero">
+    <div class="shell catalog-hero-grid">
+      <div data-reveal>
+        <span class="hero-badge"><i></i> Ofertas combinadas</span>
+        <h1>Kits personalizados</h1>
+        <p>Cada kit pode combinar cartas, boosters ou os dois. O próprio colecionador define o conteúdo, a quantidade disponível e o preço do conjunto.</p>
+      </div>
+      <div class="catalog-hero-stats" data-reveal>
+        <div><strong>{kits.length}</strong><span>kits publicados</span></div>
+        <div><strong>{totalUnits}</strong><span>unidades disponíveis</span></div>
+        <div><strong>{collections.length}</strong><span>coleções cadastradas</span></div>
+      </div>
+    </div>
+  </section>
+
+  {kits.length > 0 ? (
+    <CatalogBrowser kind="kit" items={kits} />
+  ) : (
+    <section class="shell standalone-empty-state" data-reveal>
+      <span aria-hidden="true">▦</span>
+      <div><small>Nenhum kit publicado</small><h2>O espaço já está pronto para o primeiro conjunto.</h2><p>Um colecionador pode selecionar cartas e boosters da própria coleção, descrever o conteúdo e definir um preço personalizado para o kit completo.</p></div>
+      <a class="primary-cta" href={`${base}cadastro/`}><span>Criar uma coleção</span><b>↗</b></a>
+    </section>
+  )}
+</BaseLayout>

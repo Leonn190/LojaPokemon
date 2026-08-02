@@ -9,9 +9,20 @@ interface Props {
   items: CatalogItem[];
   viewAllHref: string;
   viewAllLabel: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
 }
 
-const { eyebrow, title, description, items, viewAllHref, viewAllLabel } = Astro.props;
+const {
+  eyebrow,
+  title,
+  description,
+  items,
+  viewAllHref,
+  viewAllLabel,
+  emptyTitle = 'Nada publicado por enquanto',
+  emptyDescription = 'Os itens aparecerão aqui assim que um colecionador publicar este tipo de produto.',
+} = Astro.props;
 ---
 
 <section class="shell showcase-section" data-reveal>
@@ -26,14 +37,22 @@ const { eyebrow, title, description, items, viewAllHref, viewAllLabel } = Astro.
     </div>
   </div>
 
-  <div class="carousel-track" aria-label={`${title}: itens passando automaticamente`}>
-    <div class="carousel-belt">
-      <div class="carousel-sequence">
-        {items.map((item) => <ProductCard item={item} compact />)}
-      </div>
-      <div class="carousel-sequence">
-        {items.map((item) => <ProductCard item={item} compact />)}
+  {items.length > 0 ? (
+    <div class="carousel-track" data-random-carousel aria-label={`${title}: itens passando automaticamente`}>
+      <div class="carousel-belt">
+        <div class="carousel-sequence">
+          {items.map((item) => <ProductCard item={item} compact />)}
+        </div>
+        <div class="carousel-sequence" aria-hidden="true">
+          {items.map((item) => <ProductCard item={item} compact />)}
+        </div>
       </div>
     </div>
-  </div>
+  ) : (
+    <a class="carousel-empty-panel" href={viewAllHref}>
+      <span class="empty-carousel-icon" aria-hidden="true">◇</span>
+      <div><strong>{emptyTitle}</strong><p>{emptyDescription}</p></div>
+      <b aria-hidden="true">Criar agora ↗</b>
+    </a>
+  )}
 </section>

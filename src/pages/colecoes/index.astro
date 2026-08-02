@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CollectionCard from '../../components/CollectionCard.astro';
+import { getCollections } from '../../lib/catalog';
+
+const collections = getCollections();
+const totalCards = collections.reduce((total, item) => total + item.cards.length, 0);
+const totalBoosters = collections.reduce((total, item) => total + item.boosters.length, 0);
+const rawBase = import.meta.env.BASE_URL || '/';
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+---
+
+<BaseLayout
+  title="Coleções da comunidade"
+  description="Conheça os colecionadores do Nexus TCG e explore os itens de cada coleção."
+  active="collections"
+>
+  <section class="catalog-hero collections-catalog-hero">
+    <div class="shell catalog-hero-grid">
+      <div data-reveal>
+        <span class="hero-badge"><i></i> Perfis de colecionador</span>
+        <h1>Coleções da comunidade</h1>
+        <p>Cada página pertence a um colecionador. Entre em uma coleção para visualizar apenas as cartas, boosters e kits daquele perfil.</p>
+      </div>
+      <div class="catalog-hero-stats" data-reveal>
+        <div><strong>{collections.length}</strong><span>coleções publicadas</span></div>
+        <div><strong>{totalCards}</strong><span>cartas catalogadas</span></div>
+        <div><strong>{totalBoosters}</strong><span>boosters diferentes</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="shell collections-browser" data-collections-browser>
+    <div class="collections-toolbar" data-reveal>
+      <div class="search-control">
+        <label for="collection-search">Pesquisar coleções</label>
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg>
+          <input id="collection-search" type="search" placeholder="Nome do colecionador ou da coleção..." data-collection-search />
+        </div>
+      </div>
+      <a class="primary-cta" href={`${base}cadastro/`}><span>Criar minha coleção</span><b>＋</b></a>
+    </div>
+
+    <div class="collections-summary"><strong data-collection-count>{collections.length}</strong> {collections.length === 1 ? 'coleção encontrada' : 'coleções encontradas'}</div>
+    <div class="collections-grid" data-collections-grid>
+      {collections.map((collection) => (
+        <div data-collection-entry data-search={collection.searchText}><CollectionCard collection={collection} /></div>
+      ))}
+    </div>
+    <div class="empty-state collection-empty-state" data-collection-empty>
+      <span>◇</span><h2>Nenhuma coleção encontrada</h2><p>Tente pesquisar pelo nome do colecionador.</p>
+    </div>
+  </section>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-collections-browser]');
+      const search = root?.querySelector('[data-collection-search]');
+      const entries = [...(root?.querySelectorAll('[data-collection-entry]') || [])];
+      const count = root?.querySelector('[data-collection-count]');
+      const empty = root?.querySelector('[data-collection-empty]');
+      const normalize = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const apply = () => {
+        const query = normalize(search?.value);
+        let visible = 0;
+        entries.forEach((entry) => {
+          const matches = !query || normalize(entry.dataset.search).includes(query);
+          entry.hidden = !matches;
+          if (matches) visible += 1;
+        });
+        if (count) count.textContent = String(visible);
+        empty?.classList.toggle('show', visible === 0);
+      };
+      search?.addEventListener('input', apply);
+    })();
+  </script>
+</BaseLayout>

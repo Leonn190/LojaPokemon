@@ -1,0 +1,112 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CatalogBrowser from '../../components/CatalogBrowser.astro';
+import ProductImage from '../../components/ProductImage.astro';
+import { formatBRL, getCollections, type CollectorCollection } from '../../lib/catalog';
+
+export function getStaticPaths() {
+  return getCollections().map((collection) => ({ params: { slug: collection.slug }, props: { collection } }));
+}
+
+interface Props { collection: CollectorCollection; }
+const { collection } = Astro.props;
+const rawBase = import.meta.env.BASE_URL || '/';
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const initials = collection.owner.slice(0, 2).toUpperCase();
+const cover = collection.coverItems.slice(0, 3);
+---
+
+<BaseLayout
+  title={collection.title}
+  description={`${collection.title}: explore cartas, boosters e kits publicados por ${collection.owner}.`}
+  active="collections"
+  bodyClass="collection-profile-page"
+>
+  <section class="collection-profile-hero">
+    <div class="shell collection-profile-grid">
+      <div class="collection-profile-copy" data-reveal>
+        <nav class="breadcrumbs" aria-label="Navegação estrutural">
+          <a href={base}>Início</a><span>/</span><a href={`${base}colecoes/`}>Coleções</a><span>/</span><strong>{collection.owner}</strong>
+        </nav>
+        <div class="profile-identity">
+          <span class="profile-avatar">{initials}</span>
+          <div><small>Colecionador no Nexus</small><strong>{collection.owner}</strong></div>
+          <span class:list={['profile-sale-status', collection.selling ? 'selling' : 'showcase-only']}>{collection.selling ? 'Itens selecionados à venda' : 'Coleção para exposição'}</span>
+        </div>
+        <h1>{collection.title}</h1>
+        <p>{collection.description}</p>
+        <div class="profile-actions">
+          <a class="primary-cta" href="#cartas"><span>Explorar a coleção</span><b>↓</b></a>
+          <button class="secondary-cta share-collection-button" type="button" data-share-collection><span>Compartilhar coleção</span><b>↗</b></button>
+        </div>
+        <div class="profile-stats">
+          <div><strong>{collection.cards.length}</strong><span>cartas</span></div>
+          <div><strong>{collection.boosters.length}</strong><span>boosters</span></div>
+          <div><strong>{collection.kits.length}</strong><span>kits</span></div>
+          <div><strong>{collection.totalUnits}</strong><span>unidades totais</span></div>
+        </div>
+      </div>
+
+      <div class="profile-cover" data-reveal>
+        <div class="profile-cover-glow" aria-hidden="true"></div>
+        {cover.map((item, index) => <div class={`profile-cover-item profile-cover-${index + 1}`}><ProductImage item={item} eager={index === 0} /></div>)}
+        {cover.length === 0 && <div class="profile-cover-empty">{initials}</div>}
+        <div class="profile-value-card"><small>Valor publicado no acervo</small><strong>{formatBRL(collection.estimatedValue)}</strong><span>somando quantidades cadastradas</span></div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="collection-section-nav" aria-label="Seções da coleção">
+    <div class="shell">
+      <a href="#cartas">Cartas <strong>{collection.cards.length}</strong></a>
+      <a href="#boosters">Boosters <strong>{collection.boosters.length}</strong></a>
+      <a href="#kits">Kits <strong>{collection.kits.length}</strong></a>
+    </div>
+  </nav>
+
+  <section id="cartas" class="collection-catalog-block">
+    <div class="shell collection-block-heading" data-reveal>
+      <div><span class="section-eyebrow">Cartas de {collection.owner}</span><h2>Cartas da coleção</h2><p>Todos os resultados abaixo pertencem exclusivamente a esta coleção.</p></div>
+    </div>
+    {collection.cards.length > 0 ? (
+      <CatalogBrowser kind="card" items={collection.cards} showOwnerFilter={false} hideOwnerOnCards />
+    ) : (
+      <div class="shell profile-empty-category"><span>◇</span><p>Nenhuma carta cadastrada nesta coleção.</p></div>
+    )}
+  </section>
+
+  <section id="boosters" class="collection-catalog-block alternate-collection-block">
+    <div class="shell collection-block-heading" data-reveal>
+      <div><span class="section-eyebrow">Boosters de {collection.owner}</span><h2>Pacotes lacrados</h2><p>Estoque de boosters publicado neste perfil.</p></div>
+    </div>
+    {collection.boosters.length > 0 ? (
+      <CatalogBrowser kind="booster" items={collection.boosters} showOwnerFilter={false} hideOwnerOnCards />
+    ) : (
+      <div class="shell profile-empty-category"><span>◇</span><p>Nenhum booster cadastrado nesta coleção.</p></div>
+    )}
+  </section>
+
+  <section id="kits" class="collection-catalog-block">
+    <div class="shell collection-block-heading" data-reveal>
+      <div><span class="section-eyebrow">Kits de {collection.owner}</span><h2>Conjuntos personalizados</h2><p>Combinações criadas usando itens da própria coleção.</p></div>
+    </div>
+    {collection.kits.length > 0 ? (
+      <CatalogBrowser kind="kit" items={collection.kits} showOwnerFilter={false} hideOwnerOnCards />
+    ) : (
+      <div class="shell profile-empty-category kit-profile-empty"><span>▦</span><div><strong>Nenhum kit publicado ainda.</strong><p>Quando {collection.owner} combinar cartas ou boosters, os conjuntos aparecerão aqui.</p></div></div>
+    )}
+  </section>
+
+  <script is:inline>
+    document.querySelector('[data-share-collection]')?.addEventListener('click', async (event) => {
+      const button = event.currentTarget;
+      const original = button.innerHTML;
+      try {
+        if (navigator.share) await navigator.share({ title: document.title, url: location.href });
+        else await navigator.clipboard.writeText(location.href);
+        button.innerHTML = '<span>Link copiado</span><b>✓</b>';
+      } catch (_) {}
+      setTimeout(() => { button.innerHTML = original; }, 1400);
+    });
+  </script>
+</BaseLayout>

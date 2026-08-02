@@ -1,0 +1,32 @@
+---
+import CollectionCard from './CollectionCard.astro';
+import type { CollectorCollection } from '../lib/catalog';
+
+interface Props {
+  collections: CollectorCollection[];
+  viewAllHref: string;
+}
+const { collections, viewAllHref } = Astro.props;
+---
+
+<section class="shell showcase-section collections-showcase" data-reveal>
+  <div class="section-heading carousel-heading">
+    <div>
+      <span class="section-eyebrow">Coleções da comunidade</span>
+      <h2>Conheça quem coleciona no Nexus.</h2>
+      <p>Cada perfil reúne as cartas, boosters e kits publicados por um colecionador.</p>
+    </div>
+    <div class="carousel-tools"><a class="text-link" href={viewAllHref}>Ver todas as coleções <span>↗</span></a></div>
+  </div>
+
+  <div class="carousel-track collection-carousel-track" data-random-carousel aria-label="Coleções passando automaticamente">
+    <div class="carousel-belt collection-carousel-belt">
+      <div class="carousel-sequence collection-carousel-sequence">
+        {collections.map((collection) => <CollectionCard collection={collection} compact />)}
+      </div>
+      <div class="carousel-sequence collection-carousel-sequence" aria-hidden="true">
+        {collections.map((collection) => <CollectionCard collection={collection} compact />)}
+      </div>
+    </div>
+  </div>
+</section>
