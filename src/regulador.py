@@ -7,11 +7,18 @@ import socket
 import subprocess
 import time
 import unicodedata
+import argparse
+import csv
+import json
+import tempfile
+import zipfile
 from collections import Counter
 from decimal import Decimal
 from io import BytesIO
 from pathlib import Path
 from typing import Any
+from urllib.parse import urljoin, urlparse
+from urllib.request import Request, urlopen
 
 import ddddocr
 from PIL import Image, ImageOps
@@ -171,23 +178,24 @@ def esperar_chrome(porta: int, timeout: float = 30) -> None:
     )
 
 
-def abrir_navegador() -> tuple[webdriver.Chrome, subprocess.Popen[Any]]:
+def abrir_navegador(url: str = URL, perfil: Path | None = None) -> tuple[webdriver.Chrome, subprocess.Popen[Any]]:
     """Abre o Chrome visivelmente e conecta o Selenium a ele."""
 
     chrome = encontrar_chrome()
     porta = obter_porta_livre()
 
-    PASTA_PERFIL_CHROME.mkdir(parents=True, exist_ok=True)
+    pasta_perfil = perfil or PASTA_PERFIL_CHROME
+    pasta_perfil.mkdir(parents=True, exist_ok=True)
 
     comando_chrome = [
         str(chrome),
         f"--remote-debugging-port={porta}",
         "--remote-debugging-address=127.0.0.1",
-        f"--user-data-dir={PASTA_PERFIL_CHROME.resolve()}",
+        f"--user-data-dir={pasta_perfil.resolve()}",
         "--window-size=1400,1000",
         "--no-first-run",
         "--no-default-browser-check",
-        URL,
+        url,
     ]
 
     processo = subprocess.Popen(comando_chrome)
@@ -200,7 +208,7 @@ def abrir_navegador() -> tuple[webdriver.Chrome, subprocess.Popen[Any]]:
     return navegador, processo
 
 
-def selecionar_aba_liga(navegador: webdriver.Chrome) -> None:
+def selecionar_aba_liga(navegador: webdriver.Chrome, url: str = URL) -> None:
     """Seleciona a aba da Liga Pokémon aberta pelo comando do Chrome."""
 
     for identificador in navegador.window_handles:
@@ -208,7 +216,7 @@ def selecionar_aba_liga(navegador: webdriver.Chrome) -> None:
         if "ligapokemon.com.br" in navegador.current_url.lower():
             return
 
-    navegador.get(URL)
+    navegador.get(url)
 
 
 def esperar_pagina(navegador: webdriver.Chrome) -> None:
@@ -305,7 +313,8 @@ def obter_dados_carta(navegador: webdriver.Chrome) -> dict[str, str]:
         return {
             nome: nome,
             colecao: String(edicao.name || '').trim(),
-            numeracao: String(edicao.num || '').trim()
+            numeracao: String(edicao.num || '').trim(),
+            imagem: imagem?.getAttribute('src') || ''
         };
         """
     )
@@ -317,6 +326,7 @@ def obter_dados_carta(navegador: webdriver.Chrome) -> dict[str, str]:
         "nome": str(dados.get("nome", "")).strip(),
         "colecao": str(dados.get("colecao", "")).strip(),
         "numeracao": str(dados.get("numeracao", "")).strip(),
+        "imagem": str(dados.get("imagem", "")).strip(),
     }
 
 
@@ -691,19 +701,19 @@ def formatar_reais(valor: Decimal) -> str:
     return f"R$ {formatado}"
 
 
-def consultar() -> dict[str, Any]:
+def consultar(url: str = URL, idioma: str = IDIOMA, estado: str = ESTADO, perfil: Path | None = None) -> dict[str, Any]:
     """Executa a consulta e devolve os dados da oferta mais barata."""
 
-    estado_desejado = normalizar_estado(ESTADO)
-    idioma_desejado = normalizar_idioma(IDIOMA)
+    estado_desejado = normalizar_estado(estado)
+    idioma_desejado = normalizar_idioma(idioma)
 
     navegador: webdriver.Chrome | None = None
     processo: subprocess.Popen[Any] | None = None
 
     try:
         print("Abrindo o Chrome...")
-        navegador, processo = abrir_navegador()
-        selecionar_aba_liga(navegador)
+        navegador, processo = abrir_navegador(url, perfil)
+        selecionar_aba_liga(navegador, url)
 
         print(
             f"Aguardando o carregamento e mais {TEMPO_ESPERA:g} segundos..."
@@ -745,6 +755,198 @@ def consultar() -> dict[str, Any]:
                 pass
 
 
+RAIZ_SRC = Path(__file__).resolve().parent
+PASTA_COLECOES_NAO_FORMATADAS = RAIZ_SRC / "Coleções não formatadas"
+PASTA_COLECOES_FORMATADAS = RAIZ_SRC / "coleções"
+PASTA_IMAGENS_PUBLICAS = RAIZ_SRC.parent / "public" / "imagens"
+
+COLUNAS_CARTAS = [
+    "Nome", "Numeração", "Coleção", "Idioma", "Estado", "Ano",
+    "Link Liga", "Preço Mais Baixo Liga", "Imagem", "Preço", "Quantidade", "À venda",
+]
+COLUNAS_BOOSTERS = ["Coleção", "Link Liga", "Preço Mais Baixo Liga", "Preço", "Quantidade", "À venda"]
+COLUNAS_KITS = ["Nome", "Descrição", "Conteúdo", "Quantidade", "Preço", "À venda"]
+
+
+def texto_csv(valor: Any) -> str:
+    return str(valor or "").strip()
+
+
+def ler_csv(caminho: Path) -> list[dict[str, str]]:
+    if not caminho.is_file():
+        return []
+    with caminho.open("r", encoding="utf-8-sig", newline="") as arquivo:
+        return [dict(linha) for linha in csv.DictReader(arquivo)]
+
+
+def escrever_csv(caminho: Path, colunas: list[str], linhas: list[dict[str, Any]]) -> None:
+    with caminho.open("w", encoding="utf-8", newline="") as arquivo:
+        escritor = csv.DictWriter(arquivo, fieldnames=colunas, extrasaction="ignore")
+        escritor.writeheader()
+        escritor.writerows(linhas)
+
+
+def nome_arquivo(valor: str) -> str:
+    normalizado = unicodedata.normalize("NFKD", valor)
+    normalizado = "".join(c for c in normalizado if not unicodedata.combining(c))
+    return re.sub(r'[\\/:*?"<>|]+', "-", normalizado).strip(" .") or "imagem"
+
+
+def baixar_imagem(url: str, nome: str) -> str:
+    """Salva a imagem da carta em public/imagens e devolve seu nome."""
+
+    if not url:
+        return ""
+    PASTA_IMAGENS_PUBLICAS.mkdir(parents=True, exist_ok=True)
+    url = urljoin("https://www.ligapokemon.com.br/", url)
+    extensao = Path(urlparse(url).path).suffix.lower()
+    if extensao not in {".jpg", ".jpeg", ".png", ".webp", ".avif"}:
+        extensao = ".jpg"
+    destino = PASTA_IMAGENS_PUBLICAS / f"{nome_arquivo(nome)}{extensao}"
+    try:
+        requisicao = Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urlopen(requisicao, timeout=45) as resposta:
+            destino.write_bytes(resposta.read())
+        return destino.name
+    except Exception as erro:
+        print(f"  Aviso: não foi possível baixar a imagem: {erro}")
+        return ""
+
+
+def consultar_booster(url: str, perfil: Path | None = None) -> dict[str, Any]:
+    """Lê nome/coleção e o menor preço sem filtrar idioma ou estado."""
+
+    navegador: webdriver.Chrome | None = None
+    processo: subprocess.Popen[Any] | None = None
+    try:
+        navegador, processo = abrir_navegador(url, perfil)
+        selecionar_aba_liga(navegador, url)
+        esperar_pagina(navegador)
+        mostrar_todas_as_ofertas(navegador)
+        dados = obter_dados_carta(navegador)
+        ocr = ddddocr.DdddOcr(show_ad=False, beta=True)
+        cache: dict[str, str] = {}
+        precos: list[Decimal] = []
+        for indice, oferta in enumerate(navegador.find_elements(By.CSS_SELECTOR, "#marketplace-stores > .store")):
+            try:
+                precos.append(decodificar_preco(navegador, oferta, ocr, cache, str(indice)))
+            except Exception:
+                continue
+        return {**dados, "preco": min(precos) if precos else None}
+    finally:
+        if navegador is not None:
+            try:
+                navegador.quit()
+            except Exception:
+                pass
+        if processo is not None and processo.poll() is None:
+            try:
+                processo.terminate()
+            except Exception:
+                pass
+
+
+def encontrar_raiz_colecao(pasta: Path) -> Path | None:
+    if (pasta / "perfil.json").is_file():
+        return pasta
+    for perfil in pasta.rglob("perfil.json"):
+        return perfil.parent
+    return None
+
+
+def formatar_colecao(origem: Path) -> Path:
+    """Converte uma coleção enviada para a pasta usada pelo site."""
+
+    perfil_origem = origem / "perfil.json"
+    if not perfil_origem.is_file():
+        raise FileNotFoundError(f"perfil.json não encontrado em {origem}")
+    perfil = json.loads(perfil_origem.read_text(encoding="utf-8-sig"))
+    identificador = re.sub(
+        r"[^A-Za-z0-9_-]+", "-", str(perfil.get("collectionId") or origem.name)
+    ).strip("-") or "colecao"
+    destino = PASTA_COLECOES_FORMATADAS / identificador
+    destino.mkdir(parents=True, exist_ok=True)
+    (destino / "perfil.json").write_text(json.dumps(perfil, ensure_ascii=False, indent=2), encoding="utf-8")
+    perfil_chrome = PASTA_PERFIL_CHROME
+
+    cartas_formatadas: list[dict[str, Any]] = []
+    for indice, linha in enumerate(ler_csv(origem / "inventario-cartas.csv"), start=1):
+        link = texto_csv(linha.get("Link Liga"))
+        idioma = texto_csv(linha.get("Idioma"))
+        estado = texto_csv(linha.get("Estado"))
+        print(f"Carta {indice}: consultando Liga Pokémon...")
+        dados: dict[str, Any] = {}
+        try:
+            dados = consultar(link, idioma, estado, perfil_chrome)
+        except Exception as erro:
+            print(f"  Aviso: consulta não concluída ({erro}). Mantendo os dados enviados.")
+        nome = texto_csv(dados.get("nome") or linha.get("Nome"))
+        numeracao = texto_csv(dados.get("numeracao") or linha.get("Numeração") or linha.get("Número"))
+        imagem = baixar_imagem(texto_csv(dados.get("imagem")), f"{nome}_{numeracao}")
+        menor = dados.get("preco")
+        cartas_formatadas.append({
+            "Nome": nome,
+            "Numeração": numeracao,
+            "Coleção": texto_csv(dados.get("colecao") or linha.get("Coleção")),
+            "Idioma": idioma,
+            "Estado": estado,
+            "Ano": texto_csv(linha.get("Ano")),
+            "Link Liga": link,
+            "Preço Mais Baixo Liga": formatar_reais(menor) if isinstance(menor, Decimal) else "",
+            "Imagem": imagem,
+            "Preço": texto_csv(linha.get("Preço")),
+            "Quantidade": texto_csv(linha.get("Quantidade")) or "1",
+            "À venda": texto_csv(linha.get("À venda") or linha.get("Venda")) or "Sim",
+        })
+
+    boosters_formatados: list[dict[str, Any]] = []
+    for indice, linha in enumerate(ler_csv(origem / "inventario-boosters.csv"), start=1):
+        link = texto_csv(linha.get("Link Liga"))
+        print(f"Booster {indice}: consultando Liga Pokémon...")
+        dados: dict[str, Any] = {}
+        try:
+            dados = consultar_booster(link, perfil_chrome)
+        except Exception as erro:
+            print(f"  Aviso: consulta não concluída ({erro}). Mantendo os dados enviados.")
+        menor = dados.get("preco")
+        boosters_formatados.append({
+            "Coleção": texto_csv(dados.get("colecao") or dados.get("nome") or linha.get("Coleção") or linha.get("Tipo de pacote")),
+            "Link Liga": link,
+            "Preço Mais Baixo Liga": formatar_reais(menor) if isinstance(menor, Decimal) else "",
+            "Preço": texto_csv(linha.get("Preço")),
+            "Quantidade": texto_csv(linha.get("Quantidade")) or "1",
+            "À venda": texto_csv(linha.get("À venda") or linha.get("Venda")) or "Sim",
+        })
+
+    kits = ler_csv(origem / "inventario-kits.csv")
+    escrever_csv(destino / "inventario-cartas.csv", COLUNAS_CARTAS, cartas_formatadas)
+    escrever_csv(destino / "inventario-boosters.csv", COLUNAS_BOOSTERS, boosters_formatados)
+    escrever_csv(destino / "inventario-kits.csv", COLUNAS_KITS, kits)
+    return destino
+
+
+def regular_pasta(entrada: Path = PASTA_COLECOES_NAO_FORMATADAS) -> list[Path]:
+    """Formata todas as pastas/ZIPs entregues em Coleções não formatadas."""
+
+    entrada.mkdir(parents=True, exist_ok=True)
+    resultados: list[Path] = []
+    for item in entrada.iterdir():
+        if item.is_dir():
+            raiz = encontrar_raiz_colecao(item)
+            if raiz:
+                resultados.append(formatar_colecao(raiz))
+        elif item.suffix.lower() == ".zip":
+            with tempfile.TemporaryDirectory(prefix="loja-pokemon-") as temporario:
+                with zipfile.ZipFile(item) as arquivo:
+                    arquivo.extractall(temporario)
+                raiz = encontrar_raiz_colecao(Path(temporario))
+                if raiz:
+                    resultados.append(formatar_colecao(raiz))
+                else:
+                    print(f"Ignorado: {item.name} não possui perfil.json.")
+    return resultados
+
+
 def main() -> None:
     try:
         resultado = consultar()
@@ -776,4 +978,27 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    argumentos = argparse.ArgumentParser(
+        description="Formata coleções enviadas e consulta a Liga Pokémon."
+    )
+    argumentos.add_argument(
+        "--consultar",
+        action="store_true",
+        help="Mantém o modo antigo: consulta a URL configurada no início do arquivo.",
+    )
+    argumentos.add_argument(
+        "--entrada",
+        type=Path,
+        default=PASTA_COLECOES_NAO_FORMATADAS,
+        help="Pasta com ZIPs ou pastas ainda não formatadas.",
+    )
+    opcoes = argumentos.parse_args()
+    if opcoes.consultar:
+        main()
+    else:
+        saidas = regular_pasta(opcoes.entrada)
+        if not saidas:
+            print(f"Nenhuma coleção encontrada em: {opcoes.entrada}")
+        else:
+            for saida in saidas:
+                print(f"Coleção formatada em: {saida}")

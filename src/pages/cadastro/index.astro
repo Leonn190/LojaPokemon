@@ -1,179 +1,216 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getEditableCollections } from '../../lib/catalog';
 
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const publishedCollections = getEditableCollections();
 ---
 
 <BaseLayout
-  title="Criar coleção"
-  description="Crie seu perfil de colecionador e prepare uma coleção digital no Nexus TCG."
+  title="Criar ou editar coleção"
+  description="Monte, importe ou edite sua coleção Pokémon e gere o ZIP para aprovação."
   active="signup"
   bodyClass="signup-page"
 >
-  <section class="signup-hero">
+  <section class="signup-hero editor-hero">
     <div class="shell signup-hero-grid">
       <div data-reveal>
-        <span class="hero-badge"><i></i> Novo perfil de colecionador</span>
-        <h1>Sua coleção começa com um perfil.</h1>
-        <p>Defina como sua coleção aparecerá no Nexus. Depois, ela poderá receber cartas, boosters e kits, com itens apenas catalogados ou disponíveis para venda.</p>
+        <span class="hero-badge"><i></i> Central de coleções</span>
+        <h1>Crie, edite e envie seu acervo.</h1>
+        <p>O ZIP gerado é a solicitação de publicação. Envie-o para <strong>alexeidostoievsky@gmail.com</strong> e peça formalmente a aprovação da sua coleção no site.</p>
       </div>
       <div class="signup-steps" data-reveal>
-        <article><span>01</span><div><strong>Crie sua identidade</strong><p>Nome do colecionador e apresentação da coleção.</p></div></article>
-        <article><span>02</span><div><strong>Escolha o conteúdo</strong><p>Cartas, boosters ou os dois, além de kits personalizados.</p></div></article>
-        <article><span>03</span><div><strong>Publique seu acervo</strong><p>Decida o que ficará exposto e o que terá preço de venda.</p></div></article>
+        <article><span>01</span><div><strong>Comece do seu jeito</strong><p>Crie uma coleção, importe um ZIP anterior ou entre em uma coleção publicada.</p></div></article>
+        <article><span>02</span><div><strong>Organize os produtos</strong><p>Adicione cartas, boosters e kits; defina venda, preço e estoque exibido.</p></div></article>
+        <article><span>03</span><div><strong>Envie para aprovação</strong><p>Baixe a versão numerada do ZIP e mande-a por e-mail para publicação.</p></div></article>
       </div>
     </div>
   </section>
 
-  <section class="shell signup-workspace" data-signup-root>
-    <form class="collector-form" data-collector-form data-reveal>
-      <div class="form-section-heading">
-        <span class="section-eyebrow">Informações principais</span>
-        <h2>Monte o perfil da coleção</h2>
-        <p>Este formulário cria um rascunho local do perfil para a estrutura atual do site.</p>
+  <section class="shell collection-editor" data-editor-root data-published={JSON.stringify(publishedCollections)}>
+    <div class="editor-mode-tabs" role="tablist" aria-label="Forma de iniciar uma coleção">
+      <button type="button" class="active" data-editor-mode="new">Criar do zero</button>
+      <button type="button" data-editor-mode="import">Importar ZIP</button>
+      <button type="button" data-editor-mode="published">Editar coleção publicada</button>
+    </div>
+
+    <div class="editor-notice" data-editor-notice>
+      <span>i</span><p>Os dados ficam somente no seu navegador até você baixar o ZIP. Como este é um site estático, a validação de e-mail e senha serve para controlar a interface, não substitui autenticação em servidor.</p>
+    </div>
+
+    <section class="editor-start-panel" data-start-panel="new">
+      <div class="form-section-heading"><span class="section-eyebrow">Nova coleção</span><h2>Dados do colecionador</h2><p>Todos os campos são obrigatórios. Depois você poderá cadastrar os produtos.</p></div>
+      <form class="editor-profile-form" data-new-profile-form>
+        <label class="form-field"><span>Nome</span><input name="owner" required placeholder="Ex.: Ana Silva" /></label>
+        <label class="form-field"><span>Nome da coleção</span><input name="title" required placeholder="Ex.: Acervo da Ana" /></label>
+        <label class="form-field"><span>Gmail</span><input name="email" type="email" required placeholder="voce@gmail.com" /></label>
+        <label class="form-field"><span>Número de telefone</span><input name="phone" required placeholder="(00) 00000-0000" /></label>
+        <label class="form-field"><span>Senha</span><input name="password" type="password" minlength="4" required /></label>
+        <label class="form-field"><span>Descrição (opcional)</span><input name="description" placeholder="Conte um pouco sobre o seu acervo" /></label>
+        <button class="primary-cta" type="submit"><span>Continuar para os produtos</span><b>→</b></button>
+      </form>
+    </section>
+
+    <section class="editor-start-panel" data-start-panel="import" hidden>
+      <div class="form-section-heading"><span class="section-eyebrow">ZIP já formatado</span><h2>Continue uma versão anterior</h2><p>Selecione um ZIP gerado nesta central. A nova edição será exportada com o próximo número de versão.</p></div>
+      <label class="zip-drop-zone" data-zip-drop><input type="file" accept=".zip,application/zip" data-zip-input /><span>↑</span><strong>Solte o ZIP aqui ou clique para escolher</strong><small>O arquivo não é enviado para nenhum servidor.</small></label>
+      <p class="import-feedback" data-import-feedback></p>
+    </section>
+
+    <section class="editor-start-panel" data-start-panel="published" hidden>
+      <div class="form-section-heading"><span class="section-eyebrow">Coleções aprovadas</span><h2>Entre para editar</h2><p>Use o Gmail e a senha vinculados à coleção. Hoje, a coleção autorizada é a Leon19.</p></div>
+      <form class="editor-profile-form published-login" data-published-login>
+        <label class="form-field"><span>Coleção</span><select name="collection" required data-published-select></select></label>
+        <label class="form-field"><span>Gmail</span><input name="email" type="email" required /></label>
+        <label class="form-field"><span>Senha</span><input name="password" type="password" required /></label>
+        <button class="primary-cta" type="submit"><span>Autorizar edição</span><b>→</b></button>
+      </form>
+      <p class="import-feedback" data-login-feedback></p>
+    </section>
+
+    <section class="editor-workspace" data-editor-workspace hidden>
+      <header class="editor-workspace-header">
+        <div><span class="section-eyebrow">Editor da coleção</span><h2 data-workspace-title>Sua coleção</h2><p data-workspace-meta>Versão 1</p></div>
+        <button type="button" class="secondary-cta" data-reset-editor><span>Recomeçar</span><b>×</b></button>
+      </header>
+
+      <div class="editor-settings">
+        <label class="toggle-field"><input type="checkbox" data-show-quantity checked /><span><strong>Mostrar quantidades</strong><small>Exibe o estoque nas páginas públicas.</small></span></label>
+        <label class="toggle-field"><input type="checkbox" data-collection-selling checked /><span><strong>Permitir venda</strong><small>Itens marcados à venda poderão entrar no carrinho.</small></span></label>
       </div>
 
-      <div class="form-grid">
-        <label class="form-field">
-          <span>Nome do colecionador</span>
-          <input name="owner" type="text" placeholder="Ex.: Leon19" minlength="3" maxlength="30" required />
-          <small>Será exibido em todos os itens publicados.</small>
-        </label>
-        <label class="form-field">
-          <span>Nome da coleção</span>
-          <input name="title" type="text" placeholder="Ex.: Coleção do Leon19" minlength="3" maxlength="60" required />
-          <small>Este será o título da página exclusiva.</small>
-        </label>
-        <label class="form-field form-field-wide">
-          <span>Descrição</span>
-          <textarea name="description" rows="4" maxlength="240" placeholder="Conte um pouco sobre o foco da sua coleção..." required></textarea>
-          <small><b data-description-count>0</b>/240 caracteres</small>
-        </label>
+      <div class="editor-add-grid">
+        <form class="editor-item-form" data-card-form>
+          <span class="section-eyebrow">Nova carta</span><h3>Adicionar carta</h3>
+          <label><span>Link Liga</span><input name="linkLiga" type="url" required placeholder="https://www.ligapokemon.com.br/..." /></label>
+          <label><span>Estado</span><select name="condition" required><option value="NM">NM</option><option value="SP">SP</option><option value="MP">MP</option><option value="HP">HP</option><option value="D">D</option></select></label>
+          <label><span>Idioma</span><input name="language" required placeholder="Português (PT-BR)" /></label>
+          <label><span>Quantidade</span><input name="quantity" type="number" min="1" value="1" required /></label>
+          <label><span>Preço de venda (opcional)</span><input name="price" type="number" min="0" step="0.01" placeholder="Ex.: 45.90" /></label>
+          <label class="inline-check"><input name="forSale" type="checkbox" checked /> Disponível para venda</label>
+          <button type="submit" class="secondary-cta"><span>Adicionar carta</span><b>＋</b></button>
+        </form>
+        <form class="editor-item-form" data-booster-form>
+          <span class="section-eyebrow">Novo booster</span><h3>Adicionar booster</h3>
+          <label><span>Link Liga</span><input name="linkLiga" type="url" required placeholder="https://www.ligapokemon.com.br/..." /></label>
+          <label><span>Quantidade</span><input name="quantity" type="number" min="1" value="1" required /></label>
+          <label><span>Preço de venda (opcional)</span><input name="price" type="number" min="0" step="0.01" placeholder="Ex.: 30.00" /></label>
+          <label class="inline-check"><input name="forSale" type="checkbox" checked /> Disponível para venda</label>
+          <button type="submit" class="secondary-cta"><span>Adicionar booster</span><b>＋</b></button>
+        </form>
+        <form class="editor-item-form" data-kit-form>
+          <span class="section-eyebrow">Kit da coleção</span><h3>Criar kit</h3>
+          <label><span>Nome do kit</span><input name="name" required placeholder="Ex.: Kit Evoluções" /></label>
+          <label><span>Produtos do kit</span><select name="contents" multiple required data-kit-contents></select><small>Segure Ctrl/Cmd para selecionar vários produtos.</small></label>
+          <label><span>Quantidade</span><input name="quantity" type="number" min="1" value="1" required /></label>
+          <label><span>Preço do kit</span><input name="price" type="number" min="0" step="0.01" required /></label>
+          <label class="inline-check"><input name="forSale" type="checkbox" checked /> Disponível para venda</label>
+          <button type="submit" class="secondary-cta"><span>Criar kit</span><b>＋</b></button>
+        </form>
       </div>
 
-      <fieldset class="content-choice">
-        <legend>O que sua coleção terá?</legend>
-        <label><input type="checkbox" name="content" value="cards" checked /><span>◆</span><div><strong>Cartas</strong><small>Cadastre nome, número, estado, quantidade e preço.</small></div></label>
-        <label><input type="checkbox" name="content" value="boosters" checked /><span>▰</span><div><strong>Boosters</strong><small>Organize pacotes lacrados e as diferentes artes.</small></div></label>
-        <label><input type="checkbox" name="content" value="kits" checked /><span>▦</span><div><strong>Kits</strong><small>Combine itens da coleção em ofertas personalizadas.</small></div></label>
-      </fieldset>
-
-      <fieldset class="sale-choice">
-        <legend>Como você pretende usar o perfil?</legend>
-        <label><input type="radio" name="mode" value="selling" checked /><span><strong>Colecionar e vender</strong><small>Alguns itens poderão ter preço e entrar no carrinho.</small></span></label>
-        <label><input type="radio" name="mode" value="showcase" /><span><strong>Somente coleção online</strong><small>O perfil funciona como catálogo pessoal sem ofertas.</small></span></label>
-      </fieldset>
-
-      <div class="form-actions">
-        <button class="primary-cta form-submit" type="submit"><span>Salvar rascunho da coleção</span><b>↗</b></button>
-        <button class="secondary-cta" type="button" data-download-profile disabled><span>Baixar perfil.json</span><b>↓</b></button>
-      </div>
-      <p class="static-version-note">Como esta versão é publicada no GitHub Pages, o rascunho fica salvo somente neste navegador. A estrutura gerada já segue o formato usado pelas pastas de coleções.</p>
-    </form>
-
-    <aside class="profile-live-preview" data-profile-preview data-reveal>
-      <span class="section-eyebrow">Prévia em tempo real</span>
-      <div class="preview-profile-card">
-        <div class="preview-cover-grid"><span>◆</span><span>▰</span><span>▦</span></div>
-        <div class="preview-owner-row"><span data-preview-avatar>NX</span><div><small>Colecionador</small><strong data-preview-owner>Seu nome</strong></div></div>
-        <h2 data-preview-title>Sua coleção no Nexus</h2>
-        <p data-preview-description>A descrição da sua coleção aparecerá aqui.</p>
-        <div class="preview-content-tags" data-preview-tags><span>Cartas</span><span>Boosters</span><span>Kits</span></div>
-        <div class="preview-mode" data-preview-mode>Itens selecionados à venda</div>
-      </div>
-      <div class="saved-draft-message" data-saved-message hidden><span>✓</span><div><strong>Rascunho salvo</strong><p>Você pode fechar a página e continuar depois neste navegador.</p></div></div>
-      <a class="text-link" href={`${base}colecoes/`}>Ver coleções publicadas <span>↗</span></a>
-    </aside>
+      <div class="editor-inventory" data-editor-inventory></div>
+      <div class="editor-export-panel"><div><span class="section-eyebrow">Pronto para aprovação</span><h3>Baixe o ZIP da versão <b data-version-number>1</b></h3><p>Envie o arquivo para alexeidostoievsky@gmail.com pedindo formalmente a aprovação ou atualização no site.</p></div><button type="button" class="primary-cta" data-download-zip><span>Baixar ZIP</span><b>↓</b></button></div>
+    </section>
   </section>
 
   <script is:inline>
     (() => {
-      const root = document.querySelector('[data-signup-root]');
-      const form = root?.querySelector('[data-collector-form]');
-      if (!form) return;
-      const owner = form.elements.owner;
-      const title = form.elements.title;
-      const description = form.elements.description;
-      const downloadButton = root.querySelector('[data-download-profile]');
-      const savedMessage = root.querySelector('[data-saved-message]');
-      const storageKey = 'nexus-tcg-collector-draft-v1';
-      let currentProfile = null;
-
-      const getContents = () => [...form.querySelectorAll('input[name="content"]:checked')].map((input) => input.value);
-      const getMode = () => form.querySelector('input[name="mode"]:checked')?.value || 'selling';
-      const buildProfile = () => ({
-        owner: owner.value.trim(),
-        title: title.value.trim(),
-        description: description.value.trim(),
-        selling: getMode() === 'selling',
-        featured: false,
-        contents: getContents(),
-      });
-      const updatePreview = () => {
-        const profile = buildProfile();
-        root.querySelector('[data-preview-owner]').textContent = profile.owner || 'Seu nome';
-        root.querySelector('[data-preview-title]').textContent = profile.title || 'Sua coleção no Nexus';
-        root.querySelector('[data-preview-description]').textContent = profile.description || 'A descrição da sua coleção aparecerá aqui.';
-        root.querySelector('[data-preview-avatar]').textContent = (profile.owner || 'NX').slice(0, 2).toUpperCase();
-        root.querySelector('[data-preview-mode]').textContent = profile.selling ? 'Itens selecionados à venda' : 'Somente coleção online';
-        const tags = root.querySelector('[data-preview-tags]');
-        tags.replaceChildren(...profile.contents.map((value) => {
-          const tag = document.createElement('span');
-          tag.textContent = value === 'cards' ? 'Cartas' : value === 'boosters' ? 'Boosters' : 'Kits';
-          return tag;
-        }));
-        root.querySelector('[data-description-count]').textContent = String(description.value.length);
+      const root = document.querySelector('[data-editor-root]');
+      if (!root) return;
+      const published = JSON.parse(root.dataset.published || '[]');
+      const panels = [...root.querySelectorAll('[data-start-panel]')];
+      const modeButtons = [...root.querySelectorAll('[data-editor-mode]')];
+      const workspace = root.querySelector('[data-editor-workspace]');
+      const inventory = root.querySelector('[data-editor-inventory]');
+      const csvHeaders = {
+        cards: ['Nome', 'Numeração', 'Coleção', 'Idioma', 'Estado', 'Ano', 'Link Liga', 'Preço', 'Quantidade', 'À venda'],
+        boosters: ['Coleção', 'Link Liga', 'Preço', 'Quantidade', 'À venda'],
+        kits: ['Nome', 'Descrição', 'Conteúdo', 'Quantidade', 'Preço', 'À venda'],
       };
-
-      try {
-        const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
-        if (saved) {
-          owner.value = saved.owner || '';
-          title.value = saved.title || '';
-          description.value = saved.description || '';
-          form.querySelectorAll('input[name="content"]').forEach((input) => { input.checked = (saved.contents || []).includes(input.value); });
-          const mode = form.querySelector(`input[name="mode"][value="${saved.selling === false ? 'showcase' : 'selling'}"]`);
-          if (mode) mode.checked = true;
-          currentProfile = saved;
-          downloadButton.disabled = false;
-          savedMessage.hidden = false;
-        }
-      } catch (_) {}
-
-      form.addEventListener('input', updatePreview);
-      form.addEventListener('change', updatePreview);
-      form.addEventListener('submit', (event) => {
-        event.preventDefault();
-        if (!form.reportValidity()) return;
-        const contents = getContents();
-        if (contents.length === 0) {
-          alert('Selecione pelo menos um tipo de conteúdo para a coleção.');
-          return;
-        }
-        currentProfile = buildProfile();
-        localStorage.setItem(storageKey, JSON.stringify(currentProfile));
-        downloadButton.disabled = false;
-        savedMessage.hidden = false;
-        savedMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      let state = null;
+      const clean = (value) => String(value ?? '').trim();
+      const toPrice = (value) => { const parsed = Number(String(value ?? '').replace(',', '.')); return Number.isFinite(parsed) ? parsed : null; };
+      const prettyPrice = (value) => value === null ? 'Preço pela Liga' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+      const safeSlug = (value) => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/gi, '-').replace(/(^-|-$)/g, '').toLowerCase() || 'colecao';
+      const getNameFromLink = (link, fallback) => {
+        try { const card = new URL(link).searchParams.get('card'); return clean(card).replace(/\([^)]*\)/g, '').replace(/[-+]/g, ' ') || fallback; } catch (_) { return fallback; }
+      };
+      const makeState = (profile, items = {}) => ({
+        profile: { owner: '', title: '', description: '', email: '', phone: '', password: '', selling: true, showQuantity: true, featured: false, version: 1, ...profile },
+        cards: [...(items.cards || [])], boosters: [...(items.boosters || [])], kits: [...(items.kits || [])],
       });
-      downloadButton.addEventListener('click', () => {
-        if (!currentProfile) return;
-        const exportProfile = {
-          owner: currentProfile.owner,
-          title: currentProfile.title,
-          description: currentProfile.description,
-          selling: currentProfile.selling,
-          featured: false,
-        };
-        const blob = new Blob([JSON.stringify(exportProfile, null, 2)], { type: 'application/json' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'perfil.json';
-        link.click();
-        URL.revokeObjectURL(link.href);
+      const activate = (profile, items) => {
+        state = makeState(profile, items);
+        workspace.hidden = false;
+        root.querySelector('[data-workspace-title]').textContent = state.profile.title;
+        root.querySelector('[data-workspace-meta]').textContent = `${state.profile.owner} · versão ${state.profile.version}`;
+        root.querySelector('[data-show-quantity]').checked = state.profile.showQuantity !== false;
+        root.querySelector('[data-collection-selling]').checked = state.profile.selling !== false;
+        root.querySelector('[data-version-number]').textContent = String(state.profile.version);
+        workspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        render();
+      };
+      const escapeHtml = (value) => clean(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
+      const renderItems = (kind, items) => {
+        const label = kind === 'cards' ? 'Cartas' : kind === 'boosters' ? 'Boosters' : 'Kits';
+        const rows = items.length ? items.map((item, index) => {
+          const name = item.name || item.collection || 'Produto da Liga';
+          const details = kind === 'cards' ? `${item.condition} · ${item.language} · ${item.quantity} un.` : kind === 'boosters' ? `${item.quantity} un.` : `${item.quantity} un. · ${item.contents}`;
+          return `<li><div><strong>${escapeHtml(name)}</strong><small>${escapeHtml(details)}</small></div><label>Preço <input data-price-edit="${kind}:${index}" type="number" min="0" step="0.01" value="${item.price ?? ''}" placeholder="Liga" /></label><label class="mini-sale"><input data-sale-edit="${kind}:${index}" type="checkbox" ${item.forSale !== false ? 'checked' : ''} /> À venda</label><button type="button" data-remove-item="${kind}:${index}" aria-label="Remover ${escapeHtml(name)}">×</button></li>`;
+        }).join('') : '<li class="inventory-empty">Nenhum item cadastrado.</li>';
+        return `<section class="inventory-group"><h3>${label} <span>${items.length}</span></h3><ul>${rows}</ul></section>`;
+      };
+      const render = () => {
+        if (!state) return;
+        inventory.innerHTML = renderItems('cards', state.cards) + renderItems('boosters', state.boosters) + renderItems('kits', state.kits);
+        const select = root.querySelector('[data-kit-contents]');
+        const products = [...state.cards.map((item, index) => ({ value: `Carta: ${item.name || getNameFromLink(item.linkLiga, 'nova carta')} #${index + 1}`, label: `Carta · ${item.name || getNameFromLink(item.linkLiga, 'nova carta')}` })), ...state.boosters.map((item, index) => ({ value: `Booster: ${item.name || getNameFromLink(item.linkLiga, 'novo booster')} #${index + 1}`, label: `Booster · ${item.name || getNameFromLink(item.linkLiga, 'novo booster')}` }))];
+        select.replaceChildren(...products.map((product) => { const option = document.createElement('option'); option.value = product.value; option.textContent = product.label; return option; }));
+      };
+      const setMode = (mode) => {
+        modeButtons.forEach((button) => button.classList.toggle('active', button.dataset.editorMode === mode));
+        panels.forEach((panel) => { panel.hidden = panel.dataset.startPanel !== mode; });
+      };
+      modeButtons.forEach((button) => button.addEventListener('click', () => setMode(button.dataset.editorMode)));
+      root.querySelector('[data-new-profile-form]')?.addEventListener('submit', (event) => {
+        event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity()) return;
+        const data = new FormData(form); const profile = Object.fromEntries(data.entries()); profile.collectionId = safeSlug(profile.title); activate(profile);
       });
-      updatePreview();
+      const publishedSelect = root.querySelector('[data-published-select]');
+      publishedSelect.replaceChildren(...published.map((collection) => { const option = document.createElement('option'); option.value = collection.slug; option.textContent = `${collection.profile.title} (${collection.slug})`; return option; }));
+      root.querySelector('[data-published-login]')?.addEventListener('submit', (event) => {
+        event.preventDefault(); const form = event.currentTarget; const values = new FormData(form); const collection = published.find((item) => item.slug === values.get('collection')); const feedback = root.querySelector('[data-login-feedback]');
+        if (!collection || clean(values.get('email')).toLowerCase() !== clean(collection.profile.email).toLowerCase() || values.get('password') !== collection.profile.password) { feedback.textContent = 'Gmail ou senha incorretos para esta coleção.'; return; }
+        feedback.textContent = ''; activate({ ...collection.profile, version: Number(collection.profile.version || 1) + 1 }, collection);
+      });
+      const csv = (headers, rows) => [headers, ...rows.map((row) => headers.map((header) => `"${String(row[header] ?? '').replaceAll('"', '""')}"`))].map((row) => row.join(',')).join('\r\n');
+      const crc32 = (bytes) => { let crc = -1; for (const byte of bytes) { crc ^= byte; for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1)); } return (crc ^ -1) >>> 0; };
+      const u16 = (value) => Uint8Array.of(value & 255, (value >>> 8) & 255);
+      const u32 = (value) => Uint8Array.of(value & 255, (value >>> 8) & 255, (value >>> 16) & 255, (value >>> 24) & 255);
+      const merge = (parts) => { const length = parts.reduce((sum, part) => sum + part.length, 0); const result = new Uint8Array(length); let offset = 0; parts.forEach((part) => { result.set(part, offset); offset += part.length; }); return result; };
+      const zipStore = (files) => { const encoder = new TextEncoder(); let offset = 0; const local = []; const central = []; files.forEach(([name, text]) => { const filename = encoder.encode(name); const data = encoder.encode(text); const crc = crc32(data); local.push(merge([u32(0x04034b50), u16(20), u16(0), u16(0), u16(0), u16(0), u32(crc), u32(data.length), u32(data.length), u16(filename.length), u16(0), filename, data])); central.push(merge([u32(0x02014b50), u16(20), u16(20), u16(0), u16(0), u16(0), u16(0), u32(crc), u32(data.length), u32(data.length), u16(filename.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(offset), filename])); offset += local[local.length - 1].length; }); const directory = merge(central); return merge([...local, directory, u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length), u32(directory.length), u32(offset), u16(0)]); };
+      const read16 = (data, offset) => data[offset] | (data[offset + 1] << 8);
+      const read32 = (data, offset) => (data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16) | (data[offset + 3] << 24)) >>> 0;
+      const unzipStore = (buffer) => { const data = new Uint8Array(buffer); let end = -1; for (let index = data.length - 22; index >= Math.max(0, data.length - 65557); index -= 1) { if (read32(data, index) === 0x06054b50) { end = index; break; } } if (end < 0) throw new Error('ZIP inválido.'); const count = read16(data, end + 10); let offset = read32(data, end + 16); const decoder = new TextDecoder(); const files = {}; for (let index = 0; index < count; index += 1) { if (read32(data, offset) !== 0x02014b50) throw new Error('Diretório do ZIP inválido.'); const method = read16(data, offset + 10); const size = read32(data, offset + 24); const nameLength = read16(data, offset + 28); const extraLength = read16(data, offset + 30); const commentLength = read16(data, offset + 32); const localOffset = read32(data, offset + 42); const name = decoder.decode(data.slice(offset + 46, offset + 46 + nameLength)); if (method !== 0) throw new Error('Este ZIP usa compressão não suportada. Importe um ZIP gerado por esta página.'); const localNameLength = read16(data, localOffset + 26); const localExtraLength = read16(data, localOffset + 28); const start = localOffset + 30 + localNameLength + localExtraLength; files[name.split('/').pop()] = decoder.decode(data.slice(start, start + size)); offset += 46 + nameLength + extraLength + commentLength; } return files; };
+      const parseCsv = (source) => { const rows = []; let row = []; let field = ''; let quoted = false; for (let index = 0; index < source.length; index += 1) { const char = source[index]; if (char === '"') { if (quoted && source[index + 1] === '"') { field += '"'; index += 1; } else quoted = !quoted; } else if (char === ',' && !quoted) { row.push(field); field = ''; } else if ((char === '\n' || char === '\r') && !quoted) { if (char === '\r' && source[index + 1] === '\n') index += 1; row.push(field); if (row.some((value) => clean(value))) rows.push(row); row = []; field = ''; } else field += char; } if (field || row.length) { row.push(field); rows.push(row); } const [headers = [], ...values] = rows; return values.map((record) => Object.fromEntries(headers.map((header, index) => [clean(header), clean(record[index])]))); };
+      const importZip = async (file) => { const feedback = root.querySelector('[data-import-feedback]'); try { const files = unzipStore(await file.arrayBuffer()); const profile = JSON.parse(files['perfil.json'] || '{}'); if (!profile.owner || !profile.title || !profile.email || !profile.password) throw new Error('O ZIP não contém um perfil válido.'); const cards = parseCsv(files['inventario-cartas.csv'] || '').map((row) => ({ name: row['Nome'], number: row['Numeração'] || row['Número'], collection: row['Coleção'], language: row['Idioma'], condition: row['Estado'], quantity: Number(row['Quantidade']) || 1, price: toPrice(row['Preço']), forSale: row['À venda'] !== 'Não', linkLiga: row['Link Liga'] })); const boosters = parseCsv(files['inventario-boosters.csv'] || '').map((row) => ({ name: row['Coleção'] || row['Tipo de pacote'], quantity: Number(row['Quantidade']) || 1, price: toPrice(row['Preço']), forSale: row['À venda'] !== 'Não', linkLiga: row['Link Liga'] })); const kits = parseCsv(files['inventario-kits.csv'] || '').map((row) => ({ name: row['Nome'], description: row['Descrição'] || '', contents: row['Conteúdo'] || '', quantity: Number(row['Quantidade']) || 1, price: toPrice(row['Preço']), forSale: row['À venda'] !== 'Não' })); feedback.textContent = ''; activate({ ...profile, version: Number(profile.version || 0) + 1 }, { cards, boosters, kits }); } catch (error) { feedback.textContent = error.message || 'Não foi possível abrir este ZIP.'; } };
+      root.querySelector('[data-zip-input]')?.addEventListener('change', (event) => { const file = event.target.files?.[0]; if (file) importZip(file); });
+      const drop = root.querySelector('[data-zip-drop]');
+      ['dragenter', 'dragover'].forEach((type) => drop?.addEventListener(type, (event) => { event.preventDefault(); drop.classList.add('dragging'); }));
+      ['dragleave', 'drop'].forEach((type) => drop?.addEventListener(type, (event) => { event.preventDefault(); drop.classList.remove('dragging'); }));
+      drop?.addEventListener('drop', (event) => { const file = event.dataTransfer?.files?.[0]; if (file) importZip(file); });
+      root.querySelector('[data-card-form]')?.addEventListener('submit', (event) => { event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return; const data = new FormData(form); const linkLiga = clean(data.get('linkLiga')); state.cards.push({ name: getNameFromLink(linkLiga, 'Carta da Liga'), number: '', collection: '', language: clean(data.get('language')), condition: clean(data.get('condition')), quantity: Number(data.get('quantity')), price: toPrice(data.get('price')), forSale: data.get('forSale') === 'on', linkLiga }); form.reset(); form.querySelector('[name="quantity"]').value = 1; form.querySelector('[name="forSale"]').checked = true; render(); });
+      root.querySelector('[data-booster-form]')?.addEventListener('submit', (event) => { event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return; const data = new FormData(form); const linkLiga = clean(data.get('linkLiga')); state.boosters.push({ name: getNameFromLink(linkLiga, 'Booster da Liga'), quantity: Number(data.get('quantity')), price: toPrice(data.get('price')), forSale: data.get('forSale') === 'on', linkLiga }); form.reset(); form.querySelector('[name="quantity"]').value = 1; form.querySelector('[name="forSale"]').checked = true; render(); });
+      root.querySelector('[data-kit-form]')?.addEventListener('submit', (event) => { event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return; const data = new FormData(form); const contents = [...form.querySelector('[name="contents"]').selectedOptions].map((option) => option.value).join(' | '); if (!contents) return; state.kits.push({ name: clean(data.get('name')), description: `Kit criado por ${state.profile.owner}`, contents, quantity: Number(data.get('quantity')), price: toPrice(data.get('price')), forSale: data.get('forSale') === 'on' }); form.reset(); form.querySelector('[name="quantity"]').value = 1; form.querySelector('[name="forSale"]').checked = true; render(); });
+      inventory.addEventListener('input', (event) => { const target = event.target; const [kind, rawIndex] = (target.dataset.priceEdit || '').split(':'); if (!kind || !state) return; state[kind][Number(rawIndex)].price = toPrice(target.value); });
+      inventory.addEventListener('change', (event) => { const target = event.target; const [kind, rawIndex] = (target.dataset.saleEdit || '').split(':'); if (!kind || !state) return; state[kind][Number(rawIndex)].forSale = target.checked; });
+      inventory.addEventListener('click', (event) => { const button = event.target.closest('[data-remove-item]'); if (!button || !state) return; const [kind, rawIndex] = button.dataset.removeItem.split(':'); state[kind].splice(Number(rawIndex), 1); render(); });
+      root.querySelector('[data-show-quantity]')?.addEventListener('change', (event) => { if (state) state.profile.showQuantity = event.target.checked; });
+      root.querySelector('[data-collection-selling]')?.addEventListener('change', (event) => { if (state) state.profile.selling = event.target.checked; });
+      root.querySelector('[data-reset-editor]')?.addEventListener('click', () => { state = null; workspace.hidden = true; root.querySelector('[data-new-profile-form]').reset(); setMode('new'); });
+      root.querySelector('[data-download-zip]')?.addEventListener('click', () => { if (!state) return; state.profile.version = Number(state.profile.version || 1); const cards = state.cards.map((item) => ({ 'Nome': item.name || '', 'Numeração': item.number || '', 'Coleção': item.collection || '', 'Idioma': item.language, 'Estado': item.condition, 'Ano': item.year || '', 'Link Liga': item.linkLiga, 'Preço': item.price ?? '', 'Quantidade': item.quantity, 'À venda': item.forSale ? 'Sim' : 'Não' })); const boosters = state.boosters.map((item) => ({ 'Coleção': item.name || '', 'Link Liga': item.linkLiga, 'Preço': item.price ?? '', 'Quantidade': item.quantity, 'À venda': item.forSale ? 'Sim' : 'Não' })); const kits = state.kits.map((item) => ({ 'Nome': item.name, 'Descrição': item.description || '', 'Conteúdo': item.contents, 'Quantidade': item.quantity, 'Preço': item.price ?? '', 'À venda': item.forSale ? 'Sim' : 'Não' })); const profile = { ...state.profile, generatedAt: new Date().toISOString() }; const zip = zipStore([['perfil.json', JSON.stringify(profile, null, 2)], ['inventario-cartas.csv', csv(csvHeaders.cards, cards)], ['inventario-boosters.csv', csv(csvHeaders.boosters, boosters)], ['inventario-kits.csv', csv(csvHeaders.kits, kits)]]); const link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([zip], { type: 'application/zip' })); link.download = `${safeSlug(state.profile.title)}-v${state.profile.version}.zip`; link.click(); URL.revokeObjectURL(link.href); });
     })();
   </script>
 </BaseLayout>

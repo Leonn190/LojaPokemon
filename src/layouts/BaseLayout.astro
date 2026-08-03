@@ -401,12 +401,17 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           if (modalName) modalName.textContent = card.dataset.name || '';
           if (modalNumber) modalNumber.textContent = isCard ? (card.dataset.number || '') : isBooster ? 'Pacote lacrado' : 'Kit personalizado';
           if (modalType) modalType.textContent = card.dataset.type || '';
-          if (modalStock) modalStock.textContent = `${card.dataset.stock || '0'} ${card.dataset.stock === '1' ? 'unidade' : 'unidades'}`;
+          if (modalStock) {
+            const showQuantity = card.dataset.showQuantity !== 'false';
+            modalStock.hidden = !showQuantity;
+            modalStock.textContent = `${card.dataset.stock || '0'} ${card.dataset.stock === '1' ? 'unidade' : 'unidades'}`;
+          }
           if (modalDescription) modalDescription.textContent = card.dataset.description || (isCard
             ? 'Carta publicada por um colecionador da comunidade Nexus TCG.'
             : isBooster ? 'Booster lacrado publicado por um colecionador da comunidade.' : 'Conjunto personalizado pelo dono da coleção.');
           if (modalPrice) modalPrice.textContent = card.dataset.priceLabel || 'Consultar';
           modalPricePanel?.classList.toggle('booster-price-panel', isBooster);
+          if (modalAdd) modalAdd.hidden = card.dataset.forSale === 'false';
 
           if (modalCondition) {
             modalCondition.hidden = !isCard;
@@ -426,7 +431,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           setSpec('[data-spec-year]', card.dataset.year || '', isCard);
           setSpec('[data-spec-type]', card.dataset.type || '', true);
           setSpec('[data-spec-contents]', card.dataset.contents || '', kind === 'kit');
-          setSpec('[data-spec-quantity]', card.dataset.stock || '0', true);
+          setSpec('[data-spec-quantity]', card.dataset.stock || '0', card.dataset.showQuantity !== 'false');
 
           modal.hidden = false;
           document.body.classList.add('modal-open');
@@ -499,6 +504,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           saveCart();
         };
         const addToCart = (card, button) => {
+          if (card.dataset.forSale === 'false') return;
           const product = productFromCard(card);
           const current = cart.find((item) => item.id === product.id);
           if (current) current.quantity = Math.min(current.stock, current.quantity + 1);

@@ -40,6 +40,8 @@ const contents = item.kind === 'kit' ? item.contents : '';
   data-price-value={price === null ? '' : String(price)}
   data-price-label={formatBRL(price)}
   data-stock={String(item.quantity)}
+  data-for-sale={item.forSale ? 'true' : 'false'}
+  data-show-quantity={item.showQuantity ? 'true' : 'false'}
   data-catalog-item={catalog ? '' : undefined}
   data-search={catalog ? item.searchText : undefined}
   data-price={catalog ? String(price ?? -1) : undefined}
@@ -52,7 +54,7 @@ const contents = item.kind === 'kit' ? item.contents : '';
   <button class="product-open-button" type="button" data-open-product aria-label={`Ver detalhes de ${item.name}`}>
     <div class="product-card-media">
       <ProductImage item={item} />
-      <span class="quantity-chip">{item.quantity} {item.quantity === 1 ? 'unidade' : 'unidades'}</span>
+      {item.showQuantity && <span class="quantity-chip">{item.quantity} {item.quantity === 1 ? 'unidade' : 'unidades'}</span>}
     </div>
 
     <div class="product-card-body">
@@ -90,8 +92,12 @@ const contents = item.kind === 'kit' ? item.contents : '';
     </a>
   )}
 
-  <button class="add-cart-button" type="button" data-add-cart>
-    <span aria-hidden="true">＋</span>
-    Adicionar ao carrinho
-  </button>
+  {item.forSale ? (
+    <button class="add-cart-button" type="button" data-add-cart>
+      <span aria-hidden="true">＋</span>
+      Adicionar ao carrinho
+    </button>
+  ) : (
+    <span class="not-for-sale-label">Não está à venda</span>
+  )}
 </article>

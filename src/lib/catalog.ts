@@ -14,6 +14,8 @@ interface OwnedItemBase {
   ownerName: string;
   ownerCollectionName: string;
   ownerCollectionSlug: string;
+  forSale: boolean;
+  showQuantity: boolean;
 }
 
 export interface CardItem extends OwnedItemBase {
@@ -24,10 +26,12 @@ export interface CardItem extends OwnedItemBase {
   condition: string;
   year: string;
   type: string;
+  linkLiga: string;
 }
 
 export interface BoosterItem extends OwnedItemBase {
   kind: 'booster';
+  linkLiga: string;
 }
 
 export interface KitItem extends OwnedItemBase {
@@ -62,6 +66,10 @@ type ProfileData = {
   description?: string;
   selling?: boolean;
   featured?: boolean;
+  showQuantity?: boolean;
+  email?: string;
+  phone?: string;
+  password?: string;
 };
 
 const collectionsRoot = [
@@ -155,6 +163,14 @@ const parseDecimal = (value: string | number | null | undefined): number | null 
 const parseQuantity = (value: string | number | null | undefined): number => {
   const parsed = Number(String(value ?? '').replace(/[^0-9-]/g, ''));
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+};
+
+const parseBoolean = (value: string | boolean | null | undefined, fallback: boolean): boolean => {
+  if (typeof value === 'boolean') return value;
+  const normalized = normalizeText(String(value ?? ''));
+  if (['false', 'nao', 'não', '0', 'no'].includes(normalized)) return false;
+  if (['true', 'sim', 's', '1', 'yes'].includes(normalized)) return true;
+  return fallback;
 };
 
 export const normalizeText = (value: string): string =>
@@ -334,6 +350,7 @@ export const getCollections = (): CollectorCollection[] => {
     const collectionSlug = slugify(folderName);
     const title = profile.title?.trim() || `Coleção de ${owner}`;
     const description = profile.description?.trim() || 'Coleção Pokémon organizada no Nexus TCG.';
+    const showQuantity = profile.showQuantity !== false;
     const usedImages = new Map<string, number>();
 
     const cards: CardItem[] = readRows(folder, 'inventario-cartas.csv').map((row) => {
@@ -346,6 +363,7 @@ export const getCollections = (): CollectorCollection[] => {
       const type = row['Tipo'] || 'Não informado';
       const quantity = parseQuantity(row['Quantidade']);
       const price = parseDecimal(row['Preço']) ?? parseDecimal(row['Menor Liga']);
+      const forSale = parseBoolean(row['À venda'] ?? row['Venda'], profile.selling !== false);
       const imageKey = normalizeText(`${name} ${number}`);
       const duplicateIndex = usedImages.get(imageKey) ?? 0;
       usedImages.set(imageKey, duplicateIndex + 1);
@@ -362,6 +380,9 @@ export const getCollections = (): CollectorCollection[] => {
         type,
         quantity,
         price,
+        forSale,
+        showQuantity,
+        linkLiga: row['Link Liga'] || '',
         slug: `${collectionSlug}-${localSlug}`,
         imageCandidates: cardImageCandidates(collectionSlug, name, number, language, duplicateIndex),
         ownerName: owner,
@@ -374,15 +395,19 @@ export const getCollections = (): CollectorCollection[] => {
     const boosters: BoosterItem[] = readRows(folder, 'inventario-boosters.csv')
       .filter((row) => normalizeText(row['Tipo de pacote'] || '') !== 'total')
       .map((row) => {
-        const name = row['Tipo de pacote'] || 'Booster sem nome';
+        const name = row['Coleção'] || row['Tipo de pacote'] || 'Booster sem nome';
         const quantity = parseQuantity(row['Quantidade']);
-        const price = parseDecimal(row['Preço']);
+        const price = parseDecimal(row['Preço']) ?? parseDecimal(row['Preço Mais Baixo Liga']) ?? parseDecimal(row['Menor Liga']);
+        const forSale = parseBoolean(row['À venda'] ?? row['Venda'], profile.selling !== false);
         const localSlug = createUniqueSlug(slugify(name), globalSlugs, `${owner}-${quantity}`);
         return {
           kind: 'booster',
           name,
           quantity,
           price,
+          forSale,
+          showQuantity,
+          linkLiga: row['Link Liga'] || '',
           slug: `${collectionSlug}-${localSlug}`,
           imageCandidates: boosterImageCandidates(collectionSlug, name),
           ownerName: owner,
@@ -398,6 +423,7 @@ export const getCollections = (): CollectorCollection[] => {
       const contents = row['Conteúdo'] || 'Conteúdo informado pelo colecionador.';
       const quantity = parseQuantity(row['Quantidade']) || 1;
       const price = parseDecimal(row['Preço']);
+      const forSale = parseBoolean(row['À venda'] ?? row['Venda'], profile.selling !== false);
       const localSlug = createUniqueSlug(slugify(name), globalSlugs, owner);
       return {
         kind: 'kit',
@@ -406,6 +432,8 @@ export const getCollections = (): CollectorCollection[] => {
         contents,
         quantity,
         price,
+        forSale,
+        showQuantity,
         slug: `${collectionSlug}-${localSlug}`,
         imageCandidates: kitImageCandidates(collectionSlug, name, row['Imagem'] || ''),
         ownerName: owner,
@@ -445,6 +473,32 @@ export const getCollections = (): CollectorCollection[] => {
 
 export const getCollection = (slug: string): CollectorCollection | undefined =>
   getCollections().find((collection) => collection.slug === slug);
+
+export const getEditableCollections = () => getCollections().map((collection) => {
+  const folderName = getCollectionFolders().find((folder) => slugify(folder) === collection.slug) || collection.slug;
+  const profile = readProfile(join(collectionsRoot, folderName));
+  return {
+    slug: collection.slug,
+    profile: {
+      owner: collection.owner,
+      title: collection.title,
+      description: collection.description,
+      email: profile.email || '',
+      phone: profile.phone || '',
+      password: profile.password || '',
+      selling: collection.selling,
+      showQuantity: profile.showQuantity !== false,
+      featured: collection.featured,
+      version: Number((profile as Record<string, unknown>).version || 1),
+      collectionId: folderName,
+    },
+    cards: collection.cards.map(({ name, number, collection: set, language, condition, quantity, price, forSale, linkLiga }) => ({
+      name, number, collection: set, language, condition, quantity, price, forSale, linkLiga,
+    })),
+    boosters: collection.boosters.map(({ name, quantity, price, forSale, linkLiga }) => ({ name, quantity, price, forSale, linkLiga })),
+    kits: collection.kits.map(({ name, description, contents, quantity, price, forSale }) => ({ name, description, contents, quantity, price, forSale })),
+  };
+});
 
 export const getCards = (collectionSlug?: string): CardItem[] => {
   const collections = collectionSlug ? getCollections().filter((item) => item.slug === collectionSlug) : getCollections();
