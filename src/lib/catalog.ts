@@ -397,7 +397,7 @@ export const getCollections = (): CollectorCollection[] => {
       .map((row) => {
         const name = row['Coleção'] || row['Tipo de pacote'] || 'Booster sem nome';
         const quantity = parseQuantity(row['Quantidade']);
-        const price = parseDecimal(row['Preço']) ?? parseDecimal(row['Preço Mais Baixo Liga']) ?? parseDecimal(row['Menor Liga']);
+        const price = parseDecimal(row['Preço']) ?? parseDecimal(row['Preço Liga mais barato']) ?? parseDecimal(row['Preço Mais Baixo Liga']) ?? parseDecimal(row['Menor Liga']);
         const forSale = parseBoolean(row['À venda'] ?? row['Venda'], profile.selling !== false);
         const localSlug = createUniqueSlug(slugify(name), globalSlugs, `${owner}-${quantity}`);
         return {
@@ -492,8 +492,8 @@ export const getEditableCollections = () => getCollections().map((collection) =>
       version: Number((profile as Record<string, unknown>).version || 1),
       collectionId: folderName,
     },
-    cards: collection.cards.map(({ name, number, collection: set, language, condition, quantity, price, forSale, linkLiga }) => ({
-      name, number, collection: set, language, condition, quantity, price, forSale, linkLiga,
+    cards: collection.cards.map(({ name, number, collection: set, language, condition, year, quantity, price, forSale, linkLiga }) => ({
+      name, number, collection: set, language, condition, year, quantity, price, forSale, linkLiga,
     })),
     boosters: collection.boosters.map(({ name, quantity, price, forSale, linkLiga }) => ({ name, quantity, price, forSale, linkLiga })),
     kits: collection.kits.map(({ name, description, contents, quantity, price, forSale }) => ({ name, description, contents, quantity, price, forSale })),

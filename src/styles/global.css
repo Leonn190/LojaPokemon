@@ -1696,6 +1696,8 @@ body.cart-open { overflow: hidden; }
 .editor-export-panel { display: flex; justify-content: space-between; gap: 25px; align-items: center; margin-top: 25px; padding: 25px; border: 1px solid rgba(84,232,223,.25); border-radius: 20px; background: radial-gradient(circle at 90% 10%, rgba(84,232,223,.12), transparent 20rem), rgba(84,232,223,.025); }
 .editor-export-panel h3 { margin: 8px 0; font-size: 1.45rem; }
 .editor-export-panel p { max-width: 640px; margin: 0; color: var(--muted); font-size: .75rem; line-height: 1.55; }
+.editor-export-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.editor-export-actions .primary-cta, .editor-export-actions .secondary-cta { white-space: nowrap; }
 
 @media (max-width: 1180px) {
   .collector-nav-cta { display: none; }
@@ -1778,5 +1780,6 @@ body.cart-open { overflow: hidden; }
   .compact-filter-panel { grid-template-columns: 1fr; }
   .compact-filter-panel .search-control { grid-column: auto; }
   .editor-workspace-header, .editor-export-panel { align-items: stretch; flex-direction: column; }
-  .editor-workspace-header .secondary-cta, .editor-export-panel .primary-cta { width: 100%; }
+  .editor-workspace-header .secondary-cta, .editor-export-actions, .editor-export-actions .primary-cta, .editor-export-actions .secondary-cta { width: 100%; }
+  .editor-export-actions { flex-direction: column; }
 }

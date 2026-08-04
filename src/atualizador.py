@@ -1,25 +1,21 @@
-"""Atualiza em massa os menores preços da Liga de uma coleção já publicada.
+"""Atualiza preços da Liga usando um único Chrome e abas temporárias.
 
-Uso: python atualizador.py
-     python atualizador.py --colecao Leon19 --lote 10
+Uso:
+    python atualizador.py
+    python atualizador.py --colecao Leon19
 """
 
 from __future__ import annotations
 
 import argparse
-import concurrent.futures
 import csv
-import shutil
-import tempfile
+from decimal import Decimal
 from pathlib import Path
-from typing import Any
 
-from regulador import (
+from formatador import (
     PASTA_COLECOES_FORMATADAS,
-    PASTA_PERFIL_CHROME,
-    consultar,
-    consultar_booster,
-    formatar_reais,
+    SessaoLiga,
+    formatar_decimal_csv,
 )
 
 
@@ -31,92 +27,75 @@ def ler_csv(caminho: Path) -> tuple[list[str], list[dict[str, str]]]:
 
 def escrever_csv(caminho: Path, cabecalhos: list[str], linhas: list[dict[str, str]]) -> None:
     with caminho.open("w", encoding="utf-8", newline="") as arquivo:
-        escritor = csv.DictWriter(arquivo, fieldnames=cabecalhos)
+        escritor = csv.DictWriter(
+            arquivo,
+            fieldnames=cabecalhos,
+            extrasaction="ignore",
+            lineterminator="\n",
+        )
         escritor.writeheader()
         escritor.writerows(linhas)
 
 
-def clonar_perfil(destino: Path) -> Path:
-    """Copia os cookies obtidos na primeira aba para um trabalhador do lote."""
-
-    if PASTA_PERFIL_CHROME.exists():
-        shutil.copytree(
-            PASTA_PERFIL_CHROME,
-            destino,
-            dirs_exist_ok=True,
-            ignore=shutil.ignore_patterns("Singleton*", "LOCK", "lockfile"),
-        )
-    return destino
-
-
-def atualizar_carta(indice: int, linha: dict[str, str], pasta_perfil: Path) -> tuple[int, str, str]:
-    link = (linha.get("Link Liga") or "").strip()
-    if not link:
-        return indice, "", "sem Link Liga"
-    try:
-        dados = consultar(
-            link,
-            (linha.get("Idioma") or "BR").strip(),
-            (linha.get("Estado") or "NM").strip(),
-            pasta_perfil,
-        )
-        preco = dados.get("preco")
-        return indice, formatar_reais(preco) if preco is not None else "", "ok"
-    except Exception as erro:
-        return indice, "", str(erro)
-
-
-def atualizar_booster(indice: int, linha: dict[str, str], pasta_perfil: Path) -> tuple[int, str, str]:
-    link = (linha.get("Link Liga") or "").strip()
-    if not link:
-        return indice, "", "sem Link Liga"
-    try:
-        dados = consultar_booster(link, pasta_perfil)
-        preco = dados.get("preco")
-        return indice, formatar_reais(preco) if preco is not None else "", "ok"
-    except Exception as erro:
-        return indice, "", str(erro)
-
-
-def atualizar_arquivo(caminho: Path, tipo: str, lote: int) -> None:
+def atualizar_cartas(caminho: Path, sessao: SessaoLiga) -> None:
     if not caminho.is_file():
         return
     cabecalhos, linhas = ler_csv(caminho)
-    if not linhas:
+    if "Menor Liga" not in cabecalhos:
+        cabecalhos.append("Menor Liga")
+
+    for indice, linha in enumerate(linhas, start=1):
+        link = (linha.get("Link Liga") or "").strip()
+        if not link:
+            print(f"  Carta {indice}: ignorada (sem Link Liga)")
+            continue
+        try:
+            dados = sessao.consultar_carta(
+                link,
+                (linha.get("Idioma") or "BR").strip(),
+                (linha.get("Estado") or "NM").strip(),
+            )
+            preco = dados.get("preco")
+            if isinstance(preco, Decimal):
+                linha["Menor Liga"] = formatar_decimal_csv(preco)
+                print(f"  Carta {indice}: {linha['Menor Liga']}")
+            else:
+                print(f"  Carta {indice}: preço não encontrado")
+        except Exception as erro:
+            print(f"  Carta {indice}: não atualizada ({erro})")
+
+    escrever_csv(caminho, cabecalhos, linhas)
+
+
+def atualizar_boosters(caminho: Path, sessao: SessaoLiga) -> None:
+    if not caminho.is_file():
         return
-    coluna_preco = "Preço Mais Baixo Liga"
+    cabecalhos, linhas = ler_csv(caminho)
+    coluna_preco = "Preço Liga mais barato"
     if coluna_preco not in cabecalhos:
         cabecalhos.append(coluna_preco)
-    trabalhador = atualizar_carta if tipo == "carta" else atualizar_booster
-    print(f"Abrindo a primeira aba para {tipo}; confirme a verificação da Liga, se necessário...")
-    primeiro_indice, primeiro_preco, primeiro_status = trabalhador(0, linhas[0], PASTA_PERFIL_CHROME)
-    if primeiro_preco:
-        linhas[primeiro_indice][coluna_preco] = primeiro_preco
-        print(f"  {tipo} 1: {primeiro_preco}")
-    else:
-        print(f"  {tipo} 1: não atualizado ({primeiro_status})")
-    if len(linhas) == 1:
-        escrever_csv(caminho, cabecalhos, linhas)
-        return
-    print(f"Atualizando os demais {len(linhas) - 1} {tipo}(s) em lotes de até {lote}...")
-    with tempfile.TemporaryDirectory(prefix="loja-pokemon-atualizador-") as temporario:
-        raiz_perfis = Path(temporario)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=lote) as executor:
-            futuros = []
-            for indice, linha in enumerate(linhas[1:], start=1):
-                perfil = clonar_perfil(raiz_perfis / f"perfil-{indice % lote}")
-                futuros.append(executor.submit(trabalhador, indice, linha, perfil))
-            for futuro in concurrent.futures.as_completed(futuros):
-                indice, preco, status = futuro.result()
-                if preco:
-                    linhas[indice][coluna_preco] = preco
-                    print(f"  {tipo} {indice + 1}: {preco}")
-                else:
-                    print(f"  {tipo} {indice + 1}: não atualizado ({status})")
+
+    for indice, linha in enumerate(linhas, start=1):
+        link = (linha.get("Link Liga") or "").strip()
+        if not link:
+            print(f"  Booster {indice}: ignorado (a coleção não possui Link Liga para ele)")
+            continue
+        try:
+            dados = sessao.consultar_booster(link)
+            preco = dados.get("preco")
+            if isinstance(preco, Decimal):
+                linha[coluna_preco] = formatar_decimal_csv(preco)
+                print(f"  Booster {indice}: {linha[coluna_preco]}")
+            else:
+                print(f"  Booster {indice}: preço não encontrado")
+        except Exception as erro:
+            print(f"  Booster {indice}: não atualizado ({erro})")
+
     escrever_csv(caminho, cabecalhos, linhas)
 
 
 def escolher_colecao(nome: str | None) -> Path:
+    PASTA_COLECOES_FORMATADAS.mkdir(parents=True, exist_ok=True)
     colecoes = sorted(path for path in PASTA_COLECOES_FORMATADAS.iterdir() if path.is_dir())
     if nome:
         selecionada = PASTA_COLECOES_FORMATADAS / nome
@@ -136,16 +115,21 @@ def escolher_colecao(nome: str | None) -> Path:
 
 
 def main() -> None:
-    argumentos = argparse.ArgumentParser(description="Atualiza os preços da Liga Pokémon em uma coleção.")
+    argumentos = argparse.ArgumentParser(
+        description="Atualiza os preços da Liga Pokémon sem reabrir o Chrome a cada item.",
+    )
     argumentos.add_argument("--colecao", help="Nome da pasta da coleção, por exemplo Leon19.")
-    argumentos.add_argument("--lote", type=int, default=10, help="Quantidade máxima de abas simultâneas (padrão: 10).")
+    argumentos.add_argument(
+        "--lote",
+        type=int,
+        default=1,
+        help="Mantido por compatibilidade; agora todas as consultas usam um único Chrome.",
+    )
     opcoes = argumentos.parse_args()
-    lote = max(1, min(opcoes.lote, 10))
     colecao = escolher_colecao(opcoes.colecao)
-    print("A primeira consulta abrirá o Chrome com seu perfil da Liga Pokémon.")
-    print("Se a Liga pedir verificação, conclua-a nessa primeira aba; os lotes seguintes reutilizam os cookies.")
-    atualizar_arquivo(colecao / "inventario-cartas.csv", "carta", lote)
-    atualizar_arquivo(colecao / "inventario-boosters.csv", "booster", lote)
+    with SessaoLiga() as sessao:
+        atualizar_cartas(colecao / "inventario-cartas.csv", sessao)
+        atualizar_boosters(colecao / "inventario-boosters.csv", sessao)
     print(f"Preços atualizados em: {colecao}")
 
 
