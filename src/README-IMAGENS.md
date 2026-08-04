@@ -9,10 +9,11 @@ src/
         ├── perfil.json
         ├── inventario-cartas.csv
         ├── inventario-boosters.csv
-        └── inventario-kits.csv
+        ├── inventario-kits.csv
+        └── inventario-albuns.csv
 ```
 
-Para adicionar outro colecionador, duplique a pasta `Leon19`, altere o nome da nova pasta e edite os quatro arquivos. O site encontra todas as pastas automaticamente durante o build e reúne os itens nas páginas gerais.
+Para adicionar outro colecionador, duplique a pasta `Leon19`, altere o nome da nova pasta e edite os arquivos da coleção. O site encontra todas as pastas automaticamente durante o build e reúne os itens nas páginas gerais.
 
 ## Imagens atuais
 
@@ -47,10 +48,20 @@ O sistema procura primeiro as imagens específicas da coleção e depois usa as 
 O arquivo `inventario-kits.csv` usa as colunas:
 
 ```text
-Nome,Descrição,Preço,Quantidade,Conteúdo,Imagem
+Nome,Descrição,Preço,Quantidade,Conteúdo,Conteúdo JSON,Valor avulso,Desconto,Imagem,À venda
 ```
 
-A coluna `Imagem` é opcional. Quando estiver vazia, o site exibe uma arte de fallback própria para kits.
+A coluna `Conteúdo JSON` guarda os itens e quantidades usados pelo construtor drag and drop. `Valor avulso` representa o preço bruto somado e `Desconto` registra a diferença para o preço final. A coluna `Imagem` continua opcional; quando estiver vazia, o site exibe as imagens dos itens ou uma arte de fallback.
+
+## Formato inicial de álbuns
+
+O editor também exporta `inventario-albuns.csv` com as colunas:
+
+```text
+Nome,Descrição,Progresso,Quantidade,Imagem,À venda
+```
+
+A área de álbuns é inicial e não altera o catálogo público nesta versão.
 
 ## Formatador e updates
 

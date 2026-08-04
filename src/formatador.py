@@ -915,18 +915,22 @@ PASTA_COLECOES_FORMATADAS = RAIZ_SRC / "coleções"
 PASTA_IMAGENS_PUBLICAS = RAIZ_SRC.parent / "public" / "imagens"
 ARQUIVO_ATUALIZACAO = "atualizacao.json"
 
-# Mesma estrutura usada pela coleção Leon19.
+# Estrutura padronizada usada pelo editor e pelo catálogo.
 COLUNAS_CARTAS = [
     "Nome", "Número", "Coleção", "Idioma", "Estado", "Ano", "Tipo",
     "Link Liga", "Link MYP", "Link Cardmarket", "Link Tcgplayer",
     "Link PriceCharting", "Minimo", "Venda Rapida", "Menor Liga", "Preço",
-    "Quantidade",
+    "Quantidade", "À venda",
 ]
 COLUNAS_BOOSTERS = [
     "Tipo de pacote", "Quantidade", "Preço mínimo", "Venda rápida",
-    "Preço Liga mais barato", "Preço",
+    "Preço Liga mais barato", "Preço", "Link Liga", "À venda",
 ]
-COLUNAS_KITS = ["Nome", "Descrição", "Preço", "Quantidade", "Conteúdo", "Imagem"]
+COLUNAS_KITS = [
+    "Nome", "Descrição", "Preço", "Quantidade", "Conteúdo", "Conteúdo JSON",
+    "Valor avulso", "Desconto", "Imagem", "À venda",
+]
+COLUNAS_ALBUNS = ["Nome", "Descrição", "Progresso", "Quantidade", "Imagem", "À venda"]
 
 
 def texto_csv(valor: Any) -> str:
@@ -1050,6 +1054,7 @@ def montar_linha_carta(linha: dict[str, Any], dados: dict[str, Any]) -> dict[str
         or primeiro_valor(linha, "Menor Liga", "Preço Mais Baixo Liga"),
         "Preço": primeiro_valor(linha, "Preço"),
         "Quantidade": quantidade_inteira(primeiro_valor(linha, "Quantidade")),
+        "À venda": primeiro_valor(linha, "À venda", "Venda") or "Sim",
     }
 
 
@@ -1064,6 +1069,8 @@ def montar_linha_booster(linha: dict[str, Any], dados: dict[str, Any]) -> dict[s
         "Preço Liga mais barato": formatar_decimal_csv(menor if isinstance(menor, Decimal) else None)
         or primeiro_valor(linha, "Preço Liga mais barato", "Preço Mais Baixo Liga", "Menor Liga"),
         "Preço": primeiro_valor(linha, "Preço"),
+        "Link Liga": primeiro_valor(linha, "Link Liga"),
+        "À venda": primeiro_valor(linha, "À venda", "Venda") or "Sim",
     }
 
 
@@ -1074,7 +1081,22 @@ def normalizar_linha_kit(linha: dict[str, Any]) -> dict[str, Any]:
         "Preço": primeiro_valor(linha, "Preço"),
         "Quantidade": quantidade_inteira(primeiro_valor(linha, "Quantidade")),
         "Conteúdo": primeiro_valor(linha, "Conteúdo"),
+        "Conteúdo JSON": primeiro_valor(linha, "Conteúdo JSON"),
+        "Valor avulso": primeiro_valor(linha, "Valor avulso", "Preço bruto"),
+        "Desconto": primeiro_valor(linha, "Desconto"),
         "Imagem": primeiro_valor(linha, "Imagem"),
+        "À venda": primeiro_valor(linha, "À venda", "Venda") or "Sim",
+    }
+
+
+def normalizar_linha_album(linha: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "Nome": primeiro_valor(linha, "Nome"),
+        "Descrição": primeiro_valor(linha, "Descrição"),
+        "Progresso": primeiro_valor(linha, "Progresso"),
+        "Quantidade": quantidade_inteira(primeiro_valor(linha, "Quantidade")),
+        "Imagem": primeiro_valor(linha, "Imagem"),
+        "À venda": primeiro_valor(linha, "À venda", "Venda") or "Não",
     }
 
 
@@ -1084,7 +1106,7 @@ def identificar_colecao(perfil: dict[str, Any], nome_padrao: str) -> str:
 
 
 def formatar_colecao(origem: Path, sessao: SessaoLiga) -> Path:
-    """Converte uma coleção completa para a estrutura exata da Leon19."""
+    """Converte uma coleção completa para a estrutura padronizada do Nexus TCG."""
 
     perfil_origem = origem / "perfil.json"
     if not perfil_origem.is_file():
@@ -1134,9 +1156,12 @@ def formatar_colecao(origem: Path, sessao: SessaoLiga) -> Path:
         boosters_formatados.append(montar_linha_booster(linha, dados))
 
     kits = [normalizar_linha_kit(linha) for linha in ler_csv(origem / "inventario-kits.csv")]
+    albuns = [normalizar_linha_album(linha) for linha in ler_csv(origem / "inventario-albuns.csv")]
     escrever_csv(destino / "inventario-cartas.csv", COLUNAS_CARTAS, cartas_formatadas)
     escrever_csv(destino / "inventario-boosters.csv", COLUNAS_BOOSTERS, boosters_formatados)
     escrever_csv(destino / "inventario-kits.csv", COLUNAS_KITS, kits)
+    if albuns or (origem / "inventario-albuns.csv").is_file():
+        escrever_csv(destino / "inventario-albuns.csv", COLUNAS_ALBUNS, albuns)
     return destino
 
 

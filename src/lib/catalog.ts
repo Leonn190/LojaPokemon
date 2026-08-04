@@ -27,17 +27,39 @@ export interface CardItem extends OwnedItemBase {
   year: string;
   type: string;
   linkLiga: string;
+  linkMyp: string;
+  linkCardmarket: string;
+  linkTcgplayer: string;
+  linkPriceCharting: string;
+  minimumPrice: number | null;
+  quickSalePrice: number | null;
+  leaguePrice: number | null;
+  finalPrice: number | null;
 }
 
 export interface BoosterItem extends OwnedItemBase {
   kind: 'booster';
   linkLiga: string;
+  minimumPrice: number | null;
+  quickSalePrice: number | null;
+  leaguePrice: number | null;
+  finalPrice: number | null;
+}
+
+export interface KitContentItem {
+  kind: 'cards' | 'boosters';
+  name: string;
+  quantity: number;
+  unitPrice: number | null;
+  imageCandidates?: string[];
 }
 
 export interface KitItem extends OwnedItemBase {
   kind: 'kit';
   description: string;
   contents: string;
+  contentItems: KitContentItem[];
+  sourceTotal: number | null;
 }
 
 export type CatalogItem = CardItem | BoosterItem | KitItem;
@@ -355,14 +377,18 @@ export const getCollections = (): CollectorCollection[] => {
 
     const cards: CardItem[] = readRows(folder, 'inventario-cartas.csv').map((row) => {
       const name = row['Nome'] || 'Carta sem nome';
-      const number = row['Número'] || 'Sem número';
+      const number = row['Número'] || row['Numeração'] || 'Sem número';
       const pokemonCollection = row['Coleção'] || 'Coleção não informada';
       const language = row['Idioma'] || 'Não informado';
       const condition = row['Estado'] || 'Não informado';
       const year = row['Ano'] || 'Não informado';
       const type = row['Tipo'] || 'Não informado';
       const quantity = parseQuantity(row['Quantidade']);
-      const price = parseDecimal(row['Preço']) ?? parseDecimal(row['Menor Liga']);
+      const minimumPrice = parseDecimal(row['Minimo']) ?? parseDecimal(row['Preço mínimo']);
+      const quickSalePrice = parseDecimal(row['Venda Rapida']) ?? parseDecimal(row['Venda rápida']);
+      const leaguePrice = parseDecimal(row['Menor Liga']) ?? parseDecimal(row['Preço Liga mais barato']);
+      const finalPrice = parseDecimal(row['Preço']);
+      const price = finalPrice ?? leaguePrice;
       const forSale = parseBoolean(row['À venda'] ?? row['Venda'], profile.selling !== false);
       const imageKey = normalizeText(`${name} ${number}`);
       const duplicateIndex = usedImages.get(imageKey) ?? 0;
@@ -383,6 +409,14 @@ export const getCollections = (): CollectorCollection[] => {
         forSale,
         showQuantity,
         linkLiga: row['Link Liga'] || '',
+        linkMyp: row['Link MYP'] || '',
+        linkCardmarket: row['Link Cardmarket'] || '',
+        linkTcgplayer: row['Link Tcgplayer'] || row['Link TCGPlayer'] || '',
+        linkPriceCharting: row['Link PriceCharting'] || '',
+        minimumPrice,
+        quickSalePrice,
+        leaguePrice,
+        finalPrice,
         slug: `${collectionSlug}-${localSlug}`,
         imageCandidates: cardImageCandidates(collectionSlug, name, number, language, duplicateIndex),
         ownerName: owner,
@@ -397,7 +431,11 @@ export const getCollections = (): CollectorCollection[] => {
       .map((row) => {
         const name = row['Coleção'] || row['Tipo de pacote'] || 'Booster sem nome';
         const quantity = parseQuantity(row['Quantidade']);
-        const price = parseDecimal(row['Preço']) ?? parseDecimal(row['Preço Liga mais barato']) ?? parseDecimal(row['Preço Mais Baixo Liga']) ?? parseDecimal(row['Menor Liga']);
+        const minimumPrice = parseDecimal(row['Preço mínimo']) ?? parseDecimal(row['Minimo']);
+        const quickSalePrice = parseDecimal(row['Venda rápida']) ?? parseDecimal(row['Venda Rapida']);
+        const leaguePrice = parseDecimal(row['Preço Liga mais barato']) ?? parseDecimal(row['Preço Mais Baixo Liga']) ?? parseDecimal(row['Menor Liga']);
+        const finalPrice = parseDecimal(row['Preço']);
+        const price = finalPrice ?? leaguePrice;
         const forSale = parseBoolean(row['À venda'] ?? row['Venda'], profile.selling !== false);
         const localSlug = createUniqueSlug(slugify(name), globalSlugs, `${owner}-${quantity}`);
         return {
@@ -408,6 +446,10 @@ export const getCollections = (): CollectorCollection[] => {
           forSale,
           showQuantity,
           linkLiga: row['Link Liga'] || '',
+          minimumPrice,
+          quickSalePrice,
+          leaguePrice,
+          finalPrice,
           slug: `${collectionSlug}-${localSlug}`,
           imageCandidates: boosterImageCandidates(collectionSlug, name),
           ownerName: owner,
@@ -423,6 +465,12 @@ export const getCollections = (): CollectorCollection[] => {
       const contents = row['Conteúdo'] || 'Conteúdo informado pelo colecionador.';
       const quantity = parseQuantity(row['Quantidade']) || 1;
       const price = parseDecimal(row['Preço']);
+      const sourceTotal = parseDecimal(row['Valor avulso']);
+      let contentItems: KitContentItem[] = [];
+      try {
+        const parsed = JSON.parse(row['Conteúdo JSON'] || '[]');
+        if (Array.isArray(parsed)) contentItems = parsed;
+      } catch (_) {}
       const forSale = parseBoolean(row['À venda'] ?? row['Venda'], profile.selling !== false);
       const localSlug = createUniqueSlug(slugify(name), globalSlugs, owner);
       return {
@@ -430,6 +478,8 @@ export const getCollections = (): CollectorCollection[] => {
         name,
         description,
         contents,
+        contentItems,
+        sourceTotal,
         quantity,
         price,
         forSale,
@@ -492,11 +542,19 @@ export const getEditableCollections = () => getCollections().map((collection) =>
       version: Number((profile as Record<string, unknown>).version || 1),
       collectionId: folderName,
     },
-    cards: collection.cards.map(({ name, number, collection: set, language, condition, year, quantity, price, forSale, linkLiga }) => ({
-      name, number, collection: set, language, condition, year, quantity, price, forSale, linkLiga,
+    cards: collection.cards.map(({ name, number, collection: set, language, condition, year, type, quantity, finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, minimumPrice, quickSalePrice, leaguePrice, imageCandidates }) => ({
+      name, number, collection: set, language, condition, year, type, quantity, price: finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, minimumPrice, quickSalePrice, leaguePrice, imageCandidates,
     })),
-    boosters: collection.boosters.map(({ name, quantity, price, forSale, linkLiga }) => ({ name, quantity, price, forSale, linkLiga })),
-    kits: collection.kits.map(({ name, description, contents, quantity, price, forSale }) => ({ name, description, contents, quantity, price, forSale })),
+    boosters: collection.boosters.map(({ name, quantity, finalPrice, forSale, linkLiga, minimumPrice, quickSalePrice, leaguePrice, imageCandidates }) => ({ name, quantity, price: finalPrice, forSale, linkLiga, minimumPrice, quickSalePrice, leaguePrice, imageCandidates })),
+    kits: collection.kits.map(({ name, description, contents, contentItems, sourceTotal, quantity, price, forSale, imageCandidates }) => ({ name, description, contents, contentItems, sourceTotal, quantity, price, forSale, imageCandidates })),
+    albums: readRows(join(collectionsRoot, folderName), 'inventario-albuns.csv').map((row) => ({
+      name: row['Nome'] || 'Álbum sem nome',
+      description: row['Descrição'] || '',
+      progress: row['Progresso'] || '',
+      quantity: parseQuantity(row['Quantidade']) || 1,
+      image: row['Imagem'] || '',
+      forSale: parseBoolean(row['À venda'] ?? row['Venda'], false),
+    })),
   };
 });
 
