@@ -23,11 +23,10 @@ from urllib.request import Request, urlopen
 import ddddocr
 from PIL import Image, ImageOps
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support.ui import WebDriverWait
 
 
 # ============================================================
@@ -46,11 +45,8 @@ ESTADO = "NM"
 # Pode usar BR, PT, PT-BR, Português, ING, EN ou Inglês.
 IDIOMA = "BR"
 
-# Tempo adicional após o carregamento da página.
-TEMPO_ESPERA = 5.0
-
-# Tempo máximo para carregar a página e encontrar os anúncios.
-TIMEOUT_CARREGAMENTO = 60
+# Intervalo entre tentativas enquanto a Liga exibe a verificação anti-bot.
+INTERVALO_TENTATIVA = 1.5
 
 # O perfil é persistente: cookies e verificações ficam salvos.
 PASTA_PERFIL_CHROME = Path(__file__).with_name("perfil_chrome_liga")
@@ -219,38 +215,42 @@ def selecionar_aba_liga(navegador: webdriver.Chrome, url: str = URL) -> None:
     navegador.get(url)
 
 
+def pagina_liga_pronta(navegador: webdriver.Chrome) -> bool:
+    """Verifica o HTML real; não depende de uma variável JavaScript da Liga."""
+
+    try:
+        dados = navegador.execute_script(
+            """
+            const texto = (document.body?.innerText || '').toLowerCase();
+            const titulo = (document.title || '').toLowerCase();
+            const verificando =
+              titulo.includes('just a moment') || titulo.includes('um momento') ||
+              texto.includes('checking your browser') || texto.includes('verifique se você é humano') ||
+              texto.includes('verificação de segurança');
+            return {
+              completa: document.readyState === 'complete',
+              verificando,
+              temCarta: Boolean(document.querySelector('#featuredImage, .featured-image img, .card-image img')),
+              temMercado: Boolean(document.querySelector('#marketplace-stores, .marketplace-stores, .store')),
+            };
+            """
+        )
+        return bool(dados["completa"] and not dados["verificando"] and dados["temCarta"] and dados["temMercado"])
+    except Exception:
+        return False
+
+
 def esperar_pagina(navegador: webdriver.Chrome) -> None:
-    """Espera a página e os dados JavaScript dos anúncios carregarem."""
+    """Tenta até a página verdadeira substituir a verificação anti-bot."""
 
-    WebDriverWait(navegador, TIMEOUT_CARREGAMENTO).until(
-        lambda driver: driver.execute_script(
-            "return document.readyState"
-        )
-        == "complete"
-    )
-
-    # Espera adicional configurável. Não é necessário pressionar Enter.
-    time.sleep(TEMPO_ESPERA)
-
-    titulo = navegador.title.lower()
-    if "just a moment" in titulo or "um momento" in titulo:
-        raise RuntimeError(
-            "A página ainda está na verificação do navegador. "
-            "Aumente TEMPO_ESPERA ou abra o perfil uma vez e resolva "
-            "a verificação manualmente."
-        )
-
-    WebDriverWait(navegador, TIMEOUT_CARREGAMENTO).until(
-        lambda driver: driver.execute_script(
-            """
-            return Boolean(
-                document.querySelector('#featuredImage') &&
-                Array.isArray(window.cards_editions) &&
-                Array.isArray(window.cards_stock)
-            );
-            """
-        )
-    )
+    tentativa = 1
+    while True:
+        if pagina_liga_pronta(navegador):
+            print("Página da Liga carregada. Coletando dados do HTML...")
+            return
+        print(f"Página ainda não está pronta; tentando novamente em {INTERVALO_TENTATIVA:g}s (tentativa {tentativa})...")
+        tentativa += 1
+        time.sleep(INTERVALO_TENTATIVA)
 
 
 def mostrar_todas_as_ofertas(navegador: webdriver.Chrome) -> None:
@@ -260,7 +260,7 @@ def mostrar_todas_as_ofertas(navegador: webdriver.Chrome) -> None:
         quantidade_antes = len(
             navegador.find_elements(
                 By.CSS_SELECTOR,
-                "#marketplace-stores > .store",
+                "#marketplace-stores > .store, .marketplace-stores > .store",
             )
         )
 
@@ -280,7 +280,7 @@ def mostrar_todas_as_ofertas(navegador: webdriver.Chrome) -> None:
         quantidade_depois = len(
             navegador.find_elements(
                 By.CSS_SELECTOR,
-                "#marketplace-stores > .store",
+                "#marketplace-stores > .store, .marketplace-stores > .store",
             )
         )
 
@@ -303,17 +303,25 @@ def obter_dados_carta(navegador: webdriver.Chrome) -> dict[str, str]:
             edicoes[0] ||
             {};
 
-        const imagem = document.querySelector('#featuredImage');
+        const imagem = document.querySelector('#featuredImage, .featured-image img, .card-image img');
         const nome =
             imagem?.getAttribute('title')?.trim() ||
             imagem?.getAttribute('alt')?.trim() ||
             document.querySelector('h1')?.textContent?.trim() ||
             '';
 
+        const textoPagina = document.body?.innerText || '';
+        const numeroHtml =
+            document.querySelector('[data-card-number], .card-number, .number')?.textContent?.trim() ||
+            (textoPagina.match(/(?:N[úu]mero|Number)\s*:?\s*([A-Z0-9/-]+)/i) || [])[1] || '';
+        const colecaoHtml =
+            document.querySelector('[data-edition-name], .edition-name, .card-edition')?.textContent?.trim() ||
+            '';
+
         return {
             nome: nome,
-            colecao: String(edicao.name || '').trim(),
-            numeracao: String(edicao.num || '').trim(),
+            colecao: String(edicao.name || colecaoHtml).trim(),
+            numeracao: String(edicao.num || numeroHtml).trim(),
             imagem: imagem?.getAttribute('src') || ''
         };
         """
@@ -500,7 +508,19 @@ def decodificar_preco(
 ) -> Decimal:
     """Lê o preço visual de um anúncio e o converte em Decimal."""
 
-    container = oferta.find_element(By.CSS_SELECTOR, ".price-with-image")
+    texto_oferta = (oferta.get_attribute("innerText") or "").replace("\xa0", " ")
+    encontrado_texto = re.search(r"R\$\s*([0-9.]+,[0-9]{2})", texto_oferta)
+    if encontrado_texto:
+        return Decimal(encontrado_texto.group(1).replace(".", "").replace(",", "."))
+
+    container = buscar_elemento_opcional(
+        oferta,
+        ".price-with-image, .price_with_image, [data-price-image]",
+    )
+    if container is None:
+        raise ErroLeituraPreco(
+            f"Oferta {oferta_id} não possui um preço legível; ela será ignorada."
+        )
     filhos = container.find_elements(By.XPATH, "./div")
 
     elementos_digitos: list[WebElement] = []
@@ -599,7 +619,7 @@ def obter_ofertas(
 
     elementos = navegador.find_elements(
         By.CSS_SELECTOR,
-        "#marketplace-stores > .store",
+        "#marketplace-stores > .store, .marketplace-stores > .store",
     )
 
     if not elementos:
@@ -673,13 +693,17 @@ def obter_ofertas(
             loja_id,
         )
 
-        preco = decodificar_preco(
-            navegador=navegador,
-            oferta=oferta,
-            ocr=ocr,
-            cache=cache_digitos,
-            oferta_id=oferta_id,
-        )
+        try:
+            preco = decodificar_preco(
+                navegador=navegador,
+                oferta=oferta,
+                ocr=ocr,
+                cache=cache_digitos,
+                oferta_id=oferta_id,
+            )
+        except (ErroLeituraPreco, NoSuchElementException) as erro:
+            print(f"  Oferta {oferta_id} ignorada: {erro}")
+            continue
 
         ofertas.append(
             {
@@ -715,9 +739,7 @@ def consultar(url: str = URL, idioma: str = IDIOMA, estado: str = ESTADO, perfil
         navegador, processo = abrir_navegador(url, perfil)
         selecionar_aba_liga(navegador, url)
 
-        print(
-            f"Aguardando o carregamento e mais {TEMPO_ESPERA:g} segundos..."
-        )
+        print("Aguardando a página verdadeira da Liga Pokémon...")
         esperar_pagina(navegador)
         mostrar_todas_as_ofertas(navegador)
 
@@ -827,7 +849,7 @@ def consultar_booster(url: str, perfil: Path | None = None) -> dict[str, Any]:
         ocr = ddddocr.DdddOcr(show_ad=False, beta=True)
         cache: dict[str, str] = {}
         precos: list[Decimal] = []
-        for indice, oferta in enumerate(navegador.find_elements(By.CSS_SELECTOR, "#marketplace-stores > .store")):
+        for indice, oferta in enumerate(navegador.find_elements(By.CSS_SELECTOR, "#marketplace-stores > .store, .marketplace-stores > .store")):
             try:
                 precos.append(decodificar_preco(navegador, oferta, ocr, cache, str(indice)))
             except Exception:
@@ -950,14 +972,6 @@ def regular_pasta(entrada: Path = PASTA_COLECOES_NAO_FORMATADAS) -> list[Path]:
 def main() -> None:
     try:
         resultado = consultar()
-    except TimeoutException:
-        print(
-            "\nErro: a página demorou mais que o permitido para carregar."
-        )
-        print(
-            "Aumente TIMEOUT_CARREGAMENTO ou TEMPO_ESPERA no início do código."
-        )
-        raise SystemExit(1)
     except Exception as erro:
         print(f"\nErro: {erro}")
         raise SystemExit(1)
