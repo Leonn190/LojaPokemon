@@ -93,10 +93,16 @@ const contents = item.kind === 'kit' ? item.contents : '';
   )}
 
   {item.forSale ? (
-    <button class="add-cart-button" type="button" data-add-cart>
-      <span aria-hidden="true">＋</span>
-      Adicionar ao carrinho
-    </button>
+    <div class="product-purchase-actions">
+      <button class="add-cart-button" type="button" data-add-cart>
+        <span aria-hidden="true">＋</span>
+        Carrinho
+      </button>
+      <button class="add-proposal-button" type="button" data-add-proposal>
+        <span aria-hidden="true">◇</span>
+        Proposta
+      </button>
+    </div>
   ) : (
     <span class="not-for-sale-label">Não está à venda</span>
   )}

@@ -132,32 +132,98 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
               <div data-spec-quantity><dt>Quantidade</dt><dd></dd></div>
             </dl>
 
-            <button class="modal-add-cart-button" type="button" data-modal-add-cart>
-              <span aria-hidden="true">＋</span> Adicionar ao carrinho
-            </button>
+            <div class="modal-purchase-actions" data-modal-purchase-actions>
+              <button class="modal-add-cart-button" type="button" data-modal-add-cart>
+                <span aria-hidden="true">＋</span> Adicionar ao carrinho
+              </button>
+              <button class="modal-add-proposal-button" type="button" data-modal-add-proposal>
+                <span aria-hidden="true">◇</span> Adicionar à proposta
+              </button>
+            </div>
           </article>
         </div>
       </section>
     </div>
 
     <button class="cart-backdrop" type="button" data-cart-backdrop hidden aria-label="Fechar carrinho"></button>
-    <aside class="cart-drawer" data-cart-drawer aria-hidden="true" aria-label="Carrinho de compras">
+    <aside class="cart-drawer" data-cart-drawer aria-hidden="true" aria-label="Carrinho e propostas">
       <header class="cart-drawer-header">
-        <div><span class="section-eyebrow">Itens de colecionadores</span><h2>Carrinho</h2></div>
+        <div><span class="section-eyebrow">Sua seleção</span><h2>Carrinho</h2></div>
         <button class="modal-close-button" type="button" data-cart-close aria-label="Fechar carrinho">×</button>
       </header>
-      <div class="cart-items" data-cart-items></div>
-      <div class="cart-empty" data-cart-empty>
-        <span aria-hidden="true">◇</span>
-        <h3>Seu carrinho está vazio</h3>
-        <p>Adicione cartas, boosters ou kits publicados pelos colecionadores.</p>
+
+      <div class="cart-tabs" role="tablist" aria-label="Tipo de compra">
+        <button class="active" type="button" role="tab" aria-selected="true" data-cart-tab="cart">
+          Carrinho <strong data-cart-tab-count="cart">0</strong>
+        </button>
+        <button type="button" role="tab" aria-selected="false" data-cart-tab="proposal">
+          Proposta <strong data-cart-tab-count="proposal">0</strong>
+        </button>
       </div>
+
+      <section class="cart-panel" data-cart-panel="cart">
+        <div class="cart-panel-intro">
+          <strong>Compra pelo preço publicado</strong>
+          <span>Estes itens entram pelo valor normal anunciado.</span>
+        </div>
+        <div class="cart-items" data-cart-items="cart"></div>
+        <div class="cart-empty" data-cart-empty="cart">
+          <span aria-hidden="true">▱</span>
+          <h3>Nenhum item no carrinho</h3>
+          <p>Adicione produtos para comprá-los pelo preço regular.</p>
+        </div>
+      </section>
+
+      <section class="cart-panel" data-cart-panel="proposal" hidden>
+        <div class="cart-panel-intro proposal-intro">
+          <strong>Proposta para compra em conjunto</strong>
+          <span>Junte vários itens e informe quanto deseja pagar pelo conjunto.</span>
+        </div>
+        <div class="cart-items" data-cart-items="proposal"></div>
+        <div class="cart-empty" data-cart-empty="proposal">
+          <span aria-hidden="true">◇</span>
+          <h3>Nenhum item na proposta</h3>
+          <p>Escolha produtos que deseja negociar em conjunto.</p>
+        </div>
+      </section>
+
       <footer class="cart-drawer-footer">
-        <div><span>Total publicado</span><strong data-cart-total>R$ 0,00</strong></div>
-        <p class="cart-seller-note">Cada item continua vinculado ao colecionador que o publicou.</p>
-        <button class="clear-cart-button" type="button" data-cart-clear>Limpar carrinho</button>
+        <div class="cart-summary-row"><span>Total do carrinho</span><strong data-cart-total>R$ 0,00</strong></div>
+        <div class="cart-summary-row proposal-published-row"><span>Valor publicado da proposta</span><strong data-proposal-published-total>R$ 0,00</strong></div>
+        <label class="proposal-value-field">
+          <span>Quanto você oferece pelo conjunto?</span>
+          <div><b>R$</b><input type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" data-proposal-offer /></div>
+        </label>
+        <p class="proposal-offer-error" data-proposal-offer-error hidden>Informe um valor para a proposta.</p>
+        <button class="checkout-button" type="button" data-cart-checkout disabled>Revisar e comprar</button>
+        <div class="cart-footer-secondary">
+          <button class="clear-cart-button" type="button" data-cart-clear disabled>Limpar tudo</button>
+          <span>Você poderá copiar a mensagem e abrir o WhatsApp Web.</span>
+        </div>
       </footer>
     </aside>
+
+    <div class="checkout-modal" data-checkout-modal hidden>
+      <button class="checkout-backdrop" type="button" data-checkout-close aria-label="Fechar finalização"></button>
+      <section class="checkout-panel" role="dialog" aria-modal="true" aria-labelledby="checkout-title" tabindex="-1">
+        <header class="checkout-header">
+          <div><span class="section-eyebrow">Finalizar contato</span><h2 id="checkout-title">Sua mensagem de compra</h2></div>
+          <button class="modal-close-button" type="button" data-checkout-close aria-label="Fechar finalização">×</button>
+        </header>
+        <div class="checkout-content">
+          <div class="checkout-instructions">
+            <span aria-hidden="true">1</span>
+            <p>Confira o texto, copie a mensagem e envie no WhatsApp para <strong>+55 13 99158-5788</strong>.</p>
+          </div>
+          <textarea readonly data-checkout-message aria-label="Mensagem de compra pronta"></textarea>
+          <div class="checkout-actions">
+            <button class="copy-checkout-button" type="button" data-checkout-copy><span>▣</span> Copiar mensagem</button>
+            <a class="whatsapp-checkout-button" href="#" target="_blank" rel="noopener noreferrer" data-checkout-whatsapp><span>↗</span> Abrir WhatsApp Web</a>
+          </div>
+          <p class="checkout-note">No WhatsApp, basta colar ou conferir a mensagem preenchida e enviar.</p>
+        </div>
+      </section>
+    </div>
 
     <script is:inline>
       (() => {
@@ -356,6 +422,8 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         const modalPrice = modal?.querySelector('[data-modal-price]');
         const modalPricePanel = modal?.querySelector('[data-modal-price-panel]');
         const modalAdd = modal?.querySelector('[data-modal-add-cart]');
+        const modalProposal = modal?.querySelector('[data-modal-add-proposal]');
+        const modalPurchaseActions = modal?.querySelector('[data-modal-purchase-actions]');
         const modalOwner = modal?.querySelector('[data-modal-owner]');
         const modalOwnerCollection = modal?.querySelector('[data-modal-owner-collection]');
         const modalOwnerAvatar = modal?.querySelector('[data-modal-owner-avatar]');
@@ -411,7 +479,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             : isBooster ? 'Booster lacrado publicado por um colecionador da comunidade.' : 'Conjunto personalizado pelo dono da coleção.');
           if (modalPrice) modalPrice.textContent = card.dataset.priceLabel || 'Consultar';
           modalPricePanel?.classList.toggle('booster-price-panel', isBooster);
-          if (modalAdd) modalAdd.hidden = card.dataset.forSale === 'false';
+          if (modalPurchaseActions) modalPurchaseActions.hidden = card.dataset.forSale === 'false';
 
           if (modalCondition) {
             modalCondition.hidden = !isCard;
@@ -440,20 +508,36 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         };
         modal?.querySelectorAll('[data-modal-close]').forEach((button) => button.addEventListener('click', closeModal));
 
-        const storageKey = 'nexus-tcg-cart-v1';
+        const storageKey = 'nexus-tcg-cart-v2';
+        const legacyStorageKey = 'nexus-tcg-cart-v1';
         let cart = [];
+        let activeCartTab = 'cart';
         try {
-          const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-          if (Array.isArray(saved)) cart = saved;
+          const saved = JSON.parse(localStorage.getItem(storageKey) || localStorage.getItem(legacyStorageKey) || '[]');
+          if (Array.isArray(saved)) {
+            cart = saved
+              .filter((item) => item && item.id)
+              .map((item) => ({ ...item, mode: item.mode === 'proposal' ? 'proposal' : 'cart' }));
+          }
+          localStorage.removeItem(legacyStorageKey);
         } catch (_) {}
+
         const cartDrawer = document.querySelector('[data-cart-drawer]');
         const cartBackdrop = document.querySelector('[data-cart-backdrop]');
-        const cartItems = document.querySelector('[data-cart-items]');
-        const cartEmpty = document.querySelector('[data-cart-empty]');
         const cartTotal = document.querySelector('[data-cart-total]');
+        const proposalPublishedTotal = document.querySelector('[data-proposal-published-total]');
+        const proposalOffer = document.querySelector('[data-proposal-offer]');
+        const proposalOfferError = document.querySelector('[data-proposal-offer-error]');
         const cartCount = document.querySelector('[data-cart-count]');
+        const checkoutButton = document.querySelector('[data-cart-checkout]');
+        const checkoutModal = document.querySelector('[data-checkout-modal]');
+        const checkoutPanel = checkoutModal?.querySelector('.checkout-panel');
+        const checkoutMessage = checkoutModal?.querySelector('[data-checkout-message]');
+        const checkoutWhatsapp = checkoutModal?.querySelector('[data-checkout-whatsapp]');
+        const checkoutCopy = checkoutModal?.querySelector('[data-checkout-copy]');
+        const whatsappNumber = '5513991585788';
 
-        const productFromCard = (card) => {
+        const productFromCard = (card, mode) => {
           const image = card.querySelector('.image-stage img');
           return {
             id: card.dataset.productId || '', kind: card.dataset.kind || 'card', name: card.dataset.name || 'Produto',
@@ -462,61 +546,104 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             price: card.dataset.priceValue === '' ? null : Number(card.dataset.priceValue),
             priceLabel: card.dataset.priceLabel || 'Consultar',
             image: image && !image.hidden ? (image.currentSrc || image.src || '') : '',
-            quantity: 1, stock: Math.max(1, Number(card.dataset.stock || 1)),
+            quantity: 1, stock: Math.max(1, Number(card.dataset.stock || 1)), mode,
           };
         };
         const saveCart = () => localStorage.setItem(storageKey, JSON.stringify(cart));
+        const itemsByMode = (mode) => cart.filter((item) => item.mode === mode);
+        const modeTotal = (mode) => itemsByMode(mode).reduce((sum, item) => Number.isFinite(item.price) ? sum + item.price * item.quantity : sum, 0);
+        const modeAmount = (mode) => itemsByMode(mode).reduce((sum, item) => sum + item.quantity, 0);
+        const itemLabel = (item) => item.number || (item.kind === 'kit' ? 'Kit' : item.kind === 'card' ? 'Carta avulsa' : 'Booster avulso');
+
+        const createCartItem = (item) => {
+          const article = document.createElement('article');
+          article.className = 'cart-item';
+          article.dataset.cartId = item.id;
+          article.dataset.cartMode = item.mode;
+
+          const thumb = document.createElement('div');
+          thumb.className = 'cart-item-thumb';
+          if (item.image) {
+            const image = document.createElement('img'); image.src = item.image; image.alt = ''; thumb.appendChild(image);
+          } else thumb.textContent = (item.name || '?').slice(0, 2).toUpperCase();
+
+          const content = document.createElement('div');
+          content.className = 'cart-item-content';
+          const title = document.createElement('strong'); title.textContent = item.name;
+          const meta = document.createElement('span'); meta.textContent = `${itemLabel(item)} · ${item.owner}`;
+          const price = document.createElement('b'); price.textContent = item.priceLabel;
+          content.append(title, meta, price);
+
+          const controls = document.createElement('div');
+          controls.className = 'cart-item-controls';
+          const decrease = document.createElement('button'); decrease.type = 'button'; decrease.dataset.cartAction = 'decrease'; decrease.setAttribute('aria-label', 'Diminuir quantidade'); decrease.textContent = '−';
+          const quantity = document.createElement('span'); quantity.textContent = String(item.quantity);
+          const increase = document.createElement('button'); increase.type = 'button'; increase.dataset.cartAction = 'increase'; increase.setAttribute('aria-label', 'Aumentar quantidade'); increase.textContent = '+';
+          const move = document.createElement('button'); move.type = 'button'; move.dataset.cartAction = 'move'; move.className = 'cart-move-button'; move.textContent = item.mode === 'proposal' ? 'Comprar pelo preço' : 'Mover para proposta';
+          const remove = document.createElement('button'); remove.type = 'button'; remove.dataset.cartAction = 'remove'; remove.className = 'cart-remove-button'; remove.textContent = 'Remover';
+          controls.append(decrease, quantity, increase, move, remove);
+          article.append(thumb, content, controls);
+          return article;
+        };
+
         const renderCart = () => {
-          if (!cartItems) return;
-          cartItems.replaceChildren();
-          let total = 0;
-          let amount = 0;
-          cart.forEach((item) => {
-            amount += item.quantity;
-            if (Number.isFinite(item.price)) total += item.price * item.quantity;
-            const article = document.createElement('article');
-            article.className = 'cart-item';
-            article.dataset.cartId = item.id;
-            const thumb = document.createElement('div');
-            thumb.className = 'cart-item-thumb';
-            if (item.image) {
-              const image = document.createElement('img'); image.src = item.image; image.alt = ''; thumb.appendChild(image);
-            } else thumb.textContent = (item.name || '?').slice(0, 2).toUpperCase();
-            const content = document.createElement('div');
-            content.className = 'cart-item-content';
-            const title = document.createElement('strong'); title.textContent = item.name;
-            const meta = document.createElement('span'); meta.textContent = `${item.number || (item.kind === 'kit' ? 'Kit' : item.kind === 'card' ? 'Carta avulsa' : 'Booster avulso')} · ${item.owner}`;
-            const price = document.createElement('b'); price.textContent = item.priceLabel;
-            content.append(title, meta, price);
-            const controls = document.createElement('div'); controls.className = 'cart-item-controls';
-            const decrease = document.createElement('button'); decrease.type = 'button'; decrease.dataset.cartAction = 'decrease'; decrease.textContent = '−';
-            const quantity = document.createElement('span'); quantity.textContent = String(item.quantity);
-            const increase = document.createElement('button'); increase.type = 'button'; increase.dataset.cartAction = 'increase'; increase.textContent = '+';
-            const remove = document.createElement('button'); remove.type = 'button'; remove.dataset.cartAction = 'remove'; remove.className = 'cart-remove-button'; remove.textContent = 'Remover';
-            controls.append(decrease, quantity, increase, remove);
-            article.append(thumb, content, controls);
-            cartItems.appendChild(article);
+          ['cart', 'proposal'].forEach((mode) => {
+            const container = document.querySelector(`[data-cart-items="${mode}"]`);
+            const empty = document.querySelector(`[data-cart-empty="${mode}"]`);
+            const items = itemsByMode(mode);
+            container?.replaceChildren(...items.map(createCartItem));
+            if (empty) empty.hidden = items.length > 0;
+            const tabCount = document.querySelector(`[data-cart-tab-count="${mode}"]`);
+            if (tabCount) tabCount.textContent = String(modeAmount(mode));
           });
-          if (cartCount) cartCount.textContent = String(amount);
-          if (cartTotal) cartTotal.textContent = formatBRL(total);
-          if (cartEmpty) cartEmpty.hidden = cart.length > 0;
+
+          document.querySelectorAll('[data-cart-tab]').forEach((tab) => {
+            const active = tab.dataset.cartTab === activeCartTab;
+            tab.classList.toggle('active', active);
+            tab.setAttribute('aria-selected', String(active));
+          });
+          document.querySelectorAll('[data-cart-panel]').forEach((panel) => {
+            panel.hidden = panel.dataset.cartPanel !== activeCartTab;
+          });
+
+          const regularTotal = modeTotal('cart');
+          const proposalTotal = modeTotal('proposal');
+          const totalAmount = modeAmount('cart') + modeAmount('proposal');
+          if (cartCount) cartCount.textContent = String(totalAmount);
+          if (cartTotal) cartTotal.textContent = formatBRL(regularTotal);
+          if (proposalPublishedTotal) proposalPublishedTotal.textContent = formatBRL(proposalTotal);
+          if (proposalOffer) {
+            proposalOffer.disabled = modeAmount('proposal') === 0;
+            proposalOffer.max = proposalTotal > 0 ? String(proposalTotal) : '';
+            if (modeAmount('proposal') === 0) proposalOffer.value = '';
+          }
           document.querySelector('[data-cart-clear]')?.toggleAttribute('disabled', cart.length === 0);
+          checkoutButton?.toggleAttribute('disabled', cart.length === 0);
+          if (proposalOfferError) proposalOfferError.hidden = true;
           saveCart();
         };
-        const addToCart = (card, button) => {
-          if (card.dataset.forSale === 'false') return;
-          const product = productFromCard(card);
-          const current = cart.find((item) => item.id === product.id);
-          if (current) current.quantity = Math.min(current.stock, current.quantity + 1);
-          else cart.push(product);
-          renderCart();
+
+        const feedbackButton = (button, label = 'Adicionado') => {
           const original = button?.innerHTML;
-          if (button) {
-            button.innerHTML = '<span aria-hidden="true">✓</span> Adicionado';
-            button.classList.add('added');
-            window.setTimeout(() => { button.innerHTML = original; button.classList.remove('added'); }, 1100);
-          }
+          if (!button) return;
+          button.innerHTML = `<span aria-hidden="true">✓</span> ${label}`;
+          button.classList.add('added');
+          window.setTimeout(() => { button.innerHTML = original; button.classList.remove('added'); }, 1100);
         };
+
+        const addToSelection = (card, button, mode) => {
+          if (card.dataset.forSale === 'false') return;
+          const product = productFromCard(card, mode);
+          const current = cart.find((item) => item.id === product.id);
+          if (current) {
+            if (current.mode === mode) current.quantity = Math.min(current.stock, current.quantity + 1);
+            else current.mode = mode;
+          } else cart.push(product);
+          activeCartTab = mode;
+          renderCart();
+          feedbackButton(button, mode === 'proposal' ? 'Na proposta' : 'No carrinho');
+        };
+
         const openCart = () => {
           closeModal();
           if (!cartDrawer || !cartBackdrop) return;
@@ -531,11 +658,87 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           cartDrawer.setAttribute('aria-hidden', 'true'); document.body.classList.remove('cart-open');
           window.setTimeout(() => { cartBackdrop.hidden = true; }, reducedMotion ? 0 : 180);
         };
+
+        const proposalValue = () => Number(proposalOffer?.value || 0);
+        const lineForItem = (item) => {
+          const subtotal = Number.isFinite(item.price) ? formatBRL(item.price * item.quantity) : 'valor a consultar';
+          const unit = Number.isFinite(item.price) ? ` (${formatBRL(item.price)} cada)` : '';
+          return `- ${item.quantity}x ${item.name}${item.number ? ` — ${item.number}` : ''}${unit} — ${subtotal}\n  Coleção: ${item.ownerCollection || 'não informada'} | Publicado por: ${item.owner}`;
+        };
+        const buildCheckoutMessage = () => {
+          const regular = itemsByMode('cart');
+          const proposal = itemsByMode('proposal');
+          const offer = proposalValue();
+          const lines = ['Olá! Quero comprar os seguintes itens do Nexus TCG:', ''];
+          if (regular.length) {
+            lines.push('COMPRA PELO PREÇO PUBLICADO');
+            regular.forEach((item) => lines.push(lineForItem(item)));
+            lines.push(`Subtotal da compra regular: ${formatBRL(modeTotal('cart'))}`, '');
+          }
+          if (proposal.length) {
+            lines.push('PROPOSTA PARA COMPRA EM CONJUNTO');
+            proposal.forEach((item) => lines.push(lineForItem(item)));
+            lines.push(`Valor publicado do conjunto: ${formatBRL(modeTotal('proposal'))}`);
+            lines.push(`Minha proposta pelo conjunto: ${formatBRL(offer)}`, '');
+          }
+          const combined = modeTotal('cart') + (proposal.length ? offer : 0);
+          lines.push(`Total se a proposta for aceita: ${formatBRL(combined)}`);
+          lines.push('', 'Podemos confirmar a disponibilidade e combinar pagamento e entrega?');
+          return lines.join('\n');
+        };
+
+        const closeCheckout = () => {
+          if (!checkoutModal || checkoutModal.hidden) return;
+          checkoutModal.classList.remove('open');
+          document.body.classList.remove('checkout-open');
+          window.setTimeout(() => { checkoutModal.hidden = true; }, reducedMotion ? 0 : 180);
+        };
+        const openCheckout = () => {
+          if (!cart.length || !checkoutModal || !checkoutMessage || !checkoutWhatsapp) return;
+          if (itemsByMode('proposal').length && proposalValue() <= 0) {
+            activeCartTab = 'proposal';
+            renderCart();
+            if (proposalOfferError) proposalOfferError.hidden = false;
+            proposalOffer?.focus();
+            return;
+          }
+          const message = buildCheckoutMessage();
+          checkoutMessage.value = message;
+          checkoutWhatsapp.href = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`;
+          closeCart();
+          checkoutModal.hidden = false;
+          document.body.classList.add('checkout-open');
+          requestAnimationFrame(() => checkoutModal.classList.add('open'));
+          checkoutPanel?.focus?.();
+        };
+        const copyCheckoutMessage = async () => {
+          const message = checkoutMessage?.value || '';
+          if (!message) return;
+          try {
+            await navigator.clipboard.writeText(message);
+          } catch (_) {
+            checkoutMessage?.focus();
+            checkoutMessage?.select();
+            document.execCommand('copy');
+            checkoutMessage?.setSelectionRange(0, 0);
+          }
+          feedbackButton(checkoutCopy, 'Mensagem copiada');
+        };
+
         document.querySelectorAll('[data-cart-open]').forEach((button) => button.addEventListener('click', openCart));
         document.querySelectorAll('[data-cart-close]').forEach((button) => button.addEventListener('click', closeCart));
+        document.querySelectorAll('[data-checkout-close]').forEach((button) => button.addEventListener('click', closeCheckout));
+        document.querySelectorAll('[data-cart-tab]').forEach((button) => button.addEventListener('click', () => {
+          activeCartTab = button.dataset.cartTab === 'proposal' ? 'proposal' : 'cart';
+          renderCart();
+        }));
         cartBackdrop?.addEventListener('click', closeCart);
         document.querySelector('[data-cart-clear]')?.addEventListener('click', () => { cart = []; renderCart(); });
-        cartItems?.addEventListener('click', (event) => {
+        checkoutButton?.addEventListener('click', openCheckout);
+        checkoutCopy?.addEventListener('click', copyCheckoutMessage);
+        proposalOffer?.addEventListener('input', () => { if (proposalOfferError) proposalOfferError.hidden = true; });
+
+        cartDrawer?.addEventListener('click', (event) => {
           const button = event.target.closest('[data-cart-action]');
           const itemElement = event.target.closest('[data-cart-id]');
           if (!button || !itemElement) return;
@@ -543,9 +746,14 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           if (index < 0) return;
           if (button.dataset.cartAction === 'increase') cart[index].quantity = Math.min(cart[index].stock, cart[index].quantity + 1);
           if (button.dataset.cartAction === 'decrease') cart[index].quantity -= 1;
+          if (button.dataset.cartAction === 'move') {
+            cart[index].mode = cart[index].mode === 'proposal' ? 'cart' : 'proposal';
+            activeCartTab = cart[index].mode;
+          }
           if (button.dataset.cartAction === 'remove' || cart[index].quantity <= 0) cart.splice(index, 1);
           renderCart();
         });
+
         document.addEventListener('click', (event) => {
           const openButton = event.target.closest('[data-open-product]');
           if (openButton) {
@@ -553,15 +761,22 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             if (card) openModal(card, openButton);
             return;
           }
-          const addButton = event.target.closest('[data-add-cart]');
-          if (addButton) {
-            const card = addButton.closest('[data-product-card]');
-            if (card) addToCart(card, addButton);
+          const cartButton = event.target.closest('[data-add-cart]');
+          if (cartButton) {
+            const card = cartButton.closest('[data-product-card]');
+            if (card) addToSelection(card, cartButton, 'cart');
+            return;
+          }
+          const proposalButton = event.target.closest('[data-add-proposal]');
+          if (proposalButton) {
+            const card = proposalButton.closest('[data-product-card]');
+            if (card) addToSelection(card, proposalButton, 'proposal');
           }
         });
-        modalAdd?.addEventListener('click', () => { if (activeProductCard) addToCart(activeProductCard, modalAdd); });
+        modalAdd?.addEventListener('click', () => { if (activeProductCard) addToSelection(activeProductCard, modalAdd, 'cart'); });
+        modalProposal?.addEventListener('click', () => { if (activeProductCard) addToSelection(activeProductCard, modalProposal, 'proposal'); });
         document.addEventListener('keydown', (event) => {
-          if (event.key === 'Escape') { closeModal(); closeCart(); }
+          if (event.key === 'Escape') { closeModal(); closeCart(); closeCheckout(); }
           if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName || '')) {
             const search = document.querySelector('[data-filter-search]');
             if (search) { event.preventDefault(); search.focus(); }

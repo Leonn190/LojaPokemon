@@ -1,10 +1,10 @@
 # Estrutura das coleções e imagens
 
-Cada colecionador possui uma pasta própria em `src/coleções/`:
+Cada colecionador possui uma pasta própria em `src/colecoes/`:
 
 ```text
 src/
-└── coleções/
+└── colecoes/
     └── Leon19/
         ├── perfil.json
         ├── inventario-cartas.csv
@@ -65,7 +65,7 @@ A área de álbuns é inicial e não altera o catálogo público nesta versão.
 
 ## Formatador e updates
 
-O script principal agora é `formatador.py`. Ele lê coleções completas e pacotes de atualização colocados em `src/Coleções não formatadas/`.
+O script principal agora é `Gerenciamento/main.py`. Ele lê coleções completas e pacotes de atualização colocados em `src/colecoes-nao-formatadas/`.
 
 Durante uma execução, o script abre apenas um Chrome. Cada carta ou booster é consultado em uma nova aba; ao terminar, essa aba é fechada e uma aba-base permanece aberta. O perfil usado pelo Chrome é temporário e é apagado automaticamente ao encerrar, portanto nenhuma pasta `perfil_chrome_liga` é criada dentro do projeto.
 
@@ -79,4 +79,4 @@ inventario-boosters.csv    # Link Liga,Quantidade
 
 `atualizacao.json` informa o `collectionId` da coleção de destino. O formatador consulta as novas linhas, acrescenta ou soma suas quantidades na coleção correspondente e registra o identificador do update para impedir que o mesmo pacote seja aplicado duas vezes.
 
-As coleções formatadas seguem os mesmos cabeçalhos da pasta `src/coleções/Leon19/`. Antes de baixar uma imagem, o formatador procura um arquivo equivalente em `public/imagens/`; quando ele já existe, nenhum arquivo novo é criado.
+As coleções formatadas seguem os mesmos cabeçalhos da pasta `src/colecoes/Leon19/`. Antes de baixar uma imagem, o formatador procura um arquivo equivalente em `public/imagens/`; quando ele já existe, nenhum arquivo novo é criado.

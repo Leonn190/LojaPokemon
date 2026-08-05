@@ -123,19 +123,8 @@ type ProfileData = {
   password?: string;
 };
 
-const decodeEscapedUnicode = (value: string): string => value.replace(/#U([0-9a-fA-F]{4})/g, (match, hex: string) => {
-  try { return String.fromCodePoint(Number.parseInt(hex, 16)); } catch { return match; }
-});
-
 const sourceRoot = join(process.cwd(), 'src');
-const encodedCollectionsFolder = existsSync(sourceRoot)
-  ? readdirSync(sourceRoot, { withFileTypes: true }).find((entry) => entry.isDirectory() && decodeEscapedUnicode(entry.name).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === 'colecoes')?.name
-  : undefined;
-const collectionsRoot = [
-  join(sourceRoot, 'coleções'),
-  join(sourceRoot, 'colecoes'),
-  encodedCollectionsFolder ? join(sourceRoot, encodedCollectionsFolder) : '',
-].find((path) => path && existsSync(path)) ?? join(sourceRoot, 'coleções');
+const collectionsRoot = join(sourceRoot, 'colecoes');
 
 const parseCsv = (source: string): CsvRow[] => {
   const text = source.replace(/^\uFEFF/, '');
