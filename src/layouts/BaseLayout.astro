@@ -287,7 +287,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           const candidates = parseImageList(image.dataset.imageCandidates);
           const gallery = parseImageList(image.dataset.imageGallery);
           let nextIndex = 0;
-          const stage = image.closest('.image-stage');
+          const stage = image.closest('[data-image-stage], .image-stage');
           const showImage = () => { image.hidden = false; stage?.classList.remove('no-image'); };
           const tryNext = () => {
             if (nextIndex < candidates.length) {
@@ -463,8 +463,10 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             delete clonedVisual.dataset.tiltReady;
             initTilt(clonedVisual);
           }
-          const clonedImage = modalMedia.querySelector('img[data-image-candidates]');
-          if (clonedImage) { delete clonedImage.dataset.fallbackReady; initImage(clonedImage); }
+          modalMedia.querySelectorAll('img[data-image-candidates]').forEach((clonedImage) => {
+            delete clonedImage.dataset.fallbackReady;
+            initImage(clonedImage);
+          });
 
           modal.classList.toggle('booster-modal', isBooster);
           modal.classList.toggle('kit-modal', kind === 'kit');

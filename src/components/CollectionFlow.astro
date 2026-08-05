@@ -1,0 +1,62 @@
+---
+import ProductImage from './ProductImage.astro';
+import type { CardItem, CollectorCollection } from '../lib/catalog';
+
+interface Props {
+  collection: CollectorCollection;
+  compact?: boolean;
+  eager?: boolean;
+}
+
+const { collection, compact = false, eager = false } = Astro.props;
+const sourceCards = [...collection.cards]
+  .sort((left, right) => (right.price ?? 0) - (left.price ?? 0) || left.name.localeCompare(right.name, 'pt-BR'))
+  .slice(0, compact ? 12 : 18);
+
+const minimumCards = compact ? 9 : 15;
+const flowCards: CardItem[] = [];
+if (sourceCards.length > 0) {
+  for (let index = 0; index < Math.max(minimumCards, sourceCards.length); index += 1) {
+    flowCards.push(sourceCards[index % sourceCards.length]);
+  }
+}
+
+const lanes = Array.from({ length: 3 }, (_, laneIndex) =>
+  flowCards.filter((_, cardIndex) => cardIndex % 3 === laneIndex),
+);
+---
+
+<div class:list={['collection-flow', compact ? 'collection-flow-compact' : 'collection-flow-hero']} aria-label={`Prévia animada das cartas de ${collection.owner}`}>
+  {flowCards.length > 0 ? (
+    <div class="collection-flow-perspective">
+      <div class="collection-flow-lanes" aria-hidden="true">
+        {lanes.map((lane, laneIndex) => (
+          <div class={`collection-flow-lane collection-flow-lane-${laneIndex + 1}`}>
+            <div class="collection-flow-track">
+              {[0, 1].map((copyIndex) => (
+                <div class="collection-flow-set">
+                  {lane.map((card, cardIndex) => (
+                    <div class="collection-flow-card">
+                      <ProductImage
+                        item={card}
+                        interactive={false}
+                        eager={eager && copyIndex === 0 && laneIndex === 1 && cardIndex === 0}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <span class="collection-flow-glow" aria-hidden="true"></span>
+      <span class="collection-flow-sheen" aria-hidden="true"></span>
+    </div>
+  ) : (
+    <div class="collection-flow-empty">
+      <span>{collection.owner.slice(0, 2).toUpperCase()}</span>
+      <small>Coleção em construção</small>
+    </div>
+  )}
+</div>

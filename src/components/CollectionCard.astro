@@ -1,5 +1,5 @@
 ---
-import ProductImage from './ProductImage.astro';
+import CollectionFlow from './CollectionFlow.astro';
 import type { CollectorCollection } from '../lib/catalog';
 
 interface Props { collection: CollectorCollection; compact?: boolean; }
@@ -7,20 +7,11 @@ const { collection, compact = false } = Astro.props;
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 const initials = collection.owner.slice(0, 2).toUpperCase();
-const preview = collection.coverItems.slice(0, compact ? 3 : 4);
 ---
 
 <a class:list={['collection-card', compact && 'compact-collection-card']} href={`${base}colecoes/${collection.slug}/`}>
   <div class="collection-card-preview">
-    {preview.length > 0 ? (
-      preview.map((item, index) => (
-        <div class={`collection-preview-item preview-${index + 1}`}>
-          <ProductImage item={item} />
-        </div>
-      ))
-    ) : (
-      <div class="collection-preview-empty"><span>{initials}</span><small>Coleção em construção</small></div>
-    )}
+    <CollectionFlow collection={collection} compact />
     <span class="collection-status">{collection.selling ? 'Itens à venda' : 'Somente exposição'}</span>
   </div>
   <div class="collection-card-body">

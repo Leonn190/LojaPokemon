@@ -648,7 +648,7 @@ export const getCollections = (): CollectorCollection[] => {
 
     const allItems: CatalogItem[] = [...cards, ...boosters, ...kits];
     const totalUnits = allItems.reduce((total, item) => total + item.quantity, 0);
-    const estimatedValue = allItems.reduce((total, item) => total + (item.price ?? 0) * item.quantity, 0);
+    const estimatedValue = [...cards, ...boosters].reduce((total, item) => total + (item.price ?? 0) * item.quantity, 0);
     const coverItems = [...allItems]
       .sort((a, b) => (b.price ?? 0) - (a.price ?? 0))
       .slice(0, 4);

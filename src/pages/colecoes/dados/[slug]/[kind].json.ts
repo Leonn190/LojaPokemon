@@ -29,6 +29,8 @@ const serialize = (item: CatalogItem) => ({
   } : {
     description: item.description,
     contents: item.contents,
+    contentItems: item.contentItems,
+    sourceTotal: item.sourceTotal,
     type: 'Kit personalizado',
   }),
 });
