@@ -10,5 +10,7 @@
   "featured": false,
   "version": 1,
   "collectionId": "colecao-de-nath",
-  "generatedAt": "2026-08-03T23:28:42.915Z"
+  "generatedAt": "2026-08-03T23:28:42.915Z",
+  "pricingMode": "media",
+  "updatedAt": "2026-08-04T21:52:11"
 }
