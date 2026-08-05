@@ -2,6 +2,18 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 export type CatalogKind = 'card' | 'booster' | 'kit';
+export type ProposalPolicy = 'flexible' | 'none' | 'fixed_price_multi_only' | 'no_defined_price' | 'multi_only';
+
+export interface ProposalDiscountTier {
+  minValue: number;
+  maxDiscount: number;
+}
+
+export interface ProposalTerms {
+  policy: ProposalPolicy;
+  flexibleDiscounts: boolean;
+  discountTiers: ProposalDiscountTier[];
+}
 
 interface OwnedItemBase {
   kind: CatalogKind;
@@ -14,6 +26,8 @@ interface OwnedItemBase {
   ownerName: string;
   ownerCollectionName: string;
   ownerCollectionSlug: string;
+  ownerPhone: string;
+  proposalTerms: ProposalTerms;
   forSale: boolean;
   showQuantity: boolean;
 }
@@ -99,6 +113,8 @@ export interface CollectorCollection {
   description: string;
   selling: boolean;
   featured: boolean;
+  phone: string;
+  proposalTerms: ProposalTerms;
   cards: CardItem[];
   boosters: BoosterItem[];
   kits: KitItem[];
@@ -121,6 +137,11 @@ type ProfileData = {
   email?: string;
   phone?: string;
   password?: string;
+  proposalTerms?: {
+    policy?: ProposalPolicy;
+    flexibleDiscounts?: boolean;
+    discountTiers?: Array<{ minValue?: string | number; maxDiscount?: string | number }>;
+  };
 };
 
 const sourceRoot = join(process.cwd(), 'src');
@@ -220,6 +241,23 @@ const parseBoolean = (value: string | boolean | null | undefined, fallback: bool
   if (['false', 'nao', 'não', '0', 'no'].includes(normalized)) return false;
   if (['true', 'sim', 's', '1', 'yes'].includes(normalized)) return true;
   return fallback;
+};
+
+const proposalPolicies: ProposalPolicy[] = ['flexible', 'none', 'fixed_price_multi_only', 'no_defined_price', 'multi_only'];
+
+const normalizeProposalTerms = (profile: ProfileData): ProposalTerms => {
+  const raw = profile.proposalTerms ?? {};
+  const policy = proposalPolicies.includes(raw.policy as ProposalPolicy) ? raw.policy as ProposalPolicy : 'flexible';
+  const discountTiers = (Array.isArray(raw.discountTiers) ? raw.discountTiers : [])
+    .map((tier) => ({ minValue: parseDecimal(tier.minValue) ?? 0, maxDiscount: parseDecimal(tier.maxDiscount) ?? 0 }))
+    .filter((tier) => tier.minValue >= 0 && tier.maxDiscount >= 0)
+    .map((tier) => ({ ...tier, maxDiscount: Math.min(100, tier.maxDiscount) }))
+    .sort((left, right) => left.minValue - right.minValue);
+  return {
+    policy,
+    flexibleDiscounts: raw.flexibleDiscounts !== false,
+    discountTiers,
+  };
 };
 
 export const normalizeText = (value: string): string =>
@@ -461,6 +499,8 @@ export const getCollections = (): CollectorCollection[] => {
     const title = profile.title?.trim() || `Coleção de ${owner}`;
     const description = profile.description?.trim() || 'Coleção Pokémon organizada no Nexus TCG.';
     const showQuantity = profile.showQuantity !== false;
+    const proposalTerms = normalizeProposalTerms(profile);
+    const ownerPhone = profile.phone?.trim() || '';
     const usedImages = new Map<string, number>();
 
     const cards: CardItem[] = readRows(folder, 'inventario-cartas.csv').map((row) => {
@@ -477,7 +517,7 @@ export const getCollections = (): CollectorCollection[] => {
       const leaguePrice = parseDecimal(row['Menor Liga']) ?? parseDecimal(row['Preço Liga mais barato']);
       const finalPrice = parseDecimal(row['Preço']);
       const price = finalPrice ?? leaguePrice;
-      const forSale = parseBoolean(row['À venda'] ?? row['Venda'], profile.selling !== false);
+      const forSale = profile.selling !== false && parseBoolean(row['À venda'] ?? row['Venda'], true);
       const imageKey = normalizeText(`${name} ${number}`);
       const duplicateIndex = usedImages.get(imageKey) ?? 0;
       usedImages.set(imageKey, duplicateIndex + 1);
@@ -510,6 +550,8 @@ export const getCollections = (): CollectorCollection[] => {
         ownerName: owner,
         ownerCollectionName: title,
         ownerCollectionSlug: collectionSlug,
+        ownerPhone,
+        proposalTerms,
         searchText: normalizeText(`${name} ${number} ${pokemonCollection} ${language} ${condition} ${year} ${type} ${owner} ${title}`),
       };
     });
@@ -524,7 +566,7 @@ export const getCollections = (): CollectorCollection[] => {
         const leaguePrice = parseDecimal(row['Preço Liga mais barato']) ?? parseDecimal(row['Preço Mais Baixo Liga']) ?? parseDecimal(row['Menor Liga']);
         const finalPrice = parseDecimal(row['Preço']);
         const price = finalPrice ?? leaguePrice;
-        const forSale = parseBoolean(row['À venda'] ?? row['Venda'], profile.selling !== false);
+        const forSale = profile.selling !== false && parseBoolean(row['À venda'] ?? row['Venda'], true);
         const localSlug = createUniqueSlug(slugify(name), globalSlugs, `${owner}-${quantity}`);
         return {
           kind: 'booster',
@@ -543,6 +585,8 @@ export const getCollections = (): CollectorCollection[] => {
           ownerName: owner,
           ownerCollectionName: title,
           ownerCollectionSlug: collectionSlug,
+          ownerPhone,
+          proposalTerms,
           searchText: normalizeText(`${name} booster pacote ${owner} ${title}`),
         };
       });
@@ -559,7 +603,7 @@ export const getCollections = (): CollectorCollection[] => {
         const parsed = JSON.parse(row['Conteúdo JSON'] || '[]');
         if (Array.isArray(parsed)) contentItems = parsed;
       } catch (_) {}
-      const forSale = parseBoolean(row['À venda'] ?? row['Venda'], profile.selling !== false);
+      const forSale = profile.selling !== false && parseBoolean(row['À venda'] ?? row['Venda'], true);
       const localSlug = createUniqueSlug(slugify(name), globalSlugs, owner);
       return {
         kind: 'kit',
@@ -577,6 +621,8 @@ export const getCollections = (): CollectorCollection[] => {
         ownerName: owner,
         ownerCollectionName: title,
         ownerCollectionSlug: collectionSlug,
+        ownerPhone,
+        proposalTerms,
         searchText: normalizeText(`${name} ${description} ${contents} ${owner} ${title}`),
       };
     });
@@ -614,6 +660,8 @@ export const getCollections = (): CollectorCollection[] => {
       description,
       selling: profile.selling !== false,
       featured: profile.featured === true,
+      phone: ownerPhone,
+      proposalTerms,
       cards,
       boosters,
       kits,
@@ -647,6 +695,7 @@ export const getEditableCollections = () => getCollections().map((collection) =>
       selling: collection.selling,
       showQuantity: profile.showQuantity !== false,
       featured: collection.featured,
+      proposalTerms: collection.proposalTerms,
       version: Number((profile as Record<string, unknown>).version || 1),
       collectionId: folderName,
     },

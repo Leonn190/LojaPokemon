@@ -5,9 +5,14 @@
   "selling": true,
   "featured": true,
   "email": "euleonsoto@gmail.com",
-  "phone": "----",
+  "phone": "13 99158-5788",
   "password": "SenhaLeon",
   "showQuantity": true,
   "version": 1,
-  "collectionId": "Leon19"
+  "collectionId": "Leon19",
+  "proposalTerms": {
+    "policy": "flexible",
+    "flexibleDiscounts": true,
+    "discountTiers": []
+  }
 }

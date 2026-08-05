@@ -12,5 +12,23 @@
   "collectionId": "colecao-de-nath",
   "generatedAt": "2026-08-03T23:28:42.915Z",
   "pricingMode": "media",
-  "updatedAt": "2026-08-04T21:52:11"
+  "updatedAt": "2026-08-04T21:52:11",
+  "proposalTerms": {
+    "policy": "multi_only",
+    "flexibleDiscounts": false,
+    "discountTiers": [
+      {
+        "minValue": 100,
+        "maxDiscount": 3
+      },
+      {
+        "minValue": 250,
+        "maxDiscount": 5
+      },
+      {
+        "minValue": 500,
+        "maxDiscount": 7
+      }
+    ]
+  }
 }

@@ -18,6 +18,8 @@ const number = item.kind === 'card' ? item.number : '';
 const pokemonCollection = item.kind === 'card' ? item.collection : item.name;
 const description = item.kind === 'kit' ? item.description : '';
 const contents = item.kind === 'kit' ? item.contents : '';
+const blocksDefinedPrice = item.proposalTerms.policy === 'no_defined_price' || item.proposalTerms.policy === 'fixed_price_multi_only';
+const canPropose = item.forSale && item.proposalTerms.policy !== 'none' && !(item.kind === 'card' && price !== null && blocksDefinedPrice);
 ---
 
 <article
@@ -37,6 +39,11 @@ const contents = item.kind === 'kit' ? item.contents : '';
   data-owner={item.ownerName}
   data-owner-collection={item.ownerCollectionName}
   data-owner-slug={item.ownerCollectionSlug}
+  data-owner-phone={item.ownerPhone}
+  data-proposal-policy={item.proposalTerms.policy}
+  data-proposal-flexible={item.proposalTerms.flexibleDiscounts ? 'true' : 'false'}
+  data-proposal-tiers={JSON.stringify(item.proposalTerms.discountTiers)}
+  data-proposal-allowed={canPropose ? 'true' : 'false'}
   data-price-value={price === null ? '' : String(price)}
   data-price-label={formatBRL(price)}
   data-stock={String(item.quantity)}
@@ -92,17 +99,15 @@ const contents = item.kind === 'kit' ? item.contents : '';
     </a>
   )}
 
-  {item.forSale ? (
-    <div class="product-purchase-actions">
-      <button class="add-cart-button" type="button" data-add-cart>
-        <span aria-hidden="true">＋</span>
-        Carrinho
-      </button>
+  {canPropose ? (
+    <div class="product-purchase-actions single-action">
       <button class="add-proposal-button" type="button" data-add-proposal>
         <span aria-hidden="true">◇</span>
-        Proposta
+        Adicionar à proposta
       </button>
     </div>
+  ) : item.forSale ? (
+    <span class="not-for-sale-label">Os termos desta coleção não permitem proposta para este item</span>
   ) : (
     <span class="not-for-sale-label">Não está à venda</span>
   )}

@@ -55,10 +55,10 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
 
           <a class:list={['collector-nav-cta', { active: active === 'signup' }]} href={`${base}cadastro/`}>Criar coleção</a>
 
-          <button class="cart-trigger" type="button" data-cart-open aria-label="Abrir carrinho">
-            <span class="cart-trigger-icon" aria-hidden="true">▱</span>
-            <span class="cart-trigger-label">Carrinho</span>
-            <strong data-cart-count>0</strong>
+          <button class="proposal-trigger" type="button" data-proposal-open aria-label="Abrir propostas">
+            <span class="proposal-trigger-icon" aria-hidden="true">◇</span>
+            <span class="proposal-trigger-label">Propostas</span>
+            <strong data-proposal-count>0</strong>
           </button>
 
           <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
@@ -133,9 +133,6 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             </dl>
 
             <div class="modal-purchase-actions" data-modal-purchase-actions>
-              <button class="modal-add-cart-button" type="button" data-modal-add-cart>
-                <span aria-hidden="true">＋</span> Adicionar ao carrinho
-              </button>
               <button class="modal-add-proposal-button" type="button" data-modal-add-proposal>
                 <span aria-hidden="true">◇</span> Adicionar à proposta
               </button>
@@ -145,82 +142,88 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
       </section>
     </div>
 
-    <button class="cart-backdrop" type="button" data-cart-backdrop hidden aria-label="Fechar carrinho"></button>
-    <aside class="cart-drawer" data-cart-drawer aria-hidden="true" aria-label="Carrinho e propostas">
-      <header class="cart-drawer-header">
-        <div><span class="section-eyebrow">Sua seleção</span><h2>Carrinho</h2></div>
-        <button class="modal-close-button" type="button" data-cart-close aria-label="Fechar carrinho">×</button>
+    <button class="proposal-backdrop" type="button" data-proposal-backdrop hidden aria-label="Fechar propostas"></button>
+    <aside class="proposal-drawer" data-proposal-drawer aria-hidden="true" aria-label="Propostas por colecionador">
+      <header class="proposal-drawer-header">
+        <div><span class="section-eyebrow">Negociação separada</span><h2>Suas propostas</h2><p>Cada colecionador recebe uma proposta própria.</p></div>
+        <button class="modal-close-button" type="button" data-proposal-close aria-label="Fechar propostas">×</button>
       </header>
 
-      <div class="cart-tabs" role="tablist" aria-label="Tipo de compra">
-        <button class="active" type="button" role="tab" aria-selected="true" data-cart-tab="cart">
-          Carrinho <strong data-cart-tab-count="cart">0</strong>
-        </button>
-        <button type="button" role="tab" aria-selected="false" data-cart-tab="proposal">
-          Proposta <strong data-cart-tab-count="proposal">0</strong>
-        </button>
-      </div>
+      <div class="proposal-drawer-content">
+        <nav class="proposal-collection-list" data-proposal-collection-list aria-label="Colecionadores selecionados"></nav>
 
-      <section class="cart-panel" data-cart-panel="cart">
-        <div class="cart-panel-intro">
-          <strong>Compra pelo preço publicado</strong>
-          <span>Estes itens entram pelo valor normal anunciado.</span>
-        </div>
-        <div class="cart-items" data-cart-items="cart"></div>
-        <div class="cart-empty" data-cart-empty="cart">
-          <span aria-hidden="true">▱</span>
-          <h3>Nenhum item no carrinho</h3>
-          <p>Adicione produtos para comprá-los pelo preço regular.</p>
-        </div>
-      </section>
-
-      <section class="cart-panel" data-cart-panel="proposal" hidden>
-        <div class="cart-panel-intro proposal-intro">
-          <strong>Proposta para compra em conjunto</strong>
-          <span>Junte vários itens e informe quanto deseja pagar pelo conjunto.</span>
-        </div>
-        <div class="cart-items" data-cart-items="proposal"></div>
-        <div class="cart-empty" data-cart-empty="proposal">
+        <div class="proposal-empty" data-proposal-empty>
           <span aria-hidden="true">◇</span>
-          <h3>Nenhum item na proposta</h3>
-          <p>Escolha produtos que deseja negociar em conjunto.</p>
+          <h3>Nenhum item selecionado</h3>
+          <p>Adicione cartas, boosters ou kits. Itens de colecionadores diferentes serão separados automaticamente.</p>
         </div>
-      </section>
 
-      <footer class="cart-drawer-footer">
-        <div class="cart-summary-row"><span>Total do carrinho</span><strong data-cart-total>R$ 0,00</strong></div>
-        <div class="cart-summary-row proposal-published-row"><span>Valor publicado da proposta</span><strong data-proposal-published-total>R$ 0,00</strong></div>
-        <label class="proposal-value-field">
-          <span>Quanto você oferece pelo conjunto?</span>
-          <div><b>R$</b><input type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00" data-proposal-offer /></div>
-        </label>
-        <p class="proposal-offer-error" data-proposal-offer-error hidden>Informe um valor para a proposta.</p>
-        <button class="checkout-button" type="button" data-cart-checkout disabled>Revisar e comprar</button>
-        <div class="cart-footer-secondary">
-          <button class="clear-cart-button" type="button" data-cart-clear disabled>Limpar tudo</button>
-          <span>Você poderá copiar a mensagem e abrir o WhatsApp Web.</span>
-        </div>
-      </footer>
+        <section class="proposal-editor" data-proposal-editor hidden>
+          <header class="proposal-editor-header">
+            <span class="origin-avatar" data-proposal-owner-avatar></span>
+            <div><small>Proposta para</small><strong data-proposal-owner></strong><span data-proposal-collection></span></div>
+          </header>
+
+          <div class="proposal-terms-card">
+            <div><span>Termos desta coleção</span><strong data-proposal-policy-label></strong></div>
+            <p data-proposal-terms-summary></p>
+          </div>
+
+          <div class="proposal-items" data-proposal-items></div>
+
+          <div class="proposal-values">
+            <div><span>Valor publicado</span><strong data-proposal-published-total>R$ 0,00</strong></div>
+            <div class="proposal-final-value"><span>Valor da proposta</span><strong data-proposal-final-total>R$ 0,00</strong></div>
+          </div>
+
+          <div class="proposal-form">
+            <label class="proposal-discount-field">
+              <span>Desconto geral solicitado</span>
+              <div><input type="number" min="0" step="0.1" value="0" data-proposal-discount /><b>%</b></div>
+              <small data-proposal-discount-limit>Confira os limites definidos pelo colecionador.</small>
+            </label>
+            <label>
+              <span>Motivo da proposta</span>
+              <textarea rows="3" maxlength="600" placeholder="Explique de forma breve por que está pedindo esse desconto." data-proposal-reason></textarea>
+            </label>
+            <label>
+              <span>Seu nome completo</span>
+              <input type="text" maxlength="120" placeholder="Nome de quem fará o pagamento" data-proposal-buyer-name />
+            </label>
+            <label>
+              <span>Endereço completo para entrega</span>
+              <textarea rows="4" maxlength="700" placeholder="Rua, número, complemento, bairro, cidade, estado e CEP" data-proposal-address></textarea>
+            </label>
+            <div class="proposal-pix-note"><span>PIX</span><p>O pagamento informado na proposta será feito por Pix após a aceitação e confirmação da disponibilidade.</p></div>
+            <p class="proposal-validation-error" data-proposal-error hidden></p>
+          </div>
+
+          <footer class="proposal-editor-actions">
+            <button class="clear-proposal-button" type="button" data-proposal-clear>Excluir esta proposta</button>
+            <button class="review-proposal-button" type="button" data-proposal-review>Revisar proposta formal</button>
+          </footer>
+        </section>
+      </div>
     </aside>
 
     <div class="checkout-modal" data-checkout-modal hidden>
-      <button class="checkout-backdrop" type="button" data-checkout-close aria-label="Fechar finalização"></button>
+      <button class="checkout-backdrop" type="button" data-checkout-close aria-label="Fechar proposta"></button>
       <section class="checkout-panel" role="dialog" aria-modal="true" aria-labelledby="checkout-title" tabindex="-1">
         <header class="checkout-header">
-          <div><span class="section-eyebrow">Finalizar contato</span><h2 id="checkout-title">Sua mensagem de compra</h2></div>
-          <button class="modal-close-button" type="button" data-checkout-close aria-label="Fechar finalização">×</button>
+          <div><span class="section-eyebrow">Proposta formal</span><h2 id="checkout-title">Mensagem pronta para enviar</h2></div>
+          <button class="modal-close-button" type="button" data-checkout-close aria-label="Fechar proposta">×</button>
         </header>
         <div class="checkout-content">
           <div class="checkout-instructions">
             <span aria-hidden="true">1</span>
-            <p>Confira o texto, copie a mensagem e envie no WhatsApp para <strong>+55 13 99158-5788</strong>.</p>
+            <p>Confira o texto, copie a mensagem e envie no WhatsApp de <strong data-checkout-owner></strong> pelo número <strong data-checkout-phone></strong>.</p>
           </div>
-          <textarea readonly data-checkout-message aria-label="Mensagem de compra pronta"></textarea>
+          <textarea readonly data-checkout-message aria-label="Mensagem da proposta pronta"></textarea>
           <div class="checkout-actions">
             <button class="copy-checkout-button" type="button" data-checkout-copy><span>▣</span> Copiar mensagem</button>
             <a class="whatsapp-checkout-button" href="#" target="_blank" rel="noopener noreferrer" data-checkout-whatsapp><span>↗</span> Abrir WhatsApp Web</a>
           </div>
-          <p class="checkout-note">No WhatsApp, basta colar ou conferir a mensagem preenchida e enviar.</p>
+          <p class="checkout-note">A proposta continua salva neste navegador até você removê-la.</p>
         </div>
       </section>
     </div>
@@ -421,7 +424,6 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         const modalDescription = modal?.querySelector('[data-modal-description]');
         const modalPrice = modal?.querySelector('[data-modal-price]');
         const modalPricePanel = modal?.querySelector('[data-modal-price-panel]');
-        const modalAdd = modal?.querySelector('[data-modal-add-cart]');
         const modalProposal = modal?.querySelector('[data-modal-add-proposal]');
         const modalPurchaseActions = modal?.querySelector('[data-modal-purchase-actions]');
         const modalOwner = modal?.querySelector('[data-modal-owner]');
@@ -479,7 +481,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             : isBooster ? 'Booster lacrado publicado por um colecionador da comunidade.' : 'Conjunto personalizado pelo dono da coleção.');
           if (modalPrice) modalPrice.textContent = card.dataset.priceLabel || 'Consultar';
           modalPricePanel?.classList.toggle('booster-price-panel', isBooster);
-          if (modalPurchaseActions) modalPurchaseActions.hidden = card.dataset.forSale === 'false';
+          if (modalPurchaseActions) modalPurchaseActions.hidden = card.dataset.proposalAllowed === 'false';
 
           if (modalCondition) {
             modalCondition.hidden = !isCard;
@@ -508,119 +510,79 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         };
         modal?.querySelectorAll('[data-modal-close]').forEach((button) => button.addEventListener('click', closeModal));
 
-        const storageKey = 'nexus-tcg-cart-v2';
-        const legacyStorageKey = 'nexus-tcg-cart-v1';
-        let cart = [];
-        let activeCartTab = 'cart';
+        const storageKey = 'nexus-tcg-proposals-v1';
+        let proposals = [];
+        let activeOwnerSlug = '';
         try {
-          const saved = JSON.parse(localStorage.getItem(storageKey) || localStorage.getItem(legacyStorageKey) || '[]');
-          if (Array.isArray(saved)) {
-            cart = saved
-              .filter((item) => item && item.id)
-              .map((item) => ({ ...item, mode: item.mode === 'proposal' ? 'proposal' : 'cart' }));
-          }
-          localStorage.removeItem(legacyStorageKey);
+          const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+          if (Array.isArray(saved)) proposals = saved.filter((group) => group?.ownerSlug && Array.isArray(group.items));
         } catch (_) {}
 
-        const cartDrawer = document.querySelector('[data-cart-drawer]');
-        const cartBackdrop = document.querySelector('[data-cart-backdrop]');
-        const cartTotal = document.querySelector('[data-cart-total]');
-        const proposalPublishedTotal = document.querySelector('[data-proposal-published-total]');
-        const proposalOffer = document.querySelector('[data-proposal-offer]');
-        const proposalOfferError = document.querySelector('[data-proposal-offer-error]');
-        const cartCount = document.querySelector('[data-cart-count]');
-        const checkoutButton = document.querySelector('[data-cart-checkout]');
+        const proposalDrawer = document.querySelector('[data-proposal-drawer]');
+        const proposalBackdrop = document.querySelector('[data-proposal-backdrop]');
+        const proposalCount = document.querySelector('[data-proposal-count]');
+        const proposalList = document.querySelector('[data-proposal-collection-list]');
+        const proposalEmpty = document.querySelector('[data-proposal-empty]');
+        const proposalEditor = document.querySelector('[data-proposal-editor]');
+        const proposalItems = document.querySelector('[data-proposal-items]');
+        const proposalDiscount = document.querySelector('[data-proposal-discount]');
+        const proposalReason = document.querySelector('[data-proposal-reason]');
+        const proposalBuyerName = document.querySelector('[data-proposal-buyer-name]');
+        const proposalAddress = document.querySelector('[data-proposal-address]');
+        const proposalError = document.querySelector('[data-proposal-error]');
         const checkoutModal = document.querySelector('[data-checkout-modal]');
         const checkoutPanel = checkoutModal?.querySelector('.checkout-panel');
         const checkoutMessage = checkoutModal?.querySelector('[data-checkout-message]');
         const checkoutWhatsapp = checkoutModal?.querySelector('[data-checkout-whatsapp]');
         const checkoutCopy = checkoutModal?.querySelector('[data-checkout-copy]');
-        const whatsappNumber = '5513991585788';
+        const checkoutOwner = checkoutModal?.querySelector('[data-checkout-owner]');
+        const checkoutPhone = checkoutModal?.querySelector('[data-checkout-phone]');
 
-        const productFromCard = (card, mode) => {
+        const policyLabels = {
+          flexible: 'Sou flexível quanto às regras',
+          none: 'Não aceito propostas',
+          fixed_price_multi_only: 'Sem proposta para cartas precificadas e somente com mais de um produto',
+          no_defined_price: 'Sem proposta para cartas com preço definido',
+          multi_only: 'Propostas somente com mais de um produto',
+        };
+        const parseJson = (value, fallback) => { try { return JSON.parse(value || '') ?? fallback; } catch (_) { return fallback; } };
+        const normalizePhone = (value) => {
+          const digits = String(value || '').replace(/\D/g, '');
+          if (!digits) return '';
+          return digits.startsWith('55') ? digits : `55${digits}`;
+        };
+        const saveProposals = () => localStorage.setItem(storageKey, JSON.stringify(proposals));
+        const activeGroup = () => proposals.find((group) => group.ownerSlug === activeOwnerSlug) || proposals[0] || null;
+        const groupQuantity = (group) => group.items.reduce((sum, item) => sum + item.quantity, 0);
+        const groupTotal = (group) => group.items.reduce((sum, item) => Number.isFinite(item.price) ? sum + item.price * item.quantity : sum, 0);
+        const itemLabel = (item) => item.number || (item.kind === 'kit' ? 'Kit' : item.kind === 'card' ? 'Carta avulsa' : 'Booster avulso');
+        const requiresMultiple = (policy) => policy === 'multi_only' || policy === 'fixed_price_multi_only';
+        const maxDiscountFor = (group) => {
+          if (!group) return 0;
+          if (group.terms.policy === 'fixed_price_multi_only' && group.items.some((item) => item.kind === 'card' && Number.isFinite(item.price))) return 0;
+          if (group.terms.flexibleDiscounts) return 100;
+          const total = groupTotal(group);
+          return [...(group.terms.discountTiers || [])]
+            .sort((left, right) => Number(left.minValue) - Number(right.minValue))
+            .reduce((limit, tier) => total >= Number(tier.minValue) ? Number(tier.maxDiscount) : limit, 0);
+        };
+        const finalTotalFor = (group) => groupTotal(group) * (1 - Math.max(0, Number(group.discount || 0)) / 100);
+
+        const productFromCard = (card) => {
           const image = card.querySelector('.image-stage img');
           return {
             id: card.dataset.productId || '', kind: card.dataset.kind || 'card', name: card.dataset.name || 'Produto',
             number: card.dataset.number || '', owner: card.dataset.owner || 'Colecionador',
-            ownerCollection: card.dataset.ownerCollection || '', ownerSlug: card.dataset.ownerSlug || '',
-            price: card.dataset.priceValue === '' ? null : Number(card.dataset.priceValue),
-            priceLabel: card.dataset.priceLabel || 'Consultar',
-            image: image && !image.hidden ? (image.currentSrc || image.src || '') : '',
-            quantity: 1, stock: Math.max(1, Number(card.dataset.stock || 1)), mode,
+            ownerCollection: card.dataset.ownerCollection || '', ownerSlug: card.dataset.ownerSlug || '', ownerPhone: card.dataset.ownerPhone || '',
+            price: card.dataset.priceValue === '' ? null : Number(card.dataset.priceValue), priceLabel: card.dataset.priceLabel || 'Consultar',
+            image: image && !image.hidden ? (image.currentSrc || image.src || '') : '', quantity: 1,
+            stock: Math.max(1, Number(card.dataset.stock || 1)),
+            terms: {
+              policy: card.dataset.proposalPolicy || 'flexible',
+              flexibleDiscounts: card.dataset.proposalFlexible !== 'false',
+              discountTiers: parseJson(card.dataset.proposalTiers, []),
+            },
           };
-        };
-        const saveCart = () => localStorage.setItem(storageKey, JSON.stringify(cart));
-        const itemsByMode = (mode) => cart.filter((item) => item.mode === mode);
-        const modeTotal = (mode) => itemsByMode(mode).reduce((sum, item) => Number.isFinite(item.price) ? sum + item.price * item.quantity : sum, 0);
-        const modeAmount = (mode) => itemsByMode(mode).reduce((sum, item) => sum + item.quantity, 0);
-        const itemLabel = (item) => item.number || (item.kind === 'kit' ? 'Kit' : item.kind === 'card' ? 'Carta avulsa' : 'Booster avulso');
-
-        const createCartItem = (item) => {
-          const article = document.createElement('article');
-          article.className = 'cart-item';
-          article.dataset.cartId = item.id;
-          article.dataset.cartMode = item.mode;
-
-          const thumb = document.createElement('div');
-          thumb.className = 'cart-item-thumb';
-          if (item.image) {
-            const image = document.createElement('img'); image.src = item.image; image.alt = ''; thumb.appendChild(image);
-          } else thumb.textContent = (item.name || '?').slice(0, 2).toUpperCase();
-
-          const content = document.createElement('div');
-          content.className = 'cart-item-content';
-          const title = document.createElement('strong'); title.textContent = item.name;
-          const meta = document.createElement('span'); meta.textContent = `${itemLabel(item)} · ${item.owner}`;
-          const price = document.createElement('b'); price.textContent = item.priceLabel;
-          content.append(title, meta, price);
-
-          const controls = document.createElement('div');
-          controls.className = 'cart-item-controls';
-          const decrease = document.createElement('button'); decrease.type = 'button'; decrease.dataset.cartAction = 'decrease'; decrease.setAttribute('aria-label', 'Diminuir quantidade'); decrease.textContent = '−';
-          const quantity = document.createElement('span'); quantity.textContent = String(item.quantity);
-          const increase = document.createElement('button'); increase.type = 'button'; increase.dataset.cartAction = 'increase'; increase.setAttribute('aria-label', 'Aumentar quantidade'); increase.textContent = '+';
-          const move = document.createElement('button'); move.type = 'button'; move.dataset.cartAction = 'move'; move.className = 'cart-move-button'; move.textContent = item.mode === 'proposal' ? 'Comprar pelo preço' : 'Mover para proposta';
-          const remove = document.createElement('button'); remove.type = 'button'; remove.dataset.cartAction = 'remove'; remove.className = 'cart-remove-button'; remove.textContent = 'Remover';
-          controls.append(decrease, quantity, increase, move, remove);
-          article.append(thumb, content, controls);
-          return article;
-        };
-
-        const renderCart = () => {
-          ['cart', 'proposal'].forEach((mode) => {
-            const container = document.querySelector(`[data-cart-items="${mode}"]`);
-            const empty = document.querySelector(`[data-cart-empty="${mode}"]`);
-            const items = itemsByMode(mode);
-            container?.replaceChildren(...items.map(createCartItem));
-            if (empty) empty.hidden = items.length > 0;
-            const tabCount = document.querySelector(`[data-cart-tab-count="${mode}"]`);
-            if (tabCount) tabCount.textContent = String(modeAmount(mode));
-          });
-
-          document.querySelectorAll('[data-cart-tab]').forEach((tab) => {
-            const active = tab.dataset.cartTab === activeCartTab;
-            tab.classList.toggle('active', active);
-            tab.setAttribute('aria-selected', String(active));
-          });
-          document.querySelectorAll('[data-cart-panel]').forEach((panel) => {
-            panel.hidden = panel.dataset.cartPanel !== activeCartTab;
-          });
-
-          const regularTotal = modeTotal('cart');
-          const proposalTotal = modeTotal('proposal');
-          const totalAmount = modeAmount('cart') + modeAmount('proposal');
-          if (cartCount) cartCount.textContent = String(totalAmount);
-          if (cartTotal) cartTotal.textContent = formatBRL(regularTotal);
-          if (proposalPublishedTotal) proposalPublishedTotal.textContent = formatBRL(proposalTotal);
-          if (proposalOffer) {
-            proposalOffer.disabled = modeAmount('proposal') === 0;
-            proposalOffer.max = proposalTotal > 0 ? String(proposalTotal) : '';
-            if (modeAmount('proposal') === 0) proposalOffer.value = '';
-          }
-          document.querySelector('[data-cart-clear]')?.toggleAttribute('disabled', cart.length === 0);
-          checkoutButton?.toggleAttribute('disabled', cart.length === 0);
-          if (proposalOfferError) proposalOfferError.hidden = true;
-          saveCart();
         };
 
         const feedbackButton = (button, label = 'Adicionado') => {
@@ -631,128 +593,223 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           window.setTimeout(() => { button.innerHTML = original; button.classList.remove('added'); }, 1100);
         };
 
-        const addToSelection = (card, button, mode) => {
-          if (card.dataset.forSale === 'false') return;
-          const product = productFromCard(card, mode);
-          const current = cart.find((item) => item.id === product.id);
-          if (current) {
-            if (current.mode === mode) current.quantity = Math.min(current.stock, current.quantity + 1);
-            else current.mode = mode;
-          } else cart.push(product);
-          activeCartTab = mode;
-          renderCart();
-          feedbackButton(button, mode === 'proposal' ? 'Na proposta' : 'No carrinho');
+        const createProposalItem = (item) => {
+          const article = document.createElement('article');
+          article.className = 'proposal-item';
+          article.dataset.proposalItemId = item.id;
+          const thumb = document.createElement('div');
+          thumb.className = 'proposal-item-thumb';
+          if (item.image) { const image = document.createElement('img'); image.src = item.image; image.alt = ''; thumb.appendChild(image); }
+          else thumb.textContent = (item.name || '?').slice(0, 2).toUpperCase();
+          const content = document.createElement('div');
+          content.className = 'proposal-item-content';
+          const title = document.createElement('strong'); title.textContent = item.name;
+          const meta = document.createElement('span'); meta.textContent = itemLabel(item);
+          const price = document.createElement('b'); price.textContent = item.priceLabel;
+          content.append(title, meta, price);
+          const controls = document.createElement('div');
+          controls.className = 'proposal-item-controls';
+          const decrease = document.createElement('button'); decrease.type = 'button'; decrease.dataset.proposalAction = 'decrease'; decrease.textContent = '−'; decrease.setAttribute('aria-label', 'Diminuir quantidade');
+          const quantity = document.createElement('span'); quantity.textContent = String(item.quantity);
+          const increase = document.createElement('button'); increase.type = 'button'; increase.dataset.proposalAction = 'increase'; increase.textContent = '+'; increase.setAttribute('aria-label', 'Aumentar quantidade');
+          const remove = document.createElement('button'); remove.type = 'button'; remove.dataset.proposalAction = 'remove'; remove.className = 'proposal-item-remove'; remove.textContent = 'Remover';
+          controls.append(decrease, quantity, increase, remove);
+          article.append(thumb, content, controls);
+          return article;
         };
 
-        const openCart = () => {
+        const syncActiveForm = (group) => {
+          if (!group) return;
+          if (proposalDiscount) proposalDiscount.value = String(group.discount ?? 0);
+          if (proposalReason) proposalReason.value = group.reason || '';
+          if (proposalBuyerName) proposalBuyerName.value = group.buyerName || '';
+          if (proposalAddress) proposalAddress.value = group.address || '';
+        };
+
+        const renderProposals = () => {
+          proposals = proposals.filter((group) => group.items.length > 0);
+          if (!activeOwnerSlug || !proposals.some((group) => group.ownerSlug === activeOwnerSlug)) activeOwnerSlug = proposals[0]?.ownerSlug || '';
+          const totalItems = proposals.reduce((sum, group) => sum + groupQuantity(group), 0);
+          if (proposalCount) proposalCount.textContent = String(totalItems);
+          proposalList?.replaceChildren(...proposals.map((group) => {
+            const button = document.createElement('button');
+            button.type = 'button'; button.dataset.proposalGroup = group.ownerSlug;
+            button.className = group.ownerSlug === activeOwnerSlug ? 'active' : '';
+            const avatar = document.createElement('span'); avatar.textContent = String(group.owner || 'CO').slice(0, 2).toUpperCase();
+            const copy = document.createElement('div');
+            const owner = document.createElement('strong'); owner.textContent = group.owner;
+            const amount = document.createElement('small'); amount.textContent = `${groupQuantity(group)} ${groupQuantity(group) === 1 ? 'item' : 'itens'}`;
+            const total = document.createElement('b'); total.textContent = formatBRL(groupTotal(group));
+            copy.append(owner, amount); button.append(avatar, copy, total);
+            return button;
+          }));
+          const group = activeGroup();
+          if (proposalEmpty) proposalEmpty.hidden = Boolean(group);
+          if (proposalEditor) proposalEditor.hidden = !group;
+          if (!group) { saveProposals(); return; }
+          document.querySelector('[data-proposal-owner-avatar]').textContent = String(group.owner || 'CO').slice(0, 2).toUpperCase();
+          document.querySelector('[data-proposal-owner]').textContent = group.owner;
+          document.querySelector('[data-proposal-collection]').textContent = group.ownerCollection;
+          document.querySelector('[data-proposal-policy-label]').textContent = policyLabels[group.terms.policy] || policyLabels.flexible;
+          const tiers = group.terms.discountTiers || [];
+          const termsText = group.terms.flexibleDiscounts
+            ? 'O colecionador marcou os descontos como flexíveis.'
+            : tiers.length
+              ? `Limites: ${tiers.map((tier) => `a partir de ${formatBRL(tier.minValue)}, até ${tier.maxDiscount}%`).join(' · ')}.`
+              : 'Nenhum desconto foi liberado nos termos atuais.';
+          document.querySelector('[data-proposal-terms-summary]').textContent = termsText;
+          proposalItems?.replaceChildren(...group.items.map(createProposalItem));
+          const published = groupTotal(group);
+          const maxDiscount = maxDiscountFor(group);
+          group.discount = Math.max(0, Math.min(Number(group.discount || 0), maxDiscount));
+          document.querySelector('[data-proposal-published-total]').textContent = formatBRL(published);
+          document.querySelector('[data-proposal-final-total]').textContent = formatBRL(finalTotalFor(group));
+          if (proposalDiscount) { proposalDiscount.max = String(maxDiscount); proposalDiscount.value = String(group.discount); }
+          const limit = document.querySelector('[data-proposal-discount-limit]');
+          if (limit) limit.textContent = group.terms.flexibleDiscounts ? 'Desconto flexível: informe o percentual que deseja negociar.' : `Máximo permitido nesta proposta: ${maxDiscount}%.`;
+          if (proposalError) proposalError.hidden = true;
+          syncActiveForm(group);
+          saveProposals();
+        };
+
+        const addToProposal = (card, button) => {
+          if (card.dataset.proposalAllowed === 'false') { feedbackButton(button, 'Não permitido'); return; }
+          const product = productFromCard(card);
+          let group = proposals.find((entry) => entry.ownerSlug === product.ownerSlug);
+          if (!group) {
+            group = { ownerSlug: product.ownerSlug, owner: product.owner, ownerCollection: product.ownerCollection, phone: product.ownerPhone, terms: product.terms, items: [], discount: 0, reason: '', buyerName: '', address: '' };
+            proposals.push(group);
+          }
+          const current = group.items.find((item) => item.id === product.id);
+          if (current) current.quantity = Math.min(current.stock, current.quantity + 1);
+          else group.items.push(product);
+          activeOwnerSlug = group.ownerSlug;
+          renderProposals();
+          feedbackButton(button, 'Na proposta');
+        };
+
+        const openProposalDrawer = () => {
           closeModal();
-          if (!cartDrawer || !cartBackdrop) return;
-          cartBackdrop.hidden = false;
-          cartDrawer.setAttribute('aria-hidden', 'false');
-          document.body.classList.add('cart-open');
-          requestAnimationFrame(() => { cartBackdrop.classList.add('open'); cartDrawer.classList.add('open'); });
+          if (!proposalDrawer || !proposalBackdrop) return;
+          proposalBackdrop.hidden = false;
+          proposalDrawer.setAttribute('aria-hidden', 'false');
+          document.body.classList.add('proposal-open');
+          requestAnimationFrame(() => { proposalBackdrop.classList.add('open'); proposalDrawer.classList.add('open'); });
         };
-        const closeCart = () => {
-          if (!cartDrawer || !cartBackdrop) return;
-          cartBackdrop.classList.remove('open'); cartDrawer.classList.remove('open');
-          cartDrawer.setAttribute('aria-hidden', 'true'); document.body.classList.remove('cart-open');
-          window.setTimeout(() => { cartBackdrop.hidden = true; }, reducedMotion ? 0 : 180);
+        const closeProposalDrawer = () => {
+          if (!proposalDrawer || !proposalBackdrop) return;
+          proposalBackdrop.classList.remove('open'); proposalDrawer.classList.remove('open');
+          proposalDrawer.setAttribute('aria-hidden', 'true'); document.body.classList.remove('proposal-open');
+          window.setTimeout(() => { proposalBackdrop.hidden = true; }, reducedMotion ? 0 : 180);
+        };
+        const closeCheckout = () => {
+          if (!checkoutModal || checkoutModal.hidden) return;
+          checkoutModal.classList.remove('open'); document.body.classList.remove('checkout-open');
+          window.setTimeout(() => { checkoutModal.hidden = true; }, reducedMotion ? 0 : 180);
         };
 
-        const proposalValue = () => Number(proposalOffer?.value || 0);
+        const showProposalError = (message) => {
+          if (!proposalError) return;
+          proposalError.textContent = message; proposalError.hidden = false;
+        };
+        const validateGroup = (group) => {
+          if (!group?.items.length) return 'Adicione pelo menos um produto.';
+          if (group.terms.policy === 'none') return 'Este colecionador não aceita propostas.';
+          if (requiresMultiple(group.terms.policy) && group.items.length < 2) return 'Os termos exigem pelo menos dois produtos diferentes nesta proposta.';
+          const maxDiscount = maxDiscountFor(group);
+          if (Number(group.discount || 0) > maxDiscount) return `O desconto máximo permitido para esta seleção é ${maxDiscount}%.`;
+          if (!String(group.buyerName || '').trim()) return 'Informe seu nome completo.';
+          if (String(group.address || '').trim().length < 20) return 'Informe o endereço completo para entrega, incluindo número, cidade, estado e CEP.';
+          if (Number(group.discount || 0) > 0 && !String(group.reason || '').trim()) return 'Explique o motivo do desconto solicitado.';
+          if (!normalizePhone(group.phone)) return 'O colecionador ainda não cadastrou um número de WhatsApp válido.';
+          return '';
+        };
         const lineForItem = (item) => {
           const subtotal = Number.isFinite(item.price) ? formatBRL(item.price * item.quantity) : 'valor a consultar';
           const unit = Number.isFinite(item.price) ? ` (${formatBRL(item.price)} cada)` : '';
-          return `- ${item.quantity}x ${item.name}${item.number ? ` — ${item.number}` : ''}${unit} — ${subtotal}\n  Coleção: ${item.ownerCollection || 'não informada'} | Publicado por: ${item.owner}`;
+          return `- ${item.quantity}x ${item.name}${item.number ? ` — ${item.number}` : ''}${unit} — ${subtotal}`;
         };
-        const buildCheckoutMessage = () => {
-          const regular = itemsByMode('cart');
-          const proposal = itemsByMode('proposal');
-          const offer = proposalValue();
-          const lines = ['Olá! Quero comprar os seguintes itens do Nexus TCG:', ''];
-          if (regular.length) {
-            lines.push('COMPRA PELO PREÇO PUBLICADO');
-            regular.forEach((item) => lines.push(lineForItem(item)));
-            lines.push(`Subtotal da compra regular: ${formatBRL(modeTotal('cart'))}`, '');
-          }
-          if (proposal.length) {
-            lines.push('PROPOSTA PARA COMPRA EM CONJUNTO');
-            proposal.forEach((item) => lines.push(lineForItem(item)));
-            lines.push(`Valor publicado do conjunto: ${formatBRL(modeTotal('proposal'))}`);
-            lines.push(`Minha proposta pelo conjunto: ${formatBRL(offer)}`, '');
-          }
-          const combined = modeTotal('cart') + (proposal.length ? offer : 0);
-          lines.push(`Total se a proposta for aceita: ${formatBRL(combined)}`);
-          lines.push('', 'Podemos confirmar a disponibilidade e combinar pagamento e entrega?');
+        const buildCheckoutMessage = (group) => {
+          const published = groupTotal(group);
+          const finalTotal = finalTotalFor(group);
+          const discount = Number(group.discount || 0);
+          const lines = [
+            `Olá, ${group.owner}!`,
+            '',
+            `Gostaria de enviar uma proposta formal pelos itens abaixo da coleção “${group.ownerCollection}”:`,
+            '',
+            ...group.items.map(lineForItem),
+            '',
+            `Valor publicado dos itens com preço definido: ${formatBRL(published)}`,
+            `Desconto geral solicitado: ${discount}%`,
+            `Valor proposto: ${formatBRL(finalTotal)}`,
+          ];
+          if (group.items.some((item) => !Number.isFinite(item.price))) lines.push('Há item(ns) com valor a consultar; peço que sejam confirmados antes da aceitação.');
+          lines.push('', `Motivo: ${group.reason || 'Não informado.'}`);
+          lines.push('', 'DADOS PARA ENTREGA', `Nome: ${group.buyerName}`, `Endereço: ${group.address}`);
+          lines.push('', 'FORMA DE PAGAMENTO', 'Pagamento por Pix, após a aceitação da proposta e a confirmação da disponibilidade dos itens.');
+          lines.push('', 'Esta mensagem foi gerada pelo Nexus TCG de acordo com os termos públicos da coleção.');
           return lines.join('\n');
         };
-
-        const closeCheckout = () => {
-          if (!checkoutModal || checkoutModal.hidden) return;
-          checkoutModal.classList.remove('open');
-          document.body.classList.remove('checkout-open');
-          window.setTimeout(() => { checkoutModal.hidden = true; }, reducedMotion ? 0 : 180);
-        };
         const openCheckout = () => {
-          if (!cart.length || !checkoutModal || !checkoutMessage || !checkoutWhatsapp) return;
-          if (itemsByMode('proposal').length && proposalValue() <= 0) {
-            activeCartTab = 'proposal';
-            renderCart();
-            if (proposalOfferError) proposalOfferError.hidden = false;
-            proposalOffer?.focus();
-            return;
-          }
-          const message = buildCheckoutMessage();
-          checkoutMessage.value = message;
-          checkoutWhatsapp.href = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`;
-          closeCart();
-          checkoutModal.hidden = false;
-          document.body.classList.add('checkout-open');
+          const group = activeGroup();
+          const error = validateGroup(group);
+          if (error) { showProposalError(error); return; }
+          const message = buildCheckoutMessage(group);
+          const phone = normalizePhone(group.phone);
+          if (checkoutMessage) checkoutMessage.value = message;
+          if (checkoutWhatsapp) checkoutWhatsapp.href = `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
+          if (checkoutOwner) checkoutOwner.textContent = group.owner;
+          if (checkoutPhone) checkoutPhone.textContent = group.phone;
+          closeProposalDrawer();
+          checkoutModal.hidden = false; document.body.classList.add('checkout-open');
           requestAnimationFrame(() => checkoutModal.classList.add('open'));
           checkoutPanel?.focus?.();
         };
         const copyCheckoutMessage = async () => {
           const message = checkoutMessage?.value || '';
           if (!message) return;
-          try {
-            await navigator.clipboard.writeText(message);
-          } catch (_) {
-            checkoutMessage?.focus();
-            checkoutMessage?.select();
-            document.execCommand('copy');
-            checkoutMessage?.setSelectionRange(0, 0);
-          }
+          try { await navigator.clipboard.writeText(message); }
+          catch (_) { checkoutMessage?.focus(); checkoutMessage?.select(); document.execCommand('copy'); checkoutMessage?.setSelectionRange(0, 0); }
           feedbackButton(checkoutCopy, 'Mensagem copiada');
         };
 
-        document.querySelectorAll('[data-cart-open]').forEach((button) => button.addEventListener('click', openCart));
-        document.querySelectorAll('[data-cart-close]').forEach((button) => button.addEventListener('click', closeCart));
+        document.querySelectorAll('[data-proposal-open]').forEach((button) => button.addEventListener('click', openProposalDrawer));
+        document.querySelectorAll('[data-proposal-close]').forEach((button) => button.addEventListener('click', closeProposalDrawer));
         document.querySelectorAll('[data-checkout-close]').forEach((button) => button.addEventListener('click', closeCheckout));
-        document.querySelectorAll('[data-cart-tab]').forEach((button) => button.addEventListener('click', () => {
-          activeCartTab = button.dataset.cartTab === 'proposal' ? 'proposal' : 'cart';
-          renderCart();
-        }));
-        cartBackdrop?.addEventListener('click', closeCart);
-        document.querySelector('[data-cart-clear]')?.addEventListener('click', () => { cart = []; renderCart(); });
-        checkoutButton?.addEventListener('click', openCheckout);
+        proposalBackdrop?.addEventListener('click', closeProposalDrawer);
         checkoutCopy?.addEventListener('click', copyCheckoutMessage);
-        proposalOffer?.addEventListener('input', () => { if (proposalOfferError) proposalOfferError.hidden = true; });
-
-        cartDrawer?.addEventListener('click', (event) => {
-          const button = event.target.closest('[data-cart-action]');
-          const itemElement = event.target.closest('[data-cart-id]');
-          if (!button || !itemElement) return;
-          const index = cart.findIndex((item) => item.id === itemElement.dataset.cartId);
-          if (index < 0) return;
-          if (button.dataset.cartAction === 'increase') cart[index].quantity = Math.min(cart[index].stock, cart[index].quantity + 1);
-          if (button.dataset.cartAction === 'decrease') cart[index].quantity -= 1;
-          if (button.dataset.cartAction === 'move') {
-            cart[index].mode = cart[index].mode === 'proposal' ? 'cart' : 'proposal';
-            activeCartTab = cart[index].mode;
-          }
-          if (button.dataset.cartAction === 'remove' || cart[index].quantity <= 0) cart.splice(index, 1);
-          renderCart();
+        document.querySelector('[data-proposal-review]')?.addEventListener('click', openCheckout);
+        document.querySelector('[data-proposal-clear]')?.addEventListener('click', () => {
+          const group = activeGroup();
+          if (!group || !window.confirm(`Excluir a proposta para ${group.owner}?`)) return;
+          proposals = proposals.filter((entry) => entry.ownerSlug !== group.ownerSlug); activeOwnerSlug = proposals[0]?.ownerSlug || ''; renderProposals();
         });
+        proposalList?.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-proposal-group]');
+          if (!button) return; activeOwnerSlug = button.dataset.proposalGroup; renderProposals();
+        });
+        proposalItems?.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-proposal-action]');
+          const itemElement = event.target.closest('[data-proposal-item-id]');
+          const group = activeGroup();
+          if (!button || !itemElement || !group) return;
+          const index = group.items.findIndex((item) => item.id === itemElement.dataset.proposalItemId);
+          if (index < 0) return;
+          if (button.dataset.proposalAction === 'increase') group.items[index].quantity = Math.min(group.items[index].stock, group.items[index].quantity + 1);
+          if (button.dataset.proposalAction === 'decrease') group.items[index].quantity -= 1;
+          if (button.dataset.proposalAction === 'remove' || group.items[index].quantity <= 0) group.items.splice(index, 1);
+          renderProposals();
+        });
+        const updateActiveField = (field, value) => {
+          const group = activeGroup(); if (!group) return;
+          group[field] = value; if (proposalError) proposalError.hidden = true; saveProposals();
+          if (field === 'discount') renderProposals();
+        };
+        proposalDiscount?.addEventListener('input', (event) => updateActiveField('discount', Math.max(0, Number(event.target.value || 0))));
+        proposalReason?.addEventListener('input', (event) => updateActiveField('reason', event.target.value));
+        proposalBuyerName?.addEventListener('input', (event) => updateActiveField('buyerName', event.target.value));
+        proposalAddress?.addEventListener('input', (event) => updateActiveField('address', event.target.value));
 
         document.addEventListener('click', (event) => {
           const openButton = event.target.closest('[data-open-product]');
@@ -761,28 +818,21 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             if (card) openModal(card, openButton);
             return;
           }
-          const cartButton = event.target.closest('[data-add-cart]');
-          if (cartButton) {
-            const card = cartButton.closest('[data-product-card]');
-            if (card) addToSelection(card, cartButton, 'cart');
-            return;
-          }
           const proposalButton = event.target.closest('[data-add-proposal]');
           if (proposalButton) {
             const card = proposalButton.closest('[data-product-card]');
-            if (card) addToSelection(card, proposalButton, 'proposal');
+            if (card) addToProposal(card, proposalButton);
           }
         });
-        modalAdd?.addEventListener('click', () => { if (activeProductCard) addToSelection(activeProductCard, modalAdd, 'cart'); });
-        modalProposal?.addEventListener('click', () => { if (activeProductCard) addToSelection(activeProductCard, modalProposal, 'proposal'); });
+        modalProposal?.addEventListener('click', () => { if (activeProductCard) addToProposal(activeProductCard, modalProposal); });
         document.addEventListener('keydown', (event) => {
-          if (event.key === 'Escape') { closeModal(); closeCart(); closeCheckout(); }
+          if (event.key === 'Escape') { closeModal(); closeProposalDrawer(); closeCheckout(); }
           if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName || '')) {
             const search = document.querySelector('[data-filter-search]');
             if (search) { event.preventDefault(); search.focus(); }
           }
         });
-        renderCart();
+        renderProposals();
 
         document.querySelectorAll('[data-reveal]').forEach((element) => element.classList.add('reveal-ready'));
         if ('IntersectionObserver' in window && !reducedMotion) {

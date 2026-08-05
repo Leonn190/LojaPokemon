@@ -12,6 +12,8 @@ const serialize = (item: CatalogItem) => ({
   ownerName: item.ownerName,
   ownerCollectionName: item.ownerCollectionName,
   ownerCollectionSlug: item.ownerCollectionSlug,
+  ownerPhone: item.ownerPhone,
+  proposalTerms: item.proposalTerms,
   forSale: item.forSale,
   showQuantity: item.showQuantity,
   ...(item.kind === 'card' ? {

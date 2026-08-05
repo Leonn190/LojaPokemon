@@ -48,6 +48,17 @@ const publishedCollections = getEditableCollections();
         <label class="form-field"><span>Número de telefone</span><input name="phone" required placeholder="(00) 00000-0000" /></label>
         <label class="form-field"><span>Senha</span><input name="password" type="password" minlength="4" required /></label>
         <label class="form-field"><span>Descrição (opcional)</span><input name="description" placeholder="Conte um pouco sobre a coleção" /></label>
+        <fieldset class="proposal-terms-form new-proposal-terms">
+          <legend>Termos de propostas</legend>
+          <label class="form-field"><span>Regra principal</span><select name="proposalPolicy" required><option value="flexible">Sou flexível quanto às regras</option><option value="none">Não aceito nenhuma proposta</option><option value="fixed_price_multi_only">Não aceito proposta para cartas com preço definido e só aceito mais de um produto</option><option value="no_defined_price">Não aceito proposta para cartas com preço definido</option><option value="multi_only">Aceito propostas apenas com mais de um produto</option></select></label>
+          <label class="proposal-flexible-check"><input name="flexibleDiscounts" type="checkbox" checked /><span><strong>Ser flexível com os descontos</strong><small>Quando marcado, os marcos abaixo funcionam apenas como referência.</small></span></label>
+          <div class="proposal-tier-heading"><strong>Marcos de desconto</strong><small>Deixe linhas vazias para ignorá-las.</small></div>
+          <div class="proposal-tier-rows">
+            <div><label><span>A partir de R$</span><input name="tierMin" type="number" min="0" step="0.01" placeholder="100" /></label><label><span>Máximo de desconto</span><div><input name="tierDiscount" type="number" min="0" max="100" step="0.1" placeholder="5" /><b>%</b></div></label></div>
+            <div><label><span>A partir de R$</span><input name="tierMin" type="number" min="0" step="0.01" placeholder="250" /></label><label><span>Máximo de desconto</span><div><input name="tierDiscount" type="number" min="0" max="100" step="0.1" placeholder="8" /><b>%</b></div></label></div>
+            <div><label><span>A partir de R$</span><input name="tierMin" type="number" min="0" step="0.01" placeholder="500" /></label><label><span>Máximo de desconto</span><div><input name="tierDiscount" type="number" min="0" max="100" step="0.1" placeholder="10" /><b>%</b></div></label></div>
+          </div>
+        </fieldset>
         <button class="primary-cta" type="submit"><span>Abrir editor</span><b>→</b></button>
       </form>
     </section>
@@ -89,13 +100,22 @@ const publishedCollections = getEditableCollections();
         </label>
         <label class="editor-setting-card">
           <span class="setting-icon">$</span>
-          <span><strong>Liberar vendas</strong><small>Permite que itens marcados entrem no carrinho.</small></span>
+          <span><strong>Liberar vendas</strong><small>Permite que itens marcados sejam incluídos em propostas.</small></span>
           <span class="switch"><input type="checkbox" data-collection-selling checked /><i></i></span>
         </label>
         <div class="editor-overview-card">
           <span class="setting-icon">Σ</span>
           <span><strong data-overview-units>0 unidades</strong><small data-overview-value>R$ 0,00 em preços definidos</small></span>
         </div>
+      </section>
+      <section class="workspace-proposal-settings" aria-label="Termos de propostas">
+        <header><div><span class="section-eyebrow">Negociação</span><h3>Termos de propostas da coleção</h3><p>Essas regras são exibidas publicamente e usadas pelo site para bloquear propostas incompatíveis.</p></div><span class="proposal-settings-badge">Pix após aceite</span></header>
+        <div class="workspace-proposal-grid">
+          <label><span>Regra principal</span><select data-proposal-policy><option value="flexible">Sou flexível quanto às regras</option><option value="none">Não aceito nenhuma proposta</option><option value="fixed_price_multi_only">Sem proposta para cartas precificadas e somente com mais de um produto</option><option value="no_defined_price">Sem proposta para cartas com preço definido</option><option value="multi_only">Propostas apenas com mais de um produto</option></select></label>
+          <label class="proposal-flexible-check"><input type="checkbox" data-flexible-discounts /><span><strong>Descontos flexíveis</strong><small>Permite que o comprador sugira qualquer percentual.</small></span></label>
+        </div>
+        <div class="workspace-tier-heading"><div><strong>Marcos máximos de desconto</strong><small>O maior marco alcançado pelo valor da proposta define o limite.</small></div><button type="button" data-add-discount-tier><span>＋</span> Adicionar marco</button></div>
+        <div class="workspace-tier-list" data-discount-tier-list></div>
       </section>
 
       <section class="editor-command-section editor-command-section-compact" aria-label="Adicionar itens à coleção">
@@ -124,7 +144,7 @@ const publishedCollections = getEditableCollections();
       </section>
 
       <div class="editor-export-panel">
-        <div><span class="section-eyebrow">Pronto para aprovação</span><h3>Baixe o ZIP da versão <b data-version-number>1</b></h3><p>O ZIP completo leva todo o inventário. O update inclui novas cartas, boosters, kits e álbuns criados ou reorganizados nesta edição.</p></div>
+        <div><span class="section-eyebrow">Pronto para aprovação</span><h3>Baixe o ZIP da versão <b data-version-number>1</b></h3><p>O ZIP completo leva todo o inventário. O update inclui alterações do perfil e dos termos, além de novas cartas, boosters, kits e álbuns criados ou reorganizados nesta edição.</p></div>
         <div class="editor-export-actions"><button type="button" class="secondary-cta" data-download-update hidden><span>Baixar só o update</span><b>＋</b></button><button type="button" class="primary-cta" data-download-zip><span>Baixar ZIP completo</span><b>↓</b></button></div>
       </div>
     </section>
@@ -382,11 +402,22 @@ const publishedCollections = getEditableCollections();
         };
       };
 
+      const proposalPolicies = ['flexible', 'none', 'fixed_price_multi_only', 'no_defined_price', 'multi_only'];
+      const normalizeProposalTerms = (terms = {}) => ({
+        policy: proposalPolicies.includes(terms.policy) ? terms.policy : 'flexible',
+        flexibleDiscounts: terms.flexibleDiscounts !== false,
+        discountTiers: (Array.isArray(terms.discountTiers) ? terms.discountTiers : [])
+          .map((tier) => ({ minValue: Math.max(0, toPrice(tier.minValue) || 0), maxDiscount: Math.min(100, Math.max(0, toPrice(tier.maxDiscount) || 0)) }))
+          .sort((left, right) => left.minValue - right.minValue),
+      });
+
       const makeState = (profile, items = {}, source = 'new') => {
         const cards = (items.cards || []).map((item) => normalizeCard(item, false));
         const boosters = (items.boosters || []).map((item) => normalizeBooster(item, false));
+        const normalizedProfile = { owner: '', title: '', description: '', email: '', phone: '', password: '', selling: true, showQuantity: true, featured: false, version: 1, ...profile };
+        normalizedProfile.proposalTerms = normalizeProposalTerms(profile?.proposalTerms);
         return {
-          profile: { owner: '', title: '', description: '', email: '', phone: '', password: '', selling: true, showQuantity: true, featured: false, version: 1, ...profile },
+          profile: normalizedProfile,
           cards, boosters,
           kits: (items.kits || []).map((item) => normalizeKit(item, cards, boosters)),
           albums: (items.albums || []).map((item) => normalizeAlbum(item, cards)),
@@ -400,6 +431,13 @@ const publishedCollections = getEditableCollections();
       };
       modeButtons.forEach((button) => button.addEventListener('click', () => setMode(button.dataset.editorMode)));
 
+      const renderDiscountTiers = () => {
+        const list = root.querySelector('[data-discount-tier-list]');
+        if (!list || !state) return;
+        const tiers = state.profile.proposalTerms.discountTiers;
+        list.innerHTML = tiers.length ? tiers.map((tier, index) => `<div class="workspace-tier-row"><label><span>A partir de R$</span><input type="number" min="0" step="0.01" value="${tier.minValue}" data-tier-edit="${index}:minValue" /></label><label><span>Desconto máximo</span><div><input type="number" min="0" max="100" step="0.1" value="${tier.maxDiscount}" data-tier-edit="${index}:maxDiscount" /><b>%</b></div></label><button type="button" data-remove-discount-tier="${index}" aria-label="Remover marco">×</button></div>`).join('') : '<div class="workspace-tier-empty"><span>◇</span><p>Nenhum marco definido. Sem flexibilidade, o desconto máximo será 0%.</p></div>';
+      };
+
       const activate = (profile, items, source = 'new') => {
         state = makeState(profile, items, source);
         modeButtons.forEach((button) => { button.hidden = true; });
@@ -411,6 +449,9 @@ const publishedCollections = getEditableCollections();
         root.querySelector('[data-workspace-meta]').textContent = `${state.profile.owner} · versão ${state.profile.version}`;
         root.querySelector('[data-show-quantity]').checked = state.profile.showQuantity !== false;
         root.querySelector('[data-collection-selling]').checked = state.profile.selling !== false;
+        root.querySelector('[data-proposal-policy]').value = state.profile.proposalTerms.policy;
+        root.querySelector('[data-flexible-discounts]').checked = state.profile.proposalTerms.flexibleDiscounts;
+        renderDiscountTiers();
         root.querySelector('[data-version-number]').textContent = String(state.profile.version);
         if (updateButton) updateButton.hidden = source === 'new';
         activeTab = 'cards'; inventoryQuery = ''; if (inventorySearch) inventorySearch.value = '';
@@ -634,7 +675,16 @@ const publishedCollections = getEditableCollections();
         event.preventDefault();
         const form = event.currentTarget;
         if (!form.reportValidity()) return;
-        const profile = Object.fromEntries(new FormData(form).entries());
+        const formData = new FormData(form);
+        const profile = Object.fromEntries(formData.entries());
+        const mins = formData.getAll('tierMin');
+        const discounts = formData.getAll('tierDiscount');
+        profile.proposalTerms = normalizeProposalTerms({
+          policy: clean(formData.get('proposalPolicy')),
+          flexibleDiscounts: formData.get('flexibleDiscounts') === 'on',
+          discountTiers: mins.map((minValue, index) => ({ minValue, maxDiscount: discounts[index] })).filter((tier) => clean(tier.minValue) && clean(tier.maxDiscount)),
+        });
+        delete profile.proposalPolicy; delete profile.flexibleDiscounts; delete profile.tierMin; delete profile.tierDiscount;
         profile.collectionId = safeSlug(profile.title);
         activate(profile, undefined, 'new');
       });
@@ -816,6 +866,21 @@ const publishedCollections = getEditableCollections();
 
       root.querySelector('[data-show-quantity]')?.addEventListener('change', (event) => { if (state) state.profile.showQuantity = event.target.checked; });
       root.querySelector('[data-collection-selling]')?.addEventListener('change', (event) => { if (state) state.profile.selling = event.target.checked; });
+      root.querySelector('[data-proposal-policy]')?.addEventListener('change', (event) => { if (state) state.profile.proposalTerms.policy = event.target.value; });
+      root.querySelector('[data-flexible-discounts]')?.addEventListener('change', (event) => { if (state) state.profile.proposalTerms.flexibleDiscounts = event.target.checked; });
+      root.querySelector('[data-add-discount-tier]')?.addEventListener('click', () => { if (!state) return; state.profile.proposalTerms.discountTiers.push({ minValue: 0, maxDiscount: 0 }); renderDiscountTiers(); });
+      root.querySelector('[data-discount-tier-list]')?.addEventListener('input', (event) => {
+        const [rawIndex, field] = (event.target.dataset.tierEdit || '').split(':');
+        const tier = state?.profile?.proposalTerms?.discountTiers?.[Number(rawIndex)];
+        if (!tier || !field) return;
+        tier[field] = field === 'maxDiscount' ? Math.min(100, Math.max(0, Number(event.target.value || 0))) : Math.max(0, Number(event.target.value || 0));
+      });
+      root.querySelector('[data-discount-tier-list]')?.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-remove-discount-tier]');
+        if (!button || !state) return;
+        state.profile.proposalTerms.discountTiers.splice(Number(button.dataset.removeDiscountTier), 1);
+        renderDiscountTiers();
+      });
       root.querySelector('[data-reset-editor]')?.addEventListener('click', () => {
         closeModals(); state = null; workspace.hidden = true; root.classList.remove('is-editing'); modeButtons.forEach((button) => { button.hidden = false; }); root.querySelector('[data-editor-notice]').hidden = false; root.querySelector('[data-new-profile-form]').reset(); setMode('new');
       });
@@ -881,11 +946,12 @@ const publishedCollections = getEditableCollections();
         const boosters = state.boosters.filter((item) => item._isNew).map((item) => ({ 'Link Liga': item.linkLiga, 'Quantidade': item.quantity }));
         const kits = state.kits.filter((item) => item._isNew).map(kitRow);
         const albums = state.albums.filter((item) => item._isNew || item._isDirty).map(albumRow);
-        if (!cards.length && !boosters.length && !kits.length && !albums.length) { window.alert('Nenhuma carta, booster, kit ou álbum novo foi criado ou alterado nesta edição.'); return; }
         const generatedAt = new Date().toISOString();
-        const metadata = { type: 'collection-update', collectionId: state.profile.collectionId || safeSlug(state.profile.title), baseVersion: Math.max(1, Number(state.profile.version || 1) - 1), version: Number(state.profile.version || 1), generatedAt, updateId: `${state.profile.collectionId || safeSlug(state.profile.title)}-${Number(state.profile.version || 1)}-${Date.now()}` };
+        const metadata = { type: 'collection-update', collectionId: state.profile.collectionId || safeSlug(state.profile.title), baseVersion: Math.max(1, Number(state.profile.version || 1) - 1), version: Number(state.profile.version || 1), generatedAt, updateId: `${state.profile.collectionId || safeSlug(state.profile.title)}-${Number(state.profile.version || 1)}-${Date.now()}`, includesProfile: true };
+        const profile = { ...state.profile, generatedAt };
         const zip = zipStore([
           ['atualizacao.json', JSON.stringify(metadata, null, 2)],
+          ['perfil.json', JSON.stringify(profile, null, 2)],
           ['inventario-cartas.csv', csv(['Link Liga', 'Quantidade', 'Estado', 'Idioma'], cards)],
           ['inventario-boosters.csv', csv(['Link Liga', 'Quantidade'], boosters)],
           ['inventario-kits.csv', csv(csvHeaders.kits, kits)],
