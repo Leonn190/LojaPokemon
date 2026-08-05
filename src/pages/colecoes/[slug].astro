@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import CatalogBrowser from '../../components/CatalogBrowser.astro';
+import CollectionShelf from '../../components/CollectionShelf.astro';
 import ProductImage from '../../components/ProductImage.astro';
 import { formatBRL, getCollections, type CollectorCollection } from '../../lib/catalog';
 
@@ -14,11 +14,29 @@ const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 const initials = collection.owner.slice(0, 2).toUpperCase();
 const cover = collection.coverItems.slice(0, 3);
+const encodePath = (path: string) => path.split('/').map(encodeURIComponent).join('/');
+const imageUrl = (path: string) => `${base}${encodePath(path)}`;
+const albumData = collection.albums.map((album) => ({
+  id: album.id,
+  name: album.name,
+  description: album.description,
+  format: album.format,
+  columns: album.columns,
+  rows: album.rows,
+  occupiedSlots: album.occupiedSlots,
+  totalSlots: album.totalSlots,
+  pages: album.pages.map((page) => ({ slots: page.slots.map((slot) => slot ? {
+    name: slot.name,
+    number: slot.number,
+    collection: slot.collection,
+    imageCandidates: slot.imageCandidates,
+  } : null) })),
+}));
 ---
 
 <BaseLayout
   title={collection.title}
-  description={`${collection.title}: explore cartas, boosters e kits publicados por ${collection.owner}.`}
+  description={`${collection.title}: explore cartas, boosters, kits e álbuns publicados por ${collection.owner}.`}
   active="collections"
   bodyClass="collection-profile-page"
 >
@@ -36,14 +54,15 @@ const cover = collection.coverItems.slice(0, 3);
         <h1>{collection.title}</h1>
         <p>{collection.description}</p>
         <div class="profile-actions">
-          <a class="primary-cta" href="#cartas"><span>Explorar a coleção</span><b>↓</b></a>
+          <a class="primary-cta" href={collection.albums.length ? '#albuns' : '#cartas'}><span>Explorar a coleção</span><b>↓</b></a>
           <button class="secondary-cta share-collection-button" type="button" data-share-collection><span>Compartilhar coleção</span><b>↗</b></button>
         </div>
-        <div class="profile-stats">
+        <div class="profile-stats profile-stats-with-albums">
           <div><strong>{collection.cards.length}</strong><span>cartas</span></div>
           <div><strong>{collection.boosters.length}</strong><span>boosters</span></div>
           <div><strong>{collection.kits.length}</strong><span>kits</span></div>
-          <div><strong>{collection.totalUnits}</strong><span>unidades totais</span></div>
+          <div><strong>{collection.albums.length}</strong><span>{collection.albums.length === 1 ? 'álbum' : 'álbuns'}</span></div>
+          <div><strong>{collection.totalUnits}</strong><span>unidades</span></div>
         </div>
       </div>
 
@@ -51,62 +70,265 @@ const cover = collection.coverItems.slice(0, 3);
         <div class="profile-cover-glow" aria-hidden="true"></div>
         {cover.map((item, index) => <div class={`profile-cover-item profile-cover-${index + 1}`}><ProductImage item={item} eager={index === 0} /></div>)}
         {cover.length === 0 && <div class="profile-cover-empty">{initials}</div>}
-        <div class="profile-value-card"><small>Valor publicado no acervo</small><strong>{formatBRL(collection.estimatedValue)}</strong><span>somando quantidades cadastradas</span></div>
+        <div class="profile-value-card"><small>Valor publicado na coleção</small><strong>{formatBRL(collection.estimatedValue)}</strong><span>somando quantidades cadastradas</span></div>
       </div>
     </div>
   </section>
 
+  {collection.albums.length > 0 && (
+    <section id="albuns" class:list={['collection-albums-showcase', collection.albums.length === 1 && 'single-album-showcase']} data-album-root data-albums={JSON.stringify(albumData)}>
+      <div class="shell">
+        <div class="collection-albums-heading" data-reveal>
+          <div><span class="section-eyebrow">Álbuns de {collection.owner}</span><h2>{collection.albums.length === 1 ? 'O álbum da coleção' : 'Álbuns organizados'}</h2><p>{collection.albums.length === 1 ? 'Abra o álbum virtual e navegue página por página.' : 'Cada álbum pode organizar as mesmas cartas de maneiras diferentes.'}</p></div>
+          <span class="album-showcase-count">{collection.albums.length} {collection.albums.length === 1 ? 'álbum' : 'álbuns'}</span>
+        </div>
+        <div class:list={['public-album-grid', collection.albums.length === 1 && 'single']}>
+          {collection.albums.map((album) => {
+            const previewCards = album.pages.flatMap((page) => page.slots).filter(Boolean).slice(0, 6);
+            return (
+              <button type="button" class="public-album-card" data-open-album={album.id}>
+                <div class="public-album-cover">
+                  <div class="album-spine"><span>NEXUS</span></div>
+                  <div class="album-cover-grid">
+                    {previewCards.map((card) => card && (
+                      <span class="album-cover-slot">
+                        {card.imageCandidates[0] ? <img src={imageUrl(card.imageCandidates[0])} alt="" loading="lazy" /> : <b>{card.name.slice(0, 2).toUpperCase()}</b>}
+                      </span>
+                    ))}
+                    {Array.from({ length: Math.max(0, 6 - previewCards.length) }).map(() => <span class="album-cover-slot empty"></span>)}
+                  </div>
+                  <span class="album-cover-shine" aria-hidden="true"></span>
+                </div>
+                <div class="public-album-copy">
+                  <span>{album.format.replace('x', ' por ')} · {album.pages.length} {album.pages.length === 1 ? 'página' : 'páginas'}</span>
+                  <h3>{album.name}</h3>
+                  <p>{album.description || 'Álbum virtual organizado pelo colecionador.'}</p>
+                  <div class="public-album-progress"><i style={`--album-progress:${album.totalSlots ? Math.round(album.occupiedSlots / album.totalSlots * 100) : 0}%`}></i><strong>{album.occupiedSlots} / {album.totalSlots} espaços</strong></div>
+                  <b class="public-album-open">Abrir álbum <span>↗</span></b>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div class="public-album-modal" data-public-album-modal hidden>
+        <button type="button" class="public-album-backdrop" data-close-public-album aria-label="Fechar álbum"></button>
+        <section class="public-album-dialog" role="dialog" aria-modal="true" aria-labelledby="public-album-title">
+          <header class="public-album-dialog-header">
+            <div><span class="section-eyebrow">Álbum virtual</span><h2 id="public-album-title" data-public-album-title>Álbum</h2><p data-public-album-description></p></div>
+            <button type="button" data-close-public-album aria-label="Fechar">×</button>
+          </header>
+          <div class="public-album-stage">
+            <button type="button" class="album-page-arrow previous" data-public-album-previous aria-label="Página anterior">‹</button>
+            <div class="public-album-page-wrap" data-public-album-page-wrap>
+              <div class="public-album-page" data-public-album-page></div>
+              <div class="public-album-rings" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+            <button type="button" class="album-page-arrow next" data-public-album-next aria-label="Próxima página">›</button>
+          </div>
+          <footer class="public-album-footer"><span data-public-album-format></span><strong data-public-album-counter>Página 1 de 1</strong><span data-public-album-filled></span></footer>
+        </section>
+      </div>
+    </section>
+  )}
+
   <nav class="collection-section-nav" aria-label="Seções da coleção">
     <div class="shell">
+      {collection.albums.length > 0 && <a href="#albuns">Álbuns <strong>{collection.albums.length}</strong></a>}
       <a href="#cartas">Cartas <strong>{collection.cards.length}</strong></a>
       <a href="#boosters">Boosters <strong>{collection.boosters.length}</strong></a>
       <a href="#kits">Kits <strong>{collection.kits.length}</strong></a>
     </div>
   </nav>
 
-  <section id="cartas" class="collection-catalog-block">
-    <div class="shell collection-block-heading" data-reveal>
-      <div><span class="section-eyebrow">Cartas de {collection.owner}</span><h2>Cartas da coleção</h2><p>Todos os resultados abaixo pertencem exclusivamente a esta coleção.</p></div>
-    </div>
-    {collection.cards.length > 0 ? (
-      <CatalogBrowser kind="card" items={collection.cards} showOwnerFilter={false} hideOwnerOnCards />
-    ) : (
-      <div class="shell profile-empty-category"><span>◇</span><p>Nenhuma carta cadastrada nesta coleção.</p></div>
-    )}
-  </section>
-
-  <section id="boosters" class="collection-catalog-block alternate-collection-block">
-    <div class="shell collection-block-heading" data-reveal>
-      <div><span class="section-eyebrow">Boosters de {collection.owner}</span><h2>Pacotes lacrados</h2><p>Estoque de boosters publicado neste perfil.</p></div>
-    </div>
-    {collection.boosters.length > 0 ? (
-      <CatalogBrowser kind="booster" items={collection.boosters} showOwnerFilter={false} hideOwnerOnCards />
-    ) : (
-      <div class="shell profile-empty-category"><span>◇</span><p>Nenhum booster cadastrado nesta coleção.</p></div>
-    )}
-  </section>
-
-  <section id="kits" class="collection-catalog-block">
-    <div class="shell collection-block-heading" data-reveal>
-      <div><span class="section-eyebrow">Kits de {collection.owner}</span><h2>Conjuntos personalizados</h2><p>Combinações criadas usando itens da própria coleção.</p></div>
-    </div>
-    {collection.kits.length > 0 ? (
-      <CatalogBrowser kind="kit" items={collection.kits} showOwnerFilter={false} hideOwnerOnCards />
-    ) : (
-      <div class="shell profile-empty-category kit-profile-empty"><span>▦</span><div><strong>Nenhum kit publicado ainda.</strong><p>Quando {collection.owner} combinar cartas ou boosters, os conjuntos aparecerão aqui.</p></div></div>
-    )}
-  </section>
+  <CollectionShelf kind="card" eyebrow={`Cartas de ${collection.owner}`} title="Cartas da coleção" description="Uma seleção passa no carrossel. Expanda somente quando quiser carregar o inventário completo e usar os filtros." items={collection.cards} endpoint={`${base}colecoes/dados/${collection.slug}/cards.json`} />
+  <CollectionShelf kind="booster" eyebrow={`Boosters de ${collection.owner}`} title="Pacotes lacrados" description="Veja uma prévia dos boosters ou abra a busca completa quando precisar." items={collection.boosters} endpoint={`${base}colecoes/dados/${collection.slug}/boosters.json`} alternate />
+  <CollectionShelf kind="kit" eyebrow={`Kits de ${collection.owner}`} title="Conjuntos personalizados" description="Combinações criadas usando itens da própria coleção." items={collection.kits} endpoint={`${base}colecoes/dados/${collection.slug}/kits.json`} />
 
   <script is:inline>
-    document.querySelector('[data-share-collection]')?.addEventListener('click', async (event) => {
-      const button = event.currentTarget;
-      const original = button.innerHTML;
-      try {
-        if (navigator.share) await navigator.share({ title: document.title, url: location.href });
-        else await navigator.clipboard.writeText(location.href);
-        button.innerHTML = '<span>Link copiado</span><b>✓</b>';
-      } catch (_) {}
-      setTimeout(() => { button.innerHTML = original; }, 1400);
-    });
+    (() => {
+      const base = document.body.dataset.siteBase || '/';
+      const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[character]));
+      const normalize = (value) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const formatBRL = (value) => value === null || value === undefined ? 'Consultar' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value));
+      const imageUrl = (path) => /^(?:https?:|data:|blob:)/i.test(path || '') ? path : `${base}${String(path || '').replace(/^\/+/, '').split('/').map(encodeURIComponent).join('/')}`;
+
+      document.querySelector('[data-share-collection]')?.addEventListener('click', async (event) => {
+        const button = event.currentTarget;
+        const original = button.innerHTML;
+        try {
+          if (navigator.share) await navigator.share({ title: document.title, url: location.href });
+          else await navigator.clipboard.writeText(location.href);
+          button.innerHTML = '<span>Link copiado</span><b>✓</b>';
+        } catch (_) {}
+        setTimeout(() => { button.innerHTML = original; }, 1400);
+      });
+
+      const albumRoot = document.querySelector('[data-album-root]');
+      if (albumRoot) {
+        let albums = [];
+        try { albums = JSON.parse(albumRoot.dataset.albums || '[]'); } catch (_) {}
+        const modal = albumRoot.querySelector('[data-public-album-modal]');
+        const pageElement = albumRoot.querySelector('[data-public-album-page]');
+        const pageWrap = albumRoot.querySelector('[data-public-album-page-wrap]');
+        let activeAlbum = null;
+        let activePage = 0;
+        const renderAlbum = (direction = 1) => {
+          if (!activeAlbum || !pageElement) return;
+          const page = activeAlbum.pages[activePage] || { slots: [] };
+          pageElement.style.setProperty('--album-columns', String(activeAlbum.columns));
+          pageElement.style.setProperty('--album-rows', String(activeAlbum.rows));
+          pageElement.innerHTML = page.slots.map((slot, index) => slot ? `<article class="public-album-slot"><div>${slot.imageCandidates?.[0] ? `<img src="${escapeHtml(imageUrl(slot.imageCandidates[0]))}" alt="${escapeHtml(slot.name)}" loading="lazy" />` : `<span>${escapeHtml(slot.name.slice(0, 2).toUpperCase())}</span>`}</div><small>${escapeHtml(slot.name)}</small><b>${escapeHtml(slot.number || '')}</b></article>` : `<div class="public-album-slot empty"><span>${index + 1}</span></div>`).join('');
+          pageWrap?.classList.remove('turn-forward', 'turn-backward');
+          void pageWrap?.offsetWidth;
+          pageWrap?.classList.add(direction >= 0 ? 'turn-forward' : 'turn-backward');
+          albumRoot.querySelector('[data-public-album-counter]').textContent = `Página ${activePage + 1} de ${activeAlbum.pages.length}`;
+          albumRoot.querySelector('[data-public-album-format]').textContent = `Formato ${activeAlbum.format.replace('x', ' por ')}`;
+          albumRoot.querySelector('[data-public-album-filled]').textContent = `${activeAlbum.occupiedSlots} cartas posicionadas`;
+          albumRoot.querySelector('[data-public-album-previous]').disabled = activePage === 0;
+          albumRoot.querySelector('[data-public-album-next]').disabled = activePage >= activeAlbum.pages.length - 1;
+        };
+        const openAlbum = (id) => {
+          activeAlbum = albums.find((album) => album.id === id);
+          if (!activeAlbum || !modal) return;
+          activePage = 0;
+          albumRoot.querySelector('[data-public-album-title]').textContent = activeAlbum.name;
+          albumRoot.querySelector('[data-public-album-description]').textContent = activeAlbum.description || 'Álbum virtual organizado pelo colecionador.';
+          modal.hidden = false;
+          document.body.classList.add('public-album-open');
+          requestAnimationFrame(() => modal.classList.add('open'));
+          renderAlbum();
+        };
+        const closeAlbum = () => { if (!modal) return; modal.classList.remove('open'); document.body.classList.remove('public-album-open'); setTimeout(() => { modal.hidden = true; }, 180); };
+        albumRoot.addEventListener('click', (event) => {
+          const opener = event.target.closest('[data-open-album]');
+          if (opener) { openAlbum(opener.dataset.openAlbum); return; }
+          if (event.target.closest('[data-close-public-album]')) { closeAlbum(); return; }
+          if (event.target.closest('[data-public-album-previous]') && activePage > 0) { activePage -= 1; renderAlbum(-1); }
+          if (event.target.closest('[data-public-album-next]') && activeAlbum && activePage < activeAlbum.pages.length - 1) { activePage += 1; renderAlbum(1); }
+        });
+        document.addEventListener('keydown', (event) => {
+          if (!modal || modal.hidden) return;
+          if (event.key === 'Escape') closeAlbum();
+          if (event.key === 'ArrowLeft' && activePage > 0) { activePage -= 1; renderAlbum(-1); }
+          if (event.key === 'ArrowRight' && activeAlbum && activePage < activeAlbum.pages.length - 1) { activePage += 1; renderAlbum(1); }
+        });
+      }
+
+      const dynamicVisual = (item) => {
+        const urls = (item.imageCandidates || []).map(imageUrl);
+        const primary = urls[0] || '';
+        const remaining = escapeHtml(JSON.stringify(urls.slice(1)));
+        const initials = item.kind === 'kit' ? 'KIT' : String(item.name || 'TCG').split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+        return `<div class="collectible-visual ${item.kind === 'booster' ? 'booster-visual' : item.kind === 'kit' ? 'kit-visual' : ''}" ${item.kind === 'card' ? 'data-tilt data-tilt-strength="5"' : ''}><div class="image-stage"><span class="image-fallback"><b>${escapeHtml(initials)}</b><small>${item.kind === 'card' ? 'Carta Pokémon' : item.kind === 'booster' ? 'Booster Pokémon' : 'Kit personalizado'}</small></span>${primary ? `<img src="${escapeHtml(primary)}" alt="${escapeHtml(item.name)}" loading="lazy" decoding="async" data-image-candidates="${remaining}" />` : ''}${item.kind === 'card' ? '<span class="foil-spectrum"></span><span class="glare"></span>' : ''}</div></div>`;
+      };
+      const productMarkup = (item) => {
+        const itemType = item.kind === 'card' ? (item.type || 'Carta Pokémon') : item.kind === 'booster' ? 'Booster avulso' : 'Kit personalizado';
+        const description = item.kind === 'card' ? `<strong>${escapeHtml(item.number || '')}</strong><span>•</span>${escapeHtml(item.collection || '')}` : item.kind === 'kit' ? escapeHtml(item.description || '') : 'Pacote lacrado publicado pelo colecionador.';
+        return `<article class="product-card compact-card" data-product-card data-product-id="${escapeHtml(`${item.kind}:${item.slug}`)}" data-kind="${escapeHtml(item.kind)}" data-name="${escapeHtml(item.name)}" data-number="${escapeHtml(item.number || '')}" data-collection="${escapeHtml(item.collection || item.name || '')}" data-language="${escapeHtml(item.language || '')}" data-condition="${escapeHtml(item.condition || '')}" data-year="${escapeHtml(item.year || '')}" data-type="${escapeHtml(itemType)}" data-description="${escapeHtml(item.description || '')}" data-contents="${escapeHtml(item.contents || '')}" data-owner="${escapeHtml(item.ownerName)}" data-owner-collection="${escapeHtml(item.ownerCollectionName)}" data-owner-slug="${escapeHtml(item.ownerCollectionSlug)}" data-price-value="${item.price ?? ''}" data-price-label="${escapeHtml(formatBRL(item.price))}" data-stock="${item.quantity}" data-for-sale="${item.forSale ? 'true' : 'false'}" data-show-quantity="${item.showQuantity ? 'true' : 'false'}"><button class="product-open-button" type="button" data-open-product><div class="product-card-media">${dynamicVisual(item)}${item.showQuantity ? `<span class="quantity-chip">${item.quantity} ${item.quantity === 1 ? 'unidade' : 'unidades'}</span>` : ''}</div><div class="product-card-body"><div class="product-card-heading"><div><span class="product-kicker">${escapeHtml(itemType)}</span><h3>${escapeHtml(item.name)}</h3></div><span class="open-arrow">⌗</span></div><p class="product-description">${description}</p><div class="product-card-footer"><div class="price-block"><small>Preço</small><strong>${escapeHtml(formatBRL(item.price))}</strong></div>${item.kind === 'card' ? `<span class="condition-badge condition-${escapeHtml(normalize(item.condition).replace(/\s+/g, '-'))}">${escapeHtml(item.condition || '')}</span>` : ''}</div></div></button>${item.forSale ? '<button class="add-cart-button" type="button" data-add-cart><span>＋</span>Adicionar ao carrinho</button>' : '<span class="not-for-sale-label">Não está à venda</span>'}</article>`;
+      };
+      const initializeDynamicCards = (container) => {
+        container.querySelectorAll('img[data-image-candidates]').forEach((image) => {
+          if (image.dataset.dynamicReady) return;
+          image.dataset.dynamicReady = 'true';
+          const show = () => { image.hidden = false; image.closest('.image-stage')?.classList.add('has-image'); };
+          const nextCandidate = () => {
+            let candidates = [];
+            try { candidates = JSON.parse(image.dataset.imageCandidates || '[]'); } catch (_) {}
+            const next = candidates.shift();
+            if (next) { image.dataset.imageCandidates = JSON.stringify(candidates); image.src = next; }
+            else image.remove();
+          };
+          image.addEventListener('load', show);
+          image.addEventListener('error', nextCandidate);
+          if (image.complete) image.naturalWidth > 0 ? show() : nextCandidate();
+        });
+        const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!finePointer || reducedMotion) return;
+        container.querySelectorAll('[data-tilt]').forEach((element) => {
+          if (element.dataset.dynamicTiltReady) return;
+          element.dataset.dynamicTiltReady = 'true';
+          element.addEventListener('pointermove', (event) => {
+            const bounds = element.getBoundingClientRect();
+            const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
+            const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
+            const strength = Number(element.dataset.tiltStrength || 5);
+            element.style.setProperty('--mx', `${x * 100}%`);
+            element.style.setProperty('--my', `${y * 100}%`);
+            element.style.setProperty('--ry', `${(x - .5) * strength * 2}deg`);
+            element.style.setProperty('--rx', `${(.5 - y) * strength * 2}deg`);
+            element.classList.add('is-tilting');
+          });
+          element.addEventListener('pointerleave', () => {
+            element.style.setProperty('--rx', '0deg');
+            element.style.setProperty('--ry', '0deg');
+            element.style.setProperty('--mx', '50%');
+            element.style.setProperty('--my', '50%');
+            element.classList.remove('is-tilting');
+          });
+        });
+      };
+
+      document.querySelectorAll('[data-collection-shelf]').forEach((shelf) => {
+        const button = shelf.querySelector('[data-expand-shelf]');
+        const expanded = shelf.querySelector('[data-expanded-catalog]');
+        const grid = shelf.querySelector('[data-shelf-grid]');
+        const search = shelf.querySelector('[data-shelf-search]');
+        const filters = shelf.querySelector('[data-shelf-filters]');
+        const count = shelf.querySelector('[data-shelf-count]');
+        const kind = shelf.dataset.kind;
+        let items = null;
+        let loading = false;
+        const optionValues = (field) => [...new Set((items || []).map((item) => item[field]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), 'pt-BR'));
+        const selectMarkup = (field, label, values) => `<label><span>${label}</span><select data-shelf-filter="${field}"><option value="">Todos</option>${values.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('')}</select></label>`;
+        const buildFilters = () => {
+          const common = `${selectMarkup('availability', 'Disponibilidade', ['À venda', 'Exposição'])}<label><span>Ordenar</span><select data-shelf-sort><option value="name">Nome</option><option value="price-asc">Menor preço</option><option value="price-desc">Maior preço</option><option value="quantity">Maior quantidade</option></select></label>`;
+          filters.innerHTML = kind === 'card' ? `${selectMarkup('collection', 'Coleção', optionValues('collection'))}${selectMarkup('condition', 'Estado', optionValues('condition'))}${selectMarkup('language', 'Idioma', optionValues('language'))}${selectMarkup('type', 'Tipo', optionValues('type'))}${common}` : common;
+          filters.querySelectorAll('select').forEach((select) => select.addEventListener('change', applyFilters));
+        };
+        const applyFilters = () => {
+          if (!items) return;
+          const query = normalize(search.value);
+          let visible = items.filter((item) => {
+            if (query && !normalize(`${item.searchText || ''} ${item.name || ''}`).includes(query)) return false;
+            return [...filters.querySelectorAll('[data-shelf-filter]')].every((select) => {
+              if (!select.value) return true;
+              if (select.dataset.shelfFilter === 'availability') return select.value === (item.forSale ? 'À venda' : 'Exposição');
+              return String(item[select.dataset.shelfFilter] || '') === select.value;
+            });
+          });
+          const sort = filters.querySelector('[data-shelf-sort]')?.value || 'name';
+          visible = [...visible].sort((left, right) => sort === 'price-asc' ? (left.price ?? Infinity) - (right.price ?? Infinity) : sort === 'price-desc' ? (right.price ?? -1) - (left.price ?? -1) : sort === 'quantity' ? right.quantity - left.quantity : String(left.name).localeCompare(String(right.name), 'pt-BR'));
+          grid.innerHTML = visible.length ? visible.map(productMarkup).join('') : '<div class="collection-filter-empty"><span>⌕</span><strong>Nenhum item encontrado</strong><p>Ajuste a busca ou remova algum filtro.</p></div>';
+          count.textContent = `${visible.length} ${visible.length === 1 ? 'resultado' : 'resultados'}`;
+          initializeDynamicCards(grid);
+        };
+        const load = async () => {
+          if (items || loading) return;
+          loading = true;
+          try {
+            const response = await fetch(shelf.dataset.endpoint);
+            if (!response.ok) throw new Error('Falha ao carregar');
+            items = await response.json();
+            buildFilters();
+            applyFilters();
+          } catch (_) {
+            grid.innerHTML = '<div class="collection-filter-empty"><span>!</span><strong>Não foi possível carregar agora</strong><p>Recarregue a página e tente novamente.</p></div>';
+            count.textContent = 'Erro no carregamento';
+          } finally { loading = false; }
+        };
+        button?.addEventListener('click', async () => {
+          const opening = expanded.hidden;
+          expanded.hidden = !opening;
+          button.classList.toggle('active', opening);
+          button.querySelector('span').textContent = opening ? 'Recolher inventário' : 'Ver todos e pesquisar';
+          button.querySelector('b').textContent = opening ? '−' : '＋';
+          if (opening) { await load(); expanded.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        });
+        search?.addEventListener('input', applyFilters);
+      });
+    })();
   </script>
 </BaseLayout>

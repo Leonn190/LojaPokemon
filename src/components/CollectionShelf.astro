@@ -1,0 +1,53 @@
+---
+import ProductCard from './ProductCard.astro';
+import type { CatalogItem, CatalogKind } from '../lib/catalog';
+
+interface Props {
+  kind: CatalogKind;
+  eyebrow: string;
+  title: string;
+  description: string;
+  items: CatalogItem[];
+  endpoint: string;
+  alternate?: boolean;
+}
+
+const { kind, eyebrow, title, description, items, endpoint, alternate = false } = Astro.props;
+const preview = items.slice(0, 8);
+const icon = kind === 'card' ? '◇' : kind === 'booster' ? '▱' : '▦';
+const emptyLabel = kind === 'card' ? 'Nenhuma carta cadastrada nesta coleção.' : kind === 'booster' ? 'Nenhum booster cadastrado nesta coleção.' : 'Nenhum kit publicado ainda.';
+---
+
+<section id={kind === 'card' ? 'cartas' : kind === 'booster' ? 'boosters' : 'kits'} class:list={['collection-catalog-block', alternate && 'alternate-collection-block']} data-collection-shelf data-kind={kind} data-endpoint={endpoint}>
+  <div class="shell collection-block-heading collection-shelf-heading" data-reveal>
+    <div><span class="section-eyebrow">{eyebrow}</span><h2>{title}</h2><p>{description}</p></div>
+    {items.length > 0 && <button type="button" class="collection-expand-button" data-expand-shelf><span>Ver todos e pesquisar</span><b>＋</b></button>}
+  </div>
+
+  {items.length > 0 ? (
+    <>
+      <div class="shell collection-preview-shell">
+        <div class="carousel-track collection-profile-carousel" data-random-carousel aria-label={`${title}: seleção da coleção`}>
+          <div class="carousel-belt">
+            <div class="carousel-sequence">
+              {preview.map((item) => <ProductCard item={item} compact hideOwner />)}
+            </div>
+            <div class="carousel-sequence" aria-hidden="true">
+              {preview.map((item) => <ProductCard item={item} compact hideOwner />)}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="shell collection-expanded-catalog" data-expanded-catalog hidden>
+        <div class="collection-expanded-toolbar">
+          <label class="collection-expanded-search"><span>⌕</span><input type="search" placeholder={`Pesquisar ${kind === 'card' ? 'cartas' : kind === 'booster' ? 'boosters' : 'kits'}...`} data-shelf-search /></label>
+          <div class="collection-expanded-filters" data-shelf-filters></div>
+          <span class="collection-expanded-count" data-shelf-count>Carregando…</span>
+        </div>
+        <div class="collection-expanded-grid" data-shelf-grid><div class="collection-loading-state"><i></i><span>Carregando o inventário completo…</span></div></div>
+      </div>
+    </>
+  ) : (
+    <div class="shell profile-empty-category"><span>{icon}</span><p>{emptyLabel}</p></div>
+  )}
+</section>

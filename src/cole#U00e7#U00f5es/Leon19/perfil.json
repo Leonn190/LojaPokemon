@@ -1,0 +1,13 @@
+{
+  "owner": "Leon Soto",
+  "title": "Coleção do Leon",
+  "description": "Uma coleção Pokémon com cartas avulsas e boosters organizados em um catálogo digital.",
+  "selling": true,
+  "featured": true,
+  "email": "euleonsoto@gmail.com",
+  "phone": "----",
+  "password": "SenhaLeon",
+  "showQuantity": true,
+  "version": 1,
+  "collectionId": "Leon19"
+}

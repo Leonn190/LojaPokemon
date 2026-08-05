@@ -64,6 +64,34 @@ export interface KitItem extends OwnedItemBase {
 
 export type CatalogItem = CardItem | BoosterItem | KitItem;
 
+export interface AlbumCardReference {
+  linkLiga: string;
+  language: string;
+  condition: string;
+  name: string;
+  number: string;
+  collection: string;
+  imageCandidates: string[];
+  cardSlug: string;
+}
+
+export interface AlbumPage {
+  slots: Array<AlbumCardReference | null>;
+}
+
+export interface AlbumItem {
+  id: string;
+  name: string;
+  description: string;
+  format: string;
+  columns: number;
+  rows: number;
+  pages: AlbumPage[];
+  occupiedSlots: number;
+  totalSlots: number;
+  coverImageCandidates: string[];
+}
+
 export interface CollectorCollection {
   slug: string;
   owner: string;
@@ -74,6 +102,7 @@ export interface CollectorCollection {
   cards: CardItem[];
   boosters: BoosterItem[];
   kits: KitItem[];
+  albums: AlbumItem[];
   totalItems: number;
   totalUnits: number;
   estimatedValue: number;
@@ -94,10 +123,19 @@ type ProfileData = {
   password?: string;
 };
 
+const decodeEscapedUnicode = (value: string): string => value.replace(/#U([0-9a-fA-F]{4})/g, (match, hex: string) => {
+  try { return String.fromCodePoint(Number.parseInt(hex, 16)); } catch { return match; }
+});
+
+const sourceRoot = join(process.cwd(), 'src');
+const encodedCollectionsFolder = existsSync(sourceRoot)
+  ? readdirSync(sourceRoot, { withFileTypes: true }).find((entry) => entry.isDirectory() && decodeEscapedUnicode(entry.name).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() === 'colecoes')?.name
+  : undefined;
 const collectionsRoot = [
-  join(process.cwd(), 'src', 'coleções'),
-  join(process.cwd(), 'src', 'colecoes'),
-].find((path) => existsSync(path)) ?? join(process.cwd(), 'src', 'coleções');
+  join(sourceRoot, 'coleções'),
+  join(sourceRoot, 'colecoes'),
+  encodedCollectionsFolder ? join(sourceRoot, encodedCollectionsFolder) : '',
+].find((path) => path && existsSync(path)) ?? join(sourceRoot, 'coleções');
 
 const parseCsv = (source: string): CsvRow[] => {
   const text = source.replace(/^\uFEFF/, '');
@@ -344,6 +382,67 @@ const kitImageCandidates = (collectionSlug: string, name: string, explicit: stri
   return unique([...explicitCandidates, ...existing, ...generated]);
 };
 
+const normalizeReferenceLink = (value: string): string => {
+  const raw = value.trim();
+  if (!raw) return '';
+  try {
+    const parsed = new URL(raw);
+    const entries = [...parsed.searchParams.entries()]
+      .filter(([key]) => key.toLowerCase() !== 'show' && key.toLowerCase() !== 'srsltid' && !key.toLowerCase().startsWith('utm_'))
+      .sort(([leftKey, leftValue], [rightKey, rightValue]) => leftKey.localeCompare(rightKey) || leftValue.localeCompare(rightValue));
+    const search = entries.map(([key, item]) => `${key}=${item}`).join('&');
+    return normalizeText(`${parsed.hostname}${parsed.pathname}?${search}`);
+  } catch (_) {
+    return normalizeText(raw);
+  }
+};
+
+const albumFormat = (value: string): { format: string; columns: number; rows: number } => {
+  const match = value.match(/([2-6])\s*(?:x|por)\s*([2-6])/i);
+  const columns = match ? Number(match[1]) : 3;
+  const rows = match ? Number(match[2]) : 3;
+  return { format: `${columns}x${rows}`, columns, rows };
+};
+
+const resolveAlbumCard = (raw: unknown, cards: CardItem[]): AlbumCardReference | null => {
+  if (!raw || typeof raw !== 'object') return null;
+  const slot = raw as Record<string, unknown>;
+  const linkLiga = String(slot.linkLiga ?? slot.link ?? '').trim();
+  const language = String(slot.language ?? slot.idioma ?? '').trim();
+  const condition = String(slot.condition ?? slot.estado ?? '').trim();
+  const name = String(slot.name ?? slot.nome ?? '').trim();
+  const number = String(slot.number ?? slot.numero ?? slot['número'] ?? '').trim();
+  const linkKey = normalizeReferenceLink(linkLiga);
+  const exact = cards.find((card) => linkKey && normalizeReferenceLink(card.linkLiga) === linkKey && (!language || normalizeText(card.language) === normalizeText(language)) && (!condition || normalizeText(card.condition) === normalizeText(condition)));
+  const byLink = exact ?? cards.find((card) => linkKey && normalizeReferenceLink(card.linkLiga) === linkKey);
+  const byIdentity = byLink ?? cards.find((card) => name && normalizeText(card.name) === normalizeText(name) && (!number || normalizeText(card.number) === normalizeText(number)));
+  const card = byIdentity;
+  const candidates = card?.imageCandidates ?? (Array.isArray(slot.imageCandidates) ? slot.imageCandidates.map(String) : []);
+  if (!card && !linkLiga && !name) return null;
+  return {
+    linkLiga: card?.linkLiga || linkLiga,
+    language: card?.language || language,
+    condition: card?.condition || condition,
+    name: card?.name || name || 'Carta não localizada',
+    number: card?.number || number,
+    collection: card?.collection || String(slot.collection ?? slot.colecao ?? ''),
+    imageCandidates: candidates,
+    cardSlug: card?.slug || '',
+  };
+};
+
+const parseAlbumPages = (raw: string, columns: number, rows: number, cards: CardItem[]): AlbumPage[] => {
+  const capacity = columns * rows;
+  let parsed: unknown = [];
+  try { parsed = JSON.parse(raw || '[]'); } catch (_) { parsed = []; }
+  const sourcePages = Array.isArray(parsed) ? parsed : [];
+  const pages = sourcePages.map((page): AlbumPage => {
+    const sourceSlots = Array.isArray(page) ? page : page && typeof page === 'object' && Array.isArray((page as Record<string, unknown>).slots) ? (page as Record<string, unknown>).slots as unknown[] : [];
+    return { slots: Array.from({ length: capacity }, (_, index) => resolveAlbumCard(sourceSlots[index], cards)) };
+  });
+  return pages.length ? pages : [{ slots: Array.from({ length: capacity }, () => null) }];
+};
+
 const createUniqueSlug = (base: string, used: Map<string, number>, suffix: string): string => {
   const count = used.get(base) ?? 0;
   used.set(base, count + 1);
@@ -493,6 +592,25 @@ export const getCollections = (): CollectorCollection[] => {
       };
     });
 
+    const albums: AlbumItem[] = readRows(folder, 'inventario-albuns.csv').map((row, albumIndex) => {
+      const layout = albumFormat(row['Formato'] || '3x3');
+      const pages = parseAlbumPages(row['Páginas JSON'] || row['Paginas JSON'] || '', layout.columns, layout.rows, cards);
+      const occupiedSlots = pages.reduce((total, page) => total + page.slots.filter(Boolean).length, 0);
+      const firstCard = pages.flatMap((page) => page.slots).find(Boolean);
+      return {
+        id: row['ID'] || `${collectionSlug}-album-${albumIndex + 1}`,
+        name: row['Nome'] || `Álbum ${albumIndex + 1}`,
+        description: row['Descrição'] || '',
+        format: layout.format,
+        columns: layout.columns,
+        rows: layout.rows,
+        pages,
+        occupiedSlots,
+        totalSlots: pages.length * layout.columns * layout.rows,
+        coverImageCandidates: firstCard?.imageCandidates || (row['Imagem'] ? [row['Imagem']] : []),
+      };
+    });
+
     const allItems: CatalogItem[] = [...cards, ...boosters, ...kits];
     const totalUnits = allItems.reduce((total, item) => total + item.quantity, 0);
     const estimatedValue = allItems.reduce((total, item) => total + (item.price ?? 0) * item.quantity, 0);
@@ -510,6 +628,7 @@ export const getCollections = (): CollectorCollection[] => {
       cards,
       boosters,
       kits,
+      albums,
       totalItems: allItems.length,
       totalUnits,
       estimatedValue,
@@ -547,13 +666,13 @@ export const getEditableCollections = () => getCollections().map((collection) =>
     })),
     boosters: collection.boosters.map(({ name, quantity, finalPrice, forSale, linkLiga, minimumPrice, quickSalePrice, leaguePrice, imageCandidates }) => ({ name, quantity, price: finalPrice, forSale, linkLiga, minimumPrice, quickSalePrice, leaguePrice, imageCandidates })),
     kits: collection.kits.map(({ name, description, contents, contentItems, sourceTotal, quantity, price, forSale, imageCandidates }) => ({ name, description, contents, contentItems, sourceTotal, quantity, price, forSale, imageCandidates })),
-    albums: readRows(join(collectionsRoot, folderName), 'inventario-albuns.csv').map((row) => ({
-      name: row['Nome'] || 'Álbum sem nome',
-      description: row['Descrição'] || '',
-      progress: row['Progresso'] || '',
-      quantity: parseQuantity(row['Quantidade']) || 1,
-      image: row['Imagem'] || '',
-      forSale: parseBoolean(row['À venda'] ?? row['Venda'], false),
+    albums: collection.albums.map((album) => ({
+      albumId: album.id,
+      name: album.name,
+      description: album.description,
+      format: album.format,
+      pages: album.pages.map((page) => ({ slots: page.slots.map((slot) => slot ? { ...slot } : null) })),
+      imageCandidates: album.coverImageCandidates,
     })),
   };
 });
