@@ -125,6 +125,7 @@ def _oferta_publica(oferta: dict[str, Any] | None, preco: Decimal | None = None)
         "preco": numero(valor),
         "idioma": str(oferta.get("idioma_original") or oferta.get("idioma") or "").strip(),
         "estado": str(oferta.get("estado_original") or oferta.get("estado") or "").strip().upper(),
+        "extra": str(oferta.get("extra") or "").strip(),
         "ofertaId": str(oferta.get("oferta_id") or "").strip(),
         "linkLoja": str(oferta.get("link_loja") or "").strip(),
     }
@@ -145,9 +146,10 @@ def _ajustar_para_estado(preco: Decimal, estado_encontrado: str, estado_desejado
         return None
     fator_origem = Decimal(str(FATORES_ESTADO[estado_encontrado]))
     fator_destino = Decimal(str(FATORES_ESTADO[estado_desejado]))
-    if fator_origem <= 0:
+    fator = Decimal("1") + (fator_destino - fator_origem)
+    if fator <= 0:
         return None
-    return (preco * fator_destino / fator_origem).quantize(Decimal("0.01"))
+    return (preco * fator).quantize(Decimal("0.01"))
 
 
 def _stats_coleta(dados: dict[str, Any], origem: str) -> dict[str, Any]:
@@ -306,8 +308,11 @@ def gerar_status_carta(dados: dict[str, Any], idioma: str, estado: str) -> dict[
                 },
             })
 
-    # 3) Buylist somente contra produto equivalente.
-    motivo_buylist = _comparacao_buylist_carta(marketplace, buylist, idioma_normalizado, estado_normalizado)
+    # 3) Buylist somente contra produto equivalente. O resumidor já remove
+    # variantes incompatíveis (ex.: Normal x Foil) quando detecta inversão anormal.
+    marketplace_equivalente = list(dados.get("ofertas_selecionadas") or marketplace)
+    buylist_equivalente = list(dados.get("buylist_selecionada") or buylist)
+    motivo_buylist = _comparacao_buylist_carta(marketplace_equivalente, buylist_equivalente, idioma_normalizado, estado_normalizado)
     if motivo_buylist:
         motivos.append(motivo_buylist)
 
@@ -405,9 +410,11 @@ def gerar_status_booster(dados: dict[str, Any]) -> dict[str, Any]:
 def preco_objeto(dados: dict[str, Any], estimado: bool) -> dict[str, Any]:
     sufixo = "" if estimado else "_coletado"
     return {
-        "Menor Liga": numero(dados.get(f"menor{sufixo}")),
-        "Preço Médio Liga": numero(dados.get(f"medio{sufixo}")),
+        "Minimo Certeiro": numero(dados.get(f"minimo_certeiro{sufixo}")),
         "Minimo": numero(dados.get(f"minimo{sufixo}")),
+        "Menor Liga": numero(dados.get(f"menor{sufixo}")),
+        "Media Liga": numero(dados.get(f"medio{sufixo}")),
+        "Venda Rapida": numero(dados.get(f"venda_rapida{sufixo}")),
         "Idioma encontrado": list(dados.get("idiomas_encontrados") or []),
         "Estado encontrado": list(dados.get("estados_encontrados") or []),
         "é estimativa": bool(dados.get("houve_estimativa")) if estimado else False,
@@ -429,10 +436,10 @@ def registrar_historico(
         "cotacaoId": cotacao_id,
         "data": data,
         "sucesso": sucesso,
-        "Preço": numero(item.get("Preço")),
-        "Preço Médio Liga": numero(item.get("Preço Médio Liga") or item.get("Preço médio Liga")),
-        "Menor Liga": numero(item.get("Menor Liga") or item.get("Preço Liga mais barato")),
+        "Minimo Certeiro": numero(item.get("Minimo Certeiro") or item.get("Mínimo Certeiro")),
         "Minimo": numero(item.get("Minimo") or item.get("Preço mínimo")),
+        "Menor Liga": numero(item.get("Menor Liga") or item.get("Preço Liga mais barato")),
+        "Media Liga": numero(item.get("Media Liga") or item.get("Preço Médio Liga") or item.get("Preço médio Liga")),
         "Venda Rapida": numero(item.get("Venda Rapida") or item.get("Venda rápida")),
         "Preço coletado": item.get("Preço coletado", {}),
         "Preço estimado": item.get("Preço estimado", {}),

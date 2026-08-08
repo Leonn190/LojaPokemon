@@ -21,6 +21,7 @@ from configuracao import (
     ESPERA_PAGINA,
     INTERVALO_TENTATIVA,
     MAX_TENTATIVAS_PAGINA,
+    MINIMO_CERTEIRO,
     PASTA_IMAGENS,
     TENTATIVAS,
     USAR_OCR,
@@ -754,6 +755,37 @@ def _extrair_idioma_estado(oferta: WebElement) -> tuple[str, str]:
     return idioma, estado
 
 
+def _extrair_extra(oferta: WebElement) -> str:
+    """Extrai a variação física da oferta (Foil/Reverse Foil/Normal), quando exibida."""
+    seletores = (
+        ".extras", ".extra", ".card-extra", ".infos-extra",
+        "[data-extra]", "[data-finish]", "[data-foil]",
+    )
+    candidatos: list[str] = []
+    for seletor in seletores:
+        elemento = buscar_elemento_opcional(oferta, seletor)
+        if elemento is None:
+            continue
+        bruto = (
+            elemento.get_attribute("data-extra")
+            or elemento.get_attribute("data-finish")
+            or elemento.get_attribute("data-foil")
+            or elemento.get_attribute("textContent")
+            or ""
+        ).strip()
+        if bruto:
+            candidatos.append(bruto)
+    candidatos.append((oferta.get_attribute("innerText") or "").strip())
+    texto = " ".join(candidatos).upper()
+    if re.search(r"REVERSE\s*FOIL|FOIL\s*REVERS", texto):
+        return "Reverse Foil"
+    if re.search(r"(?:^|\s)FOIL(?:\s|$)", texto):
+        return "Foil"
+    if re.search(r"NORMAL\s*/?\s*SEM\s*EXTRAS|SEM\s*EXTRAS", texto):
+        return "Normal / Sem Extras"
+    return ""
+
+
 def obter_todas_as_ofertas(
     navegador: webdriver.Chrome,
     origem: str,
@@ -779,6 +811,7 @@ def obter_todas_as_ofertas(
 
     for indice, oferta in enumerate(elementos, start=1):
         idioma, estado = _extrair_idioma_estado(oferta)
+        extra = _extrair_extra(oferta)
         identificador_dom = oferta.get_attribute("id") or f"{origem}-{indice}"
         correspondencia_oferta = re.search(r"(\d+)$", identificador_dom)
         oferta_id = correspondencia_oferta.group(1) if correspondencia_oferta else identificador_dom
@@ -826,6 +859,7 @@ def obter_todas_as_ofertas(
                 "loja": str(nome_loja or "").strip(),
                 "idioma": str(idioma or "").strip(),
                 "estado": str(estado or "").strip().upper(),
+                "extra": str(extra or "").strip(),
                 "linkLoja": str(link_loja or "").strip(),
                 "erro": str(erro),
             })
@@ -836,6 +870,7 @@ def obter_todas_as_ofertas(
                 "preco": preco,
                 "idioma": idioma,
                 "estado": estado,
+                "extra": extra,
                 "loja": str(nome_loja or "").strip(),
                 "link_loja": str(link_loja or "").strip(),
                 "oferta_id": oferta_id,
@@ -865,18 +900,19 @@ def _idioma_curto(idioma: str) -> str:
 
 
 def _ajustar_estado(preco: Decimal, encontrado: str, desejado: str) -> tuple[Decimal, Decimal]:
-    """Converte o preço entre estados usando fatores configuráveis por condição.
+    """Converte o preço entre estados usando a diferença direta da tabela.
 
-    Ex.: NM=1.00 e SP=0.90. Um NM de R$100 estimado como SP vira R$90;
-    um SP de R$90 estimado como NM vira R$100.
+    A tabela é lida como deságio em relação a NM/M. Assim, se SP=0.90 e
+    NM=1.00, um preço SP estimado para NM recebe +10% (e não +11,11%).
+    Isso mantém exatamente a regra operacional usada no gerenciamento.
     """
     if encontrado not in FATORES_ESTADO or desejado not in FATORES_ESTADO:
         return preco, Decimal("1")
     fator_encontrado = Decimal(str(FATORES_ESTADO[encontrado]))
     fator_desejado = Decimal(str(FATORES_ESTADO[desejado]))
-    if fator_encontrado <= 0:
+    fator = Decimal("1") + (fator_desejado - fator_encontrado)
+    if fator <= 0:
         return preco, Decimal("1")
-    fator = fator_desejado / fator_encontrado
     return (preco * fator).quantize(Decimal("0.01")), fator
 
 def selecionar_ofertas_aproximadas(
@@ -885,7 +921,7 @@ def selecionar_ofertas_aproximadas(
     estado_desejado: str | None,
     permitir_sem_filtros: bool = False,
 ) -> tuple[list[dict[str, Any]], list[str]]:
-    """Seleciona o idioma e o estado mais próximos e ajusta 20% por nível."""
+    """Seleciona idioma/estado equivalentes e aplica a tabela de condição quando necessário."""
 
     if not ofertas:
         return [], []
@@ -901,18 +937,20 @@ def selecionar_ofertas_aproximadas(
         if exatas:
             candidatas = exatas
         else:
-            oposto = "Inglês" if chave_desejada == chave_texto("Português") else "Português"
-            alternativas = [o for o in candidatas if o.get("idioma") and chave_texto(normalizar_idioma(str(o["idioma"]))) == chave_texto(oposto)]
+            # Português e Inglês são tratados como equivalentes quando a Liga não
+            # possui a variante exata. Não há ajuste monetário por idioma.
+            equivalentes = {chave_texto("Português"): "Inglês", chave_texto("Inglês"): "Português"}
+            oposto = equivalentes.get(chave_desejada, "")
+            alternativas = [o for o in candidatas if oposto and o.get("idioma") and chave_texto(normalizar_idioma(str(o["idioma"]))) == chave_texto(oposto)]
+            sem_idioma = [o for o in candidatas if not str(o.get("idioma") or "").strip()]
             if alternativas:
                 candidatas = alternativas
-                notas.append(f"idioma aproximado: {idioma_normalizado} → {oposto}")
+                notas.append(f"idioma equivalente: {idioma_normalizado} → {oposto}")
+            elif sem_idioma:
+                candidatas = sem_idioma
+                notas.append(f"idioma desejado {idioma_normalizado}; ofertas sem identificação de idioma usadas")
             elif permitir_sem_filtros:
-                sem_idioma = [o for o in candidatas if not str(o.get("idioma") or "").strip()]
-                if sem_idioma:
-                    candidatas = sem_idioma
-                    notas.append("ofertas sem identificação de idioma")
-                else:
-                    notas.append("idioma da buylist não compatível; maior oferta geral usada")
+                notas.append("idioma não identificado/compatível; conjunto geral usado como último recurso")
             else:
                 return [], notas
 
@@ -993,34 +1031,63 @@ def resumir_precos(
 
     menor = min((o["preco"] for o in vendas), default=None)
     medio = _media(vendas, "preco")
-    minimo = max((o["preco"] for o in compras), default=None)
+
+    # Correção de variante da buylist: algumas cartas têm ofertas Normal e Foil
+    # misturadas na mesma página. Só fazemos essa segunda checagem quando o maior
+    # valor de compra ficaria acima do menor preço do marketplace, situação típica
+    # do falso positivo visto em promos Foil. A variante do marketplace mais barato
+    # é a referência; se ela não estiver identificada, Foil é usado apenas quando
+    # a página de compra traz explicitamente essa tag.
+    compras_filtradas = list(compras)
+    max_compra_inicial = max((o["preco"] for o in compras_filtradas), default=None)
+    if menor is not None and max_compra_inicial is not None and max_compra_inicial > menor and compras_filtradas:
+        oferta_referencia = min(vendas, key=lambda o: o["preco"]) if vendas else None
+        extra_ref = str((oferta_referencia or {}).get("extra") or "").strip().casefold()
+        if extra_ref:
+            mesma_variante = [o for o in compras_filtradas if str(o.get("extra") or "").strip().casefold() == extra_ref]
+            if mesma_variante:
+                compras_filtradas = mesma_variante
+                notas_compra.append(f"variante da buylist igualada ao marketplace: {(oferta_referencia or {}).get('extra')}")
+        else:
+            foil = [o for o in compras_filtradas if str(o.get("extra") or "").strip().casefold() == "foil"]
+            if foil:
+                compras_filtradas = foil
+                notas_compra.append("buylist acima do marketplace: apenas ofertas com tag Foil consideradas")
+
+    minimo = max((o["preco"] for o in compras_filtradas), default=None)
+    minimo_certeiro = (menor * Decimal(str(MINIMO_CERTEIRO))).quantize(Decimal("0.01")) if menor is not None else None
     venda_rapida = (menor * Decimal(str(VENDA_RAPIDA))).quantize(Decimal("0.01")) if menor is not None else None
 
     menor_coletado = min((o.get("preco_original", o["preco"]) for o in vendas), default=None)
     medio_coletado = _media(vendas, "preco_original")
-    minimo_coletado = max((o.get("preco_original", o["preco"]) for o in compras), default=None)
+    minimo_coletado = max((o.get("preco_original", o["preco"]) for o in compras_filtradas), default=None)
+    minimo_certeiro_coletado = (menor_coletado * Decimal(str(MINIMO_CERTEIRO))).quantize(Decimal("0.01")) if menor_coletado is not None else None
+    venda_rapida_coletado = (menor_coletado * Decimal(str(VENDA_RAPIDA))).quantize(Decimal("0.01")) if menor_coletado is not None else None
 
     notas = [*notas_venda]
     notas.extend(f"buylist: {nota}" for nota in notas_compra)
     idiomas_encontrados = sorted({str(o.get("idioma_original") or o.get("idioma") or "") for o in vendas if str(o.get("idioma_original") or o.get("idioma") or "")})
     estados_encontrados = sorted({str(o.get("estado_original") or o.get("estado") or "") for o in vendas if str(o.get("estado_original") or o.get("estado") or "")})
-    houve_estimativa = any(bool(o.get("foi_estimado")) for o in [*vendas, *compras])
+    houve_estimativa = any(bool(o.get("foi_estimado")) for o in [*vendas, *compras_filtradas])
     return {
         "menor": menor,
         "medio": medio,
         "minimo": minimo,
+        "minimo_certeiro": minimo_certeiro,
         "venda_rapida": venda_rapida,
         "menor_coletado": menor_coletado,
         "medio_coletado": medio_coletado,
         "minimo_coletado": minimo_coletado,
+        "minimo_certeiro_coletado": minimo_certeiro_coletado,
+        "venda_rapida_coletado": venda_rapida_coletado,
         "alteracao": "; ".join(dict.fromkeys(notas)),
         "quantidade_ofertas": len(vendas),
-        "quantidade_buylist": len(compras),
+        "quantidade_buylist": len(compras_filtradas),
         "idiomas_encontrados": idiomas_encontrados,
         "estados_encontrados": estados_encontrados,
         "houve_estimativa": houve_estimativa,
         "ofertas_selecionadas": vendas,
-        "buylist_selecionada": compras,
+        "buylist_selecionada": compras_filtradas,
     }
 
 
@@ -1137,15 +1204,19 @@ class SessaoLiga:
         if valores_venda:
             medio = (sum(valores_venda, Decimal("0")) / Decimal(len(valores_venda))).quantize(Decimal("0.01"))
         minimo = max(valores_compra, default=None)
+        minimo_certeiro = (menor * Decimal(str(MINIMO_CERTEIRO))).quantize(Decimal("0.01")) if menor is not None else None
         resultado = {
             **dados,
             "menor": menor,
             "medio": medio,
             "minimo": minimo,
+            "minimo_certeiro": minimo_certeiro,
             "venda_rapida": (menor * Decimal(str(VENDA_RAPIDA))).quantize(Decimal("0.01")) if menor is not None else None,
             "menor_coletado": menor,
             "medio_coletado": medio,
             "minimo_coletado": minimo,
+            "minimo_certeiro_coletado": minimo_certeiro,
+            "venda_rapida_coletado": (menor * Decimal(str(VENDA_RAPIDA))).quantize(Decimal("0.01")) if menor is not None else None,
             "idiomas_encontrados": sorted({str(o.get("idioma") or "") for o in marketplace if str(o.get("idioma") or "")}),
             "estados_encontrados": sorted({str(o.get("estado") or "") for o in marketplace if str(o.get("estado") or "")}),
             "houve_estimativa": False,

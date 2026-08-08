@@ -131,6 +131,11 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
               <div data-spec-contents><dt>Conteúdo do kit</dt><dd></dd></div>
               <div data-spec-quantity><dt>Quantidade</dt><dd></dd></div>
             </dl>
+            <section class="modal-kit-details" data-modal-kit-details hidden>
+              <header><div><small>Conteúdo visual</small><strong>Itens deste kit</strong></div><span data-modal-kit-discount></span></header>
+              <div class="modal-kit-gallery" data-modal-kit-gallery></div>
+              <ul class="modal-kit-list" data-modal-kit-list></ul>
+            </section>
 
             <div class="modal-purchase-actions" data-modal-purchase-actions>
               <button class="modal-add-proposal-button" type="button" data-modal-add-proposal>
@@ -231,6 +236,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
     <script is:inline>
       (() => {
         const base = document.body.dataset.siteBase || '/';
+        const imageUrl = (path) => /^(?:https?:|data:|blob:)/i.test(String(path || '')) ? String(path || '') : `${base}${String(path || '').replace(/^\/+/, '').split('/').map(encodeURIComponent).join('/')}`;
         const normalize = (value) => String(value || '')
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '')
@@ -430,6 +436,10 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         const modalOwnerCollection = modal?.querySelector('[data-modal-owner-collection]');
         const modalOwnerAvatar = modal?.querySelector('[data-modal-owner-avatar]');
         const modalOwnerLink = modal?.querySelector('[data-modal-owner-link]');
+        const modalKitDetails = modal?.querySelector('[data-modal-kit-details]');
+        const modalKitGallery = modal?.querySelector('[data-modal-kit-gallery]');
+        const modalKitList = modal?.querySelector('[data-modal-kit-list]');
+        const modalKitDiscount = modal?.querySelector('[data-modal-kit-discount]');
         let activeProductCard = null;
         let modalReturnFocus = null;
 
@@ -502,8 +512,48 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           setSpec('[data-spec-condition]', card.dataset.condition || '', isCard);
           setSpec('[data-spec-year]', card.dataset.year || '', isCard);
           setSpec('[data-spec-type]', card.dataset.type || '', true);
-          setSpec('[data-spec-contents]', card.dataset.contents || '', kind === 'kit');
-          setSpec('[data-spec-quantity]', card.dataset.stock || '0', card.dataset.showQuantity !== 'false');
+          setSpec('[data-spec-contents]', card.dataset.contents || '', false);
+          setSpec('[data-spec-quantity]', card.dataset.stock || '0', kind !== 'kit' && card.dataset.showQuantity !== 'false');
+
+          if (modalKitDetails) {
+            modalKitDetails.hidden = kind !== 'kit';
+            if (kind === 'kit') {
+              let kitItems = [];
+              try { kitItems = JSON.parse(card.dataset.kitItems || '[]'); } catch (_) { kitItems = []; }
+              if (modalKitDiscount) {
+                const discount = Number(card.dataset.kitDiscount || 0);
+                modalKitDiscount.textContent = discount > 0 ? `${discount.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% de desconto` : 'Sem desconto';
+              }
+              if (modalKitGallery) {
+                modalKitGallery.innerHTML = '';
+                kitItems.forEach((entry) => {
+                  const figure = document.createElement('figure');
+                  const candidates = Array.isArray(entry.imageCandidates) ? entry.imageCandidates.map((value) => String(value || '')).filter(Boolean) : [];
+                  const image = document.createElement('img');
+                  image.alt = entry.name || 'Item do kit';
+                  image.loading = 'lazy';
+                  if (candidates.length) {
+                    let cursor = 0;
+                    image.src = imageUrl(candidates[cursor]);
+                    image.addEventListener('error', () => { cursor += 1; if (candidates[cursor]) image.src = imageUrl(candidates[cursor]); else image.remove(); });
+                    figure.appendChild(image);
+                  } else {
+                    const fallback = document.createElement('span');
+                    fallback.textContent = String(entry.name || 'TC').slice(0, 2).toUpperCase();
+                    figure.appendChild(fallback);
+                  }
+                  const caption = document.createElement('figcaption');
+                  caption.textContent = entry.name || 'Item';
+                  figure.appendChild(caption);
+                  modalKitGallery.appendChild(figure);
+                });
+              }
+              if (modalKitList) {
+                modalKitList.innerHTML = '';
+                kitItems.forEach((entry) => { const li = document.createElement('li'); li.textContent = entry.name || 'Item'; modalKitList.appendChild(li); });
+              }
+            }
+          }
 
           modal.hidden = false;
           document.body.classList.add('modal-open');

@@ -41,22 +41,11 @@ def escolher(titulo: str, itens: list[T], rotulo) -> T:
             print("Digite um número válido da lista.")
 
 
-def escolher_modo_preco() -> str:
-    print("\nQual valor deve preencher o campo Preço?")
-    print("  1. Menor preço encontrado/estimado na Liga")
-    print("  2. Média das ofertas encontradas/estimadas da Liga")
-    while True:
-        resposta = input("Escolha 1 ou 2: ").strip()
-        if resposta == "1": return "menor"
-        if resposta == "2": return "media"
-        print("Escolha somente 1 ou 2.")
-
-
 def executar_formatacao() -> None:
     from configuracao import ARQUIVO_PERFIL
     from gerenciamento import formatar_nova_colecao, listar_pacotes
     pacote = escolher("Coleções não formatadas disponíveis", listar_pacotes(ARQUIVO_PERFIL), lambda item: item.name)
-    destino = formatar_nova_colecao(pacote, escolher_modo_preco())
+    destino = formatar_nova_colecao(pacote, "menor")
     import json
     perfil = json.loads((destino / "perfil.json").read_text(encoding="utf-8"))
     if perfil.get("formattingComplete") is False:

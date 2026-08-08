@@ -108,6 +108,25 @@ const publishedCollections = getEditableCollections();
           <span><strong data-overview-units>0 unidades</strong><small data-overview-value>R$ 0,00 em preços definidos</small></span>
         </div>
       </section>
+
+      <section class="collector-personalization" aria-label="Personalização da página do colecionador">
+        <header><div><span class="section-eyebrow">Identidade visual</span><h3>Personalize sua página</h3><p>Escolha uma foto e três cores. Cartas favoritadas no inventário aparecem de forma sutil no fundo da página pública.</p></div><span class="personalization-note">3 cores + favoritos</span></header>
+        <div class="collector-personalization-grid">
+          <div class="profile-photo-editor">
+            <div class="profile-photo-preview" data-profile-photo-preview><span>TC</span></div>
+            <div><strong>Foto do colecionador</strong><small>PNG, JPG ou WebP. A imagem fica salva no perfil da coleção.</small><div class="profile-photo-actions"><label><input type="file" accept="image/png,image/jpeg,image/webp" data-profile-photo-input /><span>Escolher foto</span></label><button type="button" data-remove-profile-photo>Remover</button></div></div>
+          </div>
+          <div class="palette-editor">
+            <div><strong>Paleta da coleção</strong><small>As três cores dão personalidade à página sem comprometer a leitura.</small></div>
+            <div class="palette-inputs">
+              <label><span>Principal</span><input type="color" value="#54e8df" data-palette-color="0" /></label>
+              <label><span>Secundária</span><input type="color" value="#bc91ff" data-palette-color="1" /></label>
+              <label><span>Destaque</span><input type="color" value="#f4c25c" data-palette-color="2" /></label>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="workspace-proposal-settings" aria-label="Termos de propostas">
         <header><div><span class="section-eyebrow">Negociação</span><h3>Termos de propostas da coleção</h3><p>Essas regras são exibidas publicamente e usadas pelo site para bloquear propostas incompatíveis.</p></div><span class="proposal-settings-badge">Pix após aceite</span></header>
         <div class="workspace-proposal-grid">
@@ -164,6 +183,30 @@ const publishedCollections = getEditableCollections();
           <label class="modal-sale-check"><input name="forSale" type="checkbox" checked /><span><strong>Disponível para venda</strong><small>Pode ser alterado individualmente no inventário.</small></span></label>
           <footer class="modal-form-actions"><button type="button" class="secondary-cta" data-close-modal><span>Cancelar</span><b>×</b></button><button type="submit" class="primary-cta"><span>Adicionar carta</span><b>＋</b></button></footer>
         </form>
+      </section>
+    </div>
+
+    <div class="editor-modal card-advanced-modal" data-editor-modal="card-details" hidden>
+      <button class="editor-modal-backdrop" type="button" data-close-modal aria-label="Fechar"></button>
+      <section class="editor-modal-dialog card-advanced-dialog" role="dialog" aria-modal="true" aria-labelledby="card-details-title">
+        <header class="editor-modal-header"><div><span class="section-eyebrow">Visão de ativo</span><h2 id="card-details-title" data-card-details-title>Detalhes da carta</h2><p>Dados do JSON, referências de mercado e histórico de valorização/desvalorização.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
+        <div class="card-advanced-body">
+          <aside class="card-advanced-summary">
+            <div data-card-details-image></div>
+            <div><span data-card-details-number></span><h3 data-card-details-name></h3><p data-card-details-meta></p></div>
+            <div class="card-advanced-status" data-card-details-status></div>
+          </aside>
+          <main class="card-advanced-main">
+            <div class="card-market-metrics" data-card-market-metrics></div>
+            <section class="card-chart-panel">
+              <header><div><strong>Histórico de preços</strong><small>Minimo Certeiro, Minimo, Menor Liga, Media Liga e Venda Rapida.</small></div><span data-card-chart-period></span></header>
+              <div class="card-price-chart" data-card-price-chart></div>
+              <div class="card-chart-legend" data-card-chart-legend></div>
+            </section>
+            <section class="card-variation-panel"><header><strong>Valorização / desvalorização</strong><small>Comparação entre o primeiro e o último ponto disponível.</small></header><div data-card-variations></div></section>
+            <details class="card-json-panel"><summary>Ver todas as informações do JSON</summary><pre data-card-json></pre></details>
+          </main>
+        </div>
       </section>
     </div>
 
@@ -336,23 +379,26 @@ const publishedCollections = getEditableCollections();
           ...item,
           name: item.name || getNameFromLink(item.linkLiga || '', 'Carta da Liga'), number: item.number || '', collection: item.collection || '', year: item.year || '', type: item.type || '',
           language: item.language || 'Português (PT-BR)', condition: item.condition || 'NM', quantity: toQuantity(item.quantity),
-          minimumPrice: toPrice(item.minimumPrice), quickSalePrice: toPrice(item.quickSalePrice), leaguePrice: toPrice(item.leaguePrice), price: toPrice(item.price),
+          certainMinimumPrice: toPrice(item.certainMinimumPrice), minimumPrice: toPrice(item.minimumPrice), quickSalePrice: toPrice(item.quickSalePrice), leaguePrice: toPrice(item.leaguePrice), averageLeaguePrice: toPrice(item.averageLeaguePrice), price: toPrice(item.price),
           linkLiga: item.linkLiga || '', linkMyp: item.linkMyp || '', linkCardmarket: item.linkCardmarket || '', linkTcgplayer: item.linkTcgplayer || '', linkPriceCharting: item.linkPriceCharting || '',
+          favorite: item.favorite === true, priceHistory: Array.isArray(item.priceHistory) ? item.priceHistory : [], advancedData: item.advancedData && typeof item.advancedData === 'object' ? item.advancedData : {},
           forSale: item.forSale !== false, image: item.image || '', imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : [],
         };
         normalized._id = item._id || item.id || item.Id || stableCardId(normalized);
         normalized._isNew = item._isNew ?? isNew;
+        normalized._isDirty = item._isDirty ?? false;
         return normalized;
       };
       const normalizeBooster = (item = {}, isNew = false) => {
         const normalized = {
           ...item,
           name: item.name || getNameFromLink(item.linkLiga || '', 'Booster da Liga'), quantity: toQuantity(item.quantity),
-          minimumPrice: toPrice(item.minimumPrice), quickSalePrice: toPrice(item.quickSalePrice), leaguePrice: toPrice(item.leaguePrice), price: toPrice(item.price),
+          certainMinimumPrice: toPrice(item.certainMinimumPrice), minimumPrice: toPrice(item.minimumPrice), quickSalePrice: toPrice(item.quickSalePrice), leaguePrice: toPrice(item.leaguePrice), averageLeaguePrice: toPrice(item.averageLeaguePrice), price: toPrice(item.price),
           linkLiga: item.linkLiga || '', forSale: item.forSale !== false, image: item.image || '', imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : [],
         };
         normalized._id = item._id || item.id || item.Id || stableBoosterId(normalized);
         normalized._isNew = item._isNew ?? isNew;
+        normalized._isDirty = item._isDirty ?? false;
         return normalized;
       };
       const legacyKitContents = (contents, cards, boosters) => clean(contents).split('|').map((part) => clean(part)).filter(Boolean).map((rawName) => {
@@ -439,7 +485,9 @@ const publishedCollections = getEditableCollections();
       const makeState = (profile, items = {}, source = 'new') => {
         const cards = (items.cards || []).map((item) => normalizeCard(item, false));
         const boosters = (items.boosters || []).map((item) => normalizeBooster(item, false));
-        const normalizedProfile = { owner: '', title: '', description: '', email: '', phone: '', password: '', selling: true, showQuantity: true, featured: false, version: 1, ...profile };
+        const normalizedProfile = { owner: '', title: '', description: '', email: '', phone: '', password: '', selling: true, showQuantity: true, featured: false, version: 1, profilePhoto: '', palette: ['#54e8df', '#bc91ff', '#f4c25c'], ...profile };
+        normalizedProfile.palette = Array.isArray(normalizedProfile.palette) && normalizedProfile.palette.length >= 3 ? normalizedProfile.palette.slice(0, 3) : ['#54e8df', '#bc91ff', '#f4c25c'];
+        normalizedProfile.profilePhoto = clean(normalizedProfile.profilePhoto);
         normalizedProfile.proposalTerms = normalizeProposalTerms(profile?.proposalTerms);
         return {
           profile: normalizedProfile,
@@ -463,6 +511,19 @@ const publishedCollections = getEditableCollections();
         list.innerHTML = tiers.length ? tiers.map((tier, index) => `<div class="workspace-tier-row"><label><span>A partir de R$</span><input type="number" min="0" step="0.01" value="${tier.minValue}" data-tier-edit="${index}:minValue" /></label><label><span>Desconto máximo</span><div><input type="number" min="0" max="100" step="0.1" value="${tier.maxDiscount}" data-tier-edit="${index}:maxDiscount" /><b>%</b></div></label><button type="button" data-remove-discount-tier="${index}" aria-label="Remover marco">×</button></div>`).join('') : '<div class="workspace-tier-empty"><span>◇</span><p>Nenhum marco definido. Sem flexibilidade, o desconto máximo será 0%.</p></div>';
       };
 
+      const renderPersonalization = () => {
+        if (!state) return;
+        const preview = root.querySelector('[data-profile-photo-preview]');
+        if (preview) {
+          const initials = clean(state.profile.owner).split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'TC';
+          preview.innerHTML = state.profile.profilePhoto ? `<img src="${escapeHtml(state.profile.profilePhoto)}" alt="Foto de perfil" />` : `<span>${escapeHtml(initials)}</span>`;
+        }
+        root.querySelectorAll('[data-palette-color]').forEach((input) => {
+          const index = Number(input.dataset.paletteColor);
+          input.value = state.profile.palette[index] || ['#54e8df', '#bc91ff', '#f4c25c'][index];
+        });
+      };
+
       const activate = (profile, items, source = 'new') => {
         state = makeState(profile, items, source);
         modeButtons.forEach((button) => { button.hidden = true; });
@@ -477,6 +538,7 @@ const publishedCollections = getEditableCollections();
         root.querySelector('[data-proposal-policy]').value = state.profile.proposalTerms.policy;
         root.querySelector('[data-flexible-discounts]').checked = state.profile.proposalTerms.flexibleDiscounts;
         renderDiscountTiers();
+        renderPersonalization();
         root.querySelector('[data-version-number]').textContent = String(state.profile.version);
         if (updateButton) updateButton.hidden = source === 'new';
         const fullDownloadLabel = root.querySelector('[data-download-zip] span'); if (fullDownloadLabel) fullDownloadLabel.textContent = source === 'new' ? 'Baixar coleção não formatada' : 'Baixar ZIP completo JSON';
@@ -500,7 +562,8 @@ const publishedCollections = getEditableCollections();
         Object.keys(tabLabel).forEach((kind) => { const count = root.querySelector(`[data-tab-count="${kind}"]`); if (count) count.textContent = String(state[kind].length); });
       };
 
-      const priceInput = (kind, index, field, label, value) => `<label class="inventory-price-field"><span>${label}</span><input type="number" min="0" step="0.01" value="${value ?? ''}" placeholder="—" data-item-edit="${kind}:${index}:${field}" /></label>`;
+      const priceInput = (kind, index, field, label, value) => `<label class="inventory-price-field editable"><span>${label}</span><input type="number" min="0" step="0.01" value="${value ?? ''}" placeholder="—" data-item-edit="${kind}:${index}:${field}" /></label>`;
+      const priceReadout = (label, value) => `<div class="inventory-price-field read-only"><span>${label}</span><strong>${escapeHtml(prettyPrice(value))}</strong></div>`;
       const quantityInput = (kind, index, value) => `<label class="inventory-quantity-field"><span>Quantidade</span><input type="number" min="1" step="1" value="${value}" data-item-edit="${kind}:${index}:quantity" /></label>`;
       const saleToggle = (kind, index, checked) => `<label class="inventory-sale-toggle"><input type="checkbox" data-sale-edit="${kind}:${index}" ${checked ? 'checked' : ''} /><span><i></i><b>${checked ? 'À venda' : 'Exposição'}</b></span></label>`;
       const removeButton = (kind, index, name) => `<button type="button" class="inventory-remove" data-remove-item="${kind}:${index}" aria-label="Remover ${escapeHtml(name)}">×</button>`;
@@ -517,14 +580,83 @@ const publishedCollections = getEditableCollections();
         if (!rows.length) return emptyInventory('cards');
         return `<div class="inventory-sheet inventory-card-sheet"><div class="inventory-sheet-head"><span>Imagem e identificação</span><span>Informações</span><span>Links</span><span>Preços</span><span>Controle</span></div>${rows.map(({ item, index }) => {
           const name = itemName(item, 'cards');
-          return `<article class="inventory-record card-inventory-record">
+          return `<article class="inventory-record card-inventory-record" data-card-details-row="${index}">
             <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>${escapeHtml(item.number || 'Sem numeração')}</small><em>${escapeHtml(item.collection || 'Coleção a consultar')}</em></div></div>
             <div class="inventory-info-cell"><span>${escapeHtml(item.year || 'Ano —')}</span><span>${escapeHtml(item.condition || 'Estado —')}</span><span>${escapeHtml(item.language || 'Idioma —')}</span><span>${escapeHtml(item.type || 'Tipo —')}</span></div>
             <div class="inventory-links-cell">${linkButtons([{ label: 'Liga', url: item.linkLiga }, { label: 'MYP', url: item.linkMyp }, { label: 'Cardmarket', url: item.linkCardmarket }, { label: 'TCGplayer', url: item.linkTcgplayer }, { label: 'PriceCharting', url: item.linkPriceCharting }])}</div>
-            <div class="inventory-prices-cell">${priceInput('cards', index, 'minimumPrice', 'Mínimo', item.minimumPrice)}${priceInput('cards', index, 'quickSalePrice', 'Venda rápida', item.quickSalePrice)}${priceInput('cards', index, 'leaguePrice', 'Liga', item.leaguePrice)}${priceInput('cards', index, 'price', 'Preço', item.price)}</div>
-            <div class="inventory-control-cell">${quantityInput('cards', index, item.quantity)}${saleToggle('cards', index, item.forSale)}${removeButton('cards', index, name)}</div>
+            <div class="inventory-prices-cell">${priceReadout('Mín. certeiro', item.certainMinimumPrice)}${priceReadout('Mínimo', item.minimumPrice)}${priceReadout('Menor Liga', item.leaguePrice)}${priceReadout('Média Liga', item.averageLeaguePrice)}${priceReadout('Venda rápida', item.quickSalePrice)}${priceInput('cards', index, 'price', 'Preço', item.price)}</div>
+            <div class="inventory-control-cell"><button type="button" class="inventory-favorite ${item.favorite ? 'active' : ''}" data-favorite-card="${index}" title="Favoritar carta"><span>${item.favorite ? '★' : '☆'}</span>${item.favorite ? 'Favorita' : 'Favoritar'}</button><button type="button" class="inventory-details-button" data-card-details="${index}"><span>↗</span> Análise</button>${quantityInput('cards', index, item.quantity)}${saleToggle('cards', index, item.forSale)}${removeButton('cards', index, name)}</div>
           </article>`;
         }).join('')}</div>`;
+      };
+
+      const cardMetrics = [
+        { key: 'minimumCertain', field: 'certainMinimumPrice', label: 'Minimo Certeiro', color: '#54e8df' },
+        { key: 'minimumBuylist', field: 'minimumPrice', label: 'Minimo', color: '#f4c25c' },
+        { key: 'leagueLowest', field: 'leaguePrice', label: 'Menor Liga', color: '#77a9ff' },
+        { key: 'leagueAverage', field: 'averageLeaguePrice', label: 'Media Liga', color: '#bc91ff' },
+        { key: 'quickSale', field: 'quickSalePrice', label: 'Venda Rapida', color: '#7ce5a4' },
+      ];
+      const normalizedHistory = (item) => {
+        const points = (Array.isArray(item.priceHistory) ? item.priceHistory : []).map((entry) => ({
+          date: entry.date || '',
+          minimumCertain: toPrice(entry.minimumCertain ?? entry['Minimo Certeiro']),
+          minimumBuylist: toPrice(entry.minimumBuylist ?? entry.Minimo),
+          leagueLowest: toPrice(entry.leagueLowest ?? entry['Menor Liga']),
+          leagueAverage: toPrice(entry.leagueAverage ?? entry['Media Liga'] ?? entry['Preço Médio Liga']),
+          quickSale: toPrice(entry.quickSale ?? entry['Venda Rapida']),
+        }));
+        const current = { date: new Date().toISOString(), minimumCertain: item.certainMinimumPrice, minimumBuylist: item.minimumPrice, leagueLowest: item.leaguePrice, leagueAverage: item.averageLeaguePrice, quickSale: item.quickSalePrice };
+        const last = points[points.length - 1];
+        const same = last && cardMetrics.every((metric) => toPrice(last[metric.key]) === toPrice(current[metric.key]));
+        if (!same) points.push(current);
+        return points;
+      };
+      const chartMarkup = (points) => {
+        const width = 760; const height = 280; const left = 54; const right = 18; const top = 22; const bottom = 38;
+        const values = points.flatMap((point) => cardMetrics.map((metric) => toPrice(point[metric.key])).filter((value) => value !== null));
+        if (!values.length) return '<div class="card-chart-empty"><span>⌁</span><strong>Sem histórico suficiente</strong><p>A próxima cotização adicionará pontos ao gráfico.</p></div>';
+        const minValue = Math.min(...values); const maxValue = Math.max(...values); const spread = Math.max(1, maxValue - minValue);
+        const low = Math.max(0, minValue - spread * .12); const high = maxValue + spread * .12;
+        const x = (index) => left + (points.length <= 1 ? (width - left - right) / 2 : index * (width - left - right) / (points.length - 1));
+        const y = (value) => top + (high - value) / Math.max(.01, high - low) * (height - top - bottom);
+        const grid = Array.from({ length: 5 }, (_, index) => { const value = high - index * (high - low) / 4; const py = y(value); return `<g><line x1="${left}" x2="${width-right}" y1="${py}" y2="${py}" class="chart-grid-line"/><text x="${left-8}" y="${py+4}" text-anchor="end">${escapeHtml(prettyPrice(value).replace('R$ ', ''))}</text></g>`; }).join('');
+        const lines = cardMetrics.map((metric) => {
+          const chunks = []; let current = [];
+          points.forEach((point, index) => { const value = toPrice(point[metric.key]); if (value === null) { if (current.length) chunks.push(current); current = []; } else current.push(`${x(index)},${y(value)}`); });
+          if (current.length) chunks.push(current);
+          return chunks.map((chunk) => `<polyline points="${chunk.join(' ')}" fill="none" stroke="${metric.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
+        }).join('');
+        const firstDate = points[0]?.date ? new Date(points[0].date).toLocaleDateString('pt-BR') : 'Início';
+        const lastDate = points[points.length - 1]?.date ? new Date(points[points.length - 1].date).toLocaleDateString('pt-BR') : 'Atual';
+        return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Histórico das referências de preço">${grid}${lines}<text x="${left}" y="${height-9}" text-anchor="start">${escapeHtml(firstDate)}</text><text x="${width-right}" y="${height-9}" text-anchor="end">${escapeHtml(lastDate)}</text></svg>`;
+      };
+      const openCardDetails = (index) => {
+        const item = state?.cards?.[index]; if (!item) return;
+        const modal = root.querySelector('[data-editor-modal="card-details"]'); if (!modal) return;
+        modal.querySelector('[data-card-details-title]').textContent = `${itemName(item, 'cards')} — análise`;
+        modal.querySelector('[data-card-details-name]').textContent = itemName(item, 'cards');
+        modal.querySelector('[data-card-details-number]').textContent = item.number || 'Sem numeração';
+        modal.querySelector('[data-card-details-meta]').textContent = [item.collection, item.language, item.condition].filter(Boolean).join(' · ');
+        modal.querySelector('[data-card-details-image]').innerHTML = renderImage(item, item.name);
+        const status = item.advancedData?.Status || item.status || {};
+        const statusNode = modal.querySelector('[data-card-details-status]');
+        statusNode.innerHTML = `<span>${escapeHtml(status['nível'] || 'OK')}</span><p>${escapeHtml(Array.isArray(status.motivos) && status.motivos.length ? status.motivos.map((entry) => entry.mensagem || entry).join(' · ') : 'Nenhuma suspeita registrada.')}</p>`;
+        modal.querySelector('[data-card-market-metrics]').innerHTML = cardMetrics.map((metric) => `<article><span>${escapeHtml(metric.label)}</span><strong>${escapeHtml(prettyPrice(item[metric.field]))}</strong><i style="--metric-color:${metric.color}"></i></article>`).join('');
+        const points = normalizedHistory(item);
+        modal.querySelector('[data-card-price-chart]').innerHTML = chartMarkup(points);
+        modal.querySelector('[data-card-chart-legend]').innerHTML = cardMetrics.map((metric) => `<span><i style="--metric-color:${metric.color}"></i>${escapeHtml(metric.label)}</span>`).join('');
+        modal.querySelector('[data-card-chart-period]').textContent = points.length > 1 ? `${points.length} pontos` : 'valor atual';
+        modal.querySelector('[data-card-variations]').innerHTML = cardMetrics.map((metric) => {
+          const values = points.map((point) => toPrice(point[metric.key])).filter((value) => value !== null);
+          if (values.length < 2) return `<article><span>${escapeHtml(metric.label)}</span><strong>Sem comparação</strong><small>aguardando histórico</small></article>`;
+          const first = values[0]; const last = values[values.length - 1]; const delta = last - first; const pct = first ? delta / first * 100 : null;
+          const direction = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
+          return `<article class="${direction}"><span>${escapeHtml(metric.label)}</span><strong>${delta > 0 ? '+' : ''}${escapeHtml(prettyPrice(delta))}</strong><small>${pct === null ? '—' : `${pct > 0 ? '+' : ''}${pct.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`}</small></article>`;
+        }).join('');
+        const jsonData = { ...(item.advancedData || {}), Id: item._id, Nome: item.name, Número: item.number, Coleção: item.collection, Ano: item.year, Tipo: item.type, Idioma: item.language, Estado: item.condition, Quantidade: item.quantity, 'Minimo Certeiro': item.certainMinimumPrice, Minimo: item.minimumPrice, 'Menor Liga': item.leaguePrice, 'Media Liga': item.averageLeaguePrice, 'Venda Rapida': item.quickSalePrice, Preço: item.price, Favorita: item.favorite, 'À venda': item.forSale, 'Link Liga': item.linkLiga, 'Link MYP': item.linkMyp, 'Link Cardmarket': item.linkCardmarket, 'Link Tcgplayer': item.linkTcgplayer, 'Link PriceCharting': item.linkPriceCharting, Imagem: item.image };
+        modal.querySelector('[data-card-json]').textContent = JSON.stringify(jsonData, null, 2);
+        openModal('card-details');
       };
 
       const renderBoosters = () => {
@@ -535,7 +667,7 @@ const publishedCollections = getEditableCollections();
           return `<article class="inventory-record booster-inventory-record">
             <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>Pacote lacrado</small></div></div>
             <div class="inventory-links-cell">${linkButtons([{ label: 'Liga', url: item.linkLiga }])}</div>
-            <div class="inventory-prices-cell">${priceInput('boosters', index, 'minimumPrice', 'Mínimo', item.minimumPrice)}${priceInput('boosters', index, 'quickSalePrice', 'Venda rápida', item.quickSalePrice)}${priceInput('boosters', index, 'leaguePrice', 'Liga', item.leaguePrice)}${priceInput('boosters', index, 'price', 'Preço', item.price)}</div>
+            <div class="inventory-prices-cell">${priceReadout('Mín. certeiro', item.certainMinimumPrice)}${priceReadout('Mínimo', item.minimumPrice)}${priceReadout('Menor Liga', item.leaguePrice)}${priceReadout('Média Liga', item.averageLeaguePrice)}${priceReadout('Venda rápida', item.quickSalePrice)}${priceInput('boosters', index, 'price', 'Preço', item.price)}</div>
             <div class="inventory-control-cell">${quantityInput('boosters', index, item.quantity)}${saleToggle('boosters', index, item.forSale)}${removeButton('boosters', index, name)}</div>
           </article>`;
         }).join('')}</div>`;
@@ -855,7 +987,7 @@ const publishedCollections = getEditableCollections();
         const [kind, rawIndex, field] = (target.dataset.itemEdit || '').split(':');
         if (!kind || !field || !state?.[kind]?.[Number(rawIndex)]) return;
         state[kind][Number(rawIndex)][field] = field === 'quantity' ? toQuantity(target.value) : toPrice(target.value);
-        if (kind === 'kits' && !state[kind][Number(rawIndex)]._isNew) state[kind][Number(rawIndex)]._isDirty = true;
+        if (!state[kind][Number(rawIndex)]._isNew) state[kind][Number(rawIndex)]._isDirty = true;
         updateOverview();
         if (kind === 'kits' || field === 'price' || field === 'leaguePrice') renderKitBuilder();
       });
@@ -864,7 +996,7 @@ const publishedCollections = getEditableCollections();
         const [saleKind, saleIndex] = (target.dataset.saleEdit || '').split(':');
         if (saleKind && state?.[saleKind]?.[Number(saleIndex)]) {
           state[saleKind][Number(saleIndex)].forSale = target.checked;
-          if (saleKind === 'kits' && !state[saleKind][Number(saleIndex)]._isNew) state[saleKind][Number(saleIndex)]._isDirty = true;
+          if (!state[saleKind][Number(saleIndex)]._isNew) state[saleKind][Number(saleIndex)]._isDirty = true;
           renderInventory();
           return;
         }
@@ -876,6 +1008,11 @@ const publishedCollections = getEditableCollections();
       inventory.addEventListener('click', (event) => {
         const add = event.target.closest('[data-empty-add]'); if (add) { openModal(add.dataset.emptyAdd); return; }
         const organize = event.target.closest('[data-organize-album]'); if (organize) { openAlbumOrganizer(Number(organize.dataset.organizeAlbum)); return; }
+        const favorite = event.target.closest('[data-favorite-card]');
+        if (favorite && state) { const item = state.cards[Number(favorite.dataset.favoriteCard)]; if (item) { item.favorite = !item.favorite; if (!item._isNew) item._isDirty = true; renderInventory(); } return; }
+        const details = event.target.closest('[data-card-details]'); if (details) { openCardDetails(Number(details.dataset.cardDetails)); return; }
+        const row = event.target.closest('[data-card-details-row]');
+        if (row && !event.target.closest('a, button, input, label, select, textarea')) { openCardDetails(Number(row.dataset.cardDetailsRow)); return; }
         const button = event.target.closest('[data-remove-item]'); if (!button || !state) return;
         const [kind, rawIndex] = button.dataset.removeItem.split(':');
         state[kind].splice(Number(rawIndex), 1); render();
@@ -891,6 +1028,13 @@ const publishedCollections = getEditableCollections();
         if (next) { image.dataset.imageCandidates = JSON.stringify(candidates); image.src = next; }
         else { image.remove(); }
       }, true);
+
+      root.querySelector('[data-profile-photo-input]')?.addEventListener('change', (event) => {
+        const file = event.target.files?.[0]; if (!file || !state) return;
+        const reader = new FileReader(); reader.addEventListener('load', () => { state.profile.profilePhoto = String(reader.result || ''); renderPersonalization(); }); reader.readAsDataURL(file);
+      });
+      root.querySelector('[data-remove-profile-photo]')?.addEventListener('click', () => { if (!state) return; state.profile.profilePhoto = ''; const input = root.querySelector('[data-profile-photo-input]'); if (input) input.value = ''; renderPersonalization(); });
+      root.querySelectorAll('[data-palette-color]').forEach((input) => input.addEventListener('input', () => { if (!state) return; state.profile.palette[Number(input.dataset.paletteColor)] = input.value; }));
 
       root.querySelector('[data-show-quantity]')?.addEventListener('change', (event) => { if (state) state.profile.showQuantity = event.target.checked; });
       root.querySelector('[data-collection-selling]')?.addEventListener('change', (event) => { if (state) state.profile.selling = event.target.checked; });
@@ -913,31 +1057,35 @@ const publishedCollections = getEditableCollections();
         closeModals(); state = null; workspace.hidden = true; root.classList.remove('is-editing'); modeButtons.forEach((button) => { button.hidden = false; }); root.querySelector('[data-editor-notice]').hidden = false; root.querySelector('[data-new-profile-form]').reset(); setMode('new');
       });
 
-      const cardJson = (item, minimal = false) => {
+      const cardJson = (item, minimal = false, operation = '') => {
         const baseItem = {
           'Id': item._id || stableCardId(item),
           'Link Liga': item.linkLiga || '',
           'Quantidade': toQuantity(item.quantity),
           'Estado': item.condition || 'NM',
           'Idioma': item.language || 'Português (PT-BR)',
+          'Preço': item.price ?? null,
+          'Favorita': item.favorite === true,
           'À venda': item.forSale !== false,
         };
-        if (minimal) return baseItem;
-        return {
+        const result = minimal ? baseItem : {
+          ...(item.advancedData || {}),
           ...baseItem,
           'Nome': item.name || '', 'Número': item.number || '', 'Coleção': item.collection || '', 'Ano': item.year || '', 'Tipo': item.type || '',
           'Link MYP': item.linkMyp || '', 'Link Cardmarket': item.linkCardmarket || '', 'Link Tcgplayer': item.linkTcgplayer || '', 'Link PriceCharting': item.linkPriceCharting || '',
-          'Minimo': item.minimumPrice ?? null, 'Venda Rapida': item.quickSalePrice ?? null, 'Menor Liga': item.leaguePrice ?? null, 'Preço': item.price ?? null,
+          'Minimo Certeiro': item.certainMinimumPrice ?? null, 'Minimo': item.minimumPrice ?? null, 'Menor Liga': item.leaguePrice ?? null, 'Media Liga': item.averageLeaguePrice ?? null, 'Venda Rapida': item.quickSalePrice ?? null,
           'Imagem': item.image || '',
         };
+        if (operation) result.operation = operation;
+        return result;
       };
-      const boosterJson = (item, minimal = false) => {
-        const baseItem = { 'Id': item._id || stableBoosterId(item), 'Link Liga': item.linkLiga || '', 'Quantidade': toQuantity(item.quantity), 'À venda': item.forSale !== false };
-        if (minimal) return baseItem;
-        return {
-          ...baseItem, 'Tipo de pacote': item.name || '', 'Preço mínimo': item.minimumPrice ?? null, 'Venda rápida': item.quickSalePrice ?? null,
-          'Preço Liga mais barato': item.leaguePrice ?? null, 'Preço': item.price ?? null, 'Imagem': item.image || '',
+      const boosterJson = (item, minimal = false, operation = '') => {
+        const baseItem = { 'Id': item._id || stableBoosterId(item), 'Link Liga': item.linkLiga || '', 'Quantidade': toQuantity(item.quantity), 'Preço': item.price ?? null, 'À venda': item.forSale !== false };
+        const result = minimal ? baseItem : {
+          ...baseItem, 'Tipo de pacote': item.name || '', 'Minimo Certeiro': item.certainMinimumPrice ?? null, 'Minimo': item.minimumPrice ?? null, 'Menor Liga': item.leaguePrice ?? null, 'Media Liga': item.averageLeaguePrice ?? null, 'Venda Rapida': item.quickSalePrice ?? null, 'Imagem': item.image || '',
         };
+        if (operation) result.operation = operation;
+        return result;
       };
       const kitJson = (item, operation = '') => {
         const gross = toPrice(item.sourceTotal) || 0;
@@ -974,12 +1122,12 @@ const publishedCollections = getEditableCollections();
       const importedImage = (value) => { const image = clean(value); return image ? (image.includes('/') ? image : `imagens/${image}`) : ''; };
       const importCardRow = (row) => ({
         id: row['Id'] || row['ID'] || '', name: row['Nome'], number: row['Número'] || row['Numeração'], collection: row['Coleção'], language: row['Idioma'], condition: row['Estado'], year: row['Ano'], type: row['Tipo'], quantity: row['Quantidade'],
-        minimumPrice: row['Minimo'] ?? row['Preço mínimo'], quickSalePrice: row['Venda Rapida'] ?? row['Venda rápida'], leaguePrice: row['Menor Liga'] ?? row['Preço Liga mais barato'], price: row['Preço'],
+        certainMinimumPrice: row['Minimo Certeiro'] ?? row['Mínimo Certeiro'], minimumPrice: row['Minimo'] ?? row['Preço mínimo'], quickSalePrice: row['Venda Rapida'] ?? row['Venda rápida'], leaguePrice: row['Menor Liga'] ?? row['Preço Liga mais barato'], averageLeaguePrice: row['Media Liga'] ?? row['Preço Médio Liga'] ?? row['Preço médio Liga'], price: row['Preço'], favorite: row['Favorita'] === true || row['Favorita'] === 'Sim', advancedData: row,
         forSale: typeof row['À venda'] === 'boolean' ? row['À venda'] : row['À venda'] !== 'Não', linkLiga: row['Link Liga'], linkMyp: row['Link MYP'], linkCardmarket: row['Link Cardmarket'], linkTcgplayer: row['Link Tcgplayer'] || row['Link TCGPlayer'], linkPriceCharting: row['Link PriceCharting'],
         image: importedImage(row['Imagem']), imageCandidates: importedImage(row['Imagem']) ? [importedImage(row['Imagem'])] : [],
       });
       const importBoosterRow = (row) => ({
-        id: row['Id'] || row['ID'] || '', name: row['Tipo de pacote'] || row['Coleção'] || row['Nome'], quantity: row['Quantidade'], minimumPrice: row['Preço mínimo'] ?? row['Minimo'], quickSalePrice: row['Venda rápida'] ?? row['Venda Rapida'], leaguePrice: row['Preço Liga mais barato'] ?? row['Menor Liga'], price: row['Preço'],
+        id: row['Id'] || row['ID'] || '', name: row['Tipo de pacote'] || row['Coleção'] || row['Nome'], quantity: row['Quantidade'], certainMinimumPrice: row['Minimo Certeiro'] ?? row['Mínimo Certeiro'], minimumPrice: row['Minimo'] ?? row['Preço mínimo'], quickSalePrice: row['Venda Rapida'] ?? row['Venda rápida'], leaguePrice: row['Menor Liga'] ?? row['Preço Liga mais barato'], averageLeaguePrice: row['Media Liga'] ?? row['Preço médio Liga'] ?? row['Preço Médio Liga'], price: row['Preço'],
         forSale: typeof row['À venda'] === 'boolean' ? row['À venda'] : row['À venda'] !== 'Não', linkLiga: row['Link Liga'], image: importedImage(row['Imagem']), imageCandidates: importedImage(row['Imagem']) ? [importedImage(row['Imagem'])] : [],
       });
       const importKitRow = (row) => {
@@ -1034,8 +1182,8 @@ const publishedCollections = getEditableCollections();
       });
       updateButton?.addEventListener('click', () => {
         if (!state) return;
-        const cards = state.cards.filter((item) => item._isNew).map((item) => cardJson(item, true));
-        const boosters = state.boosters.filter((item) => item._isNew).map((item) => boosterJson(item, true));
+        const cards = state.cards.filter((item) => item._isNew || item._isDirty).map((item) => item._isNew ? cardJson(item, true) : cardJson(item, false, 'patch'));
+        const boosters = state.boosters.filter((item) => item._isNew || item._isDirty).map((item) => item._isNew ? boosterJson(item, true) : boosterJson(item, false, 'patch'));
         const kits = state.kits.filter((item) => item._isNew || item._isDirty).map((item) => kitJson(item, 'upsert'));
         const albums = state.albums.filter((item) => item._isNew || item._isDirty).map(albumJson);
         const generatedAt = new Date().toISOString();

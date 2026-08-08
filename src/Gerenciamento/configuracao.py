@@ -40,6 +40,7 @@ PADRAO_CONFIG: dict[str, Any] = {
     "tentativas": 3,
     "maxTentativasPagina": 120,
     "vendaRapida": 0.95,
+    "minimoCerteiro": 0.60,
     "usarOCR": True,
     "salvarParcialACadaItem": True,
     "fatoresEstado": {
@@ -74,6 +75,7 @@ MAX_TENTATIVAS_PAGINA = int(CONFIG.get("maxTentativasPagina", 120))
 ESPERA_PAGINA = float(CONFIG.get("esperaPagina", 5))
 TENTATIVAS = max(1, int(CONFIG.get("tentativas", 3)))
 VENDA_RAPIDA = float(CONFIG.get("vendaRapida", 0.95))
+MINIMO_CERTEIRO = float(CONFIG.get("minimoCerteiro", 0.60))
 USAR_OCR = bool(CONFIG.get("usarOCR", True))
 SALVAR_PARCIAL = bool(CONFIG.get("salvarParcialACadaItem", True))
 ESTADOS_ORDEM = ("M", "NM", "SP", "MP", "HP", "D")

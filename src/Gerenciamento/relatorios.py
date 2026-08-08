@@ -25,19 +25,26 @@ def registrar_variacoes(nome: str, item_id: str, tipo: str, anterior: dict[str, 
         "tipo": tipo,
         "nome": nome,
         "quantidade": int(atual.get("Quantidade") or 1),
-        "Preço (média Liga)": _variacao(
-            anterior.get("Preço Médio Liga") or anterior.get("Preço médio Liga"),
-            atual.get("Preço Médio Liga") or atual.get("Preço médio Liga"),
-        ),
-        "Menor Liga": _variacao(
-            anterior.get("Menor Liga") or anterior.get("Preço Liga mais barato"),
-            atual.get("Menor Liga") or atual.get("Preço Liga mais barato"),
+        "Minimo Certeiro": _variacao(
+            anterior.get("Minimo Certeiro") or anterior.get("Mínimo Certeiro"),
+            atual.get("Minimo Certeiro") or atual.get("Mínimo Certeiro"),
         ),
         "Minimo (buylist)": _variacao(
             anterior.get("Minimo") or anterior.get("Preço mínimo"),
             atual.get("Minimo") or atual.get("Preço mínimo"),
         ),
-        "Preço configurado": _variacao(anterior.get("Preço"), atual.get("Preço")),
+        "Menor Liga": _variacao(
+            anterior.get("Menor Liga") or anterior.get("Preço Liga mais barato"),
+            atual.get("Menor Liga") or atual.get("Preço Liga mais barato"),
+        ),
+        "Media Liga": _variacao(
+            anterior.get("Media Liga") or anterior.get("Preço Médio Liga") or anterior.get("Preço médio Liga"),
+            atual.get("Media Liga") or atual.get("Preço Médio Liga") or atual.get("Preço médio Liga"),
+        ),
+        "Venda Rapida": _variacao(
+            anterior.get("Venda Rapida") or anterior.get("Venda rápida"),
+            atual.get("Venda Rapida") or atual.get("Venda rápida"),
+        ),
         "Status": atual.get("Status", {}),
         "Preço coletado": atual.get("Preço coletado", {}),
         "Preço estimado": atual.get("Preço estimado", {}),
@@ -90,9 +97,11 @@ def salvar_relatorio(
     totais_antes = sessao.get("totaisAntes") if isinstance(sessao.get("totaisAntes"), dict) else {}
     preco_antigo = float(totais_antes.get("preço", 0.0)) if totais_antes else (_somar_total(cartas_antes, "Preço") + _somar_total(boosters_antes, "Preço"))
     preco_novo = _somar_total(cartas_depois, "Preço") + _somar_total(boosters_depois, "Preço")
-    buylist_total = _somar_total(cartas_depois, "Minimo") + _somar_total(boosters_depois, "Preço mínimo")
-    media_total = _somar_total(cartas_depois, "Preço Médio Liga") + _somar_total(boosters_depois, "Preço médio Liga")
-    menor_total = _somar_total(cartas_depois, "Menor Liga") + _somar_total(boosters_depois, "Preço Liga mais barato")
+    minimo_certeiro_total = _somar_total(cartas_depois, "Minimo Certeiro", "Mínimo Certeiro") + _somar_total(boosters_depois, "Minimo Certeiro", "Mínimo Certeiro")
+    buylist_total = _somar_total(cartas_depois, "Minimo", "Preço mínimo") + _somar_total(boosters_depois, "Minimo", "Preço mínimo")
+    menor_total = _somar_total(cartas_depois, "Menor Liga", "Preço Liga mais barato") + _somar_total(boosters_depois, "Menor Liga", "Preço Liga mais barato")
+    media_total = _somar_total(cartas_depois, "Media Liga", "Preço Médio Liga") + _somar_total(boosters_depois, "Media Liga", "Preço médio Liga")
+    venda_rapida_total = _somar_total(cartas_depois, "Venda Rapida", "Venda rápida") + _somar_total(boosters_depois, "Venda Rapida", "Venda rápida")
 
     diferenca = round(preco_novo - preco_antigo, 2)
     percentual = round((diferenca / preco_antigo) * 100, 2) if preco_antigo else None
@@ -116,14 +125,16 @@ def salvar_relatorio(
         "preçoTotalNovo": round(preco_novo, 2),
         "variaçãoAbsoluta": diferenca,
         "variaçãoPercentual": percentual,
+        "minimoCerteiroTotal": round(minimo_certeiro_total, 2),
         "buylistTotal": round(buylist_total, 2),
-        "médiaLigaTotal": round(media_total, 2),
         "menorLigaTotal": round(menor_total, 2),
+        "mediaLigaTotal": round(media_total, 2),
+        "vendaRapidaTotal": round(venda_rapida_total, 2),
     }
 
     ordenados_alta = sorted(
         resultados,
-        key=lambda r: ((r.get("Preço (média Liga)") or {}).get("diferença") if (r.get("Preço (média Liga)") or {}).get("diferença") is not None else float("-inf")),
+        key=lambda r: ((r.get("Media Liga") or {}).get("diferença") if (r.get("Media Liga") or {}).get("diferença") is not None else float("-inf")),
         reverse=True,
     )
     ordenados_baixa = list(reversed(ordenados_alta))
@@ -152,9 +163,11 @@ def salvar_relatorio(
         f"Preço total antigo: {_fmt(preco_antigo)}",
         f"Preço total novo: {_fmt(preco_novo)}",
         f"Variação: {_fmt(diferenca)}" + ("" if percentual is None else f" ({percentual:+.2f}%)".replace(".", ",")),
+        f"Mínimo certeiro total: {_fmt(minimo_certeiro_total)}",
         f"Buylist total: {_fmt(buylist_total)}",
-        f"Total pela média da Liga: {_fmt(media_total)}",
         f"Total pelo menor preço da Liga: {_fmt(menor_total)}",
+        f"Total pela média da Liga: {_fmt(media_total)}",
+        f"Venda rápida total: {_fmt(venda_rapida_total)}",
         "",
         "VARIAÇÃO POR ITEM",
         "=" * 78,
@@ -162,10 +175,11 @@ def salvar_relatorio(
     for r in resultados:
         linhas.extend([
             f"{r.get('tipo','').upper()} | {r.get('nome')} | {r.get('id')}",
-            f"  Preço (média Liga): {_fmt_var(r['Preço (média Liga)'])}",
-            f"  Menor Liga: {_fmt_var(r['Menor Liga'])}",
+            f"  Minimo Certeiro: {_fmt_var(r['Minimo Certeiro'])}",
             f"  Minimo / buylist: {_fmt_var(r['Minimo (buylist)'])}",
-            f"  Preço configurado: {_fmt_var(r['Preço configurado'])}",
+            f"  Menor Liga: {_fmt_var(r['Menor Liga'])}",
+            f"  Media Liga: {_fmt_var(r['Media Liga'])}",
+            f"  Venda Rapida: {_fmt_var(r['Venda Rapida'])}",
             f"  Status: {(r.get('Status') or {}).get('nível', 'OK')}",
         ])
         for motivo in (r.get("Status") or {}).get("motivos", []):

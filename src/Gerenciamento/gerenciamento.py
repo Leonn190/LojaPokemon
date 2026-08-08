@@ -36,7 +36,7 @@ from configuracao import (
     pasta_colecoes,
     pasta_nao_formatadas,
 )
-from liga import SessaoLiga, baixar_imagem, normalizar_estado, normalizar_idioma, valor_preco
+from liga import SessaoLiga, baixar_imagem, normalizar_estado, normalizar_idioma
 from precificacao import (
     agora_iso,
     gerar_status_booster,
@@ -153,18 +153,20 @@ def idioma_saida(valor: str) -> str:
 
 
 def _precos_atuais(dados: dict[str, Any], modo: str, preservar: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Atualiza apenas referências de mercado; o campo Preço é sempre do usuário."""
     preservar = preservar or {}
-    escolhido = valor_preco(dados, modo)
+    minimo_certeiro = numero(dados.get("minimo_certeiro"))
+    minimo = numero(dados.get("minimo"))
     menor = numero(dados.get("menor"))
     medio = numero(dados.get("medio"))
-    minimo = numero(dados.get("minimo"))
     rapida = numero(dados.get("venda_rapida"))
     return {
+        "Minimo Certeiro": minimo_certeiro if minimo_certeiro is not None else numero(primeiro(preservar, "Minimo Certeiro", "Mínimo Certeiro")),
         "Minimo": minimo if minimo is not None else numero(primeiro(preservar, "Minimo", "Mínimo", "Preço mínimo")),
-        "Venda Rapida": rapida if rapida is not None else numero(primeiro(preservar, "Venda Rapida", "Venda Rápida", "Venda rápida")),
         "Menor Liga": menor if menor is not None else numero(primeiro(preservar, "Menor Liga", "Preço Liga mais barato")),
-        "Preço Médio Liga": medio if medio is not None else numero(primeiro(preservar, "Preço Médio Liga", "Preço médio Liga")),
-        "Preço": numero(escolhido) if escolhido is not None else numero(primeiro(preservar, "Preço")),
+        "Media Liga": medio if medio is not None else numero(primeiro(preservar, "Media Liga", "Preço Médio Liga", "Preço médio Liga")),
+        "Venda Rapida": rapida if rapida is not None else numero(primeiro(preservar, "Venda Rapida", "Venda Rápida", "Venda rápida")),
+        "Preço": numero(primeiro(preservar, "Preço")),
         "Alteração de preço": texto(dados.get("alteracao")) or texto(primeiro(preservar, "Alteração de preço")),
     }
 
@@ -184,16 +186,19 @@ def normalizar_carta_existente(linha: dict[str, Any]) -> dict[str, Any]:
         "Link Cardmarket": texto(primeiro(linha, "Link Cardmarket")),
         "Link Tcgplayer": texto(primeiro(linha, "Link Tcgplayer", "Link TCGPlayer")),
         "Link PriceCharting": texto(primeiro(linha, "Link PriceCharting")),
+        "Minimo Certeiro": numero(primeiro(linha, "Minimo Certeiro", "Mínimo Certeiro")),
         "Minimo": numero(primeiro(linha, "Minimo", "Mínimo", "Preço mínimo")),
-        "Venda Rapida": numero(primeiro(linha, "Venda Rapida", "Venda Rápida", "Venda rápida")),
         "Menor Liga": numero(primeiro(linha, "Menor Liga", "Preço Liga mais barato")),
-        "Preço Médio Liga": numero(primeiro(linha, "Preço Médio Liga", "Preço médio Liga")),
+        "Media Liga": numero(primeiro(linha, "Media Liga", "Preço Médio Liga", "Preço médio Liga")),
+        "Venda Rapida": numero(primeiro(linha, "Venda Rapida", "Venda Rápida", "Venda rápida")),
         "Preço": numero(primeiro(linha, "Preço")),
         "Alteração de preço": texto(primeiro(linha, "Alteração de preço")),
         "Quantidade": inteiro(primeiro(linha, "Quantidade")),
         "Imagem": texto(primeiro(linha, "Imagem")),
         "À venda": _sim_nao(primeiro(linha, "À venda", "Venda"), True),
     })
+    for legado in ("Preço Médio Liga", "Preço médio Liga", "Mínimo Certeiro"):
+        carta.pop(legado, None)
     if not isinstance(carta.get("Status"), dict):
         carta["Status"] = {"nível": "OK", "motivos": []}
     if not isinstance(carta.get("Última cotação"), dict):
@@ -209,16 +214,19 @@ def normalizar_booster_existente(linha: dict[str, Any]) -> dict[str, Any]:
     booster.update({
         "Tipo de pacote": texto(primeiro(linha, "Tipo de pacote", "Coleção", "Nome")),
         "Quantidade": inteiro(primeiro(linha, "Quantidade")),
-        "Preço mínimo": numero(primeiro(linha, "Preço mínimo", "Minimo", "Mínimo")),
-        "Venda rápida": numero(primeiro(linha, "Venda rápida", "Venda Rapida", "Venda Rápida")),
-        "Preço Liga mais barato": numero(primeiro(linha, "Preço Liga mais barato", "Menor Liga")),
-        "Preço médio Liga": numero(primeiro(linha, "Preço médio Liga", "Preço Médio Liga")),
+        "Minimo Certeiro": numero(primeiro(linha, "Minimo Certeiro", "Mínimo Certeiro")),
+        "Minimo": numero(primeiro(linha, "Minimo", "Preço mínimo", "Mínimo")),
+        "Menor Liga": numero(primeiro(linha, "Menor Liga", "Preço Liga mais barato")),
+        "Media Liga": numero(primeiro(linha, "Media Liga", "Preço médio Liga", "Preço Médio Liga")),
+        "Venda Rapida": numero(primeiro(linha, "Venda Rapida", "Venda rápida", "Venda Rápida")),
         "Preço": numero(primeiro(linha, "Preço")),
         "Alteração de preço": texto(primeiro(linha, "Alteração de preço")),
         "Link Liga": texto(primeiro(linha, "Link Liga", "Liga", "Link")),
         "Imagem": texto(primeiro(linha, "Imagem")),
         "À venda": _sim_nao(primeiro(linha, "À venda", "Venda"), True),
     })
+    for legado in ("Preço mínimo", "Venda rápida", "Preço Liga mais barato", "Preço médio Liga", "Preço Médio Liga", "Mínimo Certeiro"):
+        booster.pop(legado, None)
     if not isinstance(booster.get("Status"), dict):
         booster["Status"] = {"nível": "OK", "motivos": []}
     if not isinstance(booster.get("Última cotação"), dict):
@@ -386,10 +394,9 @@ def montar_booster_novo(
     if not erro:
         precos = _precos_atuais(dados, modo, booster)
         booster.update({
-            "Preço mínimo": precos["Minimo"], "Venda rápida": precos["Venda Rapida"],
-            "Preço Liga mais barato": precos["Menor Liga"], "Preço médio Liga": precos["Preço Médio Liga"],
-            "Preço": precos["Preço"], "Alteração de preço": precos["Alteração de preço"],
-            "Preço coletado": preco_objeto(dados, False), "Preço estimado": preco_objeto(dados, True),
+            **precos,
+            "Preço coletado": preco_objeto(dados, False),
+            "Preço estimado": preco_objeto(dados, True),
         })
     status = _status_erro_cotizacao(erro) if erro else gerar_status_booster(dados)
     booster["Status"] = status
@@ -405,10 +412,9 @@ def cotizar_booster(
     if not erro:
         precos = _precos_atuais(dados, modo, booster)
         booster.update({
-            "Preço mínimo": precos["Minimo"], "Venda rápida": precos["Venda Rapida"],
-            "Preço Liga mais barato": precos["Menor Liga"], "Preço médio Liga": precos["Preço Médio Liga"],
-            "Preço": precos["Preço"], "Alteração de preço": precos["Alteração de preço"],
-            "Preço coletado": preco_objeto(dados, False), "Preço estimado": preco_objeto(dados, True),
+            **precos,
+            "Preço coletado": preco_objeto(dados, False),
+            "Preço estimado": preco_objeto(dados, True),
         })
     status = _status_erro_cotizacao(erro) if erro else gerar_status_booster(dados)
     if not erro:
@@ -874,7 +880,7 @@ def _mesclar_cartas(existentes: list[dict[str, Any]], novas: list[dict[str, Any]
             if not texto(atual.get(campo)) and texto(nova.get(campo)):
                 atual[campo] = nova[campo]
         for campo in (
-            "Minimo", "Venda Rapida", "Menor Liga", "Preço Médio Liga", "Preço",
+            "Minimo Certeiro", "Minimo", "Menor Liga", "Media Liga", "Venda Rapida",
             "Alteração de preço", "Preço coletado", "Preço estimado", "Status", "Última cotação",
         ):
             if nova.get(campo) not in (None, "", {}, []):
@@ -895,12 +901,37 @@ def _mesclar_boosters(existentes: list[dict[str, Any]], novos: list[dict[str, An
         if not texto(atual.get("Imagem")) and texto(novo.get("Imagem")):
             atual["Imagem"] = novo["Imagem"]
         for campo in (
-            "Preço mínimo", "Venda rápida", "Preço Liga mais barato", "Preço médio Liga", "Preço",
+            "Minimo Certeiro", "Minimo", "Menor Liga", "Media Liga", "Venda Rapida",
             "Alteração de preço", "Preço coletado", "Preço estimado", "Status", "Última cotação",
         ):
             if novo.get(campo) not in (None, "", {}, []):
                 atual[campo] = novo[campo]
         atual.pop("Histórico de preços", None)
+
+
+def _operacao_patch(linha: dict[str, Any]) -> bool:
+    return chave_texto(linha.get("operation") or linha.get("_operation")) in {"PATCH", "EDIT", "EDITAR"}
+
+
+def _aplicar_patches_usuario(existentes: list[dict[str, Any]], patches: list[dict[str, Any]], tipo: str) -> None:
+    """Aplica apenas campos controlados pelo usuário, sem consultar nem sobrescrever referências de mercado."""
+    normalizador = normalizar_carta_existente if tipo == "cartas" else normalizar_booster_existente
+    indice = {normalizador(item)["Id"]: item for item in existentes}
+    for patch in patches:
+        patch_id = texto(patch.get("Id") or patch.get("ID") or patch.get("id"))
+        if not patch_id:
+            patch_id = normalizador(patch)["Id"]
+        atual = indice.get(patch_id)
+        if atual is None:
+            raise ValueError(f"Patch de {tipo} aponta para item inexistente: {patch_id}")
+        if "Preço" in patch:
+            atual["Preço"] = numero(patch.get("Preço"))
+        if "Quantidade" in patch:
+            atual["Quantidade"] = inteiro(patch.get("Quantidade"))
+        if "À venda" in patch or "Venda" in patch:
+            atual["À venda"] = _sim_nao(primeiro(patch, "À venda", "Venda"), True)
+        if tipo == "cartas" and ("Favorita" in patch or "Favorito" in patch):
+            atual["Favorita"] = _sim_nao(primeiro(patch, "Favorita", "Favorito"), False)
 
 
 def _mesclar_kits(existentes: list[dict[str, Any]], novos: list[dict[str, Any]]) -> None:
@@ -943,7 +974,7 @@ def _mesclar_albuns(existentes: list[dict[str, Any]], novos: list[dict[str, Any]
 def _mesclar_perfil_editavel(perfil: dict[str, Any], perfil_update: dict[str, Any]) -> None:
     campos = (
         "owner", "title", "description", "email", "phone", "password",
-        "selling", "showQuantity", "featured", "proposalTerms",
+        "selling", "showQuantity", "featured", "proposalTerms", "profilePhoto", "palette",
     )
     for campo in campos:
         if campo in perfil_update:
@@ -977,8 +1008,12 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
         boosters = [normalizar_booster_existente(x) for x in ler_inventario(destino, "boosters")]
         kits = [normalizar_kit(x) for x in ler_inventario(destino, "kits")]
         albuns = [normalizar_album(x) for x in ler_inventario(destino, "albuns")]
-        novas_cartas_src = ler_inventario(origem, "cartas")
-        novos_boosters_src = ler_inventario(origem, "boosters")
+        todas_cartas_update = ler_inventario(origem, "cartas")
+        todos_boosters_update = ler_inventario(origem, "boosters")
+        patches_cartas = [x for x in todas_cartas_update if _operacao_patch(x)]
+        patches_boosters = [x for x in todos_boosters_update if _operacao_patch(x)]
+        novas_cartas_src = [x for x in todas_cartas_update if not _operacao_patch(x)]
+        novos_boosters_src = [x for x in todos_boosters_update if not _operacao_patch(x)]
         novos_kits_src = ler_inventario(origem, "kits")
         novos_albuns_src = ler_inventario(origem, "albuns")
         cotacao_id = f"update-{update_id}"
@@ -1026,6 +1061,8 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
                         mapa_ids[id_origem] = novo["Id"]
                     historico_boosters.append(registro)
 
+        _aplicar_patches_usuario(cartas, patches_cartas, "cartas")
+        _aplicar_patches_usuario(boosters, patches_boosters, "boosters")
         novos_kits = [normalizar_kit(x) for x in novos_kits_src]
         novos_albuns = [normalizar_album(x) for x in novos_albuns_src]
         novos_kits, novos_albuns = _remapear_referencias_ids(novos_kits, novos_albuns, mapa_ids)
@@ -1103,9 +1140,11 @@ def _totais_snapshot(cartas: list[dict[str, Any]], boosters: list[dict[str, Any]
         return round(sum((numero(x.get(campo)) or 0) * inteiro(x.get("Quantidade")) for x in itens), 2)
     return {
         "preço": soma(cartas, "Preço") + soma(boosters, "Preço"),
-        "media": soma(cartas, "Preço Médio Liga") + soma(boosters, "Preço médio Liga"),
-        "menor": soma(cartas, "Menor Liga") + soma(boosters, "Preço Liga mais barato"),
-        "buylist": soma(cartas, "Minimo") + soma(boosters, "Preço mínimo"),
+        "minimoCerteiro": soma(cartas, "Minimo Certeiro") + soma(boosters, "Minimo Certeiro"),
+        "buylist": soma(cartas, "Minimo") + soma(boosters, "Minimo"),
+        "menor": soma(cartas, "Menor Liga") + soma(boosters, "Menor Liga"),
+        "media": soma(cartas, "Media Liga") + soma(boosters, "Media Liga"),
+        "vendaRapida": soma(cartas, "Venda Rapida") + soma(boosters, "Venda Rapida"),
     }
 
 

@@ -76,7 +76,7 @@ const placeholder = kind === 'card'
       </>
     )}
 
-    {showOwnerFilter && owners.length > 1 && (
+    {kind !== 'card' && showOwnerFilter && owners.length > 1 && (
       <div class="select-control">
         <label for={`${kind}-owner-filter`}>Colecionador</label>
         <div class="select-input-wrap">

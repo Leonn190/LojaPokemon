@@ -34,6 +34,15 @@ interface OwnedItemBase {
   showQuantity: boolean;
 }
 
+export interface PriceHistoryEntry {
+  date: string;
+  minimumCertain: number | null;
+  minimumBuylist: number | null;
+  leagueLowest: number | null;
+  leagueAverage: number | null;
+  quickSale: number | null;
+}
+
 export interface CardItem extends OwnedItemBase {
   kind: 'card';
   number: string;
@@ -47,18 +56,25 @@ export interface CardItem extends OwnedItemBase {
   linkCardmarket: string;
   linkTcgplayer: string;
   linkPriceCharting: string;
+  certainMinimumPrice: number | null;
   minimumPrice: number | null;
   quickSalePrice: number | null;
   leaguePrice: number | null;
+  averageLeaguePrice: number | null;
   finalPrice: number | null;
+  favorite: boolean;
+  priceHistory: PriceHistoryEntry[];
+  advancedData: Record<string, unknown>;
 }
 
 export interface BoosterItem extends OwnedItemBase {
   kind: 'booster';
   linkLiga: string;
+  certainMinimumPrice: number | null;
   minimumPrice: number | null;
   quickSalePrice: number | null;
   leaguePrice: number | null;
+  averageLeaguePrice: number | null;
   finalPrice: number | null;
 }
 
@@ -119,6 +135,8 @@ export interface CollectorCollection {
   featured: boolean;
   phone: string;
   proposalTerms: ProposalTerms;
+  profilePhoto: string;
+  palette: [string, string, string];
   cards: CardItem[];
   boosters: BoosterItem[];
   kits: KitItem[];
@@ -142,6 +160,8 @@ type ProfileData = {
   email?: string;
   phone?: string;
   password?: string;
+  profilePhoto?: string;
+  palette?: string[] | { primary?: string; secondary?: string; accent?: string };
   proposalTerms?: {
     policy?: ProposalPolicy;
     flexibleDiscounts?: boolean;
@@ -228,6 +248,35 @@ const readInventory = (folder: string, baseName: string): InventoryRow[] => {
   return readRows(folder, `${baseName}.csv`);
 };
 
+
+const readJsonLines = (path: string): InventoryRow[] => {
+  const source = readText(path);
+  if (!source) return [];
+  return source.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).flatMap((line) => {
+    try {
+      const parsed = JSON.parse(line) as unknown;
+      return parsed && typeof parsed === 'object' ? [parsed as InventoryRow] : [];
+    } catch (_) {
+      return [];
+    }
+  });
+};
+
+const normalizeColor = (value: unknown, fallback: string): string => {
+  const raw = String(value ?? '').trim();
+  return /^#[0-9a-f]{6}$/i.test(raw) ? raw : fallback;
+};
+
+const normalizePalette = (profile: ProfileData): [string, string, string] => {
+  const raw = profile.palette;
+  if (Array.isArray(raw)) return [normalizeColor(raw[0], '#54e8df'), normalizeColor(raw[1], '#bc91ff'), normalizeColor(raw[2], '#f4c25c')];
+  if (raw && typeof raw === 'object') return [
+    normalizeColor(raw.primary, '#54e8df'),
+    normalizeColor(raw.secondary, '#bc91ff'),
+    normalizeColor(raw.accent, '#f4c25c'),
+  ];
+  return ['#54e8df', '#bc91ff', '#f4c25c'];
+};
 const readProfile = (folder: string): ProfileData => {
   try {
     return JSON.parse(readFileSync(join(folder, 'perfil.json'), 'utf8')) as ProfileData;
@@ -529,6 +578,26 @@ export const getCollections = (): CollectorCollection[] => {
     const proposalTerms = normalizeProposalTerms(profile);
     const ownerPhone = profile.phone?.trim() || '';
     const usedImages = new Map<string, number>();
+    const palette = normalizePalette(profile);
+    const profilePhoto = String(profile.profilePhoto ?? '').trim();
+    const rawCardHistory = readJsonLines(join(folder, 'historico', 'cartas.jsonl'));
+    const cardHistory = new Map<string, PriceHistoryEntry[]>();
+    rawCardHistory.forEach((entry) => {
+      const itemId = String(entry.itemId ?? entry.Id ?? '').trim();
+      if (!itemId || entry.sucesso === false || entry.erro) return;
+      const historyEntry: PriceHistoryEntry = {
+        date: String(entry.data ?? ''),
+        minimumCertain: parseDecimal(entry['Minimo Certeiro'] ?? entry['Mínimo Certeiro']),
+        minimumBuylist: parseDecimal(entry['Minimo'] ?? entry['Preço mínimo']),
+        leagueLowest: parseDecimal(entry['Menor Liga'] ?? entry['Preço Liga mais barato']),
+        leagueAverage: parseDecimal(entry['Media Liga'] ?? entry['Preço Médio Liga'] ?? entry['Preço médio Liga']),
+        quickSale: parseDecimal(entry['Venda Rapida'] ?? entry['Venda rápida']),
+      };
+      const list = cardHistory.get(itemId) ?? [];
+      list.push(historyEntry);
+      cardHistory.set(itemId, list);
+    });
+    cardHistory.forEach((entries) => entries.sort((left, right) => left.date.localeCompare(right.date)));
 
     const cards: CardItem[] = readInventory(folder, 'inventario-cartas').map((row) => {
       const name = String(row['Nome'] ?? '').trim() || 'Carta sem nome';
@@ -539,11 +608,13 @@ export const getCollections = (): CollectorCollection[] => {
       const year = String(row['Ano'] ?? '').trim() || 'Não informado';
       const type = String(row['Tipo'] ?? '').trim() || 'Não informado';
       const quantity = parseQuantity(row['Quantidade']);
+      const certainMinimumPrice = parseDecimal(row['Minimo Certeiro']) ?? parseDecimal(row['Mínimo Certeiro']);
       const minimumPrice = parseDecimal(row['Minimo']) ?? parseDecimal(row['Preço mínimo']);
       const quickSalePrice = parseDecimal(row['Venda Rapida']) ?? parseDecimal(row['Venda rápida']);
       const leaguePrice = parseDecimal(row['Menor Liga']) ?? parseDecimal(row['Preço Liga mais barato']);
+      const averageLeaguePrice = parseDecimal(row['Media Liga']) ?? parseDecimal(row['Preço Médio Liga']) ?? parseDecimal(row['Preço médio Liga']);
       const finalPrice = parseDecimal(row['Preço']);
-      const price = finalPrice ?? leaguePrice;
+      const price = finalPrice;
       const forSale = profile.selling !== false && parseBoolean(row['À venda'] ?? row['Venda'], true);
       const imageKey = normalizeText(`${name} ${number}`);
       const duplicateIndex = usedImages.get(imageKey) ?? 0;
@@ -570,10 +641,15 @@ export const getCollections = (): CollectorCollection[] => {
         linkCardmarket: String(row['Link Cardmarket'] ?? ''),
         linkTcgplayer: String(row['Link Tcgplayer'] ?? row['Link TCGPlayer'] ?? ''),
         linkPriceCharting: String(row['Link PriceCharting'] ?? ''),
+        certainMinimumPrice,
         minimumPrice,
         quickSalePrice,
         leaguePrice,
+        averageLeaguePrice,
         finalPrice,
+        favorite: parseBoolean(row['Favorita'] ?? row['Favorito'], false),
+        priceHistory: cardHistory.get(id) ?? [],
+        advancedData: { ...row },
         slug: `${collectionSlug}-${localSlug}`,
         image: String(row['Imagem'] ?? ''),
         imageCandidates: cardImageCandidates(collectionSlug, name, number, language, duplicateIndex, String(row['Imagem'] ?? '')),
@@ -591,11 +667,13 @@ export const getCollections = (): CollectorCollection[] => {
       .map((row) => {
         const name = String(row['Tipo de pacote'] ?? row['Coleção'] ?? row['Nome'] ?? '').trim() || 'Booster sem nome';
         const quantity = parseQuantity(row['Quantidade']);
+        const certainMinimumPrice = parseDecimal(row['Minimo Certeiro']) ?? parseDecimal(row['Mínimo Certeiro']);
         const minimumPrice = parseDecimal(row['Preço mínimo']) ?? parseDecimal(row['Minimo']);
         const quickSalePrice = parseDecimal(row['Venda rápida']) ?? parseDecimal(row['Venda Rapida']);
         const leaguePrice = parseDecimal(row['Preço Liga mais barato']) ?? parseDecimal(row['Preço Mais Baixo Liga']) ?? parseDecimal(row['Menor Liga']);
+        const averageLeaguePrice = parseDecimal(row['Media Liga']) ?? parseDecimal(row['Preço médio Liga']) ?? parseDecimal(row['Preço Médio Liga']);
         const finalPrice = parseDecimal(row['Preço']);
-        const price = finalPrice ?? leaguePrice;
+        const price = finalPrice;
         const forSale = profile.selling !== false && parseBoolean(row['À venda'] ?? row['Venda'], true);
         const localSlug = createUniqueSlug(slugify(name), globalSlugs, `${owner}-${quantity}`);
         const id = String(row['Id'] ?? row['ID'] ?? '').trim() || `${collectionSlug}:booster:${normalizeText(`${row['Link Liga'] ?? ''}|${name}`)}`;
@@ -608,9 +686,11 @@ export const getCollections = (): CollectorCollection[] => {
           forSale,
           showQuantity,
           linkLiga: String(row['Link Liga'] ?? ''),
+          certainMinimumPrice,
           minimumPrice,
           quickSalePrice,
           leaguePrice,
+          averageLeaguePrice,
           finalPrice,
           slug: `${collectionSlug}-${localSlug}`,
           image: String(row['Imagem'] ?? ''),
@@ -719,6 +799,8 @@ export const getCollections = (): CollectorCollection[] => {
       featured: profile.featured === true,
       phone: ownerPhone,
       proposalTerms,
+      profilePhoto,
+      palette,
       cards,
       boosters,
       kits,
@@ -755,11 +837,13 @@ export const getEditableCollections = () => getCollections().map((collection) =>
       proposalTerms: collection.proposalTerms,
       version: Number((profile as Record<string, unknown>).version || 1),
       collectionId: folderName,
+      profilePhoto: collection.profilePhoto,
+      palette: collection.palette,
     },
-    cards: collection.cards.map(({ id, name, number, collection: set, language, condition, year, type, quantity, finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, minimumPrice, quickSalePrice, leaguePrice, image, imageCandidates }) => ({
-      id, name, number, collection: set, language, condition, year, type, quantity, price: finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, minimumPrice, quickSalePrice, leaguePrice, image, imageCandidates,
+    cards: collection.cards.map(({ id, name, number, collection: set, language, condition, year, type, quantity, finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, averageLeaguePrice, favorite, priceHistory, advancedData, image, imageCandidates }) => ({
+      id, name, number, collection: set, language, condition, year, type, quantity, price: finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, averageLeaguePrice, favorite, priceHistory, advancedData, image, imageCandidates,
     })),
-    boosters: collection.boosters.map(({ id, name, quantity, finalPrice, forSale, linkLiga, minimumPrice, quickSalePrice, leaguePrice, image, imageCandidates }) => ({ id, name, quantity, price: finalPrice, forSale, linkLiga, minimumPrice, quickSalePrice, leaguePrice, image, imageCandidates })),
+    boosters: collection.boosters.map(({ id, name, quantity, finalPrice, forSale, linkLiga, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, averageLeaguePrice, image, imageCandidates }) => ({ id, name, quantity, price: finalPrice, forSale, linkLiga, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, averageLeaguePrice, image, imageCandidates })),
     kits: collection.kits.map(({ id, name, description, contents, contentItems, sourceTotal, quantity, price, forSale, image, imageCandidates }) => ({ id, name, description, contents, contentItems, sourceTotal, quantity, price, forSale, image, imageCandidates })),
     albums: collection.albums.map((album) => ({
       albumId: album.id,

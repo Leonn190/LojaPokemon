@@ -19,7 +19,7 @@ historico/
 └── boosters.jsonl
 ```
 
-Cada linha é uma cotização independente com `itemId`, `cotacaoId`, data, preços, status, erro e `sucesso`. O inventário mantém apenas `Última cotação` quando houve sucesso. Assim, uma falha não faz o item parecer atualizado e o inventário não cresce indefinidamente.
+Cada linha é uma cotização independente com `itemId`, `cotacaoId`, data, preços, status, erro e `sucesso`. O histórico de mercado guarda `Minimo Certeiro`, `Minimo`, `Menor Liga`, `Media Liga` e `Venda Rapida`; o campo `Preço` não entra no histórico porque é uma escolha manual do colecionador. O inventário mantém apenas `Última cotação` quando houve sucesso. Assim, uma falha não faz o item parecer atualizado e o inventário não cresce indefinidamente.
 
 ## IDs e referências
 
@@ -53,7 +53,7 @@ Para cartas:
 - suspeita leve quando existe realmente apenas uma oferta utilizável;
 - aviso próprio quando ofertas foram detectadas mas parte delas falhou no OCR.
 
-A comparação buylist × venda é feita em camadas. Primeiro procura mesmo idioma + mesmo estado. Depois aceita mesmo idioma + outro estado somente após converter o preço pelos fatores configurados. Não compara idiomas diferentes como se fossem o mesmo produto.
+A comparação buylist × venda é feita em camadas. Primeiro procura idioma + estado compatíveis. Português e inglês podem ser usados como equivalentes quando a variante exata não existe, sem fator de idioma. Se o estado exato não existe, a tabela de condição é aplicada. Quando a maior buylist ultrapassa o menor marketplace, a variante física também é conferida (por exemplo, Foil contra Foil), evitando misturar uma oferta Normal com uma carta Foil.
 
 A coleta registra separadamente quantas ofertas foram `detectadas`, quantas foram `lidas` e quantas tiveram `falhas`. Por isso, 5 ofertas detectadas com 4 falhas de OCR não viram falsamente “só existe uma loja”.
 
@@ -68,7 +68,17 @@ Os fatores padrão ficam em `config.json`:
 - HP = 0.50
 - D = 0.30
 
-A conversão entre estados usa a razão entre os fatores. O valor coletado e o valor estimado continuam separados.
+A conversão entre estados usa a diferença direta entre os fatores. Exemplo: SP = 0,90 para NM = 1,00 resulta em **+10%** sobre o preço SP. O valor coletado e o valor estimado continuam separados.
+
+As cinco referências calculadas pelo gerenciador são:
+
+- `Minimo Certeiro` = `Menor Liga × 0,60`;
+- `Minimo` = maior buylist compatível;
+- `Menor Liga` = menor oferta compatível;
+- `Media Liga` = média das ofertas compatíveis;
+- `Venda Rapida` = `Menor Liga × 0,95`.
+
+`Preço` nunca é recalculado pelo gerenciador: somente o usuário altera esse campo.
 
 ## Formatação parcial e retry
 
@@ -109,7 +119,7 @@ Updates JSON podem conter:
 
 Novas cartas/boosters são consultadas antes de alterar o inventário. Se alguma consulta falhar, a atualização do inventário é cancelada. Quando tudo termina, perfil, cartas, boosters, kits e álbuns são promovidos na mesma transação. `updateId` impede aplicação duplicada.
 
-Kits enviados com `operation: "upsert"` substituem a versão do mesmo `Id`; álbuns de update também representam o estado completo do álbum.
+Kits enviados com `operation: "upsert"` substituem a versão do mesmo `Id`; álbuns de update também representam o estado completo do álbum. Edições de usuário em cartas/boosters podem usar `operation: "patch"`; nesse caso somente campos controlados pelo usuário (como `Preço`, quantidade, disponibilidade e favorito de carta) são aplicados, sem sobrescrever referências de mercado.
 
 ## Relatórios
 
@@ -118,7 +128,7 @@ Cada cotização concluída salva em `relatorios/`:
 - `cotizacao-<data>.json`;
 - `cotizacao-<data>.txt`.
 
-Os relatórios continuam contendo totais, variações, buylist, média Liga, menor Liga, itens sem oferta e status por item.
+Os relatórios contêm totais e variações das cinco referências de mercado, além de itens sem oferta, erros e status por item.
 
 ## Configuração
 
