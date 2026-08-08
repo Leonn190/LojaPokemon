@@ -1,0 +1,39 @@
+COTIZAÇÃO CONCLUÍDA
+==============================================================================
+Data: 2026-08-08T16:16:01-03:00
+Escopo: Apenas cartas
+Cartas: 3 | Boosters: 0
+Atualizadas: 3 cartas + 0 boosters
+Sem ofertas: 0 | Erros: 0
+Suspeitas: 1 | Suspeitas leves: 0
+
+Preço total antigo: R$ 146,09
+Preço total novo: R$ 144,04
+Variação: R$ -2,05 (-1,40%)
+Buylist total: R$ 140,50
+Total pela média da Liga: R$ 144,04
+Total pelo menor preço da Liga: R$ 84,90
+
+VARIAÇÃO POR ITEM
+==============================================================================
+CARTA | Eevee ex | PRE-075-BR-NM
+  Preço (média Liga): R$ 35,82 → R$ 35,32 | -0,50 (-1,40%)
+  Menor Liga: R$ 22,00 → R$ 22,00 | +0,00 (+0,00%)
+  Minimo / buylist: R$ 12,50 → R$ 15,62 | +3,12 (+24,96%)
+  Preço configurado: R$ 35,82 → R$ 35,32 | -0,50 (-1,40%)
+  Status: OK
+
+CARTA | Eevee ex | SVP-174-BR-NM
+  Preço (média Liga): R$ 62,87 → R$ 62,37 | -0,50 (-0,80%)
+  Menor Liga: R$ 30,00 → R$ 37,90 | +7,90 (+26,33%)
+  Minimo / buylist: R$ 85,19 → R$ 106,49 | +21,30 (+25,00%)
+  Preço configurado: R$ 62,87 → R$ 62,37 | -0,50 (-0,80%)
+  Status: Suspeita
+    - Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente
+
+CARTA | Flareon ex | PRE-014-BR-NM
+  Preço (média Liga): R$ 47,40 → R$ 46,35 | -1,05 (-2,22%)
+  Menor Liga: R$ 26,00 → R$ 25,00 | -1,00 (-3,85%)
+  Minimo / buylist: R$ 15,27 → R$ 18,39 | +3,12 (+20,43%)
+  Preço configurado: R$ 47,40 → R$ 46,35 | -1,05 (-2,22%)
+  Status: OK

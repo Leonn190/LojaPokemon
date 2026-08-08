@@ -1,0 +1,312 @@
+[
+  {
+    "Id": "KIT-6CDFFF4AEABB",
+    "Nome": "Kit Greninja",
+    "Descrição": "Seleção temática com todas as cartas de Greninja e sua linha evolutiva disponíveis na coleção.",
+    "Preço": 449.9,
+    "Quantidade": 1,
+    "Conteúdo": [
+      {
+        "kind": "cards",
+        "itemId": "SSPR-SWSH155-SWSH158-ING-NM",
+        "name": "Greninja V-UNION (SWSH155–SWSH158)",
+        "quantity": 1,
+        "unitPrice": 200.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "SCR-041-142-BR-NM",
+        "name": "Greninja ex (041/142)",
+        "quantity": 1,
+        "unitPrice": 8.9
+      },
+      {
+        "kind": "cards",
+        "itemId": "PR-XY-XY20-BR-D",
+        "name": "Greninja EX (XY20)",
+        "quantity": 1,
+        "unitPrice": 9.9
+      },
+      {
+        "kind": "cards",
+        "itemId": "XYP-XY133-BR-MP",
+        "name": "Ash-Greninja EX (XY133)",
+        "quantity": 1,
+        "unitPrice": 56.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "SSPR-SWSH144-ING-MP",
+        "name": "Greninja (SWSH144)",
+        "quantity": 1,
+        "unitPrice": 160.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "ASR-046-189-BR-SP",
+        "name": "Greninja Radiante (046/189)",
+        "quantity": 1,
+        "unitPrice": 9.9
+      },
+      {
+        "kind": "cards",
+        "itemId": "CRI-022-086-BR-NM",
+        "name": "Mega Greninja ex (022/086)",
+        "quantity": 1,
+        "unitPrice": 13.9
+      },
+      {
+        "kind": "cards",
+        "itemId": "CRI-089-086-BR-NM",
+        "name": "Frogadier (089/086)",
+        "quantity": 1,
+        "unitPrice": 34.9
+      }
+    ],
+    "Valor avulso": 493.5,
+    "Desconto": 43.6,
+    "Imagem": "",
+    "À venda": true
+  },
+  {
+    "Id": "KIT-F9AFC4E33BFC",
+    "Nome": "Kit Pikachu",
+    "Descrição": "Conjunto especial com as cartas de Pikachu disponíveis na coleção, incluindo versões promocionais e comemorativas.",
+    "Preço": 2949.9,
+    "Quantidade": 1,
+    "Conteúdo": [
+      {
+        "kind": "cards",
+        "itemId": "SSPR-SWSH139-SWSH142-BR-NM",
+        "name": "Pikachu V-UNIÃO (SWSH139–SWSH142)",
+        "quantity": 1,
+        "unitPrice": 250.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "CCC-PROMO-24-ING-NM",
+        "name": "Pikachu de ______ (Promo 24)",
+        "quantity": 1,
+        "unitPrice": 195.9
+      },
+      {
+        "kind": "cards",
+        "itemId": "CEL-005-025-BR-NM",
+        "name": "Pikachu (005/025)",
+        "quantity": 1,
+        "unitPrice": 46.5
+      },
+      {
+        "kind": "cards",
+        "itemId": "LORTG-TG05-TG30-BR-NM",
+        "name": "Pikachu (TG05/TG30)",
+        "quantity": 1,
+        "unitPrice": 326.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "XYP-XY124-BR-NM",
+        "name": "Pikachu EX (XY124)",
+        "quantity": 1,
+        "unitPrice": 1900.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "XYP-XY124-BR-MP",
+        "name": "Pikachu EX (XY124)",
+        "quantity": 1,
+        "unitPrice": 378.9
+      },
+      {
+        "kind": "cards",
+        "itemId": "CEL-008-025-ING-NM",
+        "name": "Pikachu Surfista V (008/025)",
+        "quantity": 1,
+        "unitPrice": 34.9
+      },
+      {
+        "kind": "cards",
+        "itemId": "CEL-008-025-BR-NM",
+        "name": "Pikachu Surfista V (008/025)",
+        "quantity": 1,
+        "unitPrice": 30.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "CEL-009-025-ING-NM",
+        "name": "Pikachu Surfista VMAX (009/025)",
+        "quantity": 1,
+        "unitPrice": 80.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "EVO-35-108-ING-MP",
+        "name": "Pikachu (35/108)",
+        "quantity": 1,
+        "unitPrice": 37.0
+      }
+    ],
+    "Valor avulso": 3279.2,
+    "Desconto": 329.3,
+    "Imagem": "",
+    "À venda": true
+  },
+  {
+    "Id": "KIT-5C27836159DE",
+    "Nome": "Kit Charizard",
+    "Descrição": "Kit premium reunindo todas as cartas de Charizard e sua linha evolutiva disponíveis na coleção.",
+    "Preço": 3699.9,
+    "Quantidade": 1,
+    "Conteúdo": [
+      {
+        "kind": "cards",
+        "itemId": "CCC-4-102-ING-NM",
+        "name": "Charizard (4/102)",
+        "quantity": 1,
+        "unitPrice": 1460.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "SSPR-SWSH260-ING-NM",
+        "name": "Charizard V (SWSH260)",
+        "quantity": 1,
+        "unitPrice": 600.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "SSPR-SWSH261-ING-NM",
+        "name": "Charizard VMAX (SWSH261)",
+        "quantity": 1,
+        "unitPrice": 490.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "SWSHP-SWSH262-ING-NM",
+        "name": "Charizard V-ASTRO (SWSH262)",
+        "quantity": 1,
+        "unitPrice": 1100.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "PGO-011-078-ING-NM",
+        "name": "Charizard Radiante (011/078)",
+        "quantity": 1,
+        "unitPrice": 220.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "PFL-013-094-BR-NM",
+        "name": "Mega Charizard X ex (013/094)",
+        "quantity": 1,
+        "unitPrice": 14.5
+      },
+      {
+        "kind": "cards",
+        "itemId": "MEP-MEP-023-BR-NM",
+        "name": "Mega Charizard X ex (MEP 023)",
+        "quantity": 1,
+        "unitPrice": 122.0
+      }
+    ],
+    "Valor avulso": 4006.5,
+    "Desconto": 306.6,
+    "Imagem": "",
+    "À venda": true
+  },
+  {
+    "Id": "KIT-27255D21DCB8",
+    "Nome": "Kit Mewtwo",
+    "Descrição": "Coleção temática com todas as versões de Mewtwo atualmente disponíveis no inventário.",
+    "Preço": 669.9,
+    "Quantidade": 1,
+    "Conteúdo": [
+      {
+        "kind": "cards",
+        "itemId": "SSPR-SWSH159-SWSH162-ING-NM",
+        "name": "Mewtwo V-UNION (SWSH159–SWSH162)",
+        "quantity": 1,
+        "unitPrice": 400.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "SLG-72-73-BR-NM",
+        "name": "Mewtwo GX (72/73)",
+        "quantity": 1,
+        "unitPrice": 140.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "SSPR-SWSH229-ING-NM",
+        "name": "Mewtwo V (SWSH229)",
+        "quantity": 1,
+        "unitPrice": 60.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "SLG-39-73-BR-NM",
+        "name": "Mewtwo GX (39/73)",
+        "quantity": 1,
+        "unitPrice": 58.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "BKT-62-162-BR-D",
+        "name": "Mewtwo EX (62/162)",
+        "quantity": 1,
+        "unitPrice": 17.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "XYPR-XY107-BR-SP",
+        "name": "Mewtwo EX (XY107)",
+        "quantity": 1,
+        "unitPrice": 62.9
+      }
+    ],
+    "Valor avulso": 737.9,
+    "Desconto": 68.0,
+    "Imagem": "",
+    "À venda": true
+  },
+  {
+    "Id": "KIT-0EE86F84D8CC",
+    "Nome": "Kit Linhagem Venusaur",
+    "Descrição": "Kit da linhagem de Venusaur, incluindo Bulbasaur e todas as versões relacionadas disponíveis.",
+    "Preço": 59.9,
+    "Quantidade": 1,
+    "Conteúdo": [
+      {
+        "kind": "cards",
+        "itemId": "MEP-133-132-STAMPED-BR-NM",
+        "name": "Bulbasaur (133/132 Stamped)",
+        "quantity": 1,
+        "unitPrice": 25.9
+      },
+      {
+        "kind": "cards",
+        "itemId": "MEG-003-132-BR-NM",
+        "name": "Mega Venusaur ex (003/132)",
+        "quantity": 1,
+        "unitPrice": 5.0
+      },
+      {
+        "kind": "cards",
+        "itemId": "MEG-155-132-BR-NM",
+        "name": "Mega Venusaur ex (155/132)",
+        "quantity": 1,
+        "unitPrice": 31.9
+      },
+      {
+        "kind": "cards",
+        "itemId": "MEP-MEP-013-BR-NM",
+        "name": "Mega Venusaur ex (MEP 013)",
+        "quantity": 1,
+        "unitPrice": 6.3
+      }
+    ],
+    "Valor avulso": 69.1,
+    "Desconto": 9.2,
+    "Imagem": "",
+    "À venda": true
+  }
+]

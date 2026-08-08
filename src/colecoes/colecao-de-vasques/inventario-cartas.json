@@ -1,0 +1,2689 @@
+[
+  {
+    "Nome": "Morpeko da Marine",
+    "Número": "206",
+    "Coleção": "Escarlate e Violeta Promos",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "NM",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Marnie%27s+Morpeko+%28206%2F%E2%88%9E%29&num=206",
+    "Preço": 79.53,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "ESCARLATE-E-VIOLETA-PROMOS-206-BR-NM",
+    "Tipo": "S",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 45.09,
+    "Venda Rapida": 59.75,
+    "Menor Liga": 62.89,
+    "Preço Médio Liga": 79.53,
+    "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
+    "Imagem": "Morpeko da Marine_206.jpg",
+    "Status": {
+      "nível": "OK",
+      "motivos": [],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 25,
+          "lidas": 25,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 17,
+          "lidas": 17,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 62.89,
+      "Preço Médio Liga": 79.53,
+      "Minimo": 45.09,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 62.89,
+      "Preço Médio Liga": 79.53,
+      "Minimo": 45.09,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Umbreon e Darkrai-GX",
+    "Número": "SM241",
+    "Coleção": "Sol e Lua Promos",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "NM",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Umbreon+%26+Darkrai-GX+%28SM241%2F250%29&ed=SMP&num=SM241",
+    "Preço": 780.62,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "SMP-SM241-BR-NM",
+    "Tipo": "S",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 446.88,
+    "Venda Rapida": 550.05,
+    "Menor Liga": 579.0,
+    "Preço Médio Liga": 780.62,
+    "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
+    "Imagem": "Umbreon e Darkrai-GX_SM241.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "buylist_acima_marketplace",
+          "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+          "evidencia": {
+            "comparacao": "mesmo_idioma_estado_ajustado",
+            "estadoReferencia": "NM",
+            "idiomaReferencia": "Português",
+            "venda": {
+              "loja": "Colecionador Amigo",
+              "preco": 423.33,
+              "idioma": "Português",
+              "estado": "D",
+              "ofertaId": "32198410",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=797846&tcg=32198410"
+            },
+            "buylist": {
+              "loja": "",
+              "preco": 446.88,
+              "idioma": "Português",
+              "estado": "M",
+              "ofertaId": "31995569",
+              "linkLoja": "https://www.ligapokemon.com.br/b/?bl=31995569"
+            },
+            "diferenca": 23.55
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 33,
+          "lidas": 33,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 20,
+          "lidas": 20,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 579.0,
+      "Preço Médio Liga": 780.62,
+      "Minimo": 446.88,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 579.0,
+      "Preço Médio Liga": 780.62,
+      "Minimo": 446.88,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Darkrai-GX",
+    "Número": "SV70",
+    "Coleção": "Destinos Ocultos",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "NM",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Darkrai-GX+%28SV70%2F68%29&num=SV70",
+    "Preço": 845.0,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "DESTINOS-OCULTOS-SV70-BR-NM",
+    "Tipo": "RU",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 599.95,
+    "Venda Rapida": 802.75,
+    "Menor Liga": 845.0,
+    "Preço Médio Liga": 845.0,
+    "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
+    "Imagem": "Darkrai-GX_SV70.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "buylist_acima_marketplace",
+          "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+          "evidencia": {
+            "comparacao": "mesmo_idioma_estado_ajustado",
+            "estadoReferencia": "NM",
+            "idiomaReferencia": "Português",
+            "venda": {
+              "loja": "Eternatus Card House",
+              "preco": 300.0,
+              "idioma": "Português",
+              "estado": "HP",
+              "ofertaId": "31039811",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=309753&tcg=31039811"
+            },
+            "buylist": {
+              "loja": "",
+              "preco": 599.95,
+              "idioma": "Português",
+              "estado": "M",
+              "ofertaId": "24424658",
+              "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24424658"
+            },
+            "diferenca": 299.95
+          }
+        },
+        {
+          "nivel": "suspeita_leve",
+          "codigo": "uma_oferta",
+          "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+          "evidencia": {
+            "ofertasCompativeis": 1,
+            "detectadas": 7,
+            "lidas": 7,
+            "falhas": 0,
+            "erros": []
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 7,
+          "lidas": 7,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 15,
+          "lidas": 15,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 845.0,
+      "Preço Médio Liga": 845.0,
+      "Minimo": 599.95,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 845.0,
+      "Preço Médio Liga": 845.0,
+      "Minimo": 599.95,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Stoutland",
+    "Número": "248",
+    "Coleção": "Eclipse Cósmico",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "NM",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Stoutland+%28248%2F236%29&ed=CEC&num=248",
+    "Preço": 45.17,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "CEC-248-BR-NM",
+    "Tipo": "SR",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 23.61,
+    "Venda Rapida": 33.16,
+    "Menor Liga": 34.9,
+    "Preço Médio Liga": 45.17,
+    "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
+    "Imagem": "Stoutland_248.jpg",
+    "Status": {
+      "nível": "OK",
+      "motivos": [],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 15,
+          "lidas": 15,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 16,
+          "lidas": 16,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 34.9,
+      "Preço Médio Liga": 45.17,
+      "Minimo": 23.61,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 34.9,
+      "Preço Médio Liga": 45.17,
+      "Minimo": 23.61,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Umbreon-GX",
+    "Número": "80",
+    "Coleção": "Sol e Lua",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "NM",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Umbreon-GX+%2880%2F149%29&ed=SUM&num=80",
+    "Preço": 70.72,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "SUM-80-BR-NM",
+    "Tipo": "RU",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 49.63,
+    "Venda Rapida": 61.75,
+    "Menor Liga": 65.0,
+    "Preço Médio Liga": 70.72,
+    "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
+    "Imagem": "Umbreon-GX_80.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "buylist_acima_marketplace",
+          "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+          "evidencia": {
+            "comparacao": "mesmo_idioma_estado_ajustado",
+            "estadoReferencia": "NM",
+            "idiomaReferencia": "Português",
+            "venda": {
+              "loja": "Brandao Card Game",
+              "preco": 38.67,
+              "idioma": "Português",
+              "estado": "MP",
+              "ofertaId": "29743506",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=207836&tcg=29743506"
+            },
+            "buylist": {
+              "loja": "",
+              "preco": 49.63,
+              "idioma": "Português",
+              "estado": "M",
+              "ofertaId": "24403283",
+              "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24403283"
+            },
+            "diferenca": 10.96
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 28,
+          "lidas": 28,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 24,
+          "lidas": 24,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 65.0,
+      "Preço Médio Liga": 70.72,
+      "Minimo": 49.63,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 65.0,
+      "Preço Médio Liga": 70.72,
+      "Minimo": 49.63,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "M Sharpedo-EX",
+    "Número": "XY200",
+    "Coleção": "XY Promos",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "NM",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Sharpedo-EX+%28XY200%2F%E2%88%9E%29&ed=XYPR&num=XY200",
+    "Preço": 86.0,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "XYPR-XY200-BR-NM",
+    "Tipo": "S",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 51.12,
+    "Venda Rapida": 68.4,
+    "Menor Liga": 72.0,
+    "Preço Médio Liga": 86.0,
+    "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
+    "Imagem": "M Sharpedo-EX_XY200.jpg",
+    "Status": {
+      "nível": "OK",
+      "motivos": [],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 35,
+          "lidas": 35,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 13,
+          "lidas": 13,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 72.0,
+      "Preço Médio Liga": 86.0,
+      "Minimo": 51.12,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 72.0,
+      "Preço Médio Liga": 86.0,
+      "Minimo": 51.12,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Dhelmise-V",
+    "Número": "187",
+    "Coleção": "Espada e Escudo",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "NM",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Dhelmise-V+%28187%2F202%29&ed=SSH&num=187",
+    "Preço": 29.06,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "SSH-187-BR-NM",
+    "Tipo": "RU",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 18.82,
+    "Venda Rapida": 25.18,
+    "Menor Liga": 26.5,
+    "Preço Médio Liga": 29.06,
+    "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
+    "Imagem": "Dhelmise-V_187.jpg",
+    "Status": {
+      "nível": "OK",
+      "motivos": [],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 10,
+          "lidas": 10,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 15,
+          "lidas": 15,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 26.5,
+      "Preço Médio Liga": 29.06,
+      "Minimo": 18.82,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 26.5,
+      "Preço Médio Liga": 29.06,
+      "Minimo": 18.82,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Grimmsnarl-V",
+    "Número": "SV116",
+    "Coleção": "Destinos Brilhantes (Shiny)",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "NM",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Grimmsnarl-V+%28SV116%2FS122%29&ed=SFS&num=SV116",
+    "Preço": 18.13,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "SFS-SV116-BR-NM",
+    "Tipo": "RH",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 9.87,
+    "Venda Rapida": 13.2,
+    "Menor Liga": 13.9,
+    "Preço Médio Liga": 18.13,
+    "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
+    "Imagem": "Grimmsnarl-V_SV116.jpg",
+    "Status": {
+      "nível": "OK",
+      "motivos": [],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 19,
+          "lidas": 19,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 27,
+          "lidas": 27,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 13.9,
+      "Preço Médio Liga": 18.13,
+      "Minimo": 9.87,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 13.9,
+      "Preço Médio Liga": 18.13,
+      "Minimo": 9.87,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Zacian ex do Lupo",
+    "Número": "193",
+    "Coleção": "Escarlate e Violeta Promos",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "NM",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Hop%27s+Zacian+ex%28193%2F%E2%88%9E%29&num=193",
+    "Preço": 13.29,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "ESCARLATE-E-VIOLETA-PROMOS-193-BR-NM",
+    "Tipo": "S",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 4.19,
+    "Venda Rapida": 3.32,
+    "Menor Liga": 3.5,
+    "Preço Médio Liga": 13.29,
+    "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
+    "Imagem": "Zacian ex do Lupo_193.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "buylist_acima_marketplace",
+          "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+          "evidencia": {
+            "comparacao": "mesmo_idioma_estado_ajustado",
+            "estadoReferencia": "NM",
+            "idiomaReferencia": "Português",
+            "venda": {
+              "loja": "Anny TCG",
+              "preco": 3.5,
+              "idioma": "Português",
+              "estado": "NM",
+              "ofertaId": "32196937",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=794876&tcg=32196937"
+            },
+            "buylist": {
+              "loja": "",
+              "preco": 4.19,
+              "idioma": "Português",
+              "estado": "M",
+              "ofertaId": "24396843",
+              "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24396843"
+            },
+            "diferenca": 0.69
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 68,
+          "lidas": 68,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 24,
+          "lidas": 24,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 3.5,
+      "Preço Médio Liga": 13.29,
+      "Minimo": 4.19,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 3.5,
+      "Preço Médio Liga": 13.29,
+      "Minimo": 4.19,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Beedrill ex",
+    "Número": "098",
+    "Coleção": "Caos Ascendente",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "NM",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Beedrill+ex+%28098%2F086%29&ed=CRI&num=098",
+    "Preço": 35.77,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "CRI-098-BR-NM",
+    "Tipo": "RU",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 16.33,
+    "Venda Rapida": 21.85,
+    "Menor Liga": 23.0,
+    "Preço Médio Liga": 35.77,
+    "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
+    "Imagem": "Beedrill ex_098.jpg",
+    "Status": {
+      "nível": "OK",
+      "motivos": [],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 44,
+          "lidas": 44,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 22,
+          "lidas": 22,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 23.0,
+      "Preço Médio Liga": 35.77,
+      "Minimo": 16.33,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 23.0,
+      "Preço Médio Liga": 35.77,
+      "Minimo": 16.33,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "M Rayquaza-EX",
+    "Número": "105",
+    "Coleção": "Céus Estrondosos",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "D",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Rayquaza-EX+%28105%2F108%29&ed=ROS&num=105",
+    "Preço": 549.9,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "ROS-105-BR-D",
+    "Tipo": "RU",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 382.44,
+    "Venda Rapida": 284.9,
+    "Menor Liga": 299.9,
+    "Preço Médio Liga": 549.9,
+    "Alteração de preço": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
+    "Imagem": "M Rayquaza-EX_105.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "buylist_acima_marketplace",
+          "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+          "evidencia": {
+            "comparacao": "mesmo_idioma_estado_ajustado",
+            "estadoReferencia": "D",
+            "idiomaReferencia": "Português",
+            "venda": {
+              "loja": "PlayGround",
+              "preco": 299.9,
+              "idioma": "Português",
+              "estado": "D",
+              "ofertaId": "8454987",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=84075&tcg=8454987"
+            },
+            "buylist": {
+              "loja": "",
+              "preco": 382.44,
+              "idioma": "Português",
+              "estado": "M",
+              "ofertaId": "24420551",
+              "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24420551"
+            },
+            "diferenca": 82.54
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 19,
+          "lidas": 19,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 15,
+          "lidas": 15,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 299.9,
+      "Preço Médio Liga": 549.9,
+      "Minimo": 1274.81,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 299.9,
+      "Preço Médio Liga": 549.9,
+      "Minimo": 382.44,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Gardevoir-EX",
+    "Número": "RC30",
+    "Coleção": "Gerações",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "D",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Gardevoir-EX+%28RC30%2F83%29&ed=GEN&num=RC30",
+    "Preço": 106.21,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "GEN-RC30-BR-D",
+    "Tipo": "RU",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 95.63,
+    "Venda Rapida": 56.9,
+    "Menor Liga": 59.9,
+    "Preço Médio Liga": 106.21,
+    "Alteração de preço": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
+    "Imagem": "Gardevoir-EX_RC30.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "buylist_acima_marketplace",
+          "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+          "evidencia": {
+            "comparacao": "mesmo_idioma_estado_ajustado",
+            "estadoReferencia": "D",
+            "idiomaReferencia": "Português",
+            "venda": {
+              "loja": "Coleciona Geek",
+              "preco": 48.0,
+              "idioma": "Português",
+              "estado": "MP",
+              "ofertaId": "21276039",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=459129&tcg=21276039"
+            },
+            "buylist": {
+              "loja": "",
+              "preco": 95.63,
+              "idioma": "Português",
+              "estado": "M",
+              "ofertaId": "24422726",
+              "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24422726"
+            },
+            "diferenca": 47.63
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 38,
+          "lidas": 38,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 15,
+          "lidas": 15,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 59.9,
+      "Preço Médio Liga": 106.21,
+      "Minimo": 318.78,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 59.9,
+      "Preço Médio Liga": 106.21,
+      "Minimo": 95.63,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Pikachu",
+    "Número": "RC29",
+    "Coleção": "Gerações",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "D",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Pikachu%28RC29%2F83%29&num=RC29",
+    "Preço": 207.35,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "GERA-ES-RC29-BR-D",
+    "Tipo": "RU",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 108.53,
+    "Venda Rapida": 72.68,
+    "Menor Liga": 76.5,
+    "Preço Médio Liga": 207.35,
+    "Alteração de preço": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
+    "Imagem": "Pikachu_RC29.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "buylist_acima_marketplace",
+          "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+          "evidencia": {
+            "comparacao": "mesmo_idioma_estado_ajustado",
+            "estadoReferencia": "D",
+            "idiomaReferencia": "Português",
+            "venda": {
+              "loja": "Coleciona Geek",
+              "preco": 57.8,
+              "idioma": "Português",
+              "estado": "MP",
+              "ofertaId": "20996563",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=459129&tcg=20996563"
+            },
+            "buylist": {
+              "loja": "",
+              "preco": 108.53,
+              "idioma": "Português",
+              "estado": "M",
+              "ofertaId": "31970902",
+              "linkLoja": "https://www.ligapokemon.com.br/b/?bl=31970902"
+            },
+            "diferenca": 50.73
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 39,
+          "lidas": 39,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 24,
+          "lidas": 24,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 76.5,
+      "Preço Médio Liga": 207.35,
+      "Minimo": 361.76,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 76.5,
+      "Preço Médio Liga": 207.35,
+      "Minimo": 108.53,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Darkrai",
+    "Número": "XY22",
+    "Coleção": "XY Promos",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "D",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Darkrai+%28XY22%2F%E2%88%9E%29&ed=XYPR&num=XY22",
+    "Preço": 26.98,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "XYPR-XY22-BR-D",
+    "Tipo": "S",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 38.32,
+    "Venda Rapida": 1.89,
+    "Menor Liga": 1.99,
+    "Preço Médio Liga": 26.98,
+    "Alteração de preço": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
+    "Imagem": "Darkrai_XY22.png",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "buylist_acima_marketplace",
+          "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+          "evidencia": {
+            "comparacao": "mesmo_idioma_estado_ajustado",
+            "estadoReferencia": "D",
+            "idiomaReferencia": "Português",
+            "venda": {
+              "loja": "Calm Mind",
+              "preco": 1.99,
+              "idioma": "Português",
+              "estado": "D",
+              "ofertaId": "26273892",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=700886&tcg=26273892"
+            },
+            "buylist": {
+              "loja": "",
+              "preco": 38.32,
+              "idioma": "Português",
+              "estado": "M",
+              "ofertaId": "24402647",
+              "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24402647"
+            },
+            "diferenca": 36.33
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 12,
+          "lidas": 12,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 12,
+          "lidas": 12,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 1.99,
+      "Preço Médio Liga": 26.98,
+      "Minimo": 127.73,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 1.99,
+      "Preço Médio Liga": 26.98,
+      "Minimo": 38.32,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Lycanroc-GX",
+    "Número": "156",
+    "Coleção": "Guardiões Ascendentes",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "D",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Lycanroc-GX+%28156%2F145%29&num=156",
+    "Preço": 89.9,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "GUARDI-ES-ASCENDENTES-156-BR-D",
+    "Tipo": "RU",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 12.76,
+    "Venda Rapida": 85.4,
+    "Menor Liga": 89.9,
+    "Preço Médio Liga": 89.9,
+    "Alteração de preço": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
+    "Imagem": "Lycanroc-GX_156.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "estado_melhor_mais_barato",
+          "mensagem": "Suspeita de carta mais bem conservada por preço menor",
+          "evidencia": {
+            "referencia": {
+              "loja": "Pharaohs Shop",
+              "preco": 89.9,
+              "idioma": "Português",
+              "estado": "D",
+              "ofertaId": "159891",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=155555&tcg=159891"
+            },
+            "comparacao": {
+              "loja": "Triade TCG",
+              "preco": 59.9,
+              "idioma": "Português",
+              "estado": "NM",
+              "ofertaId": "32115283",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=767399&tcg=32115283"
+            },
+            "diferenca": 30.0
+          }
+        },
+        {
+          "nivel": "suspeita_leve",
+          "codigo": "uma_oferta",
+          "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+          "evidencia": {
+            "ofertasCompativeis": 1,
+            "detectadas": 18,
+            "lidas": 18,
+            "falhas": 0,
+            "erros": []
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 18,
+          "lidas": 18,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 13,
+          "lidas": 13,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 89.9,
+      "Preço Médio Liga": 89.9,
+      "Minimo": 42.53,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 89.9,
+      "Preço Médio Liga": 89.9,
+      "Minimo": 12.76,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Zoroark TURBO",
+    "Número": "92",
+    "Coleção": "Turbo Revolução",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "D",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Zoroark+BREAK+%2892%2F162%29&ed=BKT&num=92",
+    "Preço": 20.22,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "BKT-92-BR-D",
+    "Tipo": "RU",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 1.8,
+    "Venda Rapida": 10.45,
+    "Menor Liga": 11.0,
+    "Preço Médio Liga": 20.22,
+    "Alteração de preço": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
+    "Imagem": "Zoroark TURBO_92.png",
+    "Status": {
+      "nível": "OK",
+      "motivos": [],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 16,
+          "lidas": 16,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 1,
+          "lidas": 1,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 11.0,
+      "Preço Médio Liga": 20.22,
+      "Minimo": 5.99,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 11.0,
+      "Preço Médio Liga": 20.22,
+      "Minimo": 1.8,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Darkrai G",
+    "Número": "3",
+    "Coleção": "Rising Rivals",
+    "Idioma": "Inglês",
+    "Estado": "D",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Darkrai+G+%283%2F111%29&ed=RR&num=3",
+    "Preço": 66.0,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "RR-3-ING-D",
+    "Tipo": "RH",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 4.5,
+    "Venda Rapida": 62.7,
+    "Menor Liga": 66.0,
+    "Preço Médio Liga": 66.0,
+    "Alteração de preço": "buylist: idioma aproximado: Inglês → Português; buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
+    "Imagem": "Darkrai G_3.png",
+    "Status": {
+      "nível": "Suspeita leve",
+      "motivos": [
+        {
+          "nivel": "suspeita_leve",
+          "codigo": "uma_oferta",
+          "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+          "evidencia": {
+            "ofertasCompativeis": 1,
+            "detectadas": 2,
+            "lidas": 2,
+            "falhas": 0,
+            "erros": []
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 2,
+          "lidas": 2,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 1,
+          "lidas": 1,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 66.0,
+      "Preço Médio Liga": 66.0,
+      "Minimo": 14.99,
+      "Idioma encontrado": [
+        "Inglês"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 66.0,
+      "Preço Médio Liga": 66.0,
+      "Minimo": 4.5,
+      "Idioma encontrado": [
+        "Inglês"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Alakazam-EX",
+    "Número": "117",
+    "Coleção": "Fusão de Destinos",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "D",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Alakazam-EX+%28117%2F124%29&ed=FCO&num=117",
+    "Preço": 35.72,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "FCO-117-BR-D",
+    "Tipo": "RU",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 74.55,
+    "Venda Rapida": 16.62,
+    "Menor Liga": 17.49,
+    "Preço Médio Liga": 35.72,
+    "Alteração de preço": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
+    "Imagem": "Alakazam-EX_117.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "buylist_acima_marketplace",
+          "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+          "evidencia": {
+            "comparacao": "mesmo_idioma_estado_ajustado",
+            "estadoReferencia": "D",
+            "idiomaReferencia": "Português",
+            "venda": {
+              "loja": "Domínio Geek",
+              "preco": 17.49,
+              "idioma": "Português",
+              "estado": "D",
+              "ofertaId": "32143198",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=148052&tcg=32143198"
+            },
+            "buylist": {
+              "loja": "",
+              "preco": 74.55,
+              "idioma": "Português",
+              "estado": "M",
+              "ofertaId": "24422846",
+              "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24422846"
+            },
+            "diferenca": 57.06
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 12,
+          "lidas": 12,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 14,
+          "lidas": 14,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 17.49,
+      "Preço Médio Liga": 35.72,
+      "Minimo": 248.5,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 17.49,
+      "Preço Médio Liga": 35.72,
+      "Minimo": 74.55,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "D"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Genesect-EX",
+    "Número": "120",
+    "Coleção": "Fusão de Destinos",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "SP",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Genesect-EX+%28120%2F124%29&ed=FCO&num=120",
+    "Preço": 60.84,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "FCO-120-BR-SP",
+    "Tipo": "RU",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 57.47,
+    "Venda Rapida": 22.32,
+    "Menor Liga": 23.5,
+    "Preço Médio Liga": 60.84,
+    "Alteração de preço": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%",
+    "Imagem": "Genesect-EX_120.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "buylist_acima_marketplace",
+          "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+          "evidencia": {
+            "comparacao": "mesmo_idioma_estado_ajustado",
+            "estadoReferencia": "SP",
+            "idiomaReferencia": "Português",
+            "venda": {
+              "loja": "Magic Store Brasil",
+              "preco": 23.5,
+              "idioma": "Português",
+              "estado": "SP",
+              "ofertaId": "174680",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=52667&tcg=174680"
+            },
+            "buylist": {
+              "loja": "",
+              "preco": 57.47,
+              "idioma": "Português",
+              "estado": "M",
+              "ofertaId": "24422841",
+              "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24422841"
+            },
+            "diferenca": 33.97
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 14,
+          "lidas": 14,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 22,
+          "lidas": 22,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 23.5,
+      "Preço Médio Liga": 60.84,
+      "Minimo": 63.86,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "SP"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 23.5,
+      "Preço Médio Liga": 60.84,
+      "Minimo": 57.47,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "SP"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Lucario e Melmetal-GX",
+    "Número": "120",
+    "Coleção": "Elos Inquebráveis",
+    "Idioma": "Inglês",
+    "Estado": "SP",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Lucario+%26+Melmetal-GX+%28120%2F214%29&num=120",
+    "Preço": 0.0,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "ELOS-INQUEBR-VEIS-120-ING-SP",
+    "Tipo": "RH",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 31.49,
+    "Venda Rapida": null,
+    "Menor Liga": null,
+    "Preço Médio Liga": null,
+    "Alteração de preço": "buylist: idioma aproximado: Inglês → Português; buylist: estado desejado SP; estado encontrado M; estimativa -10.00%",
+    "Imagem": "Lucario e Melmetal-GX_120.jpg",
+    "Status": {
+      "nível": "OK",
+      "motivos": [],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 9,
+          "lidas": 9,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 1,
+          "lidas": 1,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": null,
+      "Preço Médio Liga": null,
+      "Minimo": 34.99,
+      "Idioma encontrado": [],
+      "Estado encontrado": [],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": null,
+      "Preço Médio Liga": null,
+      "Minimo": 31.49,
+      "Idioma encontrado": [],
+      "Estado encontrado": [],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Darkrai-GX",
+    "Número": "88a",
+    "Coleção": "Sombras Ardentes",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "SP",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Darkrai-GX+%2888a%2F147%29&ed=BUS&num=88a",
+    "Preço": 38.98,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "BUS-88A-BR-SP",
+    "Tipo": "SR",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 35.08,
+    "Venda Rapida": 30.4,
+    "Menor Liga": 32.0,
+    "Preço Médio Liga": 38.98,
+    "Alteração de preço": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%",
+    "Imagem": "Darkrai-GX_88a.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "outro_idioma_mais_barato",
+          "mensagem": "Suspeita de carta igual em outra língua por preço menor",
+          "evidencia": {
+            "referencia": {
+              "loja": "Taverna De Avalon Geek Store",
+              "preco": 32.0,
+              "idioma": "Português",
+              "estado": "SP",
+              "ofertaId": "28916933",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=228884&tcg=28916933"
+            },
+            "comparacao": {
+              "loja": "Geek Awards TCG",
+              "preco": 24.5,
+              "idioma": "Inglês",
+              "estado": "SP",
+              "ofertaId": "30140007",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=49124&tcg=30140007"
+            },
+            "diferenca": 7.5
+          }
+        },
+        {
+          "nivel": "suspeita",
+          "codigo": "buylist_acima_marketplace",
+          "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+          "evidencia": {
+            "comparacao": "mesmo_idioma_estado_ajustado",
+            "estadoReferencia": "SP",
+            "idiomaReferencia": "Português",
+            "venda": {
+              "loja": "Banner Card Store",
+              "preco": 23.99,
+              "idioma": "Português",
+              "estado": "MP",
+              "ofertaId": "31826422",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=88061&tcg=31826422"
+            },
+            "buylist": {
+              "loja": "",
+              "preco": 35.08,
+              "idioma": "Português",
+              "estado": "M",
+              "ofertaId": "24423425",
+              "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24423425"
+            },
+            "diferenca": 11.09
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 22,
+          "lidas": 22,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 14,
+          "lidas": 14,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 32.0,
+      "Preço Médio Liga": 38.98,
+      "Minimo": 38.98,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "SP"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 32.0,
+      "Preço Médio Liga": 38.98,
+      "Minimo": 35.08,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "SP"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Aerodactyl-GX",
+    "Número": "106",
+    "Coleção": "Sintonia Mental",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "SP",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Aerodactyl-GX+%28106%2F236%29&ed=UNM&num=106",
+    "Preço": 20.0,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "UNM-106-BR-SP",
+    "Tipo": "RE",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 15.27,
+    "Venda Rapida": 19.0,
+    "Menor Liga": 20.0,
+    "Preço Médio Liga": 20.0,
+    "Alteração de preço": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%",
+    "Imagem": "Aerodactyl-GX_106.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "outro_idioma_mais_barato",
+          "mensagem": "Suspeita de carta igual em outra língua por preço menor",
+          "evidencia": {
+            "referencia": {
+              "loja": "Espaço NL",
+              "preco": 20.0,
+              "idioma": "Português",
+              "estado": "SP",
+              "ofertaId": "32170586",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=90976&tcg=32170586"
+            },
+            "comparacao": {
+              "loja": "Bazar de Bagdá",
+              "preco": 19.99,
+              "idioma": "Inglês",
+              "estado": "SP",
+              "ofertaId": "21517781",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=21517781"
+            },
+            "diferenca": 0.01
+          }
+        },
+        {
+          "nivel": "suspeita_leve",
+          "codigo": "uma_oferta",
+          "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+          "evidencia": {
+            "ofertasCompativeis": 1,
+            "detectadas": 9,
+            "lidas": 9,
+            "falhas": 0,
+            "erros": []
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 9,
+          "lidas": 9,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 14,
+          "lidas": 14,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 20.0,
+      "Preço Médio Liga": 20.0,
+      "Minimo": 16.97,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "SP"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 20.0,
+      "Preço Médio Liga": 20.0,
+      "Minimo": 15.27,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "SP"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Darkrai",
+    "Número": "BW73",
+    "Coleção": "Black &amp; White Promos",
+    "Idioma": "Inglês",
+    "Estado": "HP",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Darkrai+%28BW73%2F99%29&ed=BWPR&num=BW73",
+    "Preço": 620.0,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "BWPR-BW73-ING-HP",
+    "Tipo": "S",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 125.0,
+    "Venda Rapida": 589.0,
+    "Menor Liga": 620.0,
+    "Preço Médio Liga": 620.0,
+    "Alteração de preço": "buylist: idioma aproximado: Inglês → Português; buylist: estado desejado HP; estado encontrado M; estimativa -50.00%",
+    "Imagem": "Darkrai_BW73.png",
+    "Status": {
+      "nível": "Suspeita leve",
+      "motivos": [
+        {
+          "nivel": "suspeita_leve",
+          "codigo": "uma_oferta",
+          "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+          "evidencia": {
+            "ofertasCompativeis": 1,
+            "detectadas": 2,
+            "lidas": 2,
+            "falhas": 0,
+            "erros": []
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 2,
+          "lidas": 2,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 1,
+          "lidas": 1,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 620.0,
+      "Preço Médio Liga": 620.0,
+      "Minimo": 249.99,
+      "Idioma encontrado": [
+        "Inglês"
+      ],
+      "Estado encontrado": [
+        "HP"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 620.0,
+      "Preço Médio Liga": 620.0,
+      "Minimo": 125.0,
+      "Idioma encontrado": [
+        "Inglês"
+      ],
+      "Estado encontrado": [
+        "HP"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Darkrai-EX",
+    "Número": "74",
+    "Coleção": "Turbo Colisão",
+    "Idioma": "Inglês",
+    "Estado": "SP",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Darkrai-EX+%2874%2F122%29&ed=BKP&num=74",
+    "Preço": 29.95,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "BKP-74-ING-SP",
+    "Tipo": "RU",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 31.89,
+    "Venda Rapida": 28.45,
+    "Menor Liga": 29.95,
+    "Preço Médio Liga": 29.95,
+    "Alteração de preço": "buylist: idioma aproximado: Inglês → Português; buylist: estado desejado SP; estado encontrado M; estimativa -10.00%",
+    "Imagem": "Darkrai-EX_74.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "buylist_acima_marketplace",
+          "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+          "evidencia": {
+            "comparacao": "mesmo_idioma_estado_ajustado",
+            "estadoReferencia": "SP",
+            "idiomaReferencia": "Inglês",
+            "venda": {
+              "loja": "Jimmie TCG",
+              "preco": 26.7,
+              "idioma": "Português",
+              "estado": "D",
+              "ofertaId": "28667300",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=464058&tcg=28667300"
+            },
+            "buylist": {
+              "loja": "",
+              "preco": 31.89,
+              "idioma": "Português",
+              "estado": "M",
+              "ofertaId": "24422609",
+              "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24422609"
+            },
+            "diferenca": 5.19
+          }
+        },
+        {
+          "nivel": "suspeita_leve",
+          "codigo": "uma_oferta",
+          "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+          "evidencia": {
+            "ofertasCompativeis": 1,
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 14,
+          "lidas": 14,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 14,
+          "lidas": 14,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 29.95,
+      "Preço Médio Liga": 29.95,
+      "Minimo": 35.43,
+      "Idioma encontrado": [
+        "Inglês"
+      ],
+      "Estado encontrado": [
+        "SP"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 29.95,
+      "Preço Médio Liga": 29.95,
+      "Minimo": 31.89,
+      "Idioma encontrado": [
+        "Inglês"
+      ],
+      "Estado encontrado": [
+        "SP"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Dragapult-VMAX",
+    "Número": "93",
+    "Coleção": "Rixa Rebelde",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "NM",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Dragapult-VMAX+%2893%2F192%29&num=93",
+    "Preço": 39.07,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "RIXA-REBELDE-93-BR-NM",
+    "Tipo": "RL",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 74.97,
+    "Venda Rapida": 20.89,
+    "Menor Liga": 21.99,
+    "Preço Médio Liga": 39.07,
+    "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
+    "Imagem": "Dragapult-VMAX_93.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "buylist_acima_marketplace",
+          "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+          "evidencia": {
+            "comparacao": "mesmo_idioma_estado_ajustado",
+            "estadoReferencia": "NM",
+            "idiomaReferencia": "Português",
+            "venda": {
+              "loja": "Império TCG",
+              "preco": 21.99,
+              "idioma": "Português",
+              "estado": "NM",
+              "ofertaId": "32119936",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=65189&tcg=32119936"
+            },
+            "buylist": {
+              "loja": "",
+              "preco": 74.97,
+              "idioma": "Português",
+              "estado": "M",
+              "ofertaId": "34414418",
+              "linkLoja": "https://www.ligapokemon.com.br/b/?bl=34414418"
+            },
+            "diferenca": 52.98
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 16,
+          "lidas": 16,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 22,
+          "lidas": 22,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 21.99,
+      "Preço Médio Liga": 39.07,
+      "Minimo": 74.97,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 21.99,
+      "Preço Médio Liga": 39.07,
+      "Minimo": 74.97,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Toxtricity-V",
+    "Número": "SWSH017",
+    "Coleção": "Espada e Escudo Promos",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "MP",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Toxtricity-V+%28SWSH017%2F71%29&ed=SSPR&num=SWSH017",
+    "Preço": 8.79,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "SSPR-SWSH017-BR-MP",
+    "Tipo": "S",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 5.32,
+    "Venda Rapida": 5.53,
+    "Menor Liga": 5.82,
+    "Preço Médio Liga": 8.79,
+    "Alteração de preço": "estado desejado MP; estado encontrado SP; estimativa -16.67%; buylist: estado desejado MP; estado encontrado M; estimativa -25.00%",
+    "Imagem": "Toxtricity-V_SWSH017.jpg",
+    "Status": {
+      "nível": "OK",
+      "motivos": [],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 16,
+          "lidas": 16,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 14,
+          "lidas": 14,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 6.99,
+      "Preço Médio Liga": 10.55,
+      "Minimo": 7.1,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "SP"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 5.82,
+      "Preço Médio Liga": 8.79,
+      "Minimo": 5.32,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "SP"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Steelix-EX",
+    "Número": "67",
+    "Coleção": "Cerco de Vapor",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "MP",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Steelix-EX+%2867%2F114%29&ed=STS&num=67",
+    "Preço": 12.95,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "STS-67-BR-MP",
+    "Tipo": "RU",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 5.27,
+    "Venda Rapida": 9.4,
+    "Menor Liga": 9.89,
+    "Preço Médio Liga": 12.95,
+    "Alteração de preço": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%",
+    "Imagem": "Steelix-EX_67.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "estado_melhor_mais_barato",
+          "mensagem": "Suspeita de carta mais bem conservada por preço menor",
+          "evidencia": {
+            "referencia": {
+              "loja": "Kanto TCG",
+              "preco": 9.89,
+              "idioma": "Português",
+              "estado": "MP",
+              "ofertaId": "8651398",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=265437&tcg=8651398"
+            },
+            "comparacao": {
+              "loja": "Triade TCG",
+              "preco": 9.0,
+              "idioma": "Português",
+              "estado": "SP",
+              "ofertaId": "32138297",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=767399&tcg=32138297"
+            },
+            "diferenca": 0.89
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 35,
+          "lidas": 35,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 14,
+          "lidas": 14,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 9.89,
+      "Preço Médio Liga": 12.95,
+      "Minimo": 7.03,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "MP"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 9.89,
+      "Preço Médio Liga": 12.95,
+      "Minimo": 5.27,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "MP"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Magearna-EX",
+    "Número": "75",
+    "Coleção": "Cerco de Vapor",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "MP",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Magearna-EX+%2875%2F114%29&ed=STS&num=75",
+    "Preço": 11.08,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "STS-75-BR-MP",
+    "Tipo": "RU",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 5.27,
+    "Venda Rapida": 6.65,
+    "Menor Liga": 7.0,
+    "Preço Médio Liga": 11.08,
+    "Alteração de preço": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%",
+    "Imagem": "Magearna-EX_75.jpg",
+    "Status": {
+      "nível": "OK",
+      "motivos": [],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 37,
+          "lidas": 37,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 14,
+          "lidas": 14,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 7.0,
+      "Preço Médio Liga": 11.08,
+      "Minimo": 7.03,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "MP"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 7.0,
+      "Preço Médio Liga": 11.08,
+      "Minimo": 5.27,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "MP"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Skarmory-EX",
+    "Número": "145",
+    "Coleção": "XY",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "MP",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Skarmory-EX+%28145%2F146%29&ed=XY&num=145",
+    "Preço": 67.45,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "XY-145-BR-MP",
+    "Tipo": "RU",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 22.49,
+    "Venda Rapida": 56.9,
+    "Menor Liga": 59.9,
+    "Preço Médio Liga": 67.45,
+    "Alteração de preço": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%",
+    "Imagem": "Skarmory-EX_145.png",
+    "Status": {
+      "nível": "OK",
+      "motivos": [],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 18,
+          "lidas": 18,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 1,
+          "lidas": 1,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 59.9,
+      "Preço Médio Liga": 67.45,
+      "Minimo": 29.99,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "MP"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 59.9,
+      "Preço Médio Liga": 67.45,
+      "Minimo": 22.49,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "MP"
+      ],
+      "é estimativa": true
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  },
+  {
+    "Nome": "Wailord ex",
+    "Número": "016",
+    "Coleção": "Escuridão Absoluta",
+    "Idioma": "Português (PT-BR)",
+    "Estado": "NM",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards/card&card=Wailord+ex+%28016%2F084%29&ed=PBL&num=016",
+    "Preço": 8.26,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "PBL-016-BR-NM",
+    "Tipo": "RD",
+    "Link MYP": "",
+    "Link Cardmarket": "",
+    "Link Tcgplayer": "",
+    "Link PriceCharting": "",
+    "Minimo": 2.8,
+    "Venda Rapida": 2.38,
+    "Menor Liga": 2.5,
+    "Preço Médio Liga": 8.26,
+    "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
+    "Imagem": "Wailord ex_016.jpg",
+    "Status": {
+      "nível": "Suspeita",
+      "motivos": [
+        {
+          "nivel": "suspeita",
+          "codigo": "buylist_acima_marketplace",
+          "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+          "evidencia": {
+            "comparacao": "mesmo_idioma_estado_ajustado",
+            "estadoReferencia": "NM",
+            "idiomaReferencia": "Português",
+            "venda": {
+              "loja": "Holo Gallery",
+              "preco": 2.5,
+              "idioma": "Português",
+              "estado": "NM",
+              "ofertaId": "32013672",
+              "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=838728&tcg=32013672"
+            },
+            "buylist": {
+              "loja": "",
+              "preco": 2.8,
+              "idioma": "Português",
+              "estado": "M",
+              "ofertaId": "34028184",
+              "linkLoja": "https://www.ligapokemon.com.br/b/?bl=34028184"
+            },
+            "diferenca": 0.3
+          }
+        }
+      ],
+      "coleta": {
+        "marketplace": {
+          "detectadas": 164,
+          "lidas": 164,
+          "falhas": 0,
+          "erros": []
+        },
+        "buylist": {
+          "detectadas": 14,
+          "lidas": 14,
+          "falhas": 0,
+          "erros": []
+        }
+      }
+    },
+    "Preço coletado": {
+      "Menor Liga": 2.5,
+      "Preço Médio Liga": 8.26,
+      "Minimo": 2.8,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Preço estimado": {
+      "Menor Liga": 2.5,
+      "Preço Médio Liga": 8.26,
+      "Minimo": 2.8,
+      "Idioma encontrado": [
+        "Português"
+      ],
+      "Estado encontrado": [
+        "NM"
+      ],
+      "é estimativa": false
+    },
+    "Última cotação": {
+      "cotacaoId": "formatacao-13a8f9df90a4",
+      "data": "2026-08-08T16:44:23-03:00",
+      "sucesso": true
+    }
+  }
+]

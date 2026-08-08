@@ -57,8 +57,14 @@ def executar_formatacao() -> None:
     from gerenciamento import formatar_nova_colecao, listar_pacotes
     pacote = escolher("Coleções não formatadas disponíveis", listar_pacotes(ARQUIVO_PERFIL), lambda item: item.name)
     destino = formatar_nova_colecao(pacote, escolher_modo_preco())
-    print(f"\nColeção formatada em:\n{destino}")
-    print("Inventários salvos no novo formato JSON.")
+    import json
+    perfil = json.loads((destino / "perfil.json").read_text(encoding="utf-8"))
+    if perfil.get("formattingComplete") is False:
+        print(f"\nFormatação salva parcialmente em:\n{destino}")
+        print(f"Ainda existem {int(perfil.get('formattingPending') or 0)} item(ns) pendente(s). Execute novamente para retomar.")
+    else:
+        print(f"\nColeção formatada em:\n{destino}")
+        print("Inventários salvos no novo formato JSON.")
 
 
 def executar_atualizacao() -> None:
@@ -113,8 +119,12 @@ def executar_cotizacao() -> None:
     else:
         opcao, dias = escolher_escopo()
         destino = cotizar_colecao(colecao, opcao=opcao, dias=dias)
-    print(f"\nCotização concluída em:\n{destino}")
-    print(f"Relatórios detalhados: {destino / 'relatorios'}")
+    if cotizacao_pendente(destino):
+        print(f"\nCotização salva parcialmente em:\n{destino}")
+        print("Existem itens pendentes; execute a cotização novamente para retomar somente o que falhou.")
+    else:
+        print(f"\nCotização concluída em:\n{destino}")
+        print(f"Relatórios detalhados: {destino / 'relatorios'}")
 
 
 def main() -> None:

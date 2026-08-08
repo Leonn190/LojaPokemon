@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
 
-from configuracao import ARQUIVOS_INVENTARIO, ARQUIVOS_LEGADOS
+from configuracao import ARQUIVOS_INVENTARIO, ARQUIVOS_LEGADOS, chave_texto
 
 
 def ler_json_obj(caminho: Path) -> dict[str, Any]:
@@ -44,9 +44,15 @@ def ler_csv_legado(caminho: Path) -> list[dict[str, Any]]:
 
 def ler_inventario(pasta: Path, tipo: str) -> list[dict[str, Any]]:
     novo = pasta / ARQUIVOS_INVENTARIO[tipo]
-    if novo.is_file():
-        return ler_lista_json(novo)
-    return ler_csv_legado(pasta / ARQUIVOS_LEGADOS[tipo])
+    itens = ler_lista_json(novo) if novo.is_file() else ler_csv_legado(pasta / ARQUIVOS_LEGADOS[tipo])
+    # CSVs antigos podiam trazer uma linha agregada "Total" no inventário de boosters.
+    # No modelo JSON, total é informação derivada e nunca deve virar um item real.
+    if tipo == "boosters":
+        itens = [
+            item for item in itens
+            if chave_texto(item.get("Tipo de pacote") or item.get("Nome") or item.get("Coleção")) != "TOTAL"
+        ]
+    return itens
 
 
 def escrever_inventario(pasta: Path, tipo: str, itens: list[dict[str, Any]]) -> Path:
@@ -177,3 +183,104 @@ def transacao_arquivos(pasta: Path, nomes: list[str]) -> Iterator[Path]:
     finally:
         shutil.rmtree(staging, ignore_errors=True)
         shutil.rmtree(backup, ignore_errors=True)
+
+
+def _chave_registro_historico(registro: dict[str, Any]) -> tuple[str, str, str, str]:
+    return (
+        str(registro.get("itemId") or ""),
+        str(registro.get("cotacaoId") or ""),
+        str(registro.get("data") or ""),
+        str(registro.get("erro") or ""),
+    )
+
+
+def _caminho_historico(pasta: Path, tipo: str) -> Path:
+    from configuracao import ARQUIVOS_HISTORICO, PASTA_HISTORICO_NOME
+    if tipo not in ARQUIVOS_HISTORICO:
+        raise ValueError(f"Tipo sem histórico externo: {tipo}")
+    return pasta / PASTA_HISTORICO_NOME / ARQUIVOS_HISTORICO[tipo]
+
+
+def ler_historico(pasta: Path, tipo: str) -> list[dict[str, Any]]:
+    caminho = _caminho_historico(pasta, tipo)
+    if not caminho.is_file():
+        return []
+    registros: list[dict[str, Any]] = []
+    with caminho.open("r", encoding="utf-8-sig") as arquivo:
+        for linha in arquivo:
+            linha = linha.strip()
+            if not linha:
+                continue
+            try:
+                registro = json.loads(linha)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(registro, dict):
+                registros.append(registro)
+    return registros
+
+
+def anexar_historico(pasta: Path, tipo: str, registros: dict[str, Any] | list[dict[str, Any]]) -> int:
+    """Acrescenta registros JSONL sem duplicar a mesma tentativa/cotação."""
+    lista = [registros] if isinstance(registros, dict) else list(registros)
+    lista = [dict(r) for r in lista if isinstance(r, dict)]
+    if not lista:
+        return 0
+    caminho = _caminho_historico(pasta, tipo)
+    caminho.parent.mkdir(parents=True, exist_ok=True)
+    existentes = {_chave_registro_historico(r) for r in ler_historico(pasta, tipo)}
+    novos = [r for r in lista if _chave_registro_historico(r) not in existentes]
+    if not novos:
+        return 0
+    with caminho.open("a", encoding="utf-8", newline="\n") as arquivo:
+        for registro in novos:
+            arquivo.write(json.dumps(registro, ensure_ascii=False, separators=(",", ":")) + "\n")
+        arquivo.flush()
+        try:
+            import os
+            os.fsync(arquivo.fileno())
+        except OSError:
+            pass
+    return len(novos)
+
+
+def migrar_historicos_embutidos(pasta: Path) -> dict[str, int]:
+    """Move arrays antigos `Histórico de preços` para `historico/*.jsonl`.
+
+    O inventário passa a guardar somente `Última cotação`, evitando crescimento
+    indefinido dos JSONs usados pelo site.
+    """
+    migrados: dict[str, int] = {"cartas": 0, "boosters": 0}
+    for tipo in ("cartas", "boosters"):
+        caminho = pasta / ARQUIVOS_INVENTARIO[tipo]
+        if not caminho.is_file():
+            continue
+        itens = ler_lista_json(caminho)
+        mudou = False
+        registros: list[dict[str, Any]] = []
+        for item in itens:
+            historico = item.pop("Histórico de preços", None)
+            if not isinstance(historico, list):
+                continue
+            mudou = True
+            sucessos: list[dict[str, Any]] = []
+            for antigo in historico:
+                if not isinstance(antigo, dict):
+                    continue
+                registro = dict(antigo)
+                registro["itemId"] = str(item.get("Id") or registro.get("itemId") or "")
+                registro["sucesso"] = bool(registro.get("sucesso", not bool(registro.get("erro"))))
+                registros.append(registro)
+                if registro["sucesso"] and registro.get("data"):
+                    sucessos.append(registro)
+            if sucessos and not isinstance(item.get("Última cotação"), dict):
+                ultimo = max(sucessos, key=lambda r: str(r.get("data") or ""))
+                item["Última cotação"] = {
+                    "cotacaoId": str(ultimo.get("cotacaoId") or ""),
+                    "data": str(ultimo.get("data") or ""),
+                    "sucesso": True,
+                }
+        if mudou:
+            escrever_inventario(pasta, tipo, itens)
+        migrados[tipo] = anexar_historico(pasta, tipo, registros)
+    return migrados

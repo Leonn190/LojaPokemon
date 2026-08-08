@@ -16,11 +16,13 @@ export interface ProposalTerms {
 }
 
 interface OwnedItemBase {
+  id: string;
   kind: CatalogKind;
   name: string;
   quantity: number;
   price: number | null;
   slug: string;
+  image: string;
   imageCandidates: string[];
   searchText: string;
   ownerName: string;
@@ -62,6 +64,7 @@ export interface BoosterItem extends OwnedItemBase {
 
 export interface KitContentItem {
   kind: 'cards' | 'boosters';
+  itemId: string;
   name: string;
   quantity: number;
   unitPrice: number | null;
@@ -79,6 +82,7 @@ export interface KitItem extends OwnedItemBase {
 export type CatalogItem = CardItem | BoosterItem | KitItem;
 
 export interface AlbumCardReference {
+  itemId: string;
   linkLiga: string;
   language: string;
   condition: string;
@@ -127,6 +131,7 @@ export interface CollectorCollection {
 }
 
 type CsvRow = Record<string, string>;
+type InventoryRow = Record<string, any>;
 type ProfileData = {
   owner?: string;
   title?: string;
@@ -210,6 +215,19 @@ const readRows = (folder: string, filename: string): CsvRow[] => {
   return source ? parseCsv(source) : [];
 };
 
+// JSON é o formato oficial. CSV fica somente como leitor de compatibilidade para
+// coleções antigas que ainda não passaram pela migração.
+const readInventory = (folder: string, baseName: string): InventoryRow[] => {
+  const jsonSource = readText(join(folder, `${baseName}.json`));
+  if (jsonSource) {
+    try {
+      const parsed = JSON.parse(jsonSource) as unknown;
+      if (Array.isArray(parsed)) return parsed.filter((item): item is InventoryRow => Boolean(item) && typeof item === 'object');
+    } catch (_) {}
+  }
+  return readRows(folder, `${baseName}.csv`);
+};
+
 const readProfile = (folder: string): ProfileData => {
   try {
     return JSON.parse(readFileSync(join(folder, 'perfil.json'), 'utf8')) as ProfileData;
@@ -218,7 +236,7 @@ const readProfile = (folder: string): ProfileData => {
   }
 };
 
-const parseDecimal = (value: string | number | null | undefined): number | null => {
+const parseDecimal = (value: unknown): number | null => {
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
   const raw = String(value ?? '').trim();
   if (!raw || raw === '-') return null;
@@ -230,12 +248,12 @@ const parseDecimal = (value: string | number | null | undefined): number | null 
   return Number.isFinite(parsed) ? parsed : null;
 };
 
-const parseQuantity = (value: string | number | null | undefined): number => {
+const parseQuantity = (value: unknown): number => {
   const parsed = Number(String(value ?? '').replace(/[^0-9-]/g, ''));
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 };
 
-const parseBoolean = (value: string | boolean | null | undefined, fallback: boolean): boolean => {
+const parseBoolean = (value: unknown, fallback: boolean): boolean => {
   if (typeof value === 'boolean') return value;
   const normalized = normalizeText(String(value ?? ''));
   if (['false', 'nao', 'não', '0', 'no'].includes(normalized)) return false;
@@ -315,7 +333,9 @@ const cardImageCandidates = (
   number: string,
   language: string,
   duplicateIndex: number,
+  explicit: string = '',
 ): string[] => {
+  const explicitCandidates = explicit ? [explicit.includes('/') ? explicit : `imagens/${explicit}`] : [];
   const pool = imagePool(collectionSlug, 'card');
   const exactKey = normalizeText(`${name} ${number}`);
   const normalizedName = normalizeText(name);
@@ -351,7 +371,7 @@ const cardImageCandidates = (
   const generated = unique([...stems, ...duplicateVariants]).flatMap((stem) =>
     ['jpg', 'jpeg', 'png', 'webp', 'avif'].map((extension) => `imagens/${stem}.${extension}`),
   );
-  return unique([...preferredExisting, ...generated]);
+  return unique([...explicitCandidates, ...preferredExisting, ...generated]);
 };
 
 const boosterAliases: Record<string, string[]> = {
@@ -373,7 +393,8 @@ const boosterVariantNumber = (path: string): number => {
   return match ? Number(match[1]) : 0;
 };
 
-const boosterImageCandidates = (collectionSlug: string, name: string): string[] => {
+const boosterImageCandidates = (collectionSlug: string, name: string, explicit: string = ''): string[] => {
+  const explicitCandidates = explicit ? [explicit.includes('/') ? explicit : `imagens/${explicit}`] : [];
   const pool = imagePool(collectionSlug, 'booster');
   const keys = boosterKeys(name);
   const existing = pool
@@ -382,7 +403,7 @@ const boosterImageCandidates = (collectionSlug: string, name: string): string[] 
       return keys.some((key) => stem === key || (stem.startsWith(key) && /^\d+$/.test(stem.slice(key.length))));
     })
     .sort((left, right) => boosterVariantNumber(left) - boosterVariantNumber(right) || left.localeCompare(right, 'pt-BR'));
-  if (existing.length > 0) return existing;
+  if (existing.length > 0) return unique([...explicitCandidates, ...existing]);
 
   const baseNames = unique([
     cleanFilePart(name),
@@ -394,7 +415,8 @@ const boosterImageCandidates = (collectionSlug: string, name: string): string[] 
     const compact = boosterName.replace(/\s+/g, '');
     return [boosterName, compact].flatMap((stem) => [stem, `${stem}1`, `${stem}2`, `${stem}3`, `${stem}4`]);
   }));
-  return stems.flatMap((stem) => ['jpg', 'jpeg', 'png', 'webp', 'avif'].map((extension) => `imagensboosters/${stem}.${extension}`));
+  const generated = stems.flatMap((stem) => ['jpg', 'jpeg', 'png', 'webp', 'avif'].map((extension) => `imagensboosters/${stem}.${extension}`));
+  return unique([...explicitCandidates, ...generated]);
 };
 
 const kitImageCandidates = (collectionSlug: string, name: string, explicit: string): string[] => {
@@ -434,19 +456,22 @@ const albumFormat = (value: string): { format: string; columns: number; rows: nu
 const resolveAlbumCard = (raw: unknown, cards: CardItem[]): AlbumCardReference | null => {
   if (!raw || typeof raw !== 'object') return null;
   const slot = raw as Record<string, unknown>;
+  const itemId = String(slot.itemId ?? slot.cardId ?? slot.Id ?? '').trim();
   const linkLiga = String(slot.linkLiga ?? slot.link ?? '').trim();
   const language = String(slot.language ?? slot.idioma ?? '').trim();
   const condition = String(slot.condition ?? slot.estado ?? '').trim();
   const name = String(slot.name ?? slot.nome ?? '').trim();
   const number = String(slot.number ?? slot.numero ?? slot['número'] ?? '').trim();
   const linkKey = normalizeReferenceLink(linkLiga);
-  const exact = cards.find((card) => linkKey && normalizeReferenceLink(card.linkLiga) === linkKey && (!language || normalizeText(card.language) === normalizeText(language)) && (!condition || normalizeText(card.condition) === normalizeText(condition)));
+  const byId = itemId ? cards.find((card) => card.id === itemId) : undefined;
+  const exact = byId ?? cards.find((card) => linkKey && normalizeReferenceLink(card.linkLiga) === linkKey && (!language || normalizeText(card.language) === normalizeText(language)) && (!condition || normalizeText(card.condition) === normalizeText(condition)));
   const byLink = exact ?? cards.find((card) => linkKey && normalizeReferenceLink(card.linkLiga) === linkKey);
   const byIdentity = byLink ?? cards.find((card) => name && normalizeText(card.name) === normalizeText(name) && (!number || normalizeText(card.number) === normalizeText(number)));
   const card = byIdentity;
   const candidates = card?.imageCandidates ?? (Array.isArray(slot.imageCandidates) ? slot.imageCandidates.map(String) : []);
-  if (!card && !linkLiga && !name) return null;
+  if (!card && !linkLiga && !name && !itemId) return null;
   return {
+    itemId: card?.id || itemId,
     linkLiga: card?.linkLiga || linkLiga,
     language: card?.language || language,
     condition: card?.condition || condition,
@@ -458,10 +483,12 @@ const resolveAlbumCard = (raw: unknown, cards: CardItem[]): AlbumCardReference |
   };
 };
 
-const parseAlbumPages = (raw: string, columns: number, rows: number, cards: CardItem[]): AlbumPage[] => {
+const parseAlbumPages = (raw: unknown, columns: number, rows: number, cards: CardItem[]): AlbumPage[] => {
   const capacity = columns * rows;
-  let parsed: unknown = [];
-  try { parsed = JSON.parse(raw || '[]'); } catch (_) { parsed = []; }
+  let parsed: unknown = raw;
+  if (typeof raw === 'string') {
+    try { parsed = JSON.parse(raw || '[]'); } catch (_) { parsed = []; }
+  }
   const sourcePages = Array.isArray(parsed) ? parsed : [];
   const pages = sourcePages.map((page): AlbumPage => {
     const sourceSlots = Array.isArray(page) ? page : page && typeof page === 'object' && Array.isArray((page as Record<string, unknown>).slots) ? (page as Record<string, unknown>).slots as unknown[] : [];
@@ -503,14 +530,14 @@ export const getCollections = (): CollectorCollection[] => {
     const ownerPhone = profile.phone?.trim() || '';
     const usedImages = new Map<string, number>();
 
-    const cards: CardItem[] = readRows(folder, 'inventario-cartas.csv').map((row) => {
-      const name = row['Nome'] || 'Carta sem nome';
-      const number = row['Número'] || row['Numeração'] || 'Sem número';
-      const pokemonCollection = row['Coleção'] || 'Coleção não informada';
-      const language = row['Idioma'] || 'Não informado';
-      const condition = row['Estado'] || 'Não informado';
-      const year = row['Ano'] || 'Não informado';
-      const type = row['Tipo'] || 'Não informado';
+    const cards: CardItem[] = readInventory(folder, 'inventario-cartas').map((row) => {
+      const name = String(row['Nome'] ?? '').trim() || 'Carta sem nome';
+      const number = String(row['Número'] ?? row['Numeração'] ?? '').trim() || 'Sem número';
+      const pokemonCollection = String(row['Coleção'] ?? '').trim() || 'Coleção não informada';
+      const language = String(row['Idioma'] ?? '').trim() || 'Não informado';
+      const condition = String(row['Estado'] ?? '').trim() || 'Não informado';
+      const year = String(row['Ano'] ?? '').trim() || 'Não informado';
+      const type = String(row['Tipo'] ?? '').trim() || 'Não informado';
       const quantity = parseQuantity(row['Quantidade']);
       const minimumPrice = parseDecimal(row['Minimo']) ?? parseDecimal(row['Preço mínimo']);
       const quickSalePrice = parseDecimal(row['Venda Rapida']) ?? parseDecimal(row['Venda rápida']);
@@ -522,8 +549,10 @@ export const getCollections = (): CollectorCollection[] => {
       const duplicateIndex = usedImages.get(imageKey) ?? 0;
       usedImages.set(imageKey, duplicateIndex + 1);
       const localSlug = createUniqueSlug(slugify(`${name}-${number}`), globalSlugs, `${owner}-${language}`);
+      const id = String(row['Id'] ?? row['ID'] ?? '').trim() || `${collectionSlug}:card:${normalizeText(`${row['Link Liga'] ?? ''}|${name}|${number}|${language}|${condition}`)}`;
 
       return {
+        id,
         kind: 'card',
         name,
         number,
@@ -536,17 +565,18 @@ export const getCollections = (): CollectorCollection[] => {
         price,
         forSale,
         showQuantity,
-        linkLiga: row['Link Liga'] || '',
-        linkMyp: row['Link MYP'] || '',
-        linkCardmarket: row['Link Cardmarket'] || '',
-        linkTcgplayer: row['Link Tcgplayer'] || row['Link TCGPlayer'] || '',
-        linkPriceCharting: row['Link PriceCharting'] || '',
+        linkLiga: String(row['Link Liga'] ?? ''),
+        linkMyp: String(row['Link MYP'] ?? ''),
+        linkCardmarket: String(row['Link Cardmarket'] ?? ''),
+        linkTcgplayer: String(row['Link Tcgplayer'] ?? row['Link TCGPlayer'] ?? ''),
+        linkPriceCharting: String(row['Link PriceCharting'] ?? ''),
         minimumPrice,
         quickSalePrice,
         leaguePrice,
         finalPrice,
         slug: `${collectionSlug}-${localSlug}`,
-        imageCandidates: cardImageCandidates(collectionSlug, name, number, language, duplicateIndex),
+        image: String(row['Imagem'] ?? ''),
+        imageCandidates: cardImageCandidates(collectionSlug, name, number, language, duplicateIndex, String(row['Imagem'] ?? '')),
         ownerName: owner,
         ownerCollectionName: title,
         ownerCollectionSlug: collectionSlug,
@@ -556,10 +586,10 @@ export const getCollections = (): CollectorCollection[] => {
       };
     });
 
-    const boosters: BoosterItem[] = readRows(folder, 'inventario-boosters.csv')
-      .filter((row) => normalizeText(row['Tipo de pacote'] || '') !== 'total')
+    const boosters: BoosterItem[] = readInventory(folder, 'inventario-boosters')
+      .filter((row) => normalizeText(String(row['Tipo de pacote'] ?? '')) !== 'total')
       .map((row) => {
-        const name = row['Coleção'] || row['Tipo de pacote'] || 'Booster sem nome';
+        const name = String(row['Tipo de pacote'] ?? row['Coleção'] ?? row['Nome'] ?? '').trim() || 'Booster sem nome';
         const quantity = parseQuantity(row['Quantidade']);
         const minimumPrice = parseDecimal(row['Preço mínimo']) ?? parseDecimal(row['Minimo']);
         const quickSalePrice = parseDecimal(row['Venda rápida']) ?? parseDecimal(row['Venda Rapida']);
@@ -568,20 +598,23 @@ export const getCollections = (): CollectorCollection[] => {
         const price = finalPrice ?? leaguePrice;
         const forSale = profile.selling !== false && parseBoolean(row['À venda'] ?? row['Venda'], true);
         const localSlug = createUniqueSlug(slugify(name), globalSlugs, `${owner}-${quantity}`);
+        const id = String(row['Id'] ?? row['ID'] ?? '').trim() || `${collectionSlug}:booster:${normalizeText(`${row['Link Liga'] ?? ''}|${name}`)}`;
         return {
+          id,
           kind: 'booster',
           name,
           quantity,
           price,
           forSale,
           showQuantity,
-          linkLiga: row['Link Liga'] || '',
+          linkLiga: String(row['Link Liga'] ?? ''),
           minimumPrice,
           quickSalePrice,
           leaguePrice,
           finalPrice,
           slug: `${collectionSlug}-${localSlug}`,
-          imageCandidates: boosterImageCandidates(collectionSlug, name),
+          image: String(row['Imagem'] ?? ''),
+          imageCandidates: boosterImageCandidates(collectionSlug, name, String(row['Imagem'] ?? '')),
           ownerName: owner,
           ownerCollectionName: title,
           ownerCollectionSlug: collectionSlug,
@@ -591,21 +624,43 @@ export const getCollections = (): CollectorCollection[] => {
         };
       });
 
-    const kits: KitItem[] = readRows(folder, 'inventario-kits.csv').map((row) => {
-      const name = row['Nome'] || 'Kit sem nome';
-      const description = row['Descrição'] || 'Conjunto personalizado pelo colecionador.';
-      const contents = row['Conteúdo'] || 'Conteúdo informado pelo colecionador.';
+    const kits: KitItem[] = readInventory(folder, 'inventario-kits').map((row) => {
+      const name = String(row['Nome'] ?? '').trim() || 'Kit sem nome';
+      const description = String(row['Descrição'] ?? '').trim() || 'Conjunto personalizado pelo colecionador.';
       const quantity = parseQuantity(row['Quantidade']) || 1;
       const price = parseDecimal(row['Preço']);
-      const sourceTotal = parseDecimal(row['Valor avulso']);
-      let contentItems: KitContentItem[] = [];
-      try {
-        const parsed = JSON.parse(row['Conteúdo JSON'] || '[]');
-        if (Array.isArray(parsed)) contentItems = parsed;
-      } catch (_) {}
+      const sourceTotal = parseDecimal(row['Valor avulso'] ?? row['Preço bruto']);
+      let rawContents: unknown = row['Conteúdo'];
+      if (!Array.isArray(rawContents) && row['Conteúdo JSON']) {
+        try { rawContents = JSON.parse(String(row['Conteúdo JSON'])); } catch (_) { rawContents = []; }
+      }
+      const contentItems: KitContentItem[] = (Array.isArray(rawContents) ? rawContents : [])
+        .filter((entry): entry is Record<string, any> => Boolean(entry) && typeof entry === 'object')
+        .map((entry) => {
+          const kind: 'cards' | 'boosters' = normalizeText(String(entry.kind ?? entry.tipo ?? 'cards')).startsWith('booster') ? 'boosters' : 'cards';
+          const itemId = String(entry.itemId ?? entry.item_id ?? entry.Id ?? '').trim();
+          const entryName = String(entry.name ?? entry.nome ?? '').trim() || 'Item';
+          const source = kind === 'cards'
+            ? cards.find((card) => (itemId && card.id === itemId) || (!itemId && normalizeText(card.name) === normalizeText(entryName)))
+            : boosters.find((booster) => (itemId && booster.id === itemId) || (!itemId && normalizeText(booster.name) === normalizeText(entryName)));
+          return {
+            kind,
+            itemId: source?.id || itemId,
+            name: source?.name || entryName,
+            quantity: parseQuantity(entry.quantity ?? entry.quantidade) || 1,
+            unitPrice: parseDecimal(entry.unitPrice ?? entry.precoUnitario) ?? source?.price ?? null,
+            imageCandidates: source?.imageCandidates,
+          };
+        });
+      const legacyContents = typeof row['Conteúdo'] === 'string' ? row['Conteúdo'] : '';
+      const contents = contentItems.length
+        ? contentItems.map((entry) => `${entry.quantity}x ${entry.name}`).join(' | ')
+        : legacyContents || 'Conteúdo informado pelo colecionador.';
       const forSale = profile.selling !== false && parseBoolean(row['À venda'] ?? row['Venda'], true);
       const localSlug = createUniqueSlug(slugify(name), globalSlugs, owner);
+      const id = String(row['Id'] ?? row['ID'] ?? '').trim() || `${collectionSlug}:kit:${normalizeText(name)}`;
       return {
+        id,
         kind: 'kit',
         name,
         description,
@@ -617,7 +672,8 @@ export const getCollections = (): CollectorCollection[] => {
         forSale,
         showQuantity,
         slug: `${collectionSlug}-${localSlug}`,
-        imageCandidates: kitImageCandidates(collectionSlug, name, row['Imagem'] || ''),
+        image: String(row['Imagem'] ?? ''),
+        imageCandidates: kitImageCandidates(collectionSlug, name, String(row['Imagem'] ?? '')),
         ownerName: owner,
         ownerCollectionName: title,
         ownerCollectionSlug: collectionSlug,
@@ -627,22 +683,23 @@ export const getCollections = (): CollectorCollection[] => {
       };
     });
 
-    const albums: AlbumItem[] = readRows(folder, 'inventario-albuns.csv').map((row, albumIndex) => {
-      const layout = albumFormat(row['Formato'] || '3x3');
-      const pages = parseAlbumPages(row['Páginas JSON'] || row['Paginas JSON'] || '', layout.columns, layout.rows, cards);
+    const albums: AlbumItem[] = readInventory(folder, 'inventario-albuns').map((row, albumIndex) => {
+      const layout = albumFormat(String(row['Formato'] ?? '3x3'));
+      const rawPages = Array.isArray(row['Páginas']) ? row['Páginas'] : row['Páginas JSON'] ?? row['Paginas JSON'] ?? [];
+      const pages = parseAlbumPages(rawPages, layout.columns, layout.rows, cards);
       const occupiedSlots = pages.reduce((total, page) => total + page.slots.filter(Boolean).length, 0);
       const firstCard = pages.flatMap((page) => page.slots).find(Boolean);
       return {
-        id: row['ID'] || `${collectionSlug}-album-${albumIndex + 1}`,
-        name: row['Nome'] || `Álbum ${albumIndex + 1}`,
-        description: row['Descrição'] || '',
+        id: String(row['Id'] ?? row['ID'] ?? '').trim() || `${collectionSlug}-album-${albumIndex + 1}`,
+        name: String(row['Nome'] ?? '').trim() || `Álbum ${albumIndex + 1}`,
+        description: String(row['Descrição'] ?? ''),
         format: layout.format,
         columns: layout.columns,
         rows: layout.rows,
         pages,
         occupiedSlots,
         totalSlots: pages.length * layout.columns * layout.rows,
-        coverImageCandidates: firstCard?.imageCandidates || (row['Imagem'] ? [row['Imagem']] : []),
+        coverImageCandidates: firstCard?.imageCandidates || (row['Imagem'] ? [String(row['Imagem'])] : []),
       };
     });
 
@@ -699,11 +756,11 @@ export const getEditableCollections = () => getCollections().map((collection) =>
       version: Number((profile as Record<string, unknown>).version || 1),
       collectionId: folderName,
     },
-    cards: collection.cards.map(({ name, number, collection: set, language, condition, year, type, quantity, finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, minimumPrice, quickSalePrice, leaguePrice, imageCandidates }) => ({
-      name, number, collection: set, language, condition, year, type, quantity, price: finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, minimumPrice, quickSalePrice, leaguePrice, imageCandidates,
+    cards: collection.cards.map(({ id, name, number, collection: set, language, condition, year, type, quantity, finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, minimumPrice, quickSalePrice, leaguePrice, image, imageCandidates }) => ({
+      id, name, number, collection: set, language, condition, year, type, quantity, price: finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, minimumPrice, quickSalePrice, leaguePrice, image, imageCandidates,
     })),
-    boosters: collection.boosters.map(({ name, quantity, finalPrice, forSale, linkLiga, minimumPrice, quickSalePrice, leaguePrice, imageCandidates }) => ({ name, quantity, price: finalPrice, forSale, linkLiga, minimumPrice, quickSalePrice, leaguePrice, imageCandidates })),
-    kits: collection.kits.map(({ name, description, contents, contentItems, sourceTotal, quantity, price, forSale, imageCandidates }) => ({ name, description, contents, contentItems, sourceTotal, quantity, price, forSale, imageCandidates })),
+    boosters: collection.boosters.map(({ id, name, quantity, finalPrice, forSale, linkLiga, minimumPrice, quickSalePrice, leaguePrice, image, imageCandidates }) => ({ id, name, quantity, price: finalPrice, forSale, linkLiga, minimumPrice, quickSalePrice, leaguePrice, image, imageCandidates })),
+    kits: collection.kits.map(({ id, name, description, contents, contentItems, sourceTotal, quantity, price, forSale, image, imageCandidates }) => ({ id, name, description, contents, contentItems, sourceTotal, quantity, price, forSale, image, imageCandidates })),
     albums: collection.albums.map((album) => ({
       albumId: album.id,
       name: album.name,

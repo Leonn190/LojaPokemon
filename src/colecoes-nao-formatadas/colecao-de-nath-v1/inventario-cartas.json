@@ -1,0 +1,41 @@
+[
+  {
+    "Nome": "Eevee ex",
+    "Número": "",
+    "Coleção": "",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards/card&card=Eevee%20ex%20(075/131)&ed=PRE&num=075&srsltid=AfmBOop6xPFOQYkYmf2ugfv1bpbHAugzSxJpY0ci45ThKFeXvw2bwraJ",
+    "Preço": 0.0,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "PRE-075-BR-NM"
+  },
+  {
+    "Nome": "Eevee ex",
+    "Número": "",
+    "Coleção": "",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards/card&card=Eevee%20ex%20(174/%E2%88%9E)&ed=SVP&num=174&srsltid=AfmBOorQIOiJji_Mu7YxIbpGtL7fC0OBpspm29xTy7KbrTzpwCOSWw6z",
+    "Preço": 0.0,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "SVP-174-BR-NM"
+  },
+  {
+    "Nome": "Flareon ex",
+    "Número": "",
+    "Coleção": "",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Ano": "",
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards/card&card=Flareon+ex%20(014/131)&show=4&ed=PRE&srsltid=AfmBOoqN2W62L1TBdB2IQ2i6KW7akBX1tqCaICHRjHayJve9ZyKI5lmUfNE",
+    "Preço": 0.0,
+    "Quantidade": 1,
+    "À venda": true,
+    "Id": "PRE-SEM-NUMERO-BR-NM"
+  }
+]

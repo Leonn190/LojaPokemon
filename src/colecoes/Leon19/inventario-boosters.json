@@ -1,0 +1,614 @@
+[
+  {
+    "Tipo de pacote": "Heróis Excelsos",
+    "Quantidade": 11,
+    "Preço mínimo": 12.5,
+    "Venda rápida": 13.7,
+    "Preço Liga mais barato": 13.85,
+    "Preço médio Liga": null,
+    "Preço": 15.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-HER-IS-EXCELSOS",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Battle Styles",
+    "Quantidade": 1,
+    "Preço mínimo": 75.0,
+    "Venda rápida": 90.0,
+    "Preço Liga mais barato": 100.0,
+    "Preço médio Liga": null,
+    "Preço": 100.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-BATTLE-STYLES",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Escuridão Incandescente",
+    "Quantidade": 3,
+    "Preço mínimo": 45.0,
+    "Venda rápida": 62.0,
+    "Preço Liga mais barato": 69.0,
+    "Preço médio Liga": null,
+    "Preço": 75.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-ESCURID-O-INCANDESCENTE",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Evolving Skies",
+    "Quantidade": 4,
+    "Preço mínimo": 380.0,
+    "Venda rápida": 425.0,
+    "Preço Liga mais barato": 450.0,
+    "Preço médio Liga": null,
+    "Preço": 450.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-EVOLVING-SKIES",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Sword & Shield",
+    "Quantidade": 2,
+    "Preço mínimo": 75.0,
+    "Venda rápida": 90.0,
+    "Preço Liga mais barato": 100.0,
+    "Preço médio Liga": null,
+    "Preço": 100.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-SWORD-SHIELD",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Fenda Paradoxal",
+    "Quantidade": 4,
+    "Preço mínimo": 28.0,
+    "Venda rápida": 33.0,
+    "Preço Liga mais barato": 39.0,
+    "Preço médio Liga": null,
+    "Preço": 40.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-FENDA-PARADOXAL",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Paradox Rift (suíço)",
+    "Quantidade": 1,
+    "Preço mínimo": 36.0,
+    "Venda rápida": 50.0,
+    "Preço Liga mais barato": null,
+    "Preço médio Liga": null,
+    "Preço": 70.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-PARADOX-RIFT-SU-O",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Obsidiana em Chamas",
+    "Quantidade": 9,
+    "Preço mínimo": 17.5,
+    "Venda rápida": 22.0,
+    "Preço Liga mais barato": 24.0,
+    "Preço médio Liga": null,
+    "Preço": 25.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-OBSIDIANA-EM-CHAMAS",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Origem Perdida",
+    "Quantidade": 6,
+    "Preço mínimo": 28.0,
+    "Venda rápida": 35.0,
+    "Preço Liga mais barato": 40.0,
+    "Preço médio Liga": null,
+    "Preço": 42.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-ORIGEM-PERDIDA",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Lost Origin",
+    "Quantidade": 2,
+    "Preço mínimo": 40.0,
+    "Venda rápida": 58.0,
+    "Preço Liga mais barato": null,
+    "Preço médio Liga": null,
+    "Preço": 65.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-LOST-ORIGIN",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Reinado Arrepiante",
+    "Quantidade": 1,
+    "Preço mínimo": 38.0,
+    "Venda rápida": 52.0,
+    "Preço Liga mais barato": 60.0,
+    "Preço médio Liga": null,
+    "Preço": 60.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-REINADO-ARREPIANTE",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Chilling Reign",
+    "Quantidade": 2,
+    "Preço mínimo": 86.0,
+    "Venda rápida": 105.0,
+    "Preço Liga mais barato": 120.0,
+    "Preço médio Liga": null,
+    "Preço": 120.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-CHILLING-REIGN",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Fusion Strike",
+    "Quantidade": 2,
+    "Preço mínimo": 100.0,
+    "Venda rápida": 135.0,
+    "Preço Liga mais barato": null,
+    "Preço médio Liga": null,
+    "Preço": 180.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-FUSION-STRIKE",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Golpe Fusão",
+    "Quantidade": 2,
+    "Preço mínimo": 62.0,
+    "Venda rápida": 72.0,
+    "Preço Liga mais barato": 80.0,
+    "Preço médio Liga": null,
+    "Preço": 80.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-GOLPE-FUS-O",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Vivid Voltage",
+    "Quantidade": 4,
+    "Preço mínimo": 85.0,
+    "Venda rápida": 100.0,
+    "Preço Liga mais barato": null,
+    "Preço médio Liga": null,
+    "Preço": 105.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-VIVID-VOLTAGE",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Astros Cintilantes",
+    "Quantidade": 17,
+    "Preço mínimo": 58.0,
+    "Venda rápida": 72.0,
+    "Preço Liga mais barato": 80.0,
+    "Preço médio Liga": null,
+    "Preço": 80.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-ASTROS-CINTILANTES",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Brilliant Stars",
+    "Quantidade": 2,
+    "Preço mínimo": 100.0,
+    "Venda rápida": 135.0,
+    "Preço Liga mais barato": null,
+    "Preço médio Liga": null,
+    "Preço": 180.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-BRILLIANT-STARS",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Amigos da Jornada",
+    "Quantidade": 18,
+    "Preço mínimo": 9.8,
+    "Venda rápida": 10.25,
+    "Preço Liga mais barato": 10.49,
+    "Preço médio Liga": null,
+    "Preço": 12.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-AMIGOS-DA-JORNADA",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Escarlate e Violeta",
+    "Quantidade": 29,
+    "Preço mínimo": 26.0,
+    "Venda rápida": 35.0,
+    "Preço Liga mais barato": 39.0,
+    "Preço médio Liga": null,
+    "Preço": 40.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-ESCARLATE-E-VIOLETA",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Estrelas Radiantes",
+    "Quantidade": 15,
+    "Preço mínimo": 25.0,
+    "Venda rápida": 32.0,
+    "Preço Liga mais barato": 35.0,
+    "Preço médio Liga": null,
+    "Preço": 35.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-ESTRELAS-RADIANTES",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Astral Radiance",
+    "Quantidade": 3,
+    "Preço mínimo": 72.0,
+    "Venda rápida": 85.0,
+    "Preço Liga mais barato": 90.0,
+    "Preço médio Liga": null,
+    "Preço": 90.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-ASTRAL-RADIANCE",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Evoluções em Paldea",
+    "Quantidade": 24,
+    "Preço mínimo": 20.0,
+    "Venda rápida": 26.0,
+    "Preço Liga mais barato": 30.0,
+    "Preço médio Liga": null,
+    "Preço": 30.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-EVOLU-ES-EM-PALDEA",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Megaevolução",
+    "Quantidade": 102,
+    "Preço mínimo": 8.0,
+    "Venda rápida": 8.8,
+    "Preço Liga mais barato": 8.9,
+    "Preço médio Liga": null,
+    "Preço": 9.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-MEGAEVOLU-O",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Realeza Absoluta",
+    "Quantidade": 17,
+    "Preço mínimo": 38.0,
+    "Venda rápida": 45.0,
+    "Preço Liga mais barato": 49.0,
+    "Preço médio Liga": null,
+    "Preço": 50.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-REALEZA-ABSOLUTA",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Pokémon GO (americano)",
+    "Quantidade": 3,
+    "Preço mínimo": 50.0,
+    "Venda rápida": 60.0,
+    "Preço Liga mais barato": null,
+    "Preço médio Liga": null,
+    "Preço": 75.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-POK-MON-GO-AMERICANO",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Pokémon GO (brasileiro)",
+    "Quantidade": 3,
+    "Preço mínimo": 35.0,
+    "Venda rápida": 42.0,
+    "Preço Liga mais barato": 45.0,
+    "Preço médio Liga": null,
+    "Preço": 45.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-POK-MON-GO-BRASILEIRO",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Caos Ascendente",
+    "Quantidade": 104,
+    "Preço mínimo": 7.0,
+    "Venda rápida": 7.6,
+    "Preço Liga mais barato": 7.83,
+    "Preço médio Liga": null,
+    "Preço": 8.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-CAOS-ASCENDENTE",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Caos Ascendente (suíço)",
+    "Quantidade": 1,
+    "Preço mínimo": 15.0,
+    "Venda rápida": 20.0,
+    "Preço Liga mais barato": null,
+    "Preço médio Liga": null,
+    "Preço": 25.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-CAOS-ASCENDENTE-SU-O",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Coroa Estelar",
+    "Quantidade": 13,
+    "Preço mínimo": 13.0,
+    "Venda rápida": 14.5,
+    "Preço Liga mais barato": 14.7,
+    "Preço médio Liga": null,
+    "Preço": 16.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-COROA-ESTELAR",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Shining Fates",
+    "Quantidade": 7,
+    "Preço mínimo": 140.0,
+    "Venda rápida": 170.0,
+    "Preço Liga mais barato": 182.4,
+    "Preço médio Liga": null,
+    "Preço": 185.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-SHINING-FATES",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Fogo Fantasmagórico",
+    "Quantidade": 53,
+    "Preço mínimo": 8.2,
+    "Venda rápida": 8.85,
+    "Preço Liga mais barato": 8.9,
+    "Preço médio Liga": null,
+    "Preço": 9.2,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-FOGO-FANTASMAG-RICO",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Evoluções Prismáticas",
+    "Quantidade": 45,
+    "Preço mínimo": 11.0,
+    "Venda rápida": 12.0,
+    "Preço Liga mais barato": 12.18,
+    "Preço médio Liga": null,
+    "Preço": 13.5,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-EVOLU-ES-PRISM-TICAS",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Equilíbrio Perfeito",
+    "Quantidade": 20,
+    "Preço mínimo": 7.0,
+    "Venda rápida": 7.5,
+    "Preço Liga mais barato": 7.82,
+    "Preço médio Liga": null,
+    "Preço": 8.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-EQUIL-BRIO-PERFEITO",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  },
+  {
+    "Tipo de pacote": "Equilíbrio Perfeito (suíço)",
+    "Quantidade": 1,
+    "Preço mínimo": 15.0,
+    "Venda rápida": 20.0,
+    "Preço Liga mais barato": null,
+    "Preço médio Liga": null,
+    "Preço": 25.0,
+    "Alteração de preço": "",
+    "Link Liga": "",
+    "Imagem": "",
+    "À venda": true,
+    "Id": "BOOSTER-EQUIL-BRIO-PERFEITO-SU-O",
+    "Status": {
+      "nível": "OK",
+      "motivos": []
+    }
+  }
+]

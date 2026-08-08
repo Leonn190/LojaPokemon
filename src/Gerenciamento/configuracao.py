@@ -12,6 +12,7 @@ PASTA_COLECOES = RAIZ_PROJETO / "colecoes"
 PASTA_NAO_FORMATADAS = RAIZ_PROJETO / "colecoes-nao-formatadas"
 PASTA_IMAGENS = RAIZ_PROJETO.parent / "public" / "imagens"
 PASTA_RELATORIOS_NOME = "relatorios"
+PASTA_HISTORICO_NOME = "historico"
 ARQUIVO_PERFIL = "perfil.json"
 ARQUIVO_ATUALIZACAO = "atualizacao.json"
 ARQUIVO_CONFIG = PASTA_GERENCIAMENTO / "config.json"
@@ -21,6 +22,10 @@ ARQUIVOS_INVENTARIO = {
     "boosters": "inventario-boosters.json",
     "kits": "inventario-kits.json",
     "albuns": "inventario-albuns.json",
+}
+ARQUIVOS_HISTORICO = {
+    "cartas": "cartas.jsonl",
+    "boosters": "boosters.jsonl",
 }
 ARQUIVOS_LEGADOS = {
     "cartas": "inventario-cartas.csv",

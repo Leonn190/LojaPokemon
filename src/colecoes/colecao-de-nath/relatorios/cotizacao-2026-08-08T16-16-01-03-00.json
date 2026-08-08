@@ -1,0 +1,764 @@
+{
+  "resumo": {
+    "cotacaoId": "cot-20260808-161601-700eee",
+    "data": "2026-08-08T16:16:01-03:00",
+    "escopo": "Apenas cartas",
+    "selecionados": 3,
+    "cartasSelecionadas": 3,
+    "boostersSelecionados": 0,
+    "atualizados": 3,
+    "cartasAtualizadas": 3,
+    "boostersAtualizados": 0,
+    "semOfertas": 0,
+    "erros": 0,
+    "suspeitas": 1,
+    "suspeitasLeves": 0,
+    "preçoTotalAntigo": 146.09,
+    "preçoTotalNovo": 144.04,
+    "variaçãoAbsoluta": -2.05,
+    "variaçãoPercentual": -1.4,
+    "buylistTotal": 140.5,
+    "médiaLigaTotal": 144.04,
+    "menorLigaTotal": 84.9
+  },
+  "itens": [
+    {
+      "id": "PRE-075-BR-NM",
+      "tipo": "carta",
+      "nome": "Eevee ex",
+      "quantidade": 1,
+      "Preço (média Liga)": {
+        "antigo": 35.82,
+        "novo": 35.32,
+        "diferença": -0.5,
+        "percentual": -1.4
+      },
+      "Menor Liga": {
+        "antigo": 22.0,
+        "novo": 22.0,
+        "diferença": 0.0,
+        "percentual": 0.0
+      },
+      "Minimo (buylist)": {
+        "antigo": 12.5,
+        "novo": 15.62,
+        "diferença": 3.12,
+        "percentual": 24.96
+      },
+      "Preço configurado": {
+        "antigo": 35.82,
+        "novo": 35.32,
+        "diferença": -0.5,
+        "percentual": -1.4
+      },
+      "Status": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 48,
+            "lidas": 48,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 26,
+            "lidas": 26,
+            "falhas": 0,
+            "erros": []
+          }
+        }
+      },
+      "Preço coletado": {
+        "Menor Liga": 22.0,
+        "Preço Médio Liga": 35.32,
+        "Minimo": 15.62,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      },
+      "Preço estimado": {
+        "Menor Liga": 22.0,
+        "Preço Médio Liga": 35.32,
+        "Minimo": 15.62,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      }
+    },
+    {
+      "id": "SVP-174-BR-NM",
+      "tipo": "carta",
+      "nome": "Eevee ex",
+      "quantidade": 1,
+      "Preço (média Liga)": {
+        "antigo": 62.87,
+        "novo": 62.37,
+        "diferença": -0.5,
+        "percentual": -0.8
+      },
+      "Menor Liga": {
+        "antigo": 30.0,
+        "novo": 37.9,
+        "diferença": 7.9,
+        "percentual": 26.33
+      },
+      "Minimo (buylist)": {
+        "antigo": 85.19,
+        "novo": 106.49,
+        "diferença": 21.3,
+        "percentual": 25.0
+      },
+      "Preço configurado": {
+        "antigo": 62.87,
+        "novo": 62.37,
+        "diferença": -0.5,
+        "percentual": -0.8
+      },
+      "Status": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "buylist_acima_marketplace",
+            "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+            "evidencia": {
+              "comparacao": "mesmo_idioma_estado_ajustado",
+              "estadoReferencia": "NM",
+              "idiomaReferencia": "Português",
+              "venda": {
+                "loja": "Shadow Gallery",
+                "preco": 37.9,
+                "idioma": "Português",
+                "estado": "NM",
+                "ofertaId": "31963098",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=48136&tcg=31963098"
+              },
+              "buylist": {
+                "loja": "",
+                "preco": 106.49,
+                "idioma": "Português",
+                "estado": "M",
+                "ofertaId": "24396726",
+                "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24396726"
+              },
+              "diferenca": 68.59
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 72,
+            "lidas": 72,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 24,
+            "lidas": 24,
+            "falhas": 0,
+            "erros": []
+          }
+        }
+      },
+      "Preço coletado": {
+        "Menor Liga": 37.9,
+        "Preço Médio Liga": 62.37,
+        "Minimo": 106.49,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      },
+      "Preço estimado": {
+        "Menor Liga": 37.9,
+        "Preço Médio Liga": 62.37,
+        "Minimo": 106.49,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      }
+    },
+    {
+      "id": "PRE-014-BR-NM",
+      "tipo": "carta",
+      "nome": "Flareon ex",
+      "quantidade": 1,
+      "Preço (média Liga)": {
+        "antigo": 47.4,
+        "novo": 46.35,
+        "diferença": -1.05,
+        "percentual": -2.22
+      },
+      "Menor Liga": {
+        "antigo": 26.0,
+        "novo": 25.0,
+        "diferença": -1.0,
+        "percentual": -3.85
+      },
+      "Minimo (buylist)": {
+        "antigo": 15.27,
+        "novo": 18.39,
+        "diferença": 3.12,
+        "percentual": 20.43
+      },
+      "Preço configurado": {
+        "antigo": 47.4,
+        "novo": 46.35,
+        "diferença": -1.05,
+        "percentual": -2.22
+      },
+      "Status": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 71,
+            "lidas": 71,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 26,
+            "lidas": 26,
+            "falhas": 0,
+            "erros": []
+          }
+        }
+      },
+      "Preço coletado": {
+        "Menor Liga": 25.0,
+        "Preço Médio Liga": 46.35,
+        "Minimo": 18.39,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      },
+      "Preço estimado": {
+        "Menor Liga": 25.0,
+        "Preço Médio Liga": 46.35,
+        "Minimo": 18.39,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      }
+    }
+  ],
+  "maioresAltas": [
+    {
+      "id": "PRE-075-BR-NM",
+      "tipo": "carta",
+      "nome": "Eevee ex",
+      "quantidade": 1,
+      "Preço (média Liga)": {
+        "antigo": 35.82,
+        "novo": 35.32,
+        "diferença": -0.5,
+        "percentual": -1.4
+      },
+      "Menor Liga": {
+        "antigo": 22.0,
+        "novo": 22.0,
+        "diferença": 0.0,
+        "percentual": 0.0
+      },
+      "Minimo (buylist)": {
+        "antigo": 12.5,
+        "novo": 15.62,
+        "diferença": 3.12,
+        "percentual": 24.96
+      },
+      "Preço configurado": {
+        "antigo": 35.82,
+        "novo": 35.32,
+        "diferença": -0.5,
+        "percentual": -1.4
+      },
+      "Status": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 48,
+            "lidas": 48,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 26,
+            "lidas": 26,
+            "falhas": 0,
+            "erros": []
+          }
+        }
+      },
+      "Preço coletado": {
+        "Menor Liga": 22.0,
+        "Preço Médio Liga": 35.32,
+        "Minimo": 15.62,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      },
+      "Preço estimado": {
+        "Menor Liga": 22.0,
+        "Preço Médio Liga": 35.32,
+        "Minimo": 15.62,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      }
+    },
+    {
+      "id": "SVP-174-BR-NM",
+      "tipo": "carta",
+      "nome": "Eevee ex",
+      "quantidade": 1,
+      "Preço (média Liga)": {
+        "antigo": 62.87,
+        "novo": 62.37,
+        "diferença": -0.5,
+        "percentual": -0.8
+      },
+      "Menor Liga": {
+        "antigo": 30.0,
+        "novo": 37.9,
+        "diferença": 7.9,
+        "percentual": 26.33
+      },
+      "Minimo (buylist)": {
+        "antigo": 85.19,
+        "novo": 106.49,
+        "diferença": 21.3,
+        "percentual": 25.0
+      },
+      "Preço configurado": {
+        "antigo": 62.87,
+        "novo": 62.37,
+        "diferença": -0.5,
+        "percentual": -0.8
+      },
+      "Status": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "buylist_acima_marketplace",
+            "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+            "evidencia": {
+              "comparacao": "mesmo_idioma_estado_ajustado",
+              "estadoReferencia": "NM",
+              "idiomaReferencia": "Português",
+              "venda": {
+                "loja": "Shadow Gallery",
+                "preco": 37.9,
+                "idioma": "Português",
+                "estado": "NM",
+                "ofertaId": "31963098",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=48136&tcg=31963098"
+              },
+              "buylist": {
+                "loja": "",
+                "preco": 106.49,
+                "idioma": "Português",
+                "estado": "M",
+                "ofertaId": "24396726",
+                "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24396726"
+              },
+              "diferenca": 68.59
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 72,
+            "lidas": 72,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 24,
+            "lidas": 24,
+            "falhas": 0,
+            "erros": []
+          }
+        }
+      },
+      "Preço coletado": {
+        "Menor Liga": 37.9,
+        "Preço Médio Liga": 62.37,
+        "Minimo": 106.49,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      },
+      "Preço estimado": {
+        "Menor Liga": 37.9,
+        "Preço Médio Liga": 62.37,
+        "Minimo": 106.49,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      }
+    },
+    {
+      "id": "PRE-014-BR-NM",
+      "tipo": "carta",
+      "nome": "Flareon ex",
+      "quantidade": 1,
+      "Preço (média Liga)": {
+        "antigo": 47.4,
+        "novo": 46.35,
+        "diferença": -1.05,
+        "percentual": -2.22
+      },
+      "Menor Liga": {
+        "antigo": 26.0,
+        "novo": 25.0,
+        "diferença": -1.0,
+        "percentual": -3.85
+      },
+      "Minimo (buylist)": {
+        "antigo": 15.27,
+        "novo": 18.39,
+        "diferença": 3.12,
+        "percentual": 20.43
+      },
+      "Preço configurado": {
+        "antigo": 47.4,
+        "novo": 46.35,
+        "diferença": -1.05,
+        "percentual": -2.22
+      },
+      "Status": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 71,
+            "lidas": 71,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 26,
+            "lidas": 26,
+            "falhas": 0,
+            "erros": []
+          }
+        }
+      },
+      "Preço coletado": {
+        "Menor Liga": 25.0,
+        "Preço Médio Liga": 46.35,
+        "Minimo": 18.39,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      },
+      "Preço estimado": {
+        "Menor Liga": 25.0,
+        "Preço Médio Liga": 46.35,
+        "Minimo": 18.39,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      }
+    }
+  ],
+  "maioresQuedas": [
+    {
+      "id": "PRE-014-BR-NM",
+      "tipo": "carta",
+      "nome": "Flareon ex",
+      "quantidade": 1,
+      "Preço (média Liga)": {
+        "antigo": 47.4,
+        "novo": 46.35,
+        "diferença": -1.05,
+        "percentual": -2.22
+      },
+      "Menor Liga": {
+        "antigo": 26.0,
+        "novo": 25.0,
+        "diferença": -1.0,
+        "percentual": -3.85
+      },
+      "Minimo (buylist)": {
+        "antigo": 15.27,
+        "novo": 18.39,
+        "diferença": 3.12,
+        "percentual": 20.43
+      },
+      "Preço configurado": {
+        "antigo": 47.4,
+        "novo": 46.35,
+        "diferença": -1.05,
+        "percentual": -2.22
+      },
+      "Status": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 71,
+            "lidas": 71,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 26,
+            "lidas": 26,
+            "falhas": 0,
+            "erros": []
+          }
+        }
+      },
+      "Preço coletado": {
+        "Menor Liga": 25.0,
+        "Preço Médio Liga": 46.35,
+        "Minimo": 18.39,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      },
+      "Preço estimado": {
+        "Menor Liga": 25.0,
+        "Preço Médio Liga": 46.35,
+        "Minimo": 18.39,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      }
+    },
+    {
+      "id": "SVP-174-BR-NM",
+      "tipo": "carta",
+      "nome": "Eevee ex",
+      "quantidade": 1,
+      "Preço (média Liga)": {
+        "antigo": 62.87,
+        "novo": 62.37,
+        "diferença": -0.5,
+        "percentual": -0.8
+      },
+      "Menor Liga": {
+        "antigo": 30.0,
+        "novo": 37.9,
+        "diferença": 7.9,
+        "percentual": 26.33
+      },
+      "Minimo (buylist)": {
+        "antigo": 85.19,
+        "novo": 106.49,
+        "diferença": 21.3,
+        "percentual": 25.0
+      },
+      "Preço configurado": {
+        "antigo": 62.87,
+        "novo": 62.37,
+        "diferença": -0.5,
+        "percentual": -0.8
+      },
+      "Status": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "buylist_acima_marketplace",
+            "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+            "evidencia": {
+              "comparacao": "mesmo_idioma_estado_ajustado",
+              "estadoReferencia": "NM",
+              "idiomaReferencia": "Português",
+              "venda": {
+                "loja": "Shadow Gallery",
+                "preco": 37.9,
+                "idioma": "Português",
+                "estado": "NM",
+                "ofertaId": "31963098",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=48136&tcg=31963098"
+              },
+              "buylist": {
+                "loja": "",
+                "preco": 106.49,
+                "idioma": "Português",
+                "estado": "M",
+                "ofertaId": "24396726",
+                "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24396726"
+              },
+              "diferenca": 68.59
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 72,
+            "lidas": 72,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 24,
+            "lidas": 24,
+            "falhas": 0,
+            "erros": []
+          }
+        }
+      },
+      "Preço coletado": {
+        "Menor Liga": 37.9,
+        "Preço Médio Liga": 62.37,
+        "Minimo": 106.49,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      },
+      "Preço estimado": {
+        "Menor Liga": 37.9,
+        "Preço Médio Liga": 62.37,
+        "Minimo": 106.49,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      }
+    },
+    {
+      "id": "PRE-075-BR-NM",
+      "tipo": "carta",
+      "nome": "Eevee ex",
+      "quantidade": 1,
+      "Preço (média Liga)": {
+        "antigo": 35.82,
+        "novo": 35.32,
+        "diferença": -0.5,
+        "percentual": -1.4
+      },
+      "Menor Liga": {
+        "antigo": 22.0,
+        "novo": 22.0,
+        "diferença": 0.0,
+        "percentual": 0.0
+      },
+      "Minimo (buylist)": {
+        "antigo": 12.5,
+        "novo": 15.62,
+        "diferença": 3.12,
+        "percentual": 24.96
+      },
+      "Preço configurado": {
+        "antigo": 35.82,
+        "novo": 35.32,
+        "diferença": -0.5,
+        "percentual": -1.4
+      },
+      "Status": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 48,
+            "lidas": 48,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 26,
+            "lidas": 26,
+            "falhas": 0,
+            "erros": []
+          }
+        }
+      },
+      "Preço coletado": {
+        "Menor Liga": 22.0,
+        "Preço Médio Liga": 35.32,
+        "Minimo": 15.62,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      },
+      "Preço estimado": {
+        "Menor Liga": 22.0,
+        "Preço Médio Liga": 35.32,
+        "Minimo": 15.62,
+        "Idioma encontrado": [
+          "Português"
+        ],
+        "Estado encontrado": [
+          "NM"
+        ],
+        "é estimativa": false
+      }
+    }
+  ],
+  "semOfertas": [],
+  "erros": []
+}

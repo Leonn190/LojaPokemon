@@ -757,12 +757,21 @@ def _extrair_idioma_estado(oferta: WebElement) -> tuple[str, str]:
 def obter_todas_as_ofertas(
     navegador: webdriver.Chrome,
     origem: str,
-) -> list[dict[str, Any]]:
-    """Lê todas as ofertas visíveis, sem filtrar idioma ou estado."""
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Lê todas as ofertas visíveis e informa também falhas de leitura/OCR.
+
+    Isso evita confundir "uma oferta lida" com "uma única oferta existente".
+    """
 
     elementos = _elementos_ofertas(navegador)
+    estatisticas: dict[str, Any] = {
+        "detectadas": len(elementos),
+        "lidas": 0,
+        "falhas": 0,
+        "erros": [],
+    }
     if not elementos:
-        return []
+        return [], estatisticas
 
     ocr = ddddocr.DdddOcr(show_ad=False, beta=True)
     cache_digitos: dict[str, str] = {}
@@ -810,7 +819,16 @@ def obter_todas_as_ofertas(
                 oferta_id=oferta_id,
             )
         except (ErroLeituraPreco, NoSuchElementException) as erro:
-            print(f"  Oferta {oferta_id} ignorada: {erro}")
+            print(f"  Oferta {oferta_id} não pôde ser lida: {erro}")
+            estatisticas["falhas"] += 1
+            estatisticas["erros"].append({
+                "ofertaId": str(oferta_id),
+                "loja": str(nome_loja or "").strip(),
+                "idioma": str(idioma or "").strip(),
+                "estado": str(estado or "").strip().upper(),
+                "linkLoja": str(link_loja or "").strip(),
+                "erro": str(erro),
+            })
             continue
 
         ofertas.append(
@@ -824,7 +842,8 @@ def obter_todas_as_ofertas(
                 "origem": origem,
             }
         )
-    return ofertas
+        estatisticas["lidas"] += 1
+    return ofertas, estatisticas
 
 
 def normalizar_url_liga(url: str, show: int) -> str:
@@ -1059,7 +1078,7 @@ class SessaoLiga:
                 self.aba_base = handles[0]
             navegador.switch_to.window(self.aba_base)
 
-    def _coletar_pagina(self, url: str, origem: str, coletar_dados: bool) -> tuple[dict[str, str], list[dict[str, Any]]]:
+    def _coletar_pagina(self, url: str, origem: str, coletar_dados: bool) -> tuple[dict[str, str], list[dict[str, Any]], dict[str, Any]]:
         ultimo_erro: Exception | None = None
         for tentativa in range(1, TENTATIVAS + 1):
             navegador = self._exigir_navegador()
@@ -1071,8 +1090,8 @@ class SessaoLiga:
                     time.sleep(ESPERA_PAGINA)
                 mostrar_todas_as_ofertas(navegador)
                 dados = obter_dados_carta(navegador) if coletar_dados else {}
-                ofertas = obter_todas_as_ofertas(navegador, origem)
-                return dados, ofertas
+                ofertas, estatisticas = obter_todas_as_ofertas(navegador, origem)
+                return dados, ofertas, estatisticas
             except Exception as erro:
                 ultimo_erro = erro
                 if tentativa < TENTATIVAS:
@@ -1090,8 +1109,8 @@ class SessaoLiga:
         if chave in self._cache:
             return dict(self._cache[chave])
 
-        dados, marketplace = self._coletar_pagina(normalizar_url_liga(url, 1), "marketplace", True)
-        _, buylist = self._coletar_pagina(normalizar_url_liga(url, 10), "buylist", False)
+        dados, marketplace, stats_marketplace = self._coletar_pagina(normalizar_url_liga(url, 1), "marketplace", True)
+        _, buylist, stats_buylist = self._coletar_pagina(normalizar_url_liga(url, 10), "buylist", False)
         precos = resumir_precos(marketplace, buylist, idioma_normalizado, estado_normalizado)
         resultado = {
             **dados,
@@ -1100,6 +1119,7 @@ class SessaoLiga:
             "estado": estado_normalizado,
             "marketplace": marketplace,
             "buylist": buylist,
+            "coleta": {"marketplace": stats_marketplace, "buylist": stats_buylist},
         }
         self._cache[chave] = dict(resultado)
         return resultado
@@ -1108,8 +1128,8 @@ class SessaoLiga:
         chave = (normalizar_url_liga(url, 1), "BOOSTER", "")
         if chave in self._cache:
             return dict(self._cache[chave])
-        dados, marketplace = self._coletar_pagina(normalizar_url_liga(url, 1), "marketplace", True)
-        _, buylist = self._coletar_pagina(normalizar_url_liga(url, 10), "buylist", False)
+        dados, marketplace, stats_marketplace = self._coletar_pagina(normalizar_url_liga(url, 1), "marketplace", True)
+        _, buylist, stats_buylist = self._coletar_pagina(normalizar_url_liga(url, 10), "buylist", False)
         valores_venda = [o["preco"] for o in marketplace]
         valores_compra = [o["preco"] for o in buylist]
         menor = min(valores_venda, default=None)
@@ -1134,6 +1154,7 @@ class SessaoLiga:
             "quantidade_buylist": len(valores_compra),
             "marketplace": marketplace,
             "buylist": buylist,
+            "coleta": {"marketplace": stats_marketplace, "buylist": stats_buylist},
         }
         self._cache[chave] = dict(resultado)
         return resultado

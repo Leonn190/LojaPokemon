@@ -64,7 +64,7 @@ const publishedCollections = getEditableCollections();
     </section>
 
     <section class="editor-start-panel" data-start-panel="import" hidden>
-      <div class="form-section-heading"><span class="section-eyebrow">ZIP já formatado</span><h2>Continue uma versão anterior</h2><p>Selecione um ZIP gerado pela central. A edição será aberta com todos os itens encontrados.</p></div>
+      <div class="form-section-heading"><span class="section-eyebrow">ZIP JSON da coleção</span><h2>Continue uma versão anterior</h2><p>Selecione um ZIP JSON gerado pela central. ZIPs CSV antigos continuam aceitos apenas para migração.</p></div>
       <label class="zip-drop-zone" data-zip-drop><input type="file" accept=".zip,application/zip" data-zip-input /><span>↑</span><strong>Solte o ZIP aqui ou clique para escolher</strong><small>O arquivo não é enviado para nenhum servidor.</small></label>
       <p class="import-feedback" data-import-feedback></p>
     </section>
@@ -144,8 +144,8 @@ const publishedCollections = getEditableCollections();
       </section>
 
       <div class="editor-export-panel">
-        <div><span class="section-eyebrow">Pronto para aprovação</span><h3>Baixe o ZIP da versão <b data-version-number>1</b></h3><p>O ZIP completo leva todo o inventário. O update inclui alterações do perfil e dos termos, além de novas cartas, boosters, kits e álbuns criados ou reorganizados nesta edição.</p></div>
-        <div class="editor-export-actions"><button type="button" class="secondary-cta" data-download-update hidden><span>Baixar só o update</span><b>＋</b></button><button type="button" class="primary-cta" data-download-zip><span>Baixar ZIP completo</span><b>↓</b></button></div>
+        <div><span class="section-eyebrow">Pronto para aprovação</span><h3>Baixe o ZIP da versão <b data-version-number>1</b></h3><p>Os inventários são exportados em JSON. Para coleção nova, o ZIP sai pronto para a pasta de não formatadas; em coleções existentes, o update leva perfil, novas cartas/boosters e kits/álbuns alterados.</p></div>
+        <div class="editor-export-actions"><button type="button" class="secondary-cta" data-download-update hidden><span>Baixar só o update</span><b>＋</b></button><button type="button" class="primary-cta" data-download-zip><span>Baixar ZIP JSON</span><b>↓</b></button></div>
       </div>
     </section>
 
@@ -272,12 +272,6 @@ const publishedCollections = getEditableCollections();
       const modalElements = [...root.querySelectorAll('[data-editor-modal]')];
       const priceFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-      const csvHeaders = {
-        cards: ['Nome', 'Número', 'Coleção', 'Idioma', 'Estado', 'Ano', 'Tipo', 'Link Liga', 'Link MYP', 'Link Cardmarket', 'Link Tcgplayer', 'Link PriceCharting', 'Minimo', 'Venda Rapida', 'Menor Liga', 'Preço', 'Quantidade', 'À venda'],
-        boosters: ['Tipo de pacote', 'Quantidade', 'Preço mínimo', 'Venda rápida', 'Preço Liga mais barato', 'Preço', 'Link Liga', 'À venda'],
-        kits: ['Nome', 'Descrição', 'Preço', 'Quantidade', 'Conteúdo', 'Conteúdo JSON', 'Valor avulso', 'Desconto', 'Imagem', 'À venda'],
-        albums: ['ID', 'Nome', 'Descrição', 'Formato', 'Páginas JSON', 'Progresso', 'Quantidade', 'Imagem', 'À venda'],
-      };
 
       let state = null;
       let activeTab = 'cards';
@@ -307,6 +301,14 @@ const publishedCollections = getEditableCollections();
       const escapeHtml = (value) => clean(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
       const uid = (prefix) => `${prefix}-${Date.now().toString(36)}-${(idSeed += 1).toString(36)}`;
       const normalizeText = (value) => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const stableIdPart = (value) => clean(value).replace(/[^A-Za-z0-9]+/g, '-').replace(/(^-|-$)/g, '').toUpperCase() || 'SEM';
+      const stableLanguage = (value) => { const key = normalizeText(value); if (key.includes('portugu') || key === 'br' || key === 'pt br') return 'BR'; if (key.includes('ingles') || key === 'ing' || key === 'en') return 'ING'; return stableIdPart(value).slice(0, 5); };
+      const stableCardId = (item = {}) => {
+        let edition = clean(item.collection); let number = clean(item.number);
+        try { const url = new URL(item.linkLiga || ''); edition = url.searchParams.get('ed') || edition; number = number || url.searchParams.get('num') || ''; } catch (_) {}
+        return `${stableIdPart(edition || 'COLECAO')}-${stableIdPart(number || 'SEM-NUMERO')}-${stableLanguage(item.language || 'BR')}-${stableIdPart(item.condition || 'NM')}`;
+      };
+      const stableBoosterId = (item = {}) => { let edition = ''; try { edition = new URL(item.linkLiga || '').searchParams.get('ed') || ''; } catch (_) {} return `BOOSTER-${stableIdPart(edition || item.name || 'BOOSTER')}`; };
       const getNameFromLink = (link, fallback) => {
         try {
           const url = new URL(link);
@@ -329,31 +331,52 @@ const publishedCollections = getEditableCollections();
       const itemPrice = (item) => item?.price ?? item?.leaguePrice ?? null;
       const itemName = (item, kind) => item?.name || item?.collection || getNameFromLink(item?.linkLiga || '', kind === 'cards' ? 'Carta da Liga' : 'Booster da Liga');
 
-      const normalizeCard = (item = {}, isNew = false) => ({
-        _id: item._id || uid('card'), _isNew: item._isNew ?? isNew,
-        name: item.name || getNameFromLink(item.linkLiga || '', 'Carta da Liga'), number: item.number || '', collection: item.collection || '', year: item.year || '', type: item.type || '',
-        language: item.language || 'Português (PT-BR)', condition: item.condition || 'NM', quantity: toQuantity(item.quantity),
-        minimumPrice: toPrice(item.minimumPrice), quickSalePrice: toPrice(item.quickSalePrice), leaguePrice: toPrice(item.leaguePrice), price: toPrice(item.price),
-        linkLiga: item.linkLiga || '', linkMyp: item.linkMyp || '', linkCardmarket: item.linkCardmarket || '', linkTcgplayer: item.linkTcgplayer || '', linkPriceCharting: item.linkPriceCharting || '',
-        forSale: item.forSale !== false, imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : [],
-      });
-      const normalizeBooster = (item = {}, isNew = false) => ({
-        _id: item._id || uid('booster'), _isNew: item._isNew ?? isNew,
-        name: item.name || getNameFromLink(item.linkLiga || '', 'Booster da Liga'), quantity: toQuantity(item.quantity),
-        minimumPrice: toPrice(item.minimumPrice), quickSalePrice: toPrice(item.quickSalePrice), leaguePrice: toPrice(item.leaguePrice), price: toPrice(item.price),
-        linkLiga: item.linkLiga || '', forSale: item.forSale !== false, imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : [],
-      });
-      const legacyKitContents = (contents, cards, boosters) => clean(contents).split('|').map((part) => clean(part)).filter(Boolean).map((name) => {
-        const card = cards.find((item) => normalizeText(item.name) === normalizeText(name));
-        const booster = boosters.find((item) => normalizeText(item.name) === normalizeText(name));
-        const source = card || booster;
-        return { kind: card ? 'cards' : 'boosters', name, quantity: 1, unitPrice: itemPrice(source), imageCandidates: source?.imageCandidates || [] };
+      const normalizeCard = (item = {}, isNew = false) => {
+        const normalized = {
+          ...item,
+          name: item.name || getNameFromLink(item.linkLiga || '', 'Carta da Liga'), number: item.number || '', collection: item.collection || '', year: item.year || '', type: item.type || '',
+          language: item.language || 'Português (PT-BR)', condition: item.condition || 'NM', quantity: toQuantity(item.quantity),
+          minimumPrice: toPrice(item.minimumPrice), quickSalePrice: toPrice(item.quickSalePrice), leaguePrice: toPrice(item.leaguePrice), price: toPrice(item.price),
+          linkLiga: item.linkLiga || '', linkMyp: item.linkMyp || '', linkCardmarket: item.linkCardmarket || '', linkTcgplayer: item.linkTcgplayer || '', linkPriceCharting: item.linkPriceCharting || '',
+          forSale: item.forSale !== false, image: item.image || '', imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : [],
+        };
+        normalized._id = item._id || item.id || item.Id || stableCardId(normalized);
+        normalized._isNew = item._isNew ?? isNew;
+        return normalized;
+      };
+      const normalizeBooster = (item = {}, isNew = false) => {
+        const normalized = {
+          ...item,
+          name: item.name || getNameFromLink(item.linkLiga || '', 'Booster da Liga'), quantity: toQuantity(item.quantity),
+          minimumPrice: toPrice(item.minimumPrice), quickSalePrice: toPrice(item.quickSalePrice), leaguePrice: toPrice(item.leaguePrice), price: toPrice(item.price),
+          linkLiga: item.linkLiga || '', forSale: item.forSale !== false, image: item.image || '', imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : [],
+        };
+        normalized._id = item._id || item.id || item.Id || stableBoosterId(normalized);
+        normalized._isNew = item._isNew ?? isNew;
+        return normalized;
+      };
+      const legacyKitContents = (contents, cards, boosters) => clean(contents).split('|').map((part) => clean(part)).filter(Boolean).map((rawName) => {
+        const quantityMatch = rawName.match(/^(\d+)\s*[x×]\s*(.+)$/i);
+        const quantity = quantityMatch ? toQuantity(quantityMatch[1]) : 1;
+        const name = quantityMatch ? clean(quantityMatch[2]) : rawName;
+        const cardMatches = cards.filter((item) => normalizeText(item.name) === normalizeText(name));
+        const boosterMatches = boosters.filter((item) => normalizeText(item.name) === normalizeText(name));
+        const source = cardMatches.length === 1 ? cardMatches[0] : boosterMatches.length === 1 ? boosterMatches[0] : null;
+        return { kind: cardMatches.length ? 'cards' : 'boosters', itemId: source?._id || '', name, quantity, unitPrice: itemPrice(source), imageCandidates: source?.imageCandidates || [] };
       });
       const normalizeKit = (item = {}, cards = [], boosters = []) => {
-        const contentItems = Array.isArray(item.contentItems) && item.contentItems.length ? item.contentItems.map((entry) => ({ kind: entry.kind === 'boosters' ? 'boosters' : 'cards', name: entry.name || 'Item', quantity: toQuantity(entry.quantity), unitPrice: toPrice(entry.unitPrice), imageCandidates: Array.isArray(entry.imageCandidates) ? entry.imageCandidates : [] })) : legacyKitContents(item.contents, cards, boosters);
+        const contentItems = Array.isArray(item.contentItems) && item.contentItems.length ? item.contentItems.map((entry) => {
+          const kind = entry.kind === 'boosters' ? 'boosters' : 'cards';
+          const sources = kind === 'boosters' ? boosters : cards;
+          const byId = sources.find((source) => source._id === (entry.itemId || entry.item_id));
+          const byName = !byId ? sources.filter((source) => normalizeText(source.name) === normalizeText(entry.name || '')) : [];
+          const source = byId || (byName.length === 1 ? byName[0] : null);
+          return { kind, itemId: source?._id || entry.itemId || entry.item_id || '', name: source?.name || entry.name || 'Item', quantity: toQuantity(entry.quantity), unitPrice: toPrice(entry.unitPrice) ?? itemPrice(source), imageCandidates: source?.imageCandidates || (Array.isArray(entry.imageCandidates) ? entry.imageCandidates : []) };
+        }) : legacyKitContents(item.contents, cards, boosters);
         const sourceTotal = toPrice(item.sourceTotal) ?? contentItems.reduce((sum, entry) => sum + (entry.unitPrice || 0) * entry.quantity, 0);
-        return { _id: item._id || uid('kit'), _isNew: item._isNew ?? false, name: item.name || 'Kit sem nome', description: item.description || '', contents: item.contents || contentItems.map((entry) => `${entry.quantity}x ${entry.name}`).join(' | '), contentItems, sourceTotal, quantity: toQuantity(item.quantity), price: toPrice(item.price), forSale: item.forSale !== false, imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : [] };
+        return { ...item, _id: item._id || item.id || item.Id || uid('kit'), _isNew: item._isNew ?? false, name: item.name || 'Kit sem nome', description: item.description || '', contents: item.contents || contentItems.map((entry) => `${entry.quantity}x ${entry.name}`).join(' | '), contentItems, sourceTotal, quantity: toQuantity(item.quantity), price: toPrice(item.price), forSale: item.forSale !== false, image: item.image || '', imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : [] };
       };
+
       const parseAlbumFormat = (value = '3x3') => {
         const match = clean(value).match(/([2-6])\s*(?:x|por)\s*([2-6])/i);
         const columns = match ? Number(match[1]) : 3;
@@ -362,6 +385,8 @@ const publishedCollections = getEditableCollections();
       };
       const sameCardReference = (slot, card) => {
         if (!slot || !card) return false;
+        const slotId = slot.itemId || slot.cardId || slot.Id || '';
+        if (slotId && slotId === card._id) return true;
         if (slot.linkLiga && card.linkLiga && normalizeText(slot.linkLiga.replace(/([?&])show=\d+/i, '$1')) === normalizeText(card.linkLiga.replace(/([?&])show=\d+/i, '$1'))) return true;
         return normalizeText(slot.name) === normalizeText(card.name) && (!slot.number || !card.number || normalizeText(slot.number) === normalizeText(card.number));
       };
@@ -369,7 +394,7 @@ const publishedCollections = getEditableCollections();
         if (!slot || typeof slot !== 'object') return null;
         const card = cards.find((candidate) => sameCardReference(slot, candidate));
         return {
-          cardId: card?._id || slot.cardId || '',
+          itemId: card?._id || slot.itemId || slot.cardId || '',
           linkLiga: card?.linkLiga || slot.linkLiga || '',
           language: card?.language || slot.language || '',
           condition: card?.condition || slot.condition || '',
@@ -388,8 +413,8 @@ const publishedCollections = getEditableCollections();
         });
         const firstSlot = pages.flatMap((page) => page.slots).find(Boolean);
         return {
-          _id: item._id || uid('album'),
-          albumId: item.albumId || item.id || item._id || uid('album-id'),
+          _id: item._id || item.id || item.Id || uid('album'),
+          albumId: item.albumId || item.id || item.Id || item._id || uid('album-id'),
           _isNew: item._isNew ?? false,
           _isDirty: item._isDirty ?? false,
           name: item.name || 'Álbum sem nome',
@@ -454,6 +479,7 @@ const publishedCollections = getEditableCollections();
         renderDiscountTiers();
         root.querySelector('[data-version-number]').textContent = String(state.profile.version);
         if (updateButton) updateButton.hidden = source === 'new';
+        const fullDownloadLabel = root.querySelector('[data-download-zip] span'); if (fullDownloadLabel) fullDownloadLabel.textContent = source === 'new' ? 'Baixar coleção não formatada' : 'Baixar ZIP completo JSON';
         activeTab = 'cards'; inventoryQuery = ''; if (inventorySearch) inventorySearch.value = '';
         render();
         workspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -550,7 +576,7 @@ const publishedCollections = getEditableCollections();
 
       const currentAlbum = () => state?.albums?.[activeAlbumIndex] || null;
       const albumSlotFromCard = (card) => ({
-        cardId: card._id,
+        itemId: card._id,
         linkLiga: card.linkLiga || '',
         language: card.language || '',
         condition: card.condition || '',
@@ -724,7 +750,7 @@ const publishedCollections = getEditableCollections();
       root.querySelector('[data-kit-form]')?.addEventListener('submit', (event) => {
         event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
         if (!state.kitDraft.length) { root.querySelector('[data-kit-drop-zone]')?.classList.add('needs-items'); setTimeout(() => root.querySelector('[data-kit-drop-zone]')?.classList.remove('needs-items'), 900); return; }
-        const data = new FormData(form); const contentItems = state.kitDraft.map((entry) => ({ kind: entry.kind, name: entry.name, quantity: entry.quantity, unitPrice: entry.unitPrice, imageCandidates: entry.imageCandidates })); const sourceTotal = kitGross();
+        const data = new FormData(form); const contentItems = state.kitDraft.map((entry) => ({ kind: entry.kind, itemId: entry.itemId, name: entry.name, quantity: entry.quantity, unitPrice: entry.unitPrice, imageCandidates: entry.imageCandidates })); const sourceTotal = kitGross();
         state.kits.push(normalizeKit({ name: clean(data.get('name')), description: clean(data.get('description')), quantity: data.get('quantity'), price: data.get('price'), forSale: data.get('forSale') === 'on', contentItems, sourceTotal, contents: contentItems.map((entry) => `${entry.quantity}x ${entry.name}`).join(' | '), _isNew: true }, state.cards, state.boosters));
         state.kitDraft = []; form.reset(); form.querySelector('[name="quantity"]').value = 1; form.querySelector('[name="forSale"]').checked = true; activeTab = 'kits'; closeModals(); render(); inventorySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
@@ -829,6 +855,7 @@ const publishedCollections = getEditableCollections();
         const [kind, rawIndex, field] = (target.dataset.itemEdit || '').split(':');
         if (!kind || !field || !state?.[kind]?.[Number(rawIndex)]) return;
         state[kind][Number(rawIndex)][field] = field === 'quantity' ? toQuantity(target.value) : toPrice(target.value);
+        if (kind === 'kits' && !state[kind][Number(rawIndex)]._isNew) state[kind][Number(rawIndex)]._isDirty = true;
         updateOverview();
         if (kind === 'kits' || field === 'price' || field === 'leaguePrice') renderKitBuilder();
       });
@@ -837,6 +864,7 @@ const publishedCollections = getEditableCollections();
         const [saleKind, saleIndex] = (target.dataset.saleEdit || '').split(':');
         if (saleKind && state?.[saleKind]?.[Number(saleIndex)]) {
           state[saleKind][Number(saleIndex)].forSale = target.checked;
+          if (saleKind === 'kits' && !state[saleKind][Number(saleIndex)]._isNew) state[saleKind][Number(saleIndex)]._isDirty = true;
           renderInventory();
           return;
         }
@@ -885,19 +913,50 @@ const publishedCollections = getEditableCollections();
         closeModals(); state = null; workspace.hidden = true; root.classList.remove('is-editing'); modeButtons.forEach((button) => { button.hidden = false; }); root.querySelector('[data-editor-notice]').hidden = false; root.querySelector('[data-new-profile-form]').reset(); setMode('new');
       });
 
-      const kitRow = (item) => {
+      const cardJson = (item, minimal = false) => {
+        const baseItem = {
+          'Id': item._id || stableCardId(item),
+          'Link Liga': item.linkLiga || '',
+          'Quantidade': toQuantity(item.quantity),
+          'Estado': item.condition || 'NM',
+          'Idioma': item.language || 'Português (PT-BR)',
+          'À venda': item.forSale !== false,
+        };
+        if (minimal) return baseItem;
+        return {
+          ...baseItem,
+          'Nome': item.name || '', 'Número': item.number || '', 'Coleção': item.collection || '', 'Ano': item.year || '', 'Tipo': item.type || '',
+          'Link MYP': item.linkMyp || '', 'Link Cardmarket': item.linkCardmarket || '', 'Link Tcgplayer': item.linkTcgplayer || '', 'Link PriceCharting': item.linkPriceCharting || '',
+          'Minimo': item.minimumPrice ?? null, 'Venda Rapida': item.quickSalePrice ?? null, 'Menor Liga': item.leaguePrice ?? null, 'Preço': item.price ?? null,
+          'Imagem': item.image || '',
+        };
+      };
+      const boosterJson = (item, minimal = false) => {
+        const baseItem = { 'Id': item._id || stableBoosterId(item), 'Link Liga': item.linkLiga || '', 'Quantidade': toQuantity(item.quantity), 'À venda': item.forSale !== false };
+        if (minimal) return baseItem;
+        return {
+          ...baseItem, 'Tipo de pacote': item.name || '', 'Preço mínimo': item.minimumPrice ?? null, 'Venda rápida': item.quickSalePrice ?? null,
+          'Preço Liga mais barato': item.leaguePrice ?? null, 'Preço': item.price ?? null, 'Imagem': item.image || '',
+        };
+      };
+      const kitJson = (item, operation = '') => {
         const gross = toPrice(item.sourceTotal) || 0;
         const discount = gross > 0 && item.price !== null ? Math.max(0, gross - item.price) : 0;
-        return { 'Nome': item.name, 'Descrição': item.description || '', 'Preço': item.price ?? '', 'Quantidade': item.quantity, 'Conteúdo': item.contents || '', 'Conteúdo JSON': JSON.stringify(item.contentItems || []), 'Valor avulso': gross || '', 'Desconto': discount || '', 'Imagem': '', 'À venda': item.forSale ? 'Sim' : 'Não' };
+        const result = {
+          'Id': item._id || item.id || uid('kit-export'), 'Nome': item.name, 'Descrição': item.description || '', 'Preço': item.price ?? null, 'Quantidade': toQuantity(item.quantity),
+          'Conteúdo': (item.contentItems || []).map((entry) => ({ kind: entry.kind === 'boosters' ? 'boosters' : 'cards', itemId: entry.itemId || '', name: entry.name || 'Item', quantity: toQuantity(entry.quantity), unitPrice: toPrice(entry.unitPrice) })),
+          'Valor avulso': gross || null, 'Desconto': discount || 0, 'Imagem': item.image || '', 'À venda': item.forSale !== false,
+        };
+        if (operation) result.operation = operation;
+        return result;
       };
-      const albumPagesForExport = (item) => (item.pages || []).map((page) => ({ slots: (page.slots || []).map((slot) => slot ? { linkLiga: slot.linkLiga || '', language: slot.language || '', condition: slot.condition || '', name: slot.name || '', number: slot.number || '', collection: slot.collection || '', imageCandidates: slot.imageCandidates || [] } : null) }));
-      const albumRow = (item) => {
+      const albumPagesForExport = (item) => (item.pages || []).map((page) => ({ slots: (page.slots || []).map((slot) => slot ? { itemId: slot.itemId || '', linkLiga: slot.linkLiga || '', language: slot.language || '', condition: slot.condition || '', name: slot.name || '', number: slot.number || '', collection: slot.collection || '' } : null) }));
+      const albumJson = (item) => {
         const occupied = albumOccupied(item);
         const capacity = albumCapacity(item);
-        return { 'ID': item.albumId || item._id, 'Nome': item.name, 'Descrição': item.description || '', 'Formato': item.format || '3x3', 'Páginas JSON': JSON.stringify(albumPagesForExport(item)), 'Progresso': `${occupied} / ${capacity}`, 'Quantidade': 1, 'Imagem': '', 'À venda': 'Não' };
+        return { 'Id': item.albumId || item._id, 'Nome': item.name, 'Descrição': item.description || '', 'Formato': item.format || '3x3', 'Páginas': albumPagesForExport(item), 'Progresso': `${occupied} / ${capacity}`, 'Quantidade': 1, 'Imagem': item.image || '', 'À venda': false };
       };
 
-      const csv = (headers, rows) => [headers, ...rows.map((row) => headers.map((header) => `"${String(row[header] ?? '').replaceAll('"', '""')}"`))].map((row) => row.join(',')).join('\r\n');
       const crc32 = (bytes) => { let crc = -1; for (const byte of bytes) { crc ^= byte; for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1)); } return (crc ^ -1) >>> 0; };
       const u16 = (value) => Uint8Array.of(value & 255, (value >>> 8) & 255);
       const u32 = (value) => Uint8Array.of(value & 255, (value >>> 8) & 255, (value >>> 16) & 255, (value >>> 24) & 255);
@@ -908,20 +967,46 @@ const publishedCollections = getEditableCollections();
       const unzipStore = (buffer) => { const data = new Uint8Array(buffer); let end = -1; for (let index = data.length - 22; index >= Math.max(0, data.length - 65557); index -= 1) { if (read32(data, index) === 0x06054b50) { end = index; break; } } if (end < 0) throw new Error('ZIP inválido.'); const count = read16(data, end + 10); let offset = read32(data, end + 16); const decoder = new TextDecoder(); const files = {}; for (let index = 0; index < count; index += 1) { if (read32(data, offset) !== 0x02014b50) throw new Error('Diretório do ZIP inválido.'); const method = read16(data, offset + 10); const size = read32(data, offset + 24); const nameLength = read16(data, offset + 28); const extraLength = read16(data, offset + 30); const commentLength = read16(data, offset + 32); const localOffset = read32(data, offset + 42); const name = decoder.decode(data.slice(offset + 46, offset + 46 + nameLength)); if (method !== 0) throw new Error('Este ZIP usa compressão não suportada. Importe um ZIP gerado por esta página.'); const localNameLength = read16(data, localOffset + 26); const localExtraLength = read16(data, localOffset + 28); const start = localOffset + 30 + localNameLength + localExtraLength; files[name.split('/').pop()] = decoder.decode(data.slice(start, start + size)); offset += 46 + nameLength + extraLength + commentLength; } return files; };
       const parseCsv = (source) => { const rows = []; let row = []; let field = ''; let quoted = false; for (let index = 0; index < source.length; index += 1) { const char = source[index]; if (char === '"') { if (quoted && source[index + 1] === '"') { field += '"'; index += 1; } else quoted = !quoted; } else if (char === ',' && !quoted) { row.push(field); field = ''; } else if ((char === '\n' || char === '\r') && !quoted) { if (char === '\r' && source[index + 1] === '\n') index += 1; row.push(field); if (row.some((value) => clean(value))) rows.push(row); row = []; field = ''; } else field += char; } if (field || row.length) { row.push(field); rows.push(row); } const [headers = [], ...values] = rows; return values.map((record) => Object.fromEntries(headers.map((header, index) => [clean(header), clean(record[index])]))); };
       const parseJsonArray = (value) => { try { const parsed = JSON.parse(value || '[]'); return Array.isArray(parsed) ? parsed : []; } catch (_) { return []; } };
+      const inventoryRowsFromZip = (files, jsonName, csvName) => {
+        if (files[jsonName]) return parseJsonArray(files[jsonName]);
+        return parseCsv(files[csvName] || '');
+      };
+      const importedImage = (value) => { const image = clean(value); return image ? (image.includes('/') ? image : `imagens/${image}`) : ''; };
+      const importCardRow = (row) => ({
+        id: row['Id'] || row['ID'] || '', name: row['Nome'], number: row['Número'] || row['Numeração'], collection: row['Coleção'], language: row['Idioma'], condition: row['Estado'], year: row['Ano'], type: row['Tipo'], quantity: row['Quantidade'],
+        minimumPrice: row['Minimo'] ?? row['Preço mínimo'], quickSalePrice: row['Venda Rapida'] ?? row['Venda rápida'], leaguePrice: row['Menor Liga'] ?? row['Preço Liga mais barato'], price: row['Preço'],
+        forSale: typeof row['À venda'] === 'boolean' ? row['À venda'] : row['À venda'] !== 'Não', linkLiga: row['Link Liga'], linkMyp: row['Link MYP'], linkCardmarket: row['Link Cardmarket'], linkTcgplayer: row['Link Tcgplayer'] || row['Link TCGPlayer'], linkPriceCharting: row['Link PriceCharting'],
+        image: importedImage(row['Imagem']), imageCandidates: importedImage(row['Imagem']) ? [importedImage(row['Imagem'])] : [],
+      });
+      const importBoosterRow = (row) => ({
+        id: row['Id'] || row['ID'] || '', name: row['Tipo de pacote'] || row['Coleção'] || row['Nome'], quantity: row['Quantidade'], minimumPrice: row['Preço mínimo'] ?? row['Minimo'], quickSalePrice: row['Venda rápida'] ?? row['Venda Rapida'], leaguePrice: row['Preço Liga mais barato'] ?? row['Menor Liga'], price: row['Preço'],
+        forSale: typeof row['À venda'] === 'boolean' ? row['À venda'] : row['À venda'] !== 'Não', linkLiga: row['Link Liga'], image: importedImage(row['Imagem']), imageCandidates: importedImage(row['Imagem']) ? [importedImage(row['Imagem'])] : [],
+      });
+      const importKitRow = (row) => {
+        let contentItems = Array.isArray(row['Conteúdo']) ? row['Conteúdo'] : [];
+        if (!contentItems.length && row['Conteúdo JSON']) contentItems = parseJsonArray(row['Conteúdo JSON']);
+        const contents = typeof row['Conteúdo'] === 'string' ? row['Conteúdo'] : contentItems.map((entry) => `${toQuantity(entry.quantity)}x ${entry.name || entry.nome || 'Item'}`).join(' | ');
+        return { id: row['Id'] || row['ID'] || '', name: row['Nome'], description: row['Descrição'], contents, contentItems, quantity: row['Quantidade'], price: row['Preço'], sourceTotal: row['Valor avulso'] ?? row['Preço bruto'], forSale: typeof row['À venda'] === 'boolean' ? row['À venda'] : row['À venda'] !== 'Não', image: importedImage(row['Imagem']), imageCandidates: importedImage(row['Imagem']) ? [importedImage(row['Imagem'])] : [] };
+      };
+      const importAlbumRow = (row) => ({
+        albumId: row['Id'] || row['ID'] || '', id: row['Id'] || row['ID'] || '', name: row['Nome'], description: row['Descrição'], format: row['Formato'] || '3x3',
+        pages: Array.isArray(row['Páginas']) ? row['Páginas'] : parseJsonArray(row['Páginas JSON'] || row['Paginas JSON']), imageCandidates: importedImage(row['Imagem']) ? [importedImage(row['Imagem'])] : [],
+      });
       const importZip = async (file) => {
         const feedback = root.querySelector('[data-import-feedback]');
         try {
           const files = unzipStore(await file.arrayBuffer());
           const profile = JSON.parse(files['perfil.json'] || '{}');
           if (!profile.owner || !profile.title || !profile.email || !profile.password) throw new Error('O ZIP não contém um perfil válido.');
-          const cards = parseCsv(files['inventario-cartas.csv'] || '').map((row) => ({ name: row['Nome'], number: row['Número'] || row['Numeração'], collection: row['Coleção'], language: row['Idioma'], condition: row['Estado'], year: row['Ano'], type: row['Tipo'], quantity: row['Quantidade'], minimumPrice: row['Minimo'] || row['Preço mínimo'], quickSalePrice: row['Venda Rapida'] || row['Venda rápida'], leaguePrice: row['Menor Liga'] || row['Preço Liga mais barato'], price: row['Preço'], forSale: row['À venda'] !== 'Não', linkLiga: row['Link Liga'], linkMyp: row['Link MYP'], linkCardmarket: row['Link Cardmarket'], linkTcgplayer: row['Link Tcgplayer'] || row['Link TCGPlayer'], linkPriceCharting: row['Link PriceCharting'] }));
-          const boosters = parseCsv(files['inventario-boosters.csv'] || '').map((row) => ({ name: row['Tipo de pacote'] || row['Coleção'], quantity: row['Quantidade'], minimumPrice: row['Preço mínimo'] || row['Minimo'], quickSalePrice: row['Venda rápida'] || row['Venda Rapida'], leaguePrice: row['Preço Liga mais barato'] || row['Menor Liga'], price: row['Preço'], forSale: row['À venda'] !== 'Não', linkLiga: row['Link Liga'] }));
-          const kits = parseCsv(files['inventario-kits.csv'] || '').map((row) => ({ name: row['Nome'], description: row['Descrição'], contents: row['Conteúdo'], contentItems: parseJsonArray(row['Conteúdo JSON']), quantity: row['Quantidade'], price: row['Preço'], sourceTotal: row['Valor avulso'], forSale: row['À venda'] !== 'Não' }));
-          const albums = parseCsv(files['inventario-albuns.csv'] || '').map((row) => ({ albumId: row['ID'], name: row['Nome'], description: row['Descrição'], format: row['Formato'] || '3x3', pages: parseJsonArray(row['Páginas JSON'] || row['Paginas JSON']), imageCandidates: row['Imagem'] ? [row['Imagem']] : [] }));
+          const cards = inventoryRowsFromZip(files, 'inventario-cartas.json', 'inventario-cartas.csv').map(importCardRow);
+          const boosters = inventoryRowsFromZip(files, 'inventario-boosters.json', 'inventario-boosters.csv').map(importBoosterRow);
+          const kits = inventoryRowsFromZip(files, 'inventario-kits.json', 'inventario-kits.csv').map(importKitRow);
+          const albums = inventoryRowsFromZip(files, 'inventario-albuns.json', 'inventario-albuns.csv').map(importAlbumRow);
           feedback.textContent = '';
           activate({ ...profile, version: Number(profile.version || 0) + 1 }, { cards, boosters, kits, albums }, 'import');
         } catch (error) { feedback.textContent = error.message || 'Não foi possível abrir este ZIP.'; }
       };
+
       root.querySelector('[data-zip-input]')?.addEventListener('change', (event) => { const file = event.target.files?.[0]; if (file) importZip(file); });
       const drop = root.querySelector('[data-zip-drop]');
       ['dragenter', 'dragover'].forEach((type) => drop?.addEventListener(type, (event) => { event.preventDefault(); drop.classList.add('dragging'); }));
@@ -932,33 +1017,42 @@ const publishedCollections = getEditableCollections();
       root.querySelector('[data-download-zip]')?.addEventListener('click', () => {
         if (!state) return;
         state.profile.version = Number(state.profile.version || 1);
-        const cards = state.cards.map((item) => ({ 'Nome': item.name || '', 'Número': item.number || '', 'Coleção': item.collection || '', 'Idioma': item.language, 'Estado': item.condition, 'Ano': item.year || '', 'Tipo': item.type || '', 'Link Liga': item.linkLiga, 'Link MYP': item.linkMyp, 'Link Cardmarket': item.linkCardmarket, 'Link Tcgplayer': item.linkTcgplayer, 'Link PriceCharting': item.linkPriceCharting, 'Minimo': item.minimumPrice ?? '', 'Venda Rapida': item.quickSalePrice ?? '', 'Menor Liga': item.leaguePrice ?? '', 'Preço': item.price ?? '', 'Quantidade': item.quantity, 'À venda': item.forSale ? 'Sim' : 'Não' }));
-        const boosters = state.boosters.map((item) => ({ 'Tipo de pacote': item.name || '', 'Quantidade': item.quantity, 'Preço mínimo': item.minimumPrice ?? '', 'Venda rápida': item.quickSalePrice ?? '', 'Preço Liga mais barato': item.leaguePrice ?? '', 'Preço': item.price ?? '', 'Link Liga': item.linkLiga, 'À venda': item.forSale ? 'Sim' : 'Não' }));
-        const kits = state.kits.map(kitRow);
-        const albums = state.albums.map(albumRow);
-        const profile = { ...state.profile, generatedAt: new Date().toISOString() };
-        const zip = zipStore([['perfil.json', JSON.stringify(profile, null, 2)], ['inventario-cartas.csv', csv(csvHeaders.cards, cards)], ['inventario-boosters.csv', csv(csvHeaders.boosters, boosters)], ['inventario-kits.csv', csv(csvHeaders.kits, kits)], ['inventario-albuns.csv', csv(csvHeaders.albums, albums)]]);
-        downloadZip(zip, `${safeSlug(state.profile.title)}-v${state.profile.version}.zip`);
+        const cards = state.cards.map((item) => cardJson(item));
+        const boosters = state.boosters.map((item) => boosterJson(item));
+        const kits = state.kits.map((item) => kitJson(item));
+        const albums = state.albums.map((item) => albumJson(item));
+        const profile = { ...state.profile, generatedAt: new Date().toISOString(), collectionId: state.profile.collectionId || safeSlug(state.profile.title) };
+        const zip = zipStore([
+          ['perfil.json', JSON.stringify(profile, null, 2)],
+          ['inventario-cartas.json', JSON.stringify(cards, null, 2)],
+          ['inventario-boosters.json', JSON.stringify(boosters, null, 2)],
+          ['inventario-kits.json', JSON.stringify(kits, null, 2)],
+          ['inventario-albuns.json', JSON.stringify(albums, null, 2)],
+        ]);
+        const suffix = state.source === 'new' ? `nao-formatada-v${state.profile.version}` : `v${state.profile.version}`;
+        downloadZip(zip, `${safeSlug(profile.collectionId)}-${suffix}.zip`);
       });
       updateButton?.addEventListener('click', () => {
         if (!state) return;
-        const cards = state.cards.filter((item) => item._isNew).map((item) => ({ 'Link Liga': item.linkLiga, 'Quantidade': item.quantity, 'Estado': item.condition, 'Idioma': item.language }));
-        const boosters = state.boosters.filter((item) => item._isNew).map((item) => ({ 'Link Liga': item.linkLiga, 'Quantidade': item.quantity }));
-        const kits = state.kits.filter((item) => item._isNew).map(kitRow);
-        const albums = state.albums.filter((item) => item._isNew || item._isDirty).map(albumRow);
+        const cards = state.cards.filter((item) => item._isNew).map((item) => cardJson(item, true));
+        const boosters = state.boosters.filter((item) => item._isNew).map((item) => boosterJson(item, true));
+        const kits = state.kits.filter((item) => item._isNew || item._isDirty).map((item) => kitJson(item, 'upsert'));
+        const albums = state.albums.filter((item) => item._isNew || item._isDirty).map(albumJson);
         const generatedAt = new Date().toISOString();
-        const metadata = { type: 'collection-update', collectionId: state.profile.collectionId || safeSlug(state.profile.title), baseVersion: Math.max(1, Number(state.profile.version || 1) - 1), version: Number(state.profile.version || 1), generatedAt, updateId: `${state.profile.collectionId || safeSlug(state.profile.title)}-${Number(state.profile.version || 1)}-${Date.now()}`, includesProfile: true };
-        const profile = { ...state.profile, generatedAt };
+        const collectionId = state.profile.collectionId || safeSlug(state.profile.title);
+        const metadata = { type: 'collection-update', format: 'json-v2', collectionId, baseVersion: Math.max(1, Number(state.profile.version || 1) - 1), version: Number(state.profile.version || 1), generatedAt, updateId: `${collectionId}-${Number(state.profile.version || 1)}-${Date.now()}`, includesProfile: true };
+        const profile = { ...state.profile, collectionId, generatedAt };
         const zip = zipStore([
           ['atualizacao.json', JSON.stringify(metadata, null, 2)],
           ['perfil.json', JSON.stringify(profile, null, 2)],
-          ['inventario-cartas.csv', csv(['Link Liga', 'Quantidade', 'Estado', 'Idioma'], cards)],
-          ['inventario-boosters.csv', csv(['Link Liga', 'Quantidade'], boosters)],
-          ['inventario-kits.csv', csv(csvHeaders.kits, kits)],
-          ['inventario-albuns.csv', csv(csvHeaders.albums, albums)],
+          ['inventario-cartas.json', JSON.stringify(cards, null, 2)],
+          ['inventario-boosters.json', JSON.stringify(boosters, null, 2)],
+          ['inventario-kits.json', JSON.stringify(kits, null, 2)],
+          ['inventario-albuns.json', JSON.stringify(albums, null, 2)],
         ]);
-        downloadZip(zip, `${safeSlug(metadata.collectionId)}-update-v${metadata.version}.zip`);
+        downloadZip(zip, `${safeSlug(collectionId)}-update-v${metadata.version}.zip`);
       });
+
     })();
   </script>
 </BaseLayout>

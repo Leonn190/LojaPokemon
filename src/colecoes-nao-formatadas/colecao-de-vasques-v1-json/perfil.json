@@ -1,0 +1,19 @@
+{
+  "owner": "Rafael Vasques",
+  "title": "Coleção de Vasques",
+  "description": "",
+  "email": "--@gmail.com",
+  "phone": "13997110421",
+  "password": "VasquesGay",
+  "selling": true,
+  "showQuantity": true,
+  "featured": false,
+  "version": 1,
+  "proposalTerms": {
+    "policy": "flexible",
+    "flexibleDiscounts": true,
+    "discountTiers": []
+  },
+  "collectionId": "colecao-de-vasques",
+  "generatedAt": "2026-08-07T19:12:58.499Z"
+}

@@ -1,78 +1,61 @@
 # Nexus TCG — Gerenciamento
 
-## Formato atual
+## Formato oficial
 
-Os inventários ativos são JSONs contendo listas de objetos:
+Os inventários ativos são listas de objetos JSON:
 
 - `inventario-cartas.json`
 - `inventario-boosters.json`
 - `inventario-kits.json`
 - `inventario-albuns.json`
 
-CSVs antigos são aceitos para migração. Depois que a coleção é migrada, eles são movidos para `legado-csv/` e deixam de ser usados como inventário ativo.
+CSV existe apenas como **compatibilidade de migração**. Pacotes novos gerados pelo site usam JSON.
 
-### Exemplo resumido de carta
+O histórico completo não fica mais dentro de cada item. Cada coleção formatada usa:
+
+```text
+historico/
+├── cartas.jsonl
+└── boosters.jsonl
+```
+
+Cada linha é uma cotização independente com `itemId`, `cotacaoId`, data, preços, status, erro e `sucesso`. O inventário mantém apenas `Última cotação` quando houve sucesso. Assim, uma falha não faz o item parecer atualizado e o inventário não cresce indefinidamente.
+
+## IDs e referências
+
+Cartas e boosters possuem `Id` estável. Kits e álbuns referenciam os produtos por `itemId`:
 
 ```json
 {
-  "Id": "PRE-014-131-BR-NM",
-  "Nome": "Flareon ex",
-  "Número": "014/131",
-  "Coleção": "PRE",
-  "Idioma": "Português (PT-BR)",
-  "Estado": "NM",
-  "Ano": "2026",
-  "Tipo": "Ultra Rara",
-  "Minimo": 80.0,
-  "Venda Rapida": 104.5,
-  "Menor Liga": 110.0,
-  "Preço Médio Liga": 122.5,
-  "Preço": 122.5,
-  "Preço coletado": {
-    "Menor Liga": 110.0,
-    "Preço Médio Liga": 122.5,
-    "Minimo": 80.0,
-    "Idioma encontrado": ["Português"],
-    "Estado encontrado": ["NM"],
-    "é estimativa": false
-  },
-  "Preço estimado": {
-    "Menor Liga": 110.0,
-    "Preço Médio Liga": 122.5,
-    "Minimo": 80.0,
-    "Idioma encontrado": ["Português"],
-    "Estado encontrado": ["NM"],
-    "é estimativa": false
-  },
-  "Status": {
-    "nível": "OK",
-    "motivos": []
-  },
-  "Histórico de preços": [
-    {
-      "cotacaoId": "cot-20260807-123456-abcdef",
-      "data": "2026-08-07T12:34:56-03:00",
-      "Preço": 122.5,
-      "Preço Médio Liga": 122.5,
-      "Menor Liga": 110.0,
-      "Minimo": 80.0
-    }
-  ],
-  "Quantidade": 1,
-  "À venda": true
+  "kind": "cards",
+  "itemId": "XYP-XY124-BR-NM",
+  "name": "Pikachu EX",
+  "quantity": 1,
+  "unitPrice": 1900.0
 }
 ```
 
+O nome continua existindo apenas para exibição e compatibilidade com dados antigos. Na migração, nome/link só são usados como fallback quando o pacote ainda não possui `itemId`.
+
+## Imagens
+
+Quando a Liga fornece uma imagem, `baixar_imagem()` devolve o nome do arquivo e esse valor passa a ser salvo em `Imagem` no JSON. Isso vale para cartas e boosters. Se a imagem já existir em `public/imagens/`, ela é reutilizada.
+
 ## Status de suspeita
 
-Para cartas, a cotização marca automaticamente:
+O status agora guarda, além da mensagem, a **evidência** usada para chegar à conclusão: loja, preço, idioma, estado, oferta, link e valores comparados quando disponíveis.
 
-- **Suspeita:** existe exemplar em estado melhor e mais barato, no mesmo idioma.
-- **Suspeita:** existe exemplar equivalente em outro idioma por preço menor. Essa regra não é aplicada quando a carta desejada é em inglês.
-- **Suspeita:** alguma buylist compra acima do preço pelo qual existe uma oferta de venda.
-- **Suspeita leve:** só existe uma oferta compatível na cotização.
+Para cartas:
 
-Pode haver mais de um motivo ao mesmo tempo.
+- estado melhor e mais barato no mesmo idioma;
+- outro idioma mais barato, exceto quando a carta desejada já é em inglês;
+- buylist acima de venda equivalente;
+- suspeita leve quando existe realmente apenas uma oferta utilizável;
+- aviso próprio quando ofertas foram detectadas mas parte delas falhou no OCR.
+
+A comparação buylist × venda é feita em camadas. Primeiro procura mesmo idioma + mesmo estado. Depois aceita mesmo idioma + outro estado somente após converter o preço pelos fatores configurados. Não compara idiomas diferentes como se fossem o mesmo produto.
+
+A coleta registra separadamente quantas ofertas foram `detectadas`, quantas foram `lidas` e quantas tiveram `falhas`. Por isso, 5 ofertas detectadas com 4 falhas de OCR não viram falsamente “só existe uma loja”.
 
 ## Estado e preço estimado
 
@@ -85,19 +68,22 @@ Os fatores padrão ficam em `config.json`:
 - HP = 0.50
 - D = 0.30
 
-A conversão entre quaisquer estados é feita pela razão entre os fatores. Assim, não existe mais um desconto fixo de 20% por degrau.
+A conversão entre estados usa a razão entre os fatores. O valor coletado e o valor estimado continuam separados.
 
-Exemplos:
+## Formatação parcial e retry
 
-- R$100 NM -> SP = R$90.
-- R$90 SP -> NM = R$100.
-- R$100 NM -> MP = R$75.
+Durante uma formatação existe `formatacao-em-andamento.json`.
 
-Sempre ficam separados o valor efetivamente coletado e o valor estimado para a condição desejada.
+- sucesso → item é salvo e marcado como concluído;
+- falha → vai para `errosPendentes` e **não** é marcado como processado;
+- ao terminar a primeira passagem, somente os itens que falharam são repetidos automaticamente;
+- se ainda houver falhas, o progresso permanece e a próxima execução retoma só os pendentes.
 
-## Cotização parcial e retomada
+Uma versão parcial antiga que tenha gravado `erro_cotizacao` como item concluído é corrigida ao retomar.
 
-Durante a cotização é criado `cotizacao-em-andamento.json`. Cada item concluído é salvo imediatamente. Se o processo for interrompido, a próxima execução oferece continuar exatamente dos itens restantes.
+## Cotização parcial e retry
+
+Durante a cotização existe `cotizacao-em-andamento.json`. O comportamento é o mesmo: falhas não entram em `processados`, são registradas no histórico com `sucesso: false` e são repetidas. Somente uma cotização bem-sucedida atualiza `Última cotação`.
 
 É possível cotizar:
 
@@ -108,27 +94,35 @@ Durante a cotização é criado `cotizacao-em-andamento.json`. Cada item conclu�
 5. apenas itens sem preço;
 6. apenas itens não cotizados há X dias.
 
+O relatório final só é gerado quando não existem mais consultas pendentes.
+
 ## Atualização de coleção
 
-Atualização funciona de forma diferente da cotização: **não salva parcialmente**. Todas as novas cartas/boosters são consultadas em memória primeiro. Se uma delas falhar, o inventário oficial não é alterado. Quando tudo termina, os JSONs novos são promovidos por uma transação com staging/backup.
+Updates JSON podem conter:
+
+- `atualizacao.json`;
+- `perfil.json`;
+- `inventario-cartas.json`;
+- `inventario-boosters.json`;
+- `inventario-kits.json`;
+- `inventario-albuns.json`.
+
+Novas cartas/boosters são consultadas antes de alterar o inventário. Se alguma consulta falhar, a atualização do inventário é cancelada. Quando tudo termina, perfil, cartas, boosters, kits e álbuns são promovidos na mesma transação. `updateId` impede aplicação duplicada.
+
+Kits enviados com `operation: "upsert"` substituem a versão do mesmo `Id`; álbuns de update também representam o estado completo do álbum.
 
 ## Relatórios
 
-Cada cotização concluída salva dois arquivos em `relatorios/`:
+Cada cotização concluída salva em `relatorios/`:
 
-- `cotizacao-<data>.json` — estruturado, indicado para o site ou análises futuras;
-- `cotizacao-<data>.txt` — leitura humana.
+- `cotizacao-<data>.json`;
+- `cotizacao-<data>.txt`.
 
-O relatório inclui totais antigos/novos, variação percentual, buylist total, total pela média da Liga, total pelo menor preço da Liga, erros, itens sem ofertas, suspeitas e a variação individual de cada item em:
-
-- preço médio da Liga;
-- menor preço da Liga;
-- maior buylist (`Minimo`);
-- preço configurado da coleção.
+Os relatórios continuam contendo totais, variações, buylist, média Liga, menor Liga, itens sem oferta e status por item.
 
 ## Configuração
 
-`config.json` controla espera, tentativas, OCR, venda rápida, salvamento parcial e fatores por estado. O `main.py` continua instalando automaticamente dependências ausentes. O `requirements.txt` também está disponível para instalação manual:
+`config.json` controla espera, tentativas, OCR, venda rápida, salvamento parcial e fatores por estado. O `main.py` instala dependências ausentes automaticamente; também é possível usar:
 
 ```bash
 pip install -r requirements.txt

@@ -1,23 +1,26 @@
-# Estrutura das coleções e imagens
+# Estrutura das coleções, JSON e imagens
 
-Cada colecionador possui uma pasta própria em `src/colecoes/`:
+Cada colecionador possui uma pasta em `src/colecoes/`:
 
 ```text
 src/
 └── colecoes/
     └── Leon19/
         ├── perfil.json
-        ├── inventario-cartas.csv
-        ├── inventario-boosters.csv
-        ├── inventario-kits.csv
-        └── inventario-albuns.csv
+        ├── inventario-cartas.json
+        ├── inventario-boosters.json
+        ├── inventario-kits.json
+        ├── inventario-albuns.json
+        └── historico/
+            ├── cartas.jsonl
+            └── boosters.jsonl
 ```
 
-Para adicionar outro colecionador, duplique a pasta `Leon19`, altere o nome da nova pasta e edite os arquivos da coleção. O site encontra todas as pastas automaticamente durante o build e reúne os itens nas páginas gerais.
+O site lê JSON como formato oficial. CSV continua aceito apenas por leitores de compatibilidade para importar/migrar versões antigas.
 
-## Imagens atuais
+## Imagens
 
-As imagens existentes podem continuar nas pastas globais:
+As imagens podem continuar nas pastas globais:
 
 ```text
 public/
@@ -26,57 +29,63 @@ public/
 └── imagenskits/
 ```
 
-O catálogo mantém a associação automática por nome e numeração, aceita `.jpg`, `.jpeg`, `.png`, `.webp` e `.avif` e respeita o `base` configurado para o GitHub Pages.
+O campo `Imagem` dos JSONs tem prioridade. O Gerenciamento salva cartas e boosters baixados da Liga em `public/imagens/` e registra o nome do arquivo no próprio item. Se `Imagem` estiver vazio, o catálogo ainda usa as heurísticas antigas por nome/numeração como fallback.
 
-## Imagens por colecionador
+Também continuam suportadas imagens por coleção em `public/colecoes/<slug>/...`.
 
-Também é possível separar imagens de futuros usuários:
+## Kits
 
-```text
-public/
-└── colecoes/
-    └── nome-da-pasta-normalizado/
-        ├── imagens/
-        ├── imagensboosters/
-        └── imagenskits/
+`inventario-kits.json` é uma lista. `Conteúdo` é uma lista de referências reais:
+
+```json
+[
+  {
+    "Id": "KIT-...",
+    "Nome": "Kit Pikachu",
+    "Conteúdo": [
+      {
+        "kind": "cards",
+        "itemId": "XYP-XY124-BR-NM",
+        "name": "Pikachu EX",
+        "quantity": 1,
+        "unitPrice": 1900.0
+      }
+    ]
+  }
+]
 ```
 
-O sistema procura primeiro as imagens específicas da coleção e depois usa as pastas globais como alternativa.
+O preço do kit é recalculado pelo `itemId`. Nome é apenas informação visual/fallback legado.
 
-## Formato de kits
+## Álbuns
 
-O arquivo `inventario-kits.csv` usa as colunas:
+`inventario-albuns.json` guarda `Páginas` como array real, sem JSON serializado dentro de uma célula. Cada slot ocupado também carrega `itemId` da carta.
 
-```text
-Nome,Descrição,Preço,Quantidade,Conteúdo,Conteúdo JSON,Valor avulso,Desconto,Imagem,À venda
-```
+## Coleções não formatadas
 
-A coluna `Conteúdo JSON` guarda os itens e quantidades usados pelo construtor drag and drop. `Valor avulso` representa o preço bruto somado e `Desconto` registra a diferença para o preço final. A coluna `Imagem` continua opcional; quando estiver vazia, o site exibe as imagens dos itens ou uma arte de fallback.
-
-## Formato inicial de álbuns
-
-O editor também exporta `inventario-albuns.csv` com as colunas:
+O botão de download de uma coleção nova no editor gera um ZIP JSON pronto para `src/colecoes-nao-formatadas/`:
 
 ```text
-Nome,Descrição,Progresso,Quantidade,Imagem,À venda
+perfil.json
+inventario-cartas.json
+inventario-boosters.json
+inventario-kits.json
+inventario-albuns.json
 ```
 
-A área de álbuns é inicial e não altera o catálogo público nesta versão.
+## Updates
 
-## Formatador e updates
-
-O script principal agora é `Gerenciamento/main.py`. Ele lê coleções completas e pacotes de atualização colocados em `src/colecoes-nao-formatadas/`.
-
-Durante uma execução, o script abre apenas um Chrome. Cada carta ou booster é consultado em uma nova aba; ao terminar, essa aba é fechada e uma aba-base permanece aberta. O perfil usado pelo Chrome é temporário e é apagado automaticamente ao encerrar, portanto nenhuma pasta `perfil_chrome_liga` é criada dentro do projeto.
-
-O editor pode gerar um ZIP completo ou um ZIP contendo somente as adições. O ZIP de update usa esta estrutura:
+O botão **Baixar só o update** gera:
 
 ```text
 atualizacao.json
-inventario-cartas.csv      # Link Liga,Quantidade,Estado,Idioma
-inventario-boosters.csv    # Link Liga,Quantidade
+perfil.json
+inventario-cartas.json
+inventario-boosters.json
+inventario-kits.json
+inventario-albuns.json
 ```
 
-`atualizacao.json` informa o `collectionId` da coleção de destino. O formatador consulta as novas linhas, acrescenta ou soma suas quantidades na coleção correspondente e registra o identificador do update para impedir que o mesmo pacote seja aplicado duas vezes.
+Cartas e boosters novos podem vir em formato mínimo (link, quantidade, estado/idioma e `Id`); o Gerenciamento consulta a Liga antes de aplicar. Kits e álbuns usam `itemId`. Perfil, termos, kits e álbuns também são aplicados pelo atualizador.
 
-As coleções formatadas seguem os mesmos cabeçalhos da pasta `src/colecoes/Leon19/`. Antes de baixar uma imagem, o formatador procura um arquivo equivalente em `public/imagens/`; quando ele já existe, nenhum arquivo novo é criado.
+O ZIP completo e o ZIP de update produzidos pela página não geram mais inventários CSV.
