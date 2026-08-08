@@ -17,10 +17,14 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from configuracao import (
     ESTADOS_ORDEM,
+    FATORES_ESTADO,
+    ESPERA_PAGINA,
     INTERVALO_TENTATIVA,
     MAX_TENTATIVAS_PAGINA,
     PASTA_IMAGENS,
-    PERCENTUAL_POR_NIVEL,
+    TENTATIVAS,
+    USAR_OCR,
+    VENDA_RAPIDA,
 )
 from typing import Any
 from urllib.parse import urljoin, urlparse
@@ -535,6 +539,11 @@ def decodificar_preco(
     if encontrado_texto:
         return Decimal(encontrado_texto.group(1).replace(".", "").replace(",", "."))
 
+    if not USAR_OCR:
+        raise ErroLeituraPreco(
+            f"Oferta {oferta_id} usa preço visual e usarOCR está desativado no config.json."
+        )
+
     container = buscar_elemento_opcional(
         oferta,
         ".price-with-image, .price_with_image, [data-price-image]",
@@ -836,15 +845,20 @@ def _idioma_curto(idioma: str) -> str:
     return normalizar_idioma(idioma)
 
 
-def _ajustar_estado(preco: Decimal, encontrado: str, desejado: str) -> tuple[Decimal, int]:
-    if encontrado not in ESTADOS_ORDEM or desejado not in ESTADOS_ORDEM:
-        return preco, 0
-    diferenca = ESTADOS_ORDEM.index(encontrado) - ESTADOS_ORDEM.index(desejado)
-    fator = Decimal("1") + Decimal(PERCENTUAL_POR_NIVEL * diferenca) / Decimal("100")
-    if fator < 0:
-        fator = Decimal("0")
-    return (preco * fator).quantize(Decimal("0.01")), diferenca
+def _ajustar_estado(preco: Decimal, encontrado: str, desejado: str) -> tuple[Decimal, Decimal]:
+    """Converte o preço entre estados usando fatores configuráveis por condição.
 
+    Ex.: NM=1.00 e SP=0.90. Um NM de R$100 estimado como SP vira R$90;
+    um SP de R$90 estimado como NM vira R$100.
+    """
+    if encontrado not in FATORES_ESTADO or desejado not in FATORES_ESTADO:
+        return preco, Decimal("1")
+    fator_encontrado = Decimal(str(FATORES_ESTADO[encontrado]))
+    fator_desejado = Decimal(str(FATORES_ESTADO[desejado]))
+    if fator_encontrado <= 0:
+        return preco, Decimal("1")
+    fator = fator_desejado / fator_encontrado
+    return (preco * fator).quantize(Decimal("0.01")), fator
 
 def selecionar_ofertas_aproximadas(
     ofertas: list[dict[str, Any]],
@@ -905,11 +919,12 @@ def selecionar_ofertas_aproximadas(
                     return min(valores) if valores else Decimal("Infinity")
                 estado_escolhido = min(proximos, key=custo_estado)
                 candidatas = [o for o in candidatas if str(o.get("estado") or "").upper() == estado_escolhido]
-                diferenca = ESTADOS_ORDEM.index(estado_escolhido) - indice_desejado
-                sinal = "+" if diferenca > 0 else "-"
+                _, fator = _ajustar_estado(Decimal("100"), estado_escolhido, estado_normalizado)
+                percentual = (fator - Decimal("1")) * Decimal("100")
+                sinal = "+" if percentual >= 0 else ""
                 notas.append(
-                    f"estado aproximado: {estado_normalizado} → {estado_escolhido}; "
-                    f"ajuste {sinal}{abs(diferenca) * PERCENTUAL_POR_NIVEL}%"
+                    f"estado desejado {estado_normalizado}; estado encontrado {estado_escolhido}; "
+                    f"estimativa {sinal}{percentual.quantize(Decimal('0.01'))}%"
                 )
             elif permitir_sem_filtros:
                 sem_estado = [o for o in candidatas if not str(o.get("estado") or "").strip()]
@@ -925,9 +940,17 @@ def selecionar_ofertas_aproximadas(
     for oferta in candidatas:
         nova = dict(oferta)
         estado_encontrado = str(oferta.get("estado") or estado_escolhido or estado_normalizado).upper()
+        nova["preco_original"] = oferta["preco"]
+        nova["idioma_original"] = str(oferta.get("idioma") or "")
+        nova["estado_original"] = str(oferta.get("estado") or estado_encontrado or "")
+        nova["foi_estimado"] = False
         if estado_normalizado and estado_encontrado in ESTADOS_ORDEM:
-            nova["preco_original"] = oferta["preco"]
-            nova["preco"], _ = _ajustar_estado(oferta["preco"], estado_encontrado, estado_normalizado)
+            nova["preco"], fator = _ajustar_estado(oferta["preco"], estado_encontrado, estado_normalizado)
+            nova["fator_estimativa"] = fator
+            nova["foi_estimado"] = fator != Decimal("1")
+        if idioma_normalizado and nova["idioma_original"]:
+            nova["idioma_aproximado"] = chave_texto(normalizar_idioma(nova["idioma_original"])) != chave_texto(idioma_normalizado)
+            nova["foi_estimado"] = nova["foi_estimado"] or nova["idioma_aproximado"]
         ajustadas.append(nova)
     return ajustadas, notas
 
@@ -940,27 +963,45 @@ def resumir_precos(
 ) -> dict[str, Any]:
     vendas, notas_venda = selecionar_ofertas_aproximadas(marketplace, idioma, estado)
     compras, notas_compra = selecionar_ofertas_aproximadas(
-        buylist,
-        idioma,
-        estado,
-        permitir_sem_filtros=True,
+        buylist, idioma, estado, permitir_sem_filtros=True,
     )
+
+    def _media(ofertas: list[dict[str, Any]], campo: str) -> Decimal | None:
+        valores = [o[campo] for o in ofertas if o.get(campo) is not None]
+        if not valores:
+            return None
+        return (sum(valores, Decimal("0")) / Decimal(len(valores))).quantize(Decimal("0.01"))
+
     menor = min((o["preco"] for o in vendas), default=None)
-    medio = None
-    if vendas:
-        medio = (sum((o["preco"] for o in vendas), Decimal("0")) / Decimal(len(vendas))).quantize(Decimal("0.01"))
+    medio = _media(vendas, "preco")
     minimo = max((o["preco"] for o in compras), default=None)
-    venda_rapida = (menor * Decimal("0.95")).quantize(Decimal("0.01")) if menor is not None else None
+    venda_rapida = (menor * Decimal(str(VENDA_RAPIDA))).quantize(Decimal("0.01")) if menor is not None else None
+
+    menor_coletado = min((o.get("preco_original", o["preco"]) for o in vendas), default=None)
+    medio_coletado = _media(vendas, "preco_original")
+    minimo_coletado = max((o.get("preco_original", o["preco"]) for o in compras), default=None)
+
     notas = [*notas_venda]
     notas.extend(f"buylist: {nota}" for nota in notas_compra)
+    idiomas_encontrados = sorted({str(o.get("idioma_original") or o.get("idioma") or "") for o in vendas if str(o.get("idioma_original") or o.get("idioma") or "")})
+    estados_encontrados = sorted({str(o.get("estado_original") or o.get("estado") or "") for o in vendas if str(o.get("estado_original") or o.get("estado") or "")})
+    houve_estimativa = any(bool(o.get("foi_estimado")) for o in [*vendas, *compras])
     return {
         "menor": menor,
         "medio": medio,
         "minimo": minimo,
         "venda_rapida": venda_rapida,
+        "menor_coletado": menor_coletado,
+        "medio_coletado": medio_coletado,
+        "minimo_coletado": minimo_coletado,
         "alteracao": "; ".join(dict.fromkeys(notas)),
         "quantidade_ofertas": len(vendas),
         "quantidade_buylist": len(compras),
+        "idiomas_encontrados": idiomas_encontrados,
+        "estados_encontrados": estados_encontrados,
+        "houve_estimativa": houve_estimativa,
+        "ofertas_selecionadas": vendas,
+        "buylist_selecionada": compras,
     }
 
 
@@ -1019,17 +1060,28 @@ class SessaoLiga:
             navegador.switch_to.window(self.aba_base)
 
     def _coletar_pagina(self, url: str, origem: str, coletar_dados: bool) -> tuple[dict[str, str], list[dict[str, Any]]]:
-        navegador = self._exigir_navegador()
-        aba = self._abrir_aba(url)
-        try:
-            print(f"  Abrindo {origem}...")
-            esperar_pagina(navegador)
-            mostrar_todas_as_ofertas(navegador)
-            dados = obter_dados_carta(navegador) if coletar_dados else {}
-            ofertas = obter_todas_as_ofertas(navegador, origem)
-            return dados, ofertas
-        finally:
-            self._fechar_aba(aba)
+        ultimo_erro: Exception | None = None
+        for tentativa in range(1, TENTATIVAS + 1):
+            navegador = self._exigir_navegador()
+            aba = self._abrir_aba(url)
+            try:
+                print(f"  Abrindo {origem} (tentativa {tentativa}/{TENTATIVAS})...")
+                esperar_pagina(navegador)
+                if ESPERA_PAGINA > 0:
+                    time.sleep(ESPERA_PAGINA)
+                mostrar_todas_as_ofertas(navegador)
+                dados = obter_dados_carta(navegador) if coletar_dados else {}
+                ofertas = obter_todas_as_ofertas(navegador, origem)
+                return dados, ofertas
+            except Exception as erro:
+                ultimo_erro = erro
+                if tentativa < TENTATIVAS:
+                    print(f"  Falha temporária: {erro}. Tentando novamente...")
+            finally:
+                self._fechar_aba(aba)
+        if ultimo_erro is not None:
+            raise ultimo_erro
+        raise RuntimeError("Falha desconhecida ao coletar página da Liga.")
 
     def consultar_carta(self, url: str, idioma: str, estado: str) -> dict[str, Any]:
         idioma_normalizado = normalizar_idioma(idioma)
@@ -1064,12 +1116,19 @@ class SessaoLiga:
         medio = None
         if valores_venda:
             medio = (sum(valores_venda, Decimal("0")) / Decimal(len(valores_venda))).quantize(Decimal("0.01"))
+        minimo = max(valores_compra, default=None)
         resultado = {
             **dados,
             "menor": menor,
             "medio": medio,
-            "minimo": max(valores_compra, default=None),
-            "venda_rapida": (menor * Decimal("0.95")).quantize(Decimal("0.01")) if menor is not None else None,
+            "minimo": minimo,
+            "venda_rapida": (menor * Decimal(str(VENDA_RAPIDA))).quantize(Decimal("0.01")) if menor is not None else None,
+            "menor_coletado": menor,
+            "medio_coletado": medio,
+            "minimo_coletado": minimo,
+            "idiomas_encontrados": sorted({str(o.get("idioma") or "") for o in marketplace if str(o.get("idioma") or "")}),
+            "estados_encontrados": sorted({str(o.get("estado") or "") for o in marketplace if str(o.get("estado") or "")}),
+            "houve_estimativa": False,
             "alteracao": "",
             "quantidade_ofertas": len(valores_venda),
             "quantidade_buylist": len(valores_compra),

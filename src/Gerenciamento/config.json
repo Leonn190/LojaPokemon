@@ -1,0 +1,17 @@
+{
+  "esperaPagina": 5,
+  "intervaloTentativa": 1.5,
+  "tentativas": 3,
+  "maxTentativasPagina": 120,
+  "vendaRapida": 0.95,
+  "usarOCR": true,
+  "salvarParcialACadaItem": true,
+  "fatoresEstado": {
+    "M": 1.0,
+    "NM": 1.0,
+    "SP": 0.9,
+    "MP": 0.75,
+    "HP": 0.5,
+    "D": 0.3
+  }
+}
