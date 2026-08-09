@@ -1,5 +1,6 @@
 ---
 import { siteConfig } from '../config';
+import { getProducts } from '../lib/catalog';
 import '../styles/global.css';
 
 interface Props {
@@ -19,6 +20,8 @@ const {
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConfig.siteName}`;
+const hasProducts = getProducts().length > 0;
+const showProductsNav = active !== 'home' || hasProducts;
 ---
 
 <!doctype html>
@@ -51,7 +54,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             <a class:list={[{ active: active === 'cards' }]} href={`${base}cartas/`}>Cartas</a>
             <a class:list={[{ active: active === 'boosters' }]} href={`${base}boosters/`}>Boosters</a>
             <a class:list={[{ active: active === 'kits' }]} href={`${base}kits/`}>Kits</a>
-            <a class:list={[{ active: active === 'products' }]} href={`${base}produtos/`}>Produtos</a>
+            {showProductsNav && <a class:list={[{ active: active === 'products' }]} href={`${base}produtos/`}>Produtos</a>}
             <a class:list={[{ active: active === 'albums' }]} href={`${base}albuns/`}>Álbuns</a>
           </div>
 
@@ -87,7 +90,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           <a href={`${base}cartas/`}>Cartas</a>
           <a href={`${base}boosters/`}>Boosters</a>
           <a href={`${base}kits/`}>Kits</a>
-          <a href={`${base}produtos/`}>Produtos</a>
+          {showProductsNav && <a href={`${base}produtos/`}>Produtos</a>}
           <a href={`${base}albuns/`}>Álbuns</a>
           <a href={`${base}cadastro/`}>Criar coleção</a>
         </div>
@@ -108,7 +111,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             <div class="modal-kit-gallery" data-modal-kit-gallery hidden></div>
           </div>
           <article class="product-modal-content">
-            <div class="detail-tags">
+            <div class="detail-tags" data-modal-tags>
               <span data-modal-type></span>
               <span class="condition-badge" data-modal-condition></span>
               <span data-modal-stock></span>
@@ -136,7 +139,6 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
               <div data-spec-year><dt>Ano</dt><dd></dd></div>
               <div data-spec-type><dt>Tipo</dt><dd></dd></div>
               <div data-spec-contents><dt>Conteúdo do kit</dt><dd></dd></div>
-              <div data-spec-liga><dt>Referência Liga</dt><dd><a href="#" target="_blank" rel="noreferrer" data-modal-liga>Ver na Liga ↗</a></dd></div>
             </dl>
             <section class="modal-kit-details" data-modal-kit-details hidden>
               <header><div><small>Composição do conjunto</small><strong>Itens deste kit</strong></div><span data-modal-kit-discount></span></header>
@@ -324,10 +326,18 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
               let index = Math.max(0, valid.findIndex((url) => new URL(url, document.baseURI).href === image.currentSrc));
               image.src = valid[index];
               const seed = [...(image.alt || '')].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+              const swapGalleryImage = (url) => {
+                image.classList.add('image-swapping');
+                window.setTimeout(() => { image.src = url; }, 120);
+              };
+              image.addEventListener('load', () => {
+                if (!image.classList.contains('image-swapping')) return;
+                window.setTimeout(() => image.classList.remove('image-swapping'), 70);
+              });
               window.setInterval(() => {
                 if (document.hidden) return;
                 index = (index + 1) % valid.length;
-                image.src = valid[index];
+                swapGalleryImage(valid[index]);
               }, 2600 + (seed % 900));
             });
           };
@@ -446,7 +456,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         const modalKitGallery = modal?.querySelector('[data-modal-kit-gallery]');
         const modalKitList = modal?.querySelector('[data-modal-kit-list]');
         const modalKitDiscount = modal?.querySelector('[data-modal-kit-discount]');
-        const modalLiga = modal?.querySelector('[data-modal-liga]');
+        const modalTags = modal?.querySelector('[data-modal-tags]');
         let activeProductCard = null;
         let modalReturnFocus = null;
 
@@ -487,12 +497,17 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             initImage(clonedImage);
           });
 
+          modal.classList.toggle('card-modal', isCard);
           modal.classList.toggle('booster-modal', isBooster);
           modal.classList.toggle('kit-modal', isKit);
           modal.classList.toggle('sealed-product-modal', isProduct);
+          if (modalTags) modalTags.hidden = isCard;
           if (modalName) modalName.textContent = card.dataset.name || '';
-          if (modalNumber) modalNumber.textContent = isCard ? (card.dataset.number || '') : isBooster ? 'Pacote lacrado' : isKit ? 'Conjunto personalizado' : 'Produto lacrado';
-          if (modalType) { modalType.hidden = isKit; modalType.textContent = card.dataset.type || ''; }
+          if (modalNumber) {
+            modalNumber.hidden = isCard;
+            modalNumber.textContent = isBooster ? 'Pacote lacrado' : isKit ? 'Conjunto personalizado' : isProduct ? 'Produto lacrado' : '';
+          }
+          if (modalType) { modalType.hidden = isCard || isKit; modalType.textContent = card.dataset.type || ''; }
           if (modalStock) {
             const showQuantity = isKit && card.dataset.showQuantity !== 'false';
             modalStock.hidden = !showQuantity;
@@ -506,7 +521,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           if (modalPurchaseActions) modalPurchaseActions.hidden = card.dataset.proposalAllowed === 'false';
 
           if (modalCondition) {
-            modalCondition.hidden = !isCard;
+            modalCondition.hidden = true;
             modalCondition.textContent = card.dataset.condition || '';
             modalCondition.className = `condition-badge condition-${normalize(card.dataset.condition).replace(/\s+/g, '-')}`;
           }
@@ -517,16 +532,12 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           if (modalOwnerLink) modalOwnerLink.href = `${base}colecoes/${card.dataset.ownerSlug || ''}/`;
 
           setSpec('[data-spec-pokemon-collection]', card.dataset.collection || '', isCard || isBooster);
-          setSpec('[data-spec-number]', card.dataset.number || '', isCard);
+          setSpec('[data-spec-number]', card.dataset.number || '', false);
           setSpec('[data-spec-language]', card.dataset.language || '', isCard);
-          setSpec('[data-spec-condition]', card.dataset.condition || '', isCard);
+          setSpec('[data-spec-condition]', card.dataset.condition || '', false);
           setSpec('[data-spec-year]', card.dataset.year || '', isCard);
-          setSpec('[data-spec-type]', card.dataset.type || '', !isKit);
+          setSpec('[data-spec-type]', card.dataset.type || '', !isCard && !isKit);
           setSpec('[data-spec-contents]', card.dataset.contents || '', false);
-          const ligaRow = modal?.querySelector('[data-spec-liga]');
-          const ligaUrl = card.dataset.linkLiga || '';
-          if (ligaRow) ligaRow.hidden = !ligaUrl;
-          if (modalLiga && ligaUrl) modalLiga.href = ligaUrl;
 
           if (modalKitDetails) {
             modalKitDetails.hidden = !isKit;
@@ -540,26 +551,51 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
               }
               if (modalKitGallery) {
                 modalKitGallery.innerHTML = '';
+                const rarityTier = (value = '') => {
+                  const rarity = normalize(value);
+                  const compact = rarity.replace(/[^a-z0-9]+/g, '');
+                  const premium = ['full art','ultra rara','ultra rare','secret','secreta','gold','dourad','rainbow','illustration rare','ilustracao rara','arte rara','special illustration','sir','alt art','galeria de treinador','trainer gallery','shiny rare','shiny ultra','hyper rare'].some((token) => rarity.includes(token)) || ['ru','sr','re'].includes(rarity);
+                  if (premium) return 'premium';
+                  const holo = ['holo','foil','reverse','radiante','radiant','vmax','v-astro','vstar','mega ex',' ex','gx',' v','rh','rl','rd'].some((token) => rarity.includes(token)) || /^(?:mega\s+)?(?:ex|gx|v(?:max|star|-astro|-union)?)(?:\b|\s|—|-)/.test(rarity) || /^(?:ex|gx|v|vmax|vstar|v-astro|megaex|rh|rl|rd|s)$/.test(compact);
+                  return holo ? 'holo' : 'basic';
+                };
                 kitItems.forEach((entry) => {
                   const figure = document.createElement('figure');
                   const candidates = Array.isArray(entry.imageCandidates) ? entry.imageCandidates.map((value) => String(value || '')).filter(Boolean) : [];
-                  const image = document.createElement('img');
-                  image.alt = entry.name || 'Item do kit';
-                  image.loading = 'lazy';
+                  const isKitCard = entry.kind !== 'boosters';
+                  const visual = document.createElement('div');
+                  visual.className = isKitCard ? `collectible-visual kit-gallery-card foil-tier-${rarityTier(entry.type || '')}` : 'collectible-visual booster-visual kit-gallery-booster';
+                  visual.dataset.tilt = '';
+                  visual.dataset.tiltStrength = isKitCard ? '7' : '4';
+                  const stage = document.createElement('div');
+                  stage.className = 'image-stage';
                   if (candidates.length) {
                     let cursor = 0;
+                    const image = document.createElement('img');
+                    image.alt = entry.name || 'Item do kit';
+                    image.loading = 'lazy';
                     image.src = imageUrl(candidates[cursor]);
                     image.addEventListener('error', () => { cursor += 1; if (candidates[cursor]) image.src = imageUrl(candidates[cursor]); else image.remove(); });
-                    figure.appendChild(image);
+                    stage.appendChild(image);
                   } else {
                     const fallback = document.createElement('span');
+                    fallback.className = 'kit-gallery-fallback';
                     fallback.textContent = String(entry.name || 'TC').slice(0, 2).toUpperCase();
-                    figure.appendChild(fallback);
+                    stage.appendChild(fallback);
                   }
+                  if (isKitCard) {
+                    const holoBand = document.createElement('span'); holoBand.className = 'holo-band';
+                    const foil = document.createElement('span'); foil.className = 'foil-spectrum';
+                    const glare = document.createElement('span'); glare.className = 'glare';
+                    stage.append(holoBand, foil, glare);
+                  }
+                  visual.appendChild(stage);
+                  figure.appendChild(visual);
                   const caption = document.createElement('figcaption');
                   caption.textContent = entry.name || 'Item';
                   figure.appendChild(caption);
                   modalKitGallery.appendChild(figure);
+                  initTilt(visual);
                 });
               }
               if (modalKitList) {

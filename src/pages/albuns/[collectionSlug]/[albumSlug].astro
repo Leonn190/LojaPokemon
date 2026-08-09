@@ -212,7 +212,7 @@ const canPropose = (card: CardItem) => card.forSale && card.proposalTerms.policy
           bookWrap.classList.remove('turn-forward', 'turn-backward');
           void bookWrap.offsetWidth;
           bookWrap.classList.add(direction > 0 ? 'turn-forward' : 'turn-backward');
-          timer = window.setTimeout(() => bookWrap.classList.remove('turn-forward', 'turn-backward'), 560);
+          timer = window.setTimeout(() => bookWrap.classList.remove('turn-forward', 'turn-backward'), 780);
         }
       };
       const step = (direction) => { start += direction * perView(); render(direction); };

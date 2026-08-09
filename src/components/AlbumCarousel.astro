@@ -4,7 +4,6 @@ import type { AlbumItem } from '../lib/catalog';
 interface Props { albums: AlbumItem[]; viewAllHref: string; }
 const { albums, viewAllHref } = Astro.props;
 const preview = albums.slice(0, 14);
-const useStaticShelf = preview.length > 0 && preview.length <= 3;
 ---
 <section class="carousel-section album-carousel-section">
   <div class="shell carousel-heading" data-reveal>
@@ -12,15 +11,11 @@ const useStaticShelf = preview.length > 0 && preview.length <= 3;
     <a class="text-link" href={viewAllHref}>Ver todos os álbuns <span>↗</span></a>
   </div>
   {preview.length ? (
-    useStaticShelf ? (
-      <div class="shell album-carousel-static" data-reveal>{preview.map((album) => <AlbumCard album={album} compact />)}</div>
-    ) : (
-      <div class="carousel-track album-carousel-track" data-random-carousel>
-        <div class="carousel-belt">
-          <div class="carousel-sequence">{preview.map((album) => <AlbumCard album={album} compact />)}</div>
-          <div class="carousel-sequence" aria-hidden="true">{preview.map((album) => <AlbumCard album={album} compact />)}</div>
-        </div>
+    <div class="carousel-track album-carousel-track" data-random-carousel>
+      <div class="carousel-belt">
+        <div class="carousel-sequence">{preview.map((album) => <AlbumCard album={album} compact />)}</div>
+        <div class="carousel-sequence" aria-hidden="true">{preview.map((album) => <AlbumCard album={album} compact />)}</div>
       </div>
-    )
+    </div>
   ) : <div class="shell standalone-empty-state"><span>▤</span><div><small>Nenhum álbum publicado</small><h2>Os álbuns aparecerão aqui.</h2><p>Quando um colecionador organizar um álbum, ele passa a fazer parte desta vitrine.</p></div></div>}
 </section>

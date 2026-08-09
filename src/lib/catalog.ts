@@ -86,6 +86,7 @@ export interface KitContentItem {
   quantity: number;
   unitPrice: number | null;
   imageCandidates?: string[];
+  type?: string;
 }
 
 export interface KitItem extends OwnedItemBase {
@@ -770,6 +771,7 @@ export const getCollections = (): CollectorCollection[] => {
             quantity: parseQuantity(entry.quantity ?? entry.quantidade) || 1,
             unitPrice: parseDecimal(entry.unitPrice ?? entry.precoUnitario) ?? source?.price ?? null,
             imageCandidates: source?.imageCandidates,
+            type: kind === 'cards' && source?.kind === 'card' ? source.type : String(entry.type ?? entry.tipoCarta ?? ''),
           };
         });
       const legacyContents = typeof row['Conteúdo'] === 'string' ? row['Conteúdo'] : '';

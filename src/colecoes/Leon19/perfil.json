@@ -16,9 +16,9 @@
     "discountTiers": []
   },
   "palette": [
-    "#d84049",
-    "#08090d",
-    "#721b22"
+    "#f2384a",
+    "#06070a",
+    "#8b0f22"
   ],
   "priceDisplayFallback": "league_average_then_lowest"
 }

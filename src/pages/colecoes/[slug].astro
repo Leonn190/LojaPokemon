@@ -13,7 +13,14 @@ const { collection } = Astro.props;
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 const initials = collection.owner.slice(0, 2).toUpperCase();
-const favoriteCards = collection.cards.filter((card) => card.favorite && card.imageCandidates.length > 0).slice(0, 10);
+const cardsWithImages = collection.cards.filter((card) => card.imageCandidates.length > 0);
+const favoriteCards = cardsWithImages.filter((card) => card.favorite).slice(0, 10);
+const favoriteSlugs = new Set(favoriteCards.map((card) => card.slug));
+const valueFillCards = cardsWithImages
+  .filter((card) => !favoriteSlugs.has(card.slug))
+  .sort((left, right) => (right.price ?? -1) - (left.price ?? -1));
+const ambientCards = [...favoriteCards, ...valueFillCards].slice(0, Math.min(10, cardsWithImages.length));
+const albumSequences = collection.albums.length > 1 ? [collection.albums, collection.albums] : [collection.albums];
 const [palettePrimary, paletteSecondary, paletteAccent] = collection.palette;
 const encodePath = (path: string) => path.split('/').map(encodeURIComponent).join('/');
 const imageUrl = (path: string) => /^(?:https?:|data:|blob:)/i.test(path) ? path : `${base}${encodePath(path.replace(/^\/+/, ''))}`;
@@ -36,7 +43,8 @@ const firstSection = collection.albums.length ? 'albuns' : collection.cards.leng
   bodyClass="collection-profile-page"
 >
   <div class="collector-theme" style={`--collector-primary:${palettePrimary};--collector-secondary:${paletteSecondary};--collector-accent:${paletteAccent};`}>
-    {favoriteCards.length > 0 && <div class="collector-favorite-backdrop" aria-hidden="true">{favoriteCards.map((card, index) => <img src={imageUrl(card.imageCandidates[0])} alt="" loading="lazy" style={`--favorite-index:${index}`} />)}</div>}
+    <div class="collector-theme-atmosphere" aria-hidden="true">{Array.from({ length: 18 }).map((_, index) => <i style={`--particle-index:${index}`}></i>)}</div>
+    {ambientCards.length > 0 && <div class="collector-favorite-backdrop" aria-hidden="true">{ambientCards.map((card, index) => <img src={imageUrl(card.imageCandidates[0])} alt="" loading="lazy" style={`--favorite-index:${index}`} />)}</div>}
   <section class="collection-profile-hero">
     <div class="shell collection-profile-grid">
       <div class="collection-profile-copy" data-reveal>
@@ -87,38 +95,44 @@ const firstSection = collection.albums.length ? 'albuns' : collection.cards.leng
           <div><span class="section-eyebrow">Álbuns de {collection.owner}</span><h2>{collection.albums.length === 1 ? 'O álbum da coleção' : 'Álbuns organizados'}</h2><p>{collection.albums.length === 1 ? 'Entre direto no fichário imersivo, navegue página por página e abra cada carta sem sair do álbum.' : 'Cada álbum pode organizar as mesmas cartas de maneiras diferentes.'}</p></div>
           <span class="album-showcase-count">{collection.albums.length} {collection.albums.length === 1 ? 'álbum' : 'álbuns'}</span>
         </div>
-        <div class:list={['public-album-grid', collection.albums.length === 1 && 'single']}>
-          {collection.albums.map((album) => {
-            const previewCards = album.pages.flatMap((page) => page.slots).filter(Boolean).slice(0, 6);
-            return (
-              <a class="public-album-card" href={`${base}albuns/${encodeURIComponent(album.ownerCollectionSlug)}/${encodeURIComponent(album.slug)}/`} aria-label={`Abrir diretamente o álbum ${album.name}`}>
-                <div class="public-album-cover">
-                  <div class="album-spine"><span>NEXUS</span></div>
-                  <div class="album-cover-grid">
-                    {previewCards.map((card) => {
-                      if (!card) return null;
-                      const urls = card.imageCandidates.map(imageUrl);
-                      const [primary = '', ...fallbacks] = urls;
-                      return (
-                        <span class="album-cover-slot">
-                          {primary ? <img src={primary} alt="" loading="lazy" decoding="async" data-image-candidates={JSON.stringify(fallbacks)} /> : <b>{card.name.slice(0, 2).toUpperCase()}</b>}
-                        </span>
-                      );
-                    })}
-                    {Array.from({ length: Math.max(0, 6 - previewCards.length) }).map(() => <span class="album-cover-slot empty"></span>)}
-                  </div>
-                  <span class="album-cover-shine" aria-hidden="true"></span>
-                </div>
-                <div class="public-album-copy">
-                  <span>{album.format.replace('x', ' por ')} · {album.pages.length} {album.pages.length === 1 ? 'página' : 'páginas'}</span>
-                  <h3>{album.name}</h3>
-                  <p>{album.description || 'Álbum virtual organizado pelo colecionador.'}</p>
-                  <div class="public-album-progress"><i style={`--album-progress:${album.totalSlots ? Math.round(album.occupiedSlots / album.totalSlots * 100) : 0}%`}></i><strong>{album.occupiedSlots} / {album.totalSlots} espaços</strong></div>
-                  <b class="public-album-open">Abrir álbum <span>↗</span></b>
-                </div>
-              </a>
-            );
-          })}
+        <div class:list={['collection-album-carousel', collection.albums.length === 1 && 'single']} data-random-carousel={collection.albums.length > 1 ? '' : undefined}>
+          <div class:list={['carousel-belt', 'collection-album-belt', collection.albums.length === 1 && 'single']}>
+            {albumSequences.map((sequence, sequenceIndex) => (
+              <div class="carousel-sequence collection-album-sequence" aria-hidden={sequenceIndex > 0 ? 'true' : undefined}>
+                {sequence.map((album) => {
+                  const previewCards = album.pages.flatMap((page) => page.slots).filter(Boolean).slice(0, 6);
+                  return (
+                    <a class="public-album-card" href={`${base}albuns/${encodeURIComponent(album.ownerCollectionSlug)}/${encodeURIComponent(album.slug)}/`} aria-label={`Abrir diretamente o álbum ${album.name}`}>
+                      <div class="public-album-cover">
+                        <div class="album-spine"><span>NEXUS</span></div>
+                        <div class="album-cover-grid">
+                          {previewCards.map((card) => {
+                            if (!card) return null;
+                            const urls = card.imageCandidates.map(imageUrl);
+                            const [primary = '', ...fallbacks] = urls;
+                            return (
+                              <span class="album-cover-slot">
+                                {primary ? <img src={primary} alt="" loading="lazy" decoding="async" data-image-candidates={JSON.stringify(fallbacks)} /> : <b>{card.name.slice(0, 2).toUpperCase()}</b>}
+                              </span>
+                            );
+                          })}
+                          {Array.from({ length: Math.max(0, 6 - previewCards.length) }).map(() => <span class="album-cover-slot empty"></span>)}
+                        </div>
+                        <span class="album-cover-shine" aria-hidden="true"></span>
+                      </div>
+                      <div class="public-album-copy">
+                        <span>{album.format.replace('x', ' por ')} · {album.pages.length} {album.pages.length === 1 ? 'página' : 'páginas'}</span>
+                        <h3>{album.name}</h3>
+                        <p>{album.description || 'Álbum virtual organizado pelo colecionador.'}</p>
+                        <div class="public-album-progress"><i style={`--album-progress:${album.totalSlots ? Math.round(album.occupiedSlots / album.totalSlots * 100) : 0}%`}></i><strong>{album.occupiedSlots} / {album.totalSlots} espaços</strong></div>
+                        <b class="public-album-open">Abrir álbum <span>↗</span></b>
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -166,21 +180,34 @@ const firstSection = collection.albums.length ? 'albuns' : collection.cards.leng
         if (!primary) return '';
         return `<img src="${escapeHtml(primary)}" alt="${escapeHtml(alt)}" loading="lazy" decoding="async" data-image-candidates="${escapeHtml(JSON.stringify(urls.slice(1)))}" />`;
       };
+      const rarityTier = (type) => {
+        const value = normalize(type);
+        const premiumTokens = ['full art', 'ultra rara', 'ultra rare', 'secret', 'gold', 'rainbow', 'illustration rare', 'ilustracao rara', 'arte rara', 'special illustration', 'sir', 'alt art', 'trainer gallery', 'shiny', 'hyper'];
+        if (premiumTokens.some((token) => value.includes(token)) || /(^|\s)(ru|sr|re)(\s|$)/i.test(String(type || ''))) return 'premium';
+        const holoTokens = ['holo', 'foil', 'reverse', 'radiante', 'radiant', 'vmax', 'v-astro', 'vstar', 'mega ex', ' ex', 'gx', 'rh', 'rl', 'rd'];
+        if (holoTokens.some((token) => value.includes(token)) || /^(?:mega\s+)?(?:ex|gx|v(?:max|star|-astro|-union)?)(?:\b|\s|—|-)/i.test(value) || /(^|\s)v(\s|$)/i.test(String(type || ''))) return 'holo';
+        return 'basic';
+      };
       const dynamicVisual = (item) => {
         const initials = item.kind === 'kit' ? 'KIT' : String(item.name || 'TCG').split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
         if (item.kind === 'kit') {
-          const contents = (Array.isArray(item.contentItems) ? item.contentItems : []).filter((entry) => Array.isArray(entry.imageCandidates) && entry.imageCandidates.length).slice(0, 3);
+          const allContents = (Array.isArray(item.contentItems) ? item.contentItems : []).filter((entry) => Array.isArray(entry.imageCandidates) && entry.imageCandidates.length);
+          const cards = allContents.filter((entry) => entry.kind === 'cards').slice(0, 2);
+          const boosters = allContents.filter((entry) => entry.kind === 'boosters').slice(0, 1);
+          const contents = [...cards, ...boosters, ...allContents.filter((entry) => !cards.includes(entry) && !boosters.includes(entry))].slice(0, 3);
           if (contents.length) {
             const units = (item.contentItems || []).reduce((total, entry) => total + Math.max(1, Number(entry.quantity) || 1), 0);
+            const discount = item.sourceTotal > 0 && item.price !== null ? Math.max(0, ((item.sourceTotal - item.price) / item.sourceTotal) * 100) : 0;
             const stack = contents.map((entry, index) => {
               const entryInitials = String(entry.name || 'TCG').split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
-              return `<span class="kit-stack-card kit-stack-card-${index + 1}"><span class="kit-stack-card-surface" data-image-stage><span class="kit-stack-fallback">${escapeHtml(entryInitials || 'TCG')}</span>${dynamicImage(entry.imageCandidates, '')}</span></span>`;
+              return `<span class="kit-stack-card kit-stack-card-${index + 1} ${entry.kind === 'boosters' ? 'booster-item' : ''}"><span class="kit-stack-card-surface" data-image-stage><span class="kit-stack-fallback">${escapeHtml(entryInitials || 'TCG')}</span>${dynamicImage(entry.imageCandidates, '')}</span></span>`;
             }).join('');
-            return `<div class="collectible-visual kit-visual kit-composite-visual" data-tilt data-tilt-strength="4"><div class="image-stage kit-image-stage"><span class="image-fallback"><b>KIT</b><small>Kit personalizado</small></span><div class="kit-stack" aria-hidden="true">${stack}</div><span class="kit-composite-badge">${units || contents.length} ${units === 1 ? 'item' : 'itens'}</span><span class="kit-composite-shine"></span></div></div>`;
+            return `<div class="collectible-visual kit-visual kit-composite-visual" data-tilt data-tilt-strength="4"><div class="image-stage kit-image-stage"><span class="image-fallback"><b>KIT</b><small>Kit personalizado</small></span><div class="kit-stack" aria-hidden="true">${stack}</div><span class="kit-composite-badge">${units || contents.length} ${units === 1 ? 'item' : 'itens'}</span>${discount > 0 ? `<span class="kit-discount-badge">-${discount.toFixed(0)}%</span>` : ''}<span class="kit-composite-shine"></span></div></div>`;
           }
         }
         const image = dynamicImage(item.imageCandidates, item.name || '');
-        return `<div class="collectible-visual ${item.kind === 'booster' ? 'booster-visual' : item.kind === 'kit' ? 'kit-visual' : item.kind === 'product' ? 'sealed-product-visual' : ''}" ${item.kind !== 'kit' ? `data-tilt data-tilt-strength="${item.kind === 'booster' ? '3' : item.kind === 'product' ? '4' : '5'}"` : 'data-tilt data-tilt-strength="4"'}><div class="image-stage"><span class="image-fallback"><b>${escapeHtml(initials)}</b><small>${item.kind === 'card' ? 'Carta Pokémon' : item.kind === 'booster' ? 'Booster Pokémon' : item.kind === 'kit' ? 'Kit personalizado' : 'Produto Pokémon'}</small></span>${image}${item.kind === 'card' ? '<span class="foil-spectrum"></span><span class="glare"></span>' : ''}</div></div>`;
+        const cardTier = item.kind === 'card' ? ` foil-tier-${rarityTier(item.type)}` : '';
+        return `<div class="collectible-visual ${item.kind === 'booster' ? 'booster-visual' : item.kind === 'kit' ? 'kit-visual' : item.kind === 'product' ? 'sealed-product-visual' : ''}${cardTier}" data-tilt data-tilt-strength="${item.kind === 'booster' ? '3' : item.kind === 'product' ? '4' : item.kind === 'kit' ? '4' : '5'}"><div class="image-stage"><span class="image-fallback"><b>${escapeHtml(initials)}</b><small>${item.kind === 'card' ? 'Carta Pokémon' : item.kind === 'booster' ? 'Booster Pokémon' : item.kind === 'kit' ? 'Kit personalizado' : 'Produto Pokémon'}</small></span>${image}${item.kind === 'card' ? '<span class="holo-band"></span><span class="foil-spectrum"></span><span class="glare"></span>' : ''}</div></div>`;
       };
       const productMarkup = (item) => {
         const itemType = item.kind === 'card' ? (item.type || 'Carta Pokémon') : item.kind === 'booster' ? 'Booster avulso' : item.kind === 'kit' ? 'Kit personalizado' : 'Produto lacrado';
@@ -189,7 +216,7 @@ const firstSection = collection.albums.length ? 'albuns' : collection.cards.leng
         const blocksDefinedPrice = policy === 'no_defined_price' || policy === 'fixed_price_multi_only';
         const canPropose = item.forSale && policy !== 'none' && !(item.kind === 'card' && item.price !== null && item.price !== undefined && blocksDefinedPrice);
         const tiers = escapeHtml(JSON.stringify(item.proposalTerms?.discountTiers || []));
-        return `<article class="product-card compact-card" data-product-card data-product-id="${escapeHtml(`${item.kind}:${item.slug}`)}" data-kind="${escapeHtml(item.kind)}" data-name="${escapeHtml(item.name)}" data-number="${escapeHtml(item.number || '')}" data-collection="${escapeHtml(item.collection || item.name || '')}" data-language="${escapeHtml(item.language || '')}" data-condition="${escapeHtml(item.condition || '')}" data-year="${escapeHtml(item.year || '')}" data-type="${escapeHtml(itemType)}" data-description="${escapeHtml(item.description || '')}" data-contents="${escapeHtml(item.contents || '')}" data-kit-items="${escapeHtml(JSON.stringify(item.kind === 'kit' ? (item.contentItems || []).map((entry) => ({ name: entry.name, quantity: entry.quantity, imageCandidates: entry.imageCandidates || [] })) : []))}" data-kit-discount="${item.kind === 'kit' && item.sourceTotal > 0 && item.price !== null ? Math.max(0, ((item.sourceTotal - item.price) / item.sourceTotal) * 100).toFixed(1) : '0'}" data-link-liga="${escapeHtml(item.linkLiga || '')}" data-owner="${escapeHtml(item.ownerName)}" data-owner-collection="${escapeHtml(item.ownerCollectionName)}" data-owner-slug="${escapeHtml(item.ownerCollectionSlug)}" data-owner-phone="${escapeHtml(item.ownerPhone || '')}" data-proposal-policy="${escapeHtml(policy)}" data-proposal-flexible="${item.proposalTerms?.flexibleDiscounts !== false ? 'true' : 'false'}" data-proposal-tiers="${tiers}" data-proposal-allowed="${canPropose ? 'true' : 'false'}" data-price-value="${item.price ?? ''}" data-price-label="${escapeHtml(formatBRL(item.price))}" data-stock="${item.quantity}" data-for-sale="${item.forSale ? 'true' : 'false'}" data-show-quantity="${item.kind === 'kit' && item.showQuantity ? 'true' : 'false'}"><button class="product-open-button" type="button" data-open-product><div class="product-card-media">${dynamicVisual(item)}${item.kind === 'kit' && item.showQuantity ? `<span class="quantity-chip">${item.quantity} ${item.quantity === 1 ? 'unidade' : 'unidades'}</span>` : ''}</div><div class="product-card-body"><div class="product-card-heading"><div><span class="product-kicker">${escapeHtml(itemType)}</span><h3>${escapeHtml(item.name)}</h3></div><span class="open-arrow">⌗</span></div><p class="product-description">${description}</p><div class="product-card-footer"><div class="price-block"><small>Preço</small><strong>${escapeHtml(formatBRL(item.price))}</strong></div>${item.kind === 'card' ? `<span class="condition-badge condition-${escapeHtml(normalize(item.condition).replace(/\s+/g, '-'))}">${escapeHtml(item.condition || '')}</span>` : ''}</div></div></button>${canPropose ? '<div class="product-purchase-actions single-action"><button class="add-proposal-button" type="button" data-add-proposal><span>◇</span>Adicionar à proposta</button></div>' : item.forSale ? '<span class="not-for-sale-label">Os termos desta coleção não permitem proposta para este item</span>' : '<span class="not-for-sale-label">Não está à venda</span>'}</article>`;
+        return `<article class="product-card compact-card" data-product-card data-product-id="${escapeHtml(`${item.kind}:${item.slug}`)}" data-kind="${escapeHtml(item.kind)}" data-name="${escapeHtml(item.name)}" data-number="${escapeHtml(item.number || '')}" data-collection="${escapeHtml(item.collection || item.name || '')}" data-language="${escapeHtml(item.language || '')}" data-condition="${escapeHtml(item.condition || '')}" data-year="${escapeHtml(item.year || '')}" data-type="${escapeHtml(itemType)}" data-description="${escapeHtml(item.description || '')}" data-contents="${escapeHtml(item.contents || '')}" data-kit-items="${escapeHtml(JSON.stringify(item.kind === 'kit' ? (item.contentItems || []).map((entry) => ({ kind: entry.kind, name: entry.name, quantity: entry.quantity, type: entry.type || '', imageCandidates: entry.imageCandidates || [] })) : []))}" data-kit-discount="${item.kind === 'kit' && item.sourceTotal > 0 && item.price !== null ? Math.max(0, ((item.sourceTotal - item.price) / item.sourceTotal) * 100).toFixed(1) : '0'}" data-link-liga="${escapeHtml(item.linkLiga || '')}" data-owner="${escapeHtml(item.ownerName)}" data-owner-collection="${escapeHtml(item.ownerCollectionName)}" data-owner-slug="${escapeHtml(item.ownerCollectionSlug)}" data-owner-phone="${escapeHtml(item.ownerPhone || '')}" data-proposal-policy="${escapeHtml(policy)}" data-proposal-flexible="${item.proposalTerms?.flexibleDiscounts !== false ? 'true' : 'false'}" data-proposal-tiers="${tiers}" data-proposal-allowed="${canPropose ? 'true' : 'false'}" data-price-value="${item.price ?? ''}" data-price-label="${escapeHtml(formatBRL(item.price))}" data-stock="${item.quantity}" data-for-sale="${item.forSale ? 'true' : 'false'}" data-show-quantity="${item.kind === 'kit' && item.showQuantity ? 'true' : 'false'}"><button class="product-open-button" type="button" data-open-product><div class="product-card-media">${dynamicVisual(item)}${item.kind === 'kit' && item.showQuantity ? `<span class="quantity-chip">${item.quantity} ${item.quantity === 1 ? 'unidade' : 'unidades'}</span>` : ''}</div><div class="product-card-body"><div class="product-card-heading"><div><span class="product-kicker">${escapeHtml(itemType)}</span><h3>${escapeHtml(item.name)}</h3></div><span class="open-arrow">⌗</span></div><p class="product-description">${description}</p><div class="product-card-footer"><div class="price-block"><small>Preço</small><strong>${escapeHtml(formatBRL(item.price))}</strong></div>${item.kind === 'card' ? `<span class="condition-badge condition-${escapeHtml(normalize(item.condition).replace(/\s+/g, '-'))}">${escapeHtml(item.condition || '')}</span>` : ''}</div></div></button>${canPropose ? '<div class="product-purchase-actions single-action"><button class="add-proposal-button" type="button" data-add-proposal><span>◇</span>Adicionar à proposta</button></div>' : item.forSale ? '<span class="not-for-sale-label">Os termos desta coleção não permitem proposta para este item</span>' : '<span class="not-for-sale-label">Não está à venda</span>'}</article>`;
       };
       const initializeDynamicCards = (container) => {
         container.querySelectorAll('img[data-image-candidates]').forEach((image) => {

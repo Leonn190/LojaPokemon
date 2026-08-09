@@ -13,7 +13,7 @@ const publishedCollections = getEditableCollections();
   active="signup"
   bodyClass="signup-page"
 >
-  <section class="signup-hero editor-hero">
+  <section class="signup-hero editor-hero" data-editor-hero>
     <div class="shell signup-hero-grid">
       <div data-reveal>
         <span class="hero-badge"><i></i> Central de coleções</span>
@@ -110,14 +110,14 @@ const publishedCollections = getEditableCollections();
       </section>
 
       <section class="collector-personalization" aria-label="Personalização da página do colecionador">
-        <header><div><span class="section-eyebrow">Identidade visual</span><h3>Personalize sua página</h3><p>Escolha uma foto e três cores. Cartas favoritadas no inventário aparecem de forma sutil no fundo da página pública.</p></div><span class="personalization-note">3 cores + favoritos</span></header>
+        <header><div><span class="section-eyebrow">Identidade visual</span><h3>Personalize sua página</h3><p>As três cores controlam gradientes, glow, partículas, botões e a iluminação da coleção. As cartas favoritadas aparecem no fundo; se houver menos de 10, o Nexus completa com as cartas mais valiosas.</p></div><span class="personalization-note">Tema vivo + favoritos</span></header>
         <div class="collector-personalization-grid">
           <div class="profile-photo-editor">
             <div class="profile-photo-preview" data-profile-photo-preview><span>TC</span></div>
             <div><strong>Foto do colecionador</strong><small>PNG, JPG ou WebP. A imagem fica salva no perfil da coleção.</small><div class="profile-photo-actions"><label><input type="file" accept="image/png,image/jpeg,image/webp" data-profile-photo-input /><span>Escolher foto</span></label><button type="button" data-remove-profile-photo>Remover</button></div></div>
           </div>
           <div class="palette-editor">
-            <div><strong>Paleta da coleção</strong><small>As três cores dão personalidade à página sem comprometer a leitura.</small></div>
+            <div class="palette-editor-copy"><strong>Paleta da coleção</strong><small>Principal define o glow e ações, Secundária domina o fundo e Destaque cria contraste. Tudo continua editável a qualquer momento.</small><div class="palette-live-preview" data-palette-preview aria-hidden="true"><i></i><span><b>NEXUS</b><small>prévia do tema</small></span><em></em></div></div>
             <div class="palette-inputs">
               <label><span>Principal</span><input type="color" value="#54e8df" data-palette-color="0" /></label>
               <label><span>Secundária</span><input type="color" value="#bc91ff" data-palette-color="1" /></label>
@@ -328,6 +328,7 @@ const publishedCollections = getEditableCollections();
       const panels = [...root.querySelectorAll('[data-start-panel]')];
       const modeButtons = [...root.querySelectorAll('[data-editor-mode]')];
       const workspace = root.querySelector('[data-editor-workspace]');
+      const editorHero = document.querySelector('[data-editor-hero]');
       const inventory = root.querySelector('[data-editor-inventory]');
       const inventorySection = root.querySelector('[data-inventory-section]');
       const inventorySearch = root.querySelector('[data-inventory-search]');
@@ -563,6 +564,12 @@ const publishedCollections = getEditableCollections();
           const index = Number(input.dataset.paletteColor);
           input.value = state.profile.palette[index] || ['#54e8df', '#bc91ff', '#f4c25c'][index];
         });
+        const palettePreview = root.querySelector('[data-palette-preview]');
+        if (palettePreview) {
+          palettePreview.style.setProperty('--preview-primary', state.profile.palette[0] || '#54e8df');
+          palettePreview.style.setProperty('--preview-secondary', state.profile.palette[1] || '#bc91ff');
+          palettePreview.style.setProperty('--preview-accent', state.profile.palette[2] || '#f4c25c');
+        }
       };
 
       const activate = (profile, items, source = 'new') => {
@@ -572,6 +579,7 @@ const publishedCollections = getEditableCollections();
         root.querySelector('[data-editor-notice]').hidden = true;
         root.classList.add('is-editing');
         workspace.hidden = false;
+        if (editorHero) editorHero.hidden = true;
         root.querySelector('[data-workspace-title]').textContent = state.profile.title;
         root.querySelector('[data-workspace-meta]').textContent = `${state.profile.owner} · versão ${state.profile.version}`;
         root.querySelector('[data-show-quantity]').checked = state.profile.showQuantity !== false;
@@ -1126,7 +1134,7 @@ const publishedCollections = getEditableCollections();
         const reader = new FileReader(); reader.addEventListener('load', () => { state.profile.profilePhoto = String(reader.result || ''); renderPersonalization(); }); reader.readAsDataURL(file);
       });
       root.querySelector('[data-remove-profile-photo]')?.addEventListener('click', () => { if (!state) return; state.profile.profilePhoto = ''; const input = root.querySelector('[data-profile-photo-input]'); if (input) input.value = ''; renderPersonalization(); });
-      root.querySelectorAll('[data-palette-color]').forEach((input) => input.addEventListener('input', () => { if (!state) return; state.profile.palette[Number(input.dataset.paletteColor)] = input.value; }));
+      root.querySelectorAll('[data-palette-color]').forEach((input) => input.addEventListener('input', () => { if (!state) return; state.profile.palette[Number(input.dataset.paletteColor)] = input.value; renderPersonalization(); }));
 
       root.querySelector('[data-show-quantity]')?.addEventListener('change', (event) => { if (state) state.profile.showQuantity = event.target.checked; });
       root.querySelector('[data-collection-selling]')?.addEventListener('change', (event) => { if (state) state.profile.selling = event.target.checked; });
@@ -1147,7 +1155,7 @@ const publishedCollections = getEditableCollections();
         renderDiscountTiers();
       });
       root.querySelector('[data-reset-editor]')?.addEventListener('click', () => {
-        closeModals(); state = null; workspace.hidden = true; root.classList.remove('is-editing'); modeButtons.forEach((button) => { button.hidden = false; }); root.querySelector('[data-editor-notice]').hidden = false; root.querySelector('[data-new-profile-form]').reset(); setMode('new');
+        closeModals(); state = null; workspace.hidden = true; if (editorHero) editorHero.hidden = false; root.classList.remove('is-editing'); modeButtons.forEach((button) => { button.hidden = false; }); root.querySelector('[data-editor-notice]').hidden = false; root.querySelector('[data-new-profile-form]').reset(); setMode('new');
       });
 
       const cardJson = (item, minimal = false, operation = '') => {

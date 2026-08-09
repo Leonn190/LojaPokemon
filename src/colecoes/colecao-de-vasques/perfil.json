@@ -20,9 +20,9 @@
   "updatedAt": "2026-08-08T16:58:24-03:00",
   "formattingComplete": true,
   "palette": [
-    "#0b2942",
-    "#030912",
-    "#24506d"
+    "#0b3a62",
+    "#02050a",
+    "#008dc3"
   ],
   "priceDisplayFallback": "league_average_then_lowest"
 }
