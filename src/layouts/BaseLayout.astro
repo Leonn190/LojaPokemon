@@ -1,6 +1,5 @@
 ---
 import { siteConfig } from '../config';
-import { getProducts } from '../lib/catalog';
 import '../styles/global.css';
 
 interface Props {
@@ -20,8 +19,6 @@ const {
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConfig.siteName}`;
-const hasProducts = getProducts().length > 0;
-const showProductsNav = active !== 'home' || hasProducts;
 ---
 
 <!doctype html>
@@ -54,7 +51,7 @@ const showProductsNav = active !== 'home' || hasProducts;
             <a class:list={[{ active: active === 'cards' }]} href={`${base}cartas/`}>Cartas</a>
             <a class:list={[{ active: active === 'boosters' }]} href={`${base}boosters/`}>Boosters</a>
             <a class:list={[{ active: active === 'kits' }]} href={`${base}kits/`}>Kits</a>
-            {showProductsNav && <a class:list={[{ active: active === 'products' }]} href={`${base}produtos/`}>Produtos</a>}
+            <a class:list={[{ active: active === 'products' }]} href={`${base}produtos/`}>Produtos</a>
             <a class:list={[{ active: active === 'albums' }]} href={`${base}albuns/`}>Álbuns</a>
           </div>
 
@@ -90,7 +87,7 @@ const showProductsNav = active !== 'home' || hasProducts;
           <a href={`${base}cartas/`}>Cartas</a>
           <a href={`${base}boosters/`}>Boosters</a>
           <a href={`${base}kits/`}>Kits</a>
-          {showProductsNav && <a href={`${base}produtos/`}>Produtos</a>}
+          <a href={`${base}produtos/`}>Produtos</a>
           <a href={`${base}albuns/`}>Álbuns</a>
           <a href={`${base}cadastro/`}>Criar coleção</a>
         </div>

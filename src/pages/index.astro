@@ -5,7 +5,6 @@ import CollectionCarousel from '../components/CollectionCarousel.astro';
 import AlbumCarousel from '../components/AlbumCarousel.astro';
 import ProductImage from '../components/ProductImage.astro';
 import { getAlbums, getBoosters, getCards, getCollections, getKits, getProducts, shuffleItems } from '../lib/catalog';
-import { siteConfig } from '../config';
 
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
@@ -22,47 +21,57 @@ const featuredProducts = shuffleItems(products).slice(0, 14);
 const featuredAlbums = shuffleItems(albums).slice(0, 14);
 const featuredCollections = [...collections].sort((a, b) => Number(b.featured) - Number(a.featured));
 const totalUnits = [...cards, ...boosters, ...kits, ...products].reduce((total, item) => total + item.quantity, 0);
-const wallSource = shuffleItems(cards.filter((card) => card.imageCandidates.length > 0)).slice(0, 34);
-const rotate = (items: typeof wallSource, amount: number) => items.length ? [...items.slice(amount % items.length), ...items.slice(0, amount % items.length)] : [];
-const wallLanes = [wallSource, rotate(wallSource, 8), rotate(wallSource, 17)];
+
+// O fundo da abertura usa o mesmo princípio visual das coleções: várias colunas
+// de cartas subindo continuamente, só que inclinado para a direita e sem hover.
+const wallSource = shuffleItems(cards.filter((card) => card.imageCandidates.length > 0)).slice(0, 35);
+const rotate = (items: typeof wallSource, amount: number) => items.length
+  ? [...items.slice(amount % items.length), ...items.slice(0, amount % items.length)]
+  : [];
+const wallLanes = Array.from({ length: 5 }, (_, laneIndex) => {
+  const lane = wallSource.filter((_, cardIndex) => cardIndex % 5 === laneIndex);
+  return rotate(lane, laneIndex + 1);
+});
 ---
 
 <BaseLayout active="home">
   <section class="home-hero nexus-home-hero" aria-labelledby="home-title">
-    <div class="nexus-card-wall" aria-hidden="true">
-      <div class="nexus-wall-aurora"></div>
-      {wallLanes.map((lane, laneIndex) => (
-        <div class={`nexus-wall-lane nexus-wall-lane-${laneIndex + 1}`}>
-          <div class="nexus-wall-belt">
-            {[0, 1].map((sequence) => (
-              <div class="nexus-wall-sequence">
-                {lane.map((card, cardIndex) => (
-                  <div class="nexus-wall-card">
-                    <ProductImage item={card} eager={laneIndex === 0 && sequence === 0 && cardIndex < 8} interactive={false} />
-                  </div>
-                ))}
-              </div>
-            ))}
+    <div class="nexus-hero-card-flow" aria-hidden="true">
+      <div class="nexus-hero-flow-plane">
+        {wallLanes.map((lane, laneIndex) => (
+          <div class={`nexus-hero-flow-lane nexus-hero-flow-lane-${laneIndex + 1}`}>
+            <div class="nexus-hero-flow-track">
+              {[0, 1].map((sequence) => (
+                <div class="nexus-hero-flow-set">
+                  {lane.map((card, cardIndex) => (
+                    <div class="nexus-hero-flow-card">
+                      <ProductImage
+                        item={card}
+                        eager={laneIndex < 2 && sequence === 0 && cardIndex < 4}
+                        interactive={false}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
-      <div class="nexus-wall-vignette"></div>
-      <div class="nexus-launch-wordmark">
-        <small>NEXUS</small>
-        <strong>TCG</strong>
-        <span>Seu acervo em movimento.</span>
+        ))}
       </div>
+      <span class="nexus-hero-flow-glow"></span>
+      <span class="nexus-hero-flow-vignette"></span>
     </div>
 
     <div class="shell hero-copy nexus-home-copy">
       <span class="hero-badge"><i></i> Coleções Pokémon em um só lugar</span>
-      <h1 id="home-title">Seu acervo.<br /><em>Sua vitrine.</em></h1>
-      <p>{siteConfig.tagline} Use o Nexus para guardar sua coleção online ou transformar itens selecionados em uma vitrine de venda.</p>
+      <h1 id="home-title"><span>Nexus</span> <em>TCG</em></h1>
+      <h2 class="nexus-home-tagline">Seu acervo. Sua vitrine.</h2>
+      <p class="nexus-home-description">Organize sua coleção Pokémon, publique seus itens e encontre outros colecionadores. Use o Nexus para guardar sua coleção online ou transformar itens selecionados em uma vitrine de venda.</p>
       <div class="hero-actions">
-        <a class="primary-cta" href={`${base}colecoes/`}><span>Explorar coleções</span><b>↗</b></a>
-        <a class="secondary-cta" href={`${base}cadastro/`}><span>Criar minha coleção</span><b>＋</b></a>
+        <a class="primary-cta" href={`${base}cadastro/`}><span>Criar minha coleção</span><b>＋</b></a>
+        <a class="secondary-cta" href={`${base}colecoes/`}><span>Explorar coleções</span><b>↗</b></a>
       </div>
-      <div class="hero-metrics">
+      <div class="hero-metrics" aria-label="Números da comunidade">
         <div><strong>{collections.length}</strong><span>{collections.length === 1 ? 'coleção publicada' : 'coleções publicadas'}</span></div>
         <div><strong>{cards.length}</strong><span>cartas cadastradas</span></div>
         <div><strong>{totalUnits}</strong><span>itens na comunidade</span></div>
@@ -86,13 +95,11 @@ const wallLanes = [wallSource, rotate(wallSource, 8), rotate(wallSource, 17)];
       <div><small>Ofertas combinadas</small><h2>Kits</h2><p>Encontre conjuntos personalizados de cartas e boosters por um preço único.</p></div>
       <span class="navigation-arrow">↗</span>
     </a>
-    {products.length > 0 && (
-      <a class="navigation-card products-navigation" href={`${base}produtos/`}>
-        <div class="navigation-icon" aria-hidden="true"><span>▣</span></div>
-        <div><small>Produtos fechados</small><h2>Produtos</h2><p>Boxes e produtos Pokémon lacrados com informações padronizadas.</p></div>
-        <span class="navigation-arrow">↗</span>
-      </a>
-    )}
+    <a class="navigation-card products-navigation" href={`${base}produtos/`}>
+      <div class="navigation-icon" aria-hidden="true"><span>▣</span></div>
+      <div><small>Produtos fechados</small><h2>Produtos</h2><p>Boxes e produtos Pokémon lacrados com informações padronizadas.</p></div>
+      <span class="navigation-arrow">↗</span>
+    </a>
     <a class="navigation-card albums-navigation" href={`${base}albuns/`}>
       <div class="navigation-icon" aria-hidden="true"><span>▤</span></div>
       <div><small>Organização visual</small><h2>Álbuns</h2><p>Explore álbuns virtuais montados pelos colecionadores da comunidade.</p></div>
