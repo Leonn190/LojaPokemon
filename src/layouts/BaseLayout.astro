@@ -5,7 +5,7 @@ import '../styles/global.css';
 interface Props {
   title?: string;
   description?: string;
-  active?: 'home' | 'cards' | 'boosters' | 'kits' | 'products' | 'albums' | 'collections' | 'signup';
+  active?: 'home' | 'explore' | 'cards' | 'boosters' | 'kits' | 'products' | 'albums' | 'collections' | 'signup';
   bodyClass?: string;
 }
 
@@ -47,12 +47,10 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         <div class="nav-actions">
           <div class="nav-links" id="primary-navigation">
             <a class:list={[{ active: active === 'home' }]} href={base}>Início</a>
-            <a class:list={[{ active: active === 'collections' }]} href={`${base}colecoes/`}>Coleções</a>
-            <a class:list={[{ active: active === 'cards' }]} href={`${base}cartas/`}>Cartas</a>
-            <a class:list={[{ active: active === 'boosters' }]} href={`${base}boosters/`}>Boosters</a>
-            <a class:list={[{ active: active === 'kits' }]} href={`${base}kits/`}>Kits</a>
-            <a class:list={[{ active: active === 'products' }]} href={`${base}produtos/`}>Produtos</a>
-            <a class:list={[{ active: active === 'albums' }]} href={`${base}albuns/`}>Álbuns</a>
+            <a
+              class:list={[{ active: ['explore', 'collections', 'cards', 'boosters', 'kits', 'products', 'albums'].includes(active) }]}
+              href={`${base}explorar/`}
+            >Explorar</a>
           </div>
 
           <a class:list={['collector-nav-cta', { active: active === 'signup' }]} href={`${base}cadastro/`}>Criar coleção</a>
@@ -102,6 +100,10 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
       <button class="product-modal-backdrop" type="button" data-modal-close aria-label="Fechar detalhes"></button>
       <section class="product-modal-panel" role="dialog" aria-modal="true" aria-labelledby="product-modal-title" tabindex="-1">
         <button class="modal-close-button" type="button" data-modal-close aria-label="Fechar detalhes">×</button>
+        <div class="modal-card-condition" data-modal-card-condition hidden aria-label="Estado de conservação da carta">
+          <small>Estado</small>
+          <strong data-modal-card-condition-value></strong>
+        </div>
         <div class="product-modal-grid">
           <div class="product-modal-media-column">
             <div class="product-modal-media" data-modal-media></div>
@@ -323,27 +325,52 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
               let index = Math.max(0, valid.findIndex((url) => new URL(url, document.baseURI).href === image.currentSrc));
               image.src = valid[index];
               const seed = [...(image.alt || '')].reduce((sum, char) => sum + char.charCodeAt(0), 0);
-              const swapGalleryImage = (url) => {
-                const preload = new Image();
-                preload.onload = () => {
-                  image.classList.add('image-swapping');
-                  image.src = url;
-                };
-                preload.onerror = () => {
-                  image.classList.add('image-swapping');
-                  image.src = url;
-                };
-                preload.src = url;
-              };
-              image.addEventListener('load', () => {
-                if (!image.classList.contains('image-swapping')) return;
-                window.setTimeout(() => image.classList.remove('image-swapping'), 70);
+              let galleryTransitioning = false;
+              const waitForImage = (target) => new Promise((resolve) => {
+                if (target.complete && target.naturalWidth > 0) {
+                  if (typeof target.decode === 'function') target.decode().catch(() => {}).finally(resolve);
+                  else resolve();
+                  return;
+                }
+                target.addEventListener('load', resolve, { once: true });
+                target.addEventListener('error', resolve, { once: true });
               });
+              const swapGalleryImage = async (url) => {
+                if (galleryTransitioning || !stage || !url) return;
+                galleryTransitioning = true;
+
+                const preload = new Image();
+                preload.src = url;
+                await waitForImage(preload);
+                if (!preload.naturalWidth) {
+                  galleryTransitioning = false;
+                  return;
+                }
+
+                const overlay = document.createElement('img');
+                overlay.className = 'gallery-transition-image';
+                overlay.alt = '';
+                overlay.setAttribute('aria-hidden', 'true');
+                overlay.src = url;
+                stage.appendChild(overlay);
+                await waitForImage(overlay);
+
+                requestAnimationFrame(() => overlay.classList.add('is-visible'));
+                window.setTimeout(async () => {
+                  image.src = url;
+                  await waitForImage(image);
+                  overlay.classList.add('is-settled');
+                  window.setTimeout(() => {
+                    overlay.remove();
+                    galleryTransitioning = false;
+                  }, 90);
+                }, reducedMotion ? 0 : 420);
+              };
               window.setInterval(() => {
-                if (document.hidden) return;
+                if (document.hidden || galleryTransitioning) return;
                 index = (index + 1) % valid.length;
                 swapGalleryImage(valid[index]);
-              }, 2600 + (seed % 900));
+              }, 2800 + (seed % 900));
             });
           };
           image.addEventListener('load', () => { showImage(); startGallery(); });
@@ -462,6 +489,8 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         const modalKitList = modal?.querySelector('[data-modal-kit-list]');
         const modalKitDiscount = modal?.querySelector('[data-modal-kit-discount]');
         const modalTags = modal?.querySelector('[data-modal-tags]');
+        const modalCardCondition = modal?.querySelector('[data-modal-card-condition]');
+        const modalCardConditionValue = modal?.querySelector('[data-modal-card-condition-value]');
         const rarityTier = (value = '') => {
           const rarity = normalize(value);
           const compact = rarity.replace(/[^a-z0-9]+/g, '');
@@ -594,13 +623,13 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           modal.classList.toggle('booster-modal', isBooster);
           modal.classList.toggle('kit-modal', isKit);
           modal.classList.toggle('sealed-product-modal', isProduct);
-          if (modalTags) modalTags.hidden = isCard || isKit;
+          if (modalTags) modalTags.hidden = isCard || isKit || isBooster;
           if (modalName) modalName.textContent = card.dataset.name || '';
           if (modalNumber) {
             modalNumber.hidden = isCard;
             modalNumber.textContent = isBooster ? 'Pacote lacrado' : isKit ? 'Conjunto personalizado' : isProduct ? 'Produto lacrado' : '';
           }
-          if (modalType) { modalType.hidden = isCard || isKit; modalType.textContent = card.dataset.type || ''; }
+          if (modalType) { modalType.hidden = isCard || isKit || isBooster; modalType.textContent = card.dataset.type || ''; }
           if (modalStock) {
             const showQuantity = !isKit && card.dataset.showQuantity === 'true';
             modalStock.hidden = !showQuantity;
@@ -617,6 +646,12 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             modalCondition.hidden = true;
             modalCondition.textContent = card.dataset.condition || '';
             modalCondition.className = `condition-badge condition-${normalize(card.dataset.condition).replace(/\s+/g, '-')}`;
+          }
+          if (modalCardCondition) {
+            const condition = String(card.dataset.condition || '').trim().toUpperCase();
+            modalCardCondition.hidden = !isCard || !condition;
+            modalCardCondition.className = `modal-card-condition condition-${normalize(condition).replace(/\s+/g, '-')}`;
+            if (modalCardConditionValue) modalCardConditionValue.textContent = condition;
           }
           const ownerName = card.dataset.owner || 'Colecionador';
           if (modalOwner) modalOwner.textContent = ownerName;

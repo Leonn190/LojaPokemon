@@ -4,6 +4,11 @@ import type { AlbumItem } from '../lib/catalog';
 interface Props { albums: AlbumItem[]; viewAllHref: string; }
 const { albums, viewAllHref } = Astro.props;
 const preview = albums.slice(0, 14);
+// Uma sequência precisa ser mais larga que o viewport para o marquee nunca
+// revelar um trecho vazio quando há poucos álbuns publicados.
+const loopAlbums = preview.length
+  ? Array.from({ length: Math.max(12, preview.length) }, (_, index) => preview[index % preview.length])
+  : [];
 ---
 <section class="shell showcase-section album-carousel-section" data-reveal>
   <div class="section-heading carousel-heading">
@@ -19,8 +24,8 @@ const preview = albums.slice(0, 14);
   {preview.length ? (
     <div class="carousel-track album-carousel-track" data-random-carousel aria-label="Álbuns passando automaticamente">
       <div class="carousel-belt">
-        <div class="carousel-sequence">{preview.map((album) => <AlbumCard album={album} compact />)}</div>
-        <div class="carousel-sequence" aria-hidden="true">{preview.map((album) => <AlbumCard album={album} compact />)}</div>
+        <div class="carousel-sequence">{loopAlbums.map((album) => <AlbumCard album={album} compact />)}</div>
+        <div class="carousel-sequence" aria-hidden="true">{loopAlbums.map((album) => <AlbumCard album={album} compact />)}</div>
       </div>
     </div>
   ) : <div class="standalone-empty-state"><span>▤</span><div><small>Nenhum álbum publicado</small><h2>Os álbuns aparecerão aqui.</h2><p>Quando um colecionador organizar um álbum, ele passa a fazer parte desta vitrine.</p></div></div>}

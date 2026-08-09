@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const rawBase = import.meta.env.BASE_URL || '/';
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+---
+
+<BaseLayout
+  title="Explorar"
+  description="Escolha como explorar cartas, boosters, kits, produtos, álbuns e coleções da comunidade Nexus TCG."
+  active="explore"
+>
+  <section class="catalog-hero explore-hub-hero">
+    <div class="shell explore-hub-heading" data-reveal>
+      <span class="hero-badge"><i></i> Nexus TCG</span>
+      <h1>Explorar</h1>
+      <p>Escolha uma área da comunidade. Cada caminho abre um catálogo próprio sem perder o acesso às coleções de origem.</p>
+    </div>
+  </section>
+
+  <section class="shell navigation-cards marketplace-navigation explore-hub-navigation" aria-label="Áreas para explorar" data-reveal>
+    <a class="navigation-card cards-navigation" href={`${base}cartas/`}>
+      <div class="navigation-icon" aria-hidden="true"><span>◆</span></div>
+      <div><small>Todos os colecionadores</small><h2>Cartas</h2><p>Explore cartas publicadas em todas as coleções e descubra quem possui cada item.</p></div>
+      <span class="navigation-arrow">↗</span>
+    </a>
+    <a class="navigation-card boosters-navigation" href={`${base}boosters/`}>
+      <div class="navigation-icon" aria-hidden="true"><span>▰</span></div>
+      <div><small>Pacotes da comunidade</small><h2>Boosters</h2><p>Veja boosters lacrados de diferentes colecionadores em um catálogo unificado.</p></div>
+      <span class="navigation-arrow">↗</span>
+    </a>
+    <a class="navigation-card kits-navigation" href={`${base}kits/`}>
+      <div class="navigation-icon" aria-hidden="true"><span>▦</span></div>
+      <div><small>Ofertas combinadas</small><h2>Kits</h2><p>Encontre conjuntos personalizados de cartas e boosters por um preço único.</p></div>
+      <span class="navigation-arrow">↗</span>
+    </a>
+    <a class="navigation-card products-navigation" href={`${base}produtos/`}>
+      <div class="navigation-icon" aria-hidden="true"><span>▣</span></div>
+      <div><small>Produtos fechados</small><h2>Produtos</h2><p>Boxes e produtos Pokémon lacrados com informações padronizadas.</p></div>
+      <span class="navigation-arrow">↗</span>
+    </a>
+    <a class="navigation-card albums-navigation" href={`${base}albuns/`}>
+      <div class="navigation-icon" aria-hidden="true"><span>▤</span></div>
+      <div><small>Organização visual</small><h2>Álbuns</h2><p>Explore álbuns virtuais montados pelos colecionadores da comunidade.</p></div>
+      <span class="navigation-arrow">↗</span>
+    </a>
+    <a class="navigation-card collections-navigation" href={`${base}colecoes/`}>
+      <div class="navigation-icon" aria-hidden="true"><span>◎</span></div>
+      <div><small>Perfis de colecionador</small><h2>Coleções</h2><p>Entre na página de cada usuário e navegue apenas pelos itens daquele acervo.</p></div>
+      <span class="navigation-arrow">↗</span>
+    </a>
+  </section>
+</BaseLayout>

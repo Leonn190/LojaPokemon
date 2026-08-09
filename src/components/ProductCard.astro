@@ -95,6 +95,9 @@ const showPublicQuantity = item.kind === 'kit' && item.showQuantity;
       <div class="product-card-footer">
         <div class="price-block">
           <small>Preço</small>
+          {item.kind === 'kit' && item.sourceTotal !== null && price !== null && item.sourceTotal > price && (
+            <del class="kit-original-price">{formatBRL(item.sourceTotal)}</del>
+          )}
           <strong>{formatBRL(price)}</strong>
         </div>
         {item.kind === 'card' && <span class={`condition-badge condition-${item.condition.toLowerCase()}`}>{item.condition}</span>}
