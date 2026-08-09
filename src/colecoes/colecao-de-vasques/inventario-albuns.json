@@ -1,1 +1,318 @@
-[]
+[
+  {
+    "Id": "vasques-album-colecao-2x2",
+    "Nome": "Coleção do Vasques",
+    "Descrição": "Álbum 2 por 2 com as cartas de Rafael Vasques, organizado por coleção e depois por nome para uma navegação mais visual.",
+    "Formato": "2x2",
+    "Páginas": [
+      {
+        "slots": [
+          {
+            "itemId": "BWPR-BW73-ING-HP",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Darkrai+%28BW73%2F99%29&ed=BWPR&num=BW73",
+            "language": "Inglês",
+            "condition": "HP",
+            "name": "Darkrai",
+            "number": "BW73",
+            "collection": "Black &amp; White Promos"
+          },
+          {
+            "itemId": "CRI-098-BR-NM",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Beedrill+ex+%28098%2F086%29&ed=CRI&num=098",
+            "language": "Português (PT-BR)",
+            "condition": "NM",
+            "name": "Beedrill ex",
+            "number": "098",
+            "collection": "Caos Ascendente"
+          },
+          {
+            "itemId": "STS-75-BR-MP",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Magearna-EX+%2875%2F114%29&ed=STS&num=75",
+            "language": "Português (PT-BR)",
+            "condition": "MP",
+            "name": "Magearna-EX",
+            "number": "75",
+            "collection": "Cerco de Vapor"
+          },
+          {
+            "itemId": "STS-67-BR-MP",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Steelix-EX+%2867%2F114%29&ed=STS&num=67",
+            "language": "Português (PT-BR)",
+            "condition": "MP",
+            "name": "Steelix-EX",
+            "number": "67",
+            "collection": "Cerco de Vapor"
+          }
+        ]
+      },
+      {
+        "slots": [
+          {
+            "itemId": "ROS-105-BR-D",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Rayquaza-EX+%28105%2F108%29&ed=ROS&num=105",
+            "language": "Português (PT-BR)",
+            "condition": "D",
+            "name": "M Rayquaza-EX",
+            "number": "105",
+            "collection": "Céus Estrondosos"
+          },
+          {
+            "itemId": "SFS-SV116-BR-NM",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Grimmsnarl-V+%28SV116%2FS122%29&ed=SFS&num=SV116",
+            "language": "Português (PT-BR)",
+            "condition": "NM",
+            "name": "Grimmsnarl-V",
+            "number": "SV116",
+            "collection": "Destinos Brilhantes (Shiny)"
+          },
+          {
+            "itemId": "DESTINOS-OCULTOS-SV70-BR-NM",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Darkrai-GX+%28SV70%2F68%29&num=SV70",
+            "language": "Português (PT-BR)",
+            "condition": "NM",
+            "name": "Darkrai-GX",
+            "number": "SV70",
+            "collection": "Destinos Ocultos"
+          },
+          {
+            "itemId": "CEC-248-BR-NM",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Stoutland+%28248%2F236%29&ed=CEC&num=248",
+            "language": "Português (PT-BR)",
+            "condition": "NM",
+            "name": "Stoutland",
+            "number": "248",
+            "collection": "Eclipse Cósmico"
+          }
+        ]
+      },
+      {
+        "slots": [
+          {
+            "itemId": "ELOS-INQUEBR-VEIS-120-ING-SP",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Lucario+%26+Melmetal-GX+%28120%2F214%29&num=120",
+            "language": "Inglês",
+            "condition": "SP",
+            "name": "Lucario e Melmetal-GX",
+            "number": "120",
+            "collection": "Elos Inquebráveis"
+          },
+          {
+            "itemId": "ESCARLATE-E-VIOLETA-PROMOS-206-BR-NM",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Marnie%27s+Morpeko+%28206%2F%E2%88%9E%29&num=206",
+            "language": "Português (PT-BR)",
+            "condition": "NM",
+            "name": "Morpeko da Marine",
+            "number": "206",
+            "collection": "Escarlate e Violeta Promos"
+          },
+          {
+            "itemId": "ESCARLATE-E-VIOLETA-PROMOS-193-BR-NM",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Hop%27s+Zacian+ex%28193%2F%E2%88%9E%29&num=193",
+            "language": "Português (PT-BR)",
+            "condition": "NM",
+            "name": "Zacian ex do Lupo",
+            "number": "193",
+            "collection": "Escarlate e Violeta Promos"
+          },
+          {
+            "itemId": "PBL-016-BR-NM",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards/card&card=Wailord+ex+%28016%2F084%29&ed=PBL&num=016",
+            "language": "Português (PT-BR)",
+            "condition": "NM",
+            "name": "Wailord ex",
+            "number": "016",
+            "collection": "Escuridão Absoluta"
+          }
+        ]
+      },
+      {
+        "slots": [
+          {
+            "itemId": "SSH-187-BR-NM",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Dhelmise-V+%28187%2F202%29&ed=SSH&num=187",
+            "language": "Português (PT-BR)",
+            "condition": "NM",
+            "name": "Dhelmise-V",
+            "number": "187",
+            "collection": "Espada e Escudo"
+          },
+          {
+            "itemId": "SSPR-SWSH017-BR-MP",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Toxtricity-V+%28SWSH017%2F71%29&ed=SSPR&num=SWSH017",
+            "language": "Português (PT-BR)",
+            "condition": "MP",
+            "name": "Toxtricity-V",
+            "number": "SWSH017",
+            "collection": "Espada e Escudo Promos"
+          },
+          {
+            "itemId": "FCO-117-BR-D",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Alakazam-EX+%28117%2F124%29&ed=FCO&num=117",
+            "language": "Português (PT-BR)",
+            "condition": "D",
+            "name": "Alakazam-EX",
+            "number": "117",
+            "collection": "Fusão de Destinos"
+          },
+          {
+            "itemId": "FCO-120-BR-SP",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Genesect-EX+%28120%2F124%29&ed=FCO&num=120",
+            "language": "Português (PT-BR)",
+            "condition": "SP",
+            "name": "Genesect-EX",
+            "number": "120",
+            "collection": "Fusão de Destinos"
+          }
+        ]
+      },
+      {
+        "slots": [
+          {
+            "itemId": "GEN-RC30-BR-D",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Gardevoir-EX+%28RC30%2F83%29&ed=GEN&num=RC30",
+            "language": "Português (PT-BR)",
+            "condition": "D",
+            "name": "Gardevoir-EX",
+            "number": "RC30",
+            "collection": "Gerações"
+          },
+          {
+            "itemId": "GERA-ES-RC29-BR-D",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Pikachu%28RC29%2F83%29&num=RC29",
+            "language": "Português (PT-BR)",
+            "condition": "D",
+            "name": "Pikachu",
+            "number": "RC29",
+            "collection": "Gerações"
+          },
+          {
+            "itemId": "GUARDI-ES-ASCENDENTES-156-BR-D",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Lycanroc-GX+%28156%2F145%29&num=156",
+            "language": "Português (PT-BR)",
+            "condition": "D",
+            "name": "Lycanroc-GX",
+            "number": "156",
+            "collection": "Guardiões Ascendentes"
+          },
+          {
+            "itemId": "RR-3-ING-D",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Darkrai+G+%283%2F111%29&ed=RR&num=3",
+            "language": "Inglês",
+            "condition": "D",
+            "name": "Darkrai G",
+            "number": "3",
+            "collection": "Rising Rivals"
+          }
+        ]
+      },
+      {
+        "slots": [
+          {
+            "itemId": "RIXA-REBELDE-93-BR-NM",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Dragapult-VMAX+%2893%2F192%29&num=93",
+            "language": "Português (PT-BR)",
+            "condition": "NM",
+            "name": "Dragapult-VMAX",
+            "number": "93",
+            "collection": "Rixa Rebelde"
+          },
+          {
+            "itemId": "UNM-106-BR-SP",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Aerodactyl-GX+%28106%2F236%29&ed=UNM&num=106",
+            "language": "Português (PT-BR)",
+            "condition": "SP",
+            "name": "Aerodactyl-GX",
+            "number": "106",
+            "collection": "Sintonia Mental"
+          },
+          {
+            "itemId": "SUM-80-BR-NM",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Umbreon-GX+%2880%2F149%29&ed=SUM&num=80",
+            "language": "Português (PT-BR)",
+            "condition": "NM",
+            "name": "Umbreon-GX",
+            "number": "80",
+            "collection": "Sol e Lua"
+          },
+          {
+            "itemId": "SMP-SM241-BR-NM",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Umbreon+%26+Darkrai-GX+%28SM241%2F250%29&ed=SMP&num=SM241",
+            "language": "Português (PT-BR)",
+            "condition": "NM",
+            "name": "Umbreon e Darkrai-GX",
+            "number": "SM241",
+            "collection": "Sol e Lua Promos"
+          }
+        ]
+      },
+      {
+        "slots": [
+          {
+            "itemId": "BUS-88A-BR-SP",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Darkrai-GX+%2888a%2F147%29&ed=BUS&num=88a",
+            "language": "Português (PT-BR)",
+            "condition": "SP",
+            "name": "Darkrai-GX",
+            "number": "88a",
+            "collection": "Sombras Ardentes"
+          },
+          {
+            "itemId": "BKP-74-ING-SP",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Darkrai-EX+%2874%2F122%29&ed=BKP&num=74",
+            "language": "Inglês",
+            "condition": "SP",
+            "name": "Darkrai-EX",
+            "number": "74",
+            "collection": "Turbo Colisão"
+          },
+          {
+            "itemId": "BKT-92-BR-D",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Zoroark+BREAK+%2892%2F162%29&ed=BKT&num=92",
+            "language": "Português (PT-BR)",
+            "condition": "D",
+            "name": "Zoroark TURBO",
+            "number": "92",
+            "collection": "Turbo Revolução"
+          },
+          {
+            "itemId": "XY-145-BR-MP",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Skarmory-EX+%28145%2F146%29&ed=XY&num=145",
+            "language": "Português (PT-BR)",
+            "condition": "MP",
+            "name": "Skarmory-EX",
+            "number": "145",
+            "collection": "XY"
+          }
+        ]
+      },
+      {
+        "slots": [
+          {
+            "itemId": "XYPR-XY22-BR-D",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Darkrai+%28XY22%2F%E2%88%9E%29&ed=XYPR&num=XY22",
+            "language": "Português (PT-BR)",
+            "condition": "D",
+            "name": "Darkrai",
+            "number": "XY22",
+            "collection": "XY Promos"
+          },
+          {
+            "itemId": "XYPR-XY200-BR-NM",
+            "linkLiga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Sharpedo-EX+%28XY200%2F%E2%88%9E%29&ed=XYPR&num=XY200",
+            "language": "Português (PT-BR)",
+            "condition": "NM",
+            "name": "M Sharpedo-EX",
+            "number": "XY200",
+            "collection": "XY Promos"
+          },
+          null,
+          null
+        ]
+      }
+    ],
+    "Progresso": "30 / 32",
+    "Quantidade": 1,
+    "Imagem": "",
+    "À venda": false
+  }
+]

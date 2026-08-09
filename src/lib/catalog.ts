@@ -122,6 +122,7 @@ export interface AlbumPage {
 
 export interface AlbumItem {
   id: string;
+  slug: string;
   ownerName: string;
   ownerCollectionName: string;
   ownerCollectionSlug: string;
@@ -399,7 +400,7 @@ const cardImageCandidates = (
   duplicateIndex: number,
   explicit: string = '',
 ): string[] => {
-  const explicitCandidates = explicit ? [explicit.includes('/') ? explicit : `imagens/${explicit}`] : [];
+  const explicitCandidates = explicit ? (explicit.includes('/') ? [explicit] : [`colecoes/${collectionSlug}/imagens/${explicit}`, `imagens/${explicit}`]) : [];
   const pool = imagePool(collectionSlug, 'card');
   const exactKey = normalizeText(`${name} ${number}`);
   const normalizedName = normalizeText(name);
@@ -458,7 +459,7 @@ const boosterVariantNumber = (path: string): number => {
 };
 
 const boosterImageCandidates = (collectionSlug: string, name: string, explicit: string = ''): string[] => {
-  const explicitCandidates = explicit ? [explicit.includes('/') ? explicit : `imagens/${explicit}`] : [];
+  const explicitCandidates = explicit ? (explicit.includes('/') ? [explicit] : [`colecoes/${collectionSlug}/imagensboosters/${explicit}`, `imagensboosters/${explicit}`]) : [];
   const pool = imagePool(collectionSlug, 'booster');
   const keys = boosterKeys(name);
   const existing = pool
@@ -486,7 +487,7 @@ const boosterImageCandidates = (collectionSlug: string, name: string, explicit: 
 const kitImageCandidates = (collectionSlug: string, name: string, explicit: string): string[] => {
   const pool = imagePool(collectionSlug, 'kit');
   const explicitCandidates = explicit
-    ? [explicit.includes('/') ? explicit : `imagenskits/${explicit}`]
+    ? (explicit.includes('/') ? [explicit] : [`colecoes/${collectionSlug}/imagenskits/${explicit}`, `imagenskits/${explicit}`])
     : [];
   const key = normalizeText(name);
   const existing = pool.filter((path) => normalizeText(stemOf(path)).includes(key));
@@ -497,7 +498,7 @@ const kitImageCandidates = (collectionSlug: string, name: string, explicit: stri
 
 const productImageCandidates = (collectionSlug: string, name: string, explicit: string): string[] => {
   const pool = imagePool(collectionSlug, 'product');
-  const explicitCandidates = explicit ? [explicit.includes('/') || /^(?:https?:|data:|blob:)/i.test(explicit) ? explicit : `imagensprodutos/${explicit}`] : [];
+  const explicitCandidates = explicit ? (explicit.includes('/') || /^(?:https?:|data:|blob:)/i.test(explicit) ? [explicit] : [`colecoes/${collectionSlug}/imagensprodutos/${explicit}`, `imagensprodutos/${explicit}`]) : [];
   const key = normalizeText(name);
   const existing = pool.filter((path) => normalizeText(stemOf(path)).includes(key));
   const stems = unique([cleanFilePart(name), asciiFilePart(name), slugify(name)]);
@@ -826,8 +827,10 @@ export const getCollections = (): CollectorCollection[] => {
       const occupiedSlots = pages.reduce((total, page) => total + page.slots.filter(Boolean).length, 0);
       const firstCard = pages.flatMap((page) => page.slots).find(Boolean);
       const albumName = String(row['Nome'] ?? '').trim() || `Álbum ${albumIndex + 1}`;
+      const albumId = String(row['Id'] ?? row['ID'] ?? '').trim() || `${collectionSlug}-album-${albumIndex + 1}`;
       return {
-        id: String(row['Id'] ?? row['ID'] ?? '').trim() || `${collectionSlug}-album-${albumIndex + 1}`,
+        id: albumId,
+        slug: `${slugify(albumId || albumName)}-${albumIndex + 1}`,
         ownerName: owner, ownerCollectionName: title, ownerCollectionSlug: collectionSlug,
         searchText: normalizeText(`${albumName} ${row['Descrição'] ?? ''} ${owner} ${title}`),
         name: albumName,

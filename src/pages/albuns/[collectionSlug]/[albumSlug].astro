@@ -1,0 +1,249 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProductImage from '../../../components/ProductImage.astro';
+import { formatBRL, getCollections, type AlbumCardReference, type AlbumItem, type CardItem, type CollectorCollection } from '../../../lib/catalog';
+
+export function getStaticPaths() {
+  return getCollections().flatMap((collection) => collection.albums.map((album) => ({
+    params: { collectionSlug: collection.slug, albumSlug: album.slug },
+    props: { collection, album },
+  })));
+}
+
+interface Props { collection: CollectorCollection; album: AlbumItem; }
+const { collection, album } = Astro.props;
+const rawBase = import.meta.env.BASE_URL || '/';
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const encodePath = (path: string) => path.split('/').map(encodeURIComponent).join('/');
+const imageUrl = (path: string) => /^(?:https?:|data:|blob:)/i.test(path) ? path : `${base}${encodePath(path.replace(/^\/+/, ''))}`;
+const cardById = new Map(collection.cards.map((card) => [card.id, card]));
+const cardBySlug = new Map(collection.cards.map((card) => [card.slug, card]));
+const resolveCard = (slot: AlbumCardReference | null): CardItem | null => {
+  if (!slot) return null;
+  return cardById.get(slot.itemId) || cardBySlug.get(slot.cardSlug) || collection.cards.find((card) => card.linkLiga && slot.linkLiga && card.linkLiga === slot.linkLiga) || null;
+};
+const pages = album.pages.map((page) => ({ ...page, cards: page.slots.map(resolveCard) }));
+const progress = album.totalSlots ? Math.round((album.occupiedSlots / album.totalSlots) * 100) : 0;
+const coverCards = pages.flatMap((page) => page.cards).filter(Boolean).slice(0, 8) as CardItem[];
+const proposalBlocksDefinedPrice = (card: CardItem) => card.proposalTerms.policy === 'no_defined_price' || card.proposalTerms.policy === 'fixed_price_multi_only';
+const canPropose = (card: CardItem) => card.forSale && card.proposalTerms.policy !== 'none' && !(card.price !== null && proposalBlocksDefinedPrice(card));
+---
+
+<BaseLayout title={album.name} description={`${album.name}, álbum virtual de ${collection.owner} no Nexus TCG.`} active="albums" bodyClass="immersive-album-page">
+  <section class="album-world" data-immersive-album data-pages={album.pages.length}>
+    <div class="album-world-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="album-world-stars" aria-hidden="true"></div>
+    <button class="album-focus-exit" type="button" data-album-focus-exit aria-label="Sair do modo imersivo">× <span>Sair do modo imersivo</span></button>
+
+    <header class="shell album-experience-header" data-reveal>
+      <div class="album-experience-copy">
+        <nav class="breadcrumbs" aria-label="Navegação estrutural">
+          <a href={base}>Início</a><span>/</span><a href={`${base}albuns/`}>Álbuns</a><span>/</span><strong>{album.name}</strong>
+        </nav>
+        <span class="album-experience-kicker">Álbum virtual · {album.format.replace('x', ' por ')}</span>
+        <h1>{album.name}</h1>
+        <p>{album.description || `Álbum organizado por ${collection.owner}.`}</p>
+        <div class="album-experience-owner-row">
+          <a class="album-owner-pill" href={`${base}colecoes/${collection.slug}/`}>
+            <span>{collection.owner.slice(0,2).toUpperCase()}</span>
+            <div><small>Organizado por</small><strong>{collection.owner}</strong></div>
+            <b>↗</b>
+          </a>
+          <button class="album-focus-button" type="button" data-album-focus aria-pressed="false"><span>◈</span> Modo imersivo</button>
+        </div>
+      </div>
+
+      <div class="album-experience-cover" aria-hidden="true">
+        <div class="album-cover-depth"></div>
+        <div class="album-cover-spine"><span>NEXUS</span></div>
+        <div class="album-cover-mosaic">
+          {coverCards.map((card) => {
+            const urls = card.imageCandidates.map(imageUrl);
+            const [primary = '', ...fallbacks] = urls;
+            return <span>{primary ? <img src={primary} alt="" loading="eager" decoding="async" data-image-candidates={JSON.stringify(fallbacks)} /> : <b>{card.name.slice(0,2).toUpperCase()}</b>}</span>;
+          })}
+          {Array.from({ length: Math.max(0, 8 - coverCards.length) }).map(() => <span class="empty"></span>)}
+        </div>
+        <i class="album-cover-sweep"></i>
+      </div>
+    </header>
+
+    <section class="shell album-experience-stats" data-reveal>
+      <div><small>Páginas</small><strong>{album.pages.length}</strong></div>
+      <div><small>Formato</small><strong>{album.format.replace('x', ' × ')}</strong></div>
+      <div><small>Cartas posicionadas</small><strong>{album.occupiedSlots}</strong></div>
+      <div class="album-stat-progress"><small>Preenchimento</small><strong>{progress}%</strong><i><span style={`--album-progress:${progress}%`}></span></i></div>
+    </section>
+
+    <section class="album-reading-zone" aria-label={`Leitor do álbum ${album.name}`}>
+      <div class="shell album-reader-shell">
+        <div class="album-reader-toolbar">
+          <div><span class="section-eyebrow">Fichário aberto</span><strong data-album-page-label>Páginas 1–2</strong></div>
+          <p>Passe o mouse sobre uma carta para destacá-la. Clique para abrir todas as informações avançadas.</p>
+        </div>
+
+        <div class="immersive-album-stage" data-album-stage>
+          <button class="immersive-album-arrow previous" type="button" data-album-previous aria-label="Voltar páginas">‹</button>
+          <div class="immersive-album-book-wrap" data-album-book-wrap>
+            <div class="immersive-album-book" data-album-book>
+              {pages.map((page, pageIndex) => (
+                <section class:list={['immersive-album-sheet', pageIndex % 2 === 0 ? 'left' : 'right']} data-album-page={pageIndex} hidden={pageIndex > 1}>
+                  <header><span>Página {pageIndex + 1}</span><b>{album.format.replace('x',' × ')}</b></header>
+                  <div class="immersive-pocket-grid" style={`--album-columns:${album.columns};--album-rows:${album.rows}`}>
+                    {page.slots.map((slot, slotIndex) => {
+                      const card = page.cards[slotIndex];
+                      if (!slot) return <div class="immersive-album-slot empty"><span>{slotIndex + 1}</span><small>espaço livre</small></div>;
+                      if (!card) {
+                        const urls = slot.imageCandidates.map(imageUrl);
+                        const [primary = '', ...fallbacks] = urls;
+                        return (
+                          <article class="immersive-album-slot unresolved">
+                            <div class="immersive-card-image">{primary ? <img src={primary} alt={slot.name} loading="lazy" decoding="async" data-image-candidates={JSON.stringify(fallbacks)} /> : <span>{slot.name.slice(0,2).toUpperCase()}</span>}</div>
+                            <div class="immersive-card-caption"><strong>{slot.name}</strong><small>{slot.number}</small></div>
+                          </article>
+                        );
+                      }
+                      return (
+                        <article
+                          class="immersive-album-slot occupied"
+                          data-product-card
+                          data-product-id={`card:${card.slug}`}
+                          data-kind="card"
+                          data-name={card.name}
+                          data-number={card.number}
+                          data-collection={card.collection}
+                          data-language={card.language}
+                          data-condition={card.condition}
+                          data-year={card.year}
+                          data-type={card.type || 'Carta Pokémon'}
+                          data-description=""
+                          data-contents=""
+                          data-link-liga={card.linkLiga}
+                          data-owner={card.ownerName}
+                          data-owner-collection={card.ownerCollectionName}
+                          data-owner-slug={card.ownerCollectionSlug}
+                          data-owner-phone={card.ownerPhone}
+                          data-proposal-policy={card.proposalTerms.policy}
+                          data-proposal-flexible={card.proposalTerms.flexibleDiscounts ? 'true' : 'false'}
+                          data-proposal-tiers={JSON.stringify(card.proposalTerms.discountTiers)}
+                          data-proposal-allowed={canPropose(card) ? 'true' : 'false'}
+                          data-price-value={card.price === null ? '' : String(card.price)}
+                          data-price-label={formatBRL(card.price)}
+                          data-stock={String(card.quantity)}
+                          data-for-sale={card.forSale ? 'true' : 'false'}
+                          data-show-quantity="false"
+                        >
+                          <button class="immersive-card-button" type="button" data-open-product aria-label={`Abrir informações avançadas de ${card.name}`}>
+                            <div class="immersive-card-visual"><ProductImage item={card} interactive /></div>
+                            <div class="immersive-card-caption"><strong>{card.name}</strong><small>{card.number}</small></div>
+                            <span class="immersive-card-open">Ver detalhes <b>⌗</b></span>
+                          </button>
+                        </article>
+                      );
+                    })}
+                  </div>
+                  <span class="immersive-page-texture" aria-hidden="true"></span>
+                  <span class="immersive-page-edge" aria-hidden="true"></span>
+                </section>
+              ))}
+              {pages.length % 2 === 1 && (
+                <section class="immersive-album-sheet right immersive-album-endpaper" data-album-endpaper hidden aria-hidden="true">
+                  <div class="album-endpaper-mark"><span>NX</span><strong>Fim do álbum</strong><small>{album.name}</small></div>
+                  <span class="immersive-page-texture" aria-hidden="true"></span>
+                  <span class="immersive-page-edge" aria-hidden="true"></span>
+                </section>
+              )}
+            </div>
+            <div class="immersive-album-rings" aria-hidden="true">{Array.from({ length: 7 }).map(() => <i></i>)}</div>
+            <div class="immersive-album-center-shadow" aria-hidden="true"></div>
+            <div class="immersive-album-floor-shadow" aria-hidden="true"></div>
+          </div>
+          <button class="immersive-album-arrow next" type="button" data-album-next aria-label="Avançar páginas">›</button>
+        </div>
+
+        <footer class="album-reader-footer">
+          <div class="album-page-rail" data-album-page-rail aria-label="Ir para uma página">
+            {pages.map((_, pageIndex) => <button type="button" data-album-page-jump={pageIndex} class:list={[pageIndex === 0 && 'active']}><span>{pageIndex + 1}</span></button>)}
+          </div>
+          <div class="album-reader-hint"><span>← →</span><p>Você também pode usar as setas do teclado.</p></div>
+        </footer>
+      </div>
+    </section>
+  </section>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-immersive-album]');
+      if (!root) return;
+      const pages = [...root.querySelectorAll('[data-album-page]')];
+      const bookWrap = root.querySelector('[data-album-book-wrap]');
+      const prev = root.querySelector('[data-album-previous]');
+      const next = root.querySelector('[data-album-next]');
+      const label = root.querySelector('[data-album-page-label]');
+      const rail = root.querySelector('[data-album-page-rail]');
+      const endpaper = root.querySelector('[data-album-endpaper]');
+      const focusButton = root.querySelector('[data-album-focus]');
+      const focusExit = root.querySelector('[data-album-focus-exit]');
+      const mobile = window.matchMedia('(max-width: 760px)');
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let start = 0;
+      let timer = 0;
+      const perView = () => mobile.matches ? 1 : 2;
+      const lastStart = () => Math.max(0, pages.length - perView());
+      const normalizedStart = (value) => {
+        const clamped = Math.max(0, Math.min(value, lastStart()));
+        return perView() === 2 ? Math.floor(clamped / 2) * 2 : clamped;
+      };
+      const render = (direction = 0) => {
+        start = normalizedStart(start);
+        const count = perView();
+        pages.forEach((page, index) => { page.hidden = index < start || index >= start + count; });
+        if (endpaper) endpaper.hidden = mobile.matches || pages.length % 2 === 0 || start + count < pages.length;
+        const end = Math.min(pages.length, start + count);
+        if (label) label.textContent = end - start > 1 ? `Páginas ${start + 1}–${end}` : `Página ${start + 1}`;
+        if (prev) prev.disabled = start === 0;
+        if (next) next.disabled = start + count >= pages.length;
+        rail?.querySelectorAll('[data-album-page-jump]').forEach((button) => {
+          const index = Number(button.dataset.albumPageJump || 0);
+          button.classList.toggle('active', index >= start && index < end);
+        });
+        if (direction && bookWrap && !reduced) {
+          window.clearTimeout(timer);
+          bookWrap.classList.remove('turn-forward', 'turn-backward');
+          void bookWrap.offsetWidth;
+          bookWrap.classList.add(direction > 0 ? 'turn-forward' : 'turn-backward');
+          timer = window.setTimeout(() => bookWrap.classList.remove('turn-forward', 'turn-backward'), 560);
+        }
+      };
+      const step = (direction) => { start += direction * perView(); render(direction); };
+      prev?.addEventListener('click', () => step(-1));
+      next?.addEventListener('click', () => step(1));
+      rail?.addEventListener('click', (event) => {
+        const target = event.target instanceof Element ? event.target.closest('[data-album-page-jump]') : null;
+        if (!target) return;
+        const requested = Number(target.dataset.albumPageJump || 0);
+        const direction = requested >= start ? 1 : -1;
+        start = requested;
+        render(direction);
+      });
+      document.addEventListener('keydown', (event) => {
+        if (document.body.classList.contains('modal-open')) return;
+        if (event.key === 'ArrowLeft' && start > 0) step(-1);
+        if (event.key === 'ArrowRight' && start + perView() < pages.length) step(1);
+      });
+      mobile.addEventListener?.('change', render);
+      const setFocusMode = (active) => {
+        document.body.classList.toggle('album-focus-mode', active);
+        focusButton?.setAttribute('aria-pressed', String(active));
+        if (focusButton) focusButton.innerHTML = active ? '<span>◇</span> Sair do modo imersivo' : '<span>◈</span> Modo imersivo';
+        if (active) root.querySelector('[data-album-stage]')?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+      };
+      focusButton?.addEventListener('click', () => setFocusMode(!document.body.classList.contains('album-focus-mode')));
+      focusExit?.addEventListener('click', () => setFocusMode(false));
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && document.body.classList.contains('album-focus-mode') && !document.body.classList.contains('modal-open')) setFocusMode(false);
+      });
+      render();
+    })();
+  </script>
+</BaseLayout>

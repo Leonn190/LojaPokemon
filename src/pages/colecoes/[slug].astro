@@ -26,22 +26,7 @@ const proposalPolicyLabels = {
 };
 const proposalPolicyLabel = proposalPolicyLabels[collection.proposalTerms.policy];
 const firstSection = collection.albums.length ? 'albuns' : collection.cards.length ? 'cartas' : collection.boosters.length ? 'boosters' : collection.kits.length ? 'kits' : collection.products.length ? 'produtos' : '';
-const albumData = collection.albums.map((album) => ({
-  id: album.id,
-  name: album.name,
-  description: album.description,
-  format: album.format,
-  columns: album.columns,
-  rows: album.rows,
-  occupiedSlots: album.occupiedSlots,
-  totalSlots: album.totalSlots,
-  pages: album.pages.map((page) => ({ slots: page.slots.map((slot) => slot ? {
-    name: slot.name,
-    number: slot.number,
-    collection: slot.collection,
-    imageCandidates: slot.imageCandidates,
-  } : null) })),
-}));
+
 ---
 
 <BaseLayout
@@ -96,25 +81,30 @@ const albumData = collection.albums.map((album) => ({
   </section>
 
   {collection.albums.length > 0 && (
-    <section id="albuns" class:list={['collection-albums-showcase', collection.albums.length === 1 && 'single-album-showcase']} data-album-root data-albums={JSON.stringify(albumData)}>
+    <section id="albuns" class:list={['collection-albums-showcase', collection.albums.length === 1 && 'single-album-showcase']}>
       <div class="shell">
         <div class="collection-albums-heading" data-reveal>
-          <div><span class="section-eyebrow">Álbuns de {collection.owner}</span><h2>{collection.albums.length === 1 ? 'O álbum da coleção' : 'Álbuns organizados'}</h2><p>{collection.albums.length === 1 ? 'Abra o álbum virtual e navegue página por página.' : 'Cada álbum pode organizar as mesmas cartas de maneiras diferentes.'}</p></div>
+          <div><span class="section-eyebrow">Álbuns de {collection.owner}</span><h2>{collection.albums.length === 1 ? 'O álbum da coleção' : 'Álbuns organizados'}</h2><p>{collection.albums.length === 1 ? 'Entre direto no fichário imersivo, navegue página por página e abra cada carta sem sair do álbum.' : 'Cada álbum pode organizar as mesmas cartas de maneiras diferentes.'}</p></div>
           <span class="album-showcase-count">{collection.albums.length} {collection.albums.length === 1 ? 'álbum' : 'álbuns'}</span>
         </div>
         <div class:list={['public-album-grid', collection.albums.length === 1 && 'single']}>
           {collection.albums.map((album) => {
             const previewCards = album.pages.flatMap((page) => page.slots).filter(Boolean).slice(0, 6);
             return (
-              <button type="button" class="public-album-card" data-open-album={album.id}>
+              <a class="public-album-card" href={`${base}albuns/${encodeURIComponent(album.ownerCollectionSlug)}/${encodeURIComponent(album.slug)}/`} aria-label={`Abrir diretamente o álbum ${album.name}`}>
                 <div class="public-album-cover">
                   <div class="album-spine"><span>NEXUS</span></div>
                   <div class="album-cover-grid">
-                    {previewCards.map((card) => card && (
-                      <span class="album-cover-slot">
-                        {card.imageCandidates[0] ? <img src={imageUrl(card.imageCandidates[0])} alt="" loading="lazy" /> : <b>{card.name.slice(0, 2).toUpperCase()}</b>}
-                      </span>
-                    ))}
+                    {previewCards.map((card) => {
+                      if (!card) return null;
+                      const urls = card.imageCandidates.map(imageUrl);
+                      const [primary = '', ...fallbacks] = urls;
+                      return (
+                        <span class="album-cover-slot">
+                          {primary ? <img src={primary} alt="" loading="lazy" decoding="async" data-image-candidates={JSON.stringify(fallbacks)} /> : <b>{card.name.slice(0, 2).toUpperCase()}</b>}
+                        </span>
+                      );
+                    })}
                     {Array.from({ length: Math.max(0, 6 - previewCards.length) }).map(() => <span class="album-cover-slot empty"></span>)}
                   </div>
                   <span class="album-cover-shine" aria-hidden="true"></span>
@@ -126,31 +116,12 @@ const albumData = collection.albums.map((album) => ({
                   <div class="public-album-progress"><i style={`--album-progress:${album.totalSlots ? Math.round(album.occupiedSlots / album.totalSlots * 100) : 0}%`}></i><strong>{album.occupiedSlots} / {album.totalSlots} espaços</strong></div>
                   <b class="public-album-open">Abrir álbum <span>↗</span></b>
                 </div>
-              </button>
+              </a>
             );
           })}
         </div>
       </div>
 
-      <div class="public-album-modal" data-public-album-modal hidden>
-        <button type="button" class="public-album-backdrop" data-close-public-album aria-label="Fechar álbum"></button>
-        <section class="public-album-dialog" role="dialog" aria-modal="true" aria-labelledby="public-album-title" tabindex="-1">
-          <header class="public-album-dialog-header">
-            <div><span class="section-eyebrow">Álbum virtual</span><h2 id="public-album-title" data-public-album-title>Álbum</h2><p data-public-album-description></p></div>
-            <button type="button" data-close-public-album aria-label="Fechar">×</button>
-          </header>
-          <div class="public-album-stage">
-            <button type="button" class="album-page-arrow previous" data-public-album-previous aria-label="Páginas anteriores">‹</button>
-            <div class="public-album-page-wrap" data-public-album-page-wrap>
-              <div class="public-album-book" data-public-album-page aria-live="polite"></div>
-              <div class="public-album-rings" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-              <span class="public-album-book-shadow" aria-hidden="true"></span>
-            </div>
-            <button type="button" class="album-page-arrow next" data-public-album-next aria-label="Próximas páginas">›</button>
-          </div>
-          <footer class="public-album-footer"><span data-public-album-format></span><strong data-public-album-counter>Página 1 de 1</strong><span data-public-album-filled></span></footer>
-        </section>
-      </div>
     </section>
   )}
 
@@ -188,122 +159,6 @@ const albumData = collection.albums.map((album) => ({
         } catch (_) {}
         setTimeout(() => { button.innerHTML = original; }, 1400);
       });
-
-      const albumRoot = document.querySelector('[data-album-root]');
-      if (albumRoot) {
-        let albums = [];
-        try { albums = JSON.parse(albumRoot.dataset.albums || '[]'); } catch (_) { albums = []; }
-        const modal = albumRoot.querySelector('[data-public-album-modal]');
-        const pageElement = albumRoot.querySelector('[data-public-album-page]');
-        const pageWrap = albumRoot.querySelector('[data-public-album-page-wrap]');
-        const previousButton = albumRoot.querySelector('[data-public-album-previous]');
-        const nextButton = albumRoot.querySelector('[data-public-album-next]');
-        const compactAlbum = window.matchMedia('(max-width: 700px)');
-        let activeAlbum = null;
-        let activePage = 0;
-        let closeTimer = 0;
-        let returnFocus = null;
-
-        const pagesPerView = () => compactAlbum.matches ? 1 : 2;
-        const albumImageMarkup = (slot) => {
-          const urls = (slot.imageCandidates || []).map(imageUrl);
-          const primary = urls.shift();
-          if (!primary) return `<span>${escapeHtml(String(slot.name || 'TC').slice(0, 2).toUpperCase())}</span>`;
-          return `<img src="${escapeHtml(primary)}" alt="${escapeHtml(slot.name || 'Carta')}" loading="lazy" decoding="async" data-album-image-candidates="${escapeHtml(JSON.stringify(urls))}" />`;
-        };
-        const slotMarkup = (slot, index) => slot
-          ? `<article class="public-album-slot"><div>${albumImageMarkup(slot)}</div><small>${escapeHtml(slot.name || 'Carta')}</small><b>${escapeHtml(slot.number || '')}</b></article>`
-          : `<div class="public-album-slot empty"><span>${index + 1}</span></div>`;
-        const sheetMarkup = (page, pageIndex, side) => {
-          const slots = Array.isArray(page?.slots) ? page.slots : [];
-          return `<section class="public-album-sheet public-album-sheet-${side}"><header><span>Página ${pageIndex + 1}</span><b>${escapeHtml(activeAlbum.format.replace('x', ' × '))}</b></header><div class="public-album-pocket-grid" style="--album-columns:${activeAlbum.columns};--album-rows:${activeAlbum.rows}">${slots.map(slotMarkup).join('')}</div><span class="public-album-page-texture" aria-hidden="true"></span></section>`;
-        };
-        const initializeAlbumImages = () => {
-          pageElement?.querySelectorAll('img[data-album-image-candidates]').forEach((image) => {
-            let candidates = [];
-            try { candidates = JSON.parse(image.dataset.albumImageCandidates || '[]'); } catch (_) {}
-            image.addEventListener('error', () => {
-              const next = candidates.shift();
-              if (next) image.src = next;
-              else {
-                const fallback = document.createElement('span');
-                fallback.textContent = (image.alt || 'TC').slice(0, 2).toUpperCase();
-                image.replaceWith(fallback);
-              }
-            });
-          });
-        };
-        const renderAlbum = (direction = 1) => {
-          if (!activeAlbum || !pageElement) return;
-          const perView = pagesPerView();
-          const lastStart = Math.max(0, activeAlbum.pages.length - perView);
-          activePage = Math.min(Math.max(0, activePage), lastStart);
-          const visiblePages = activeAlbum.pages.slice(activePage, activePage + perView);
-          pageElement.classList.toggle('single-page', perView === 1 || visiblePages.length === 1);
-          pageElement.innerHTML = visiblePages.map((page, index) => sheetMarkup(page, activePage + index, index === 0 ? 'left' : 'right')).join('');
-          initializeAlbumImages();
-          pageWrap?.classList.remove('turn-forward', 'turn-backward');
-          void pageWrap?.offsetWidth;
-          pageWrap?.classList.add(direction >= 0 ? 'turn-forward' : 'turn-backward');
-          const finalPage = Math.min(activeAlbum.pages.length, activePage + visiblePages.length);
-          const counter = albumRoot.querySelector('[data-public-album-counter]');
-          const format = albumRoot.querySelector('[data-public-album-format]');
-          const filled = albumRoot.querySelector('[data-public-album-filled]');
-          if (counter) counter.textContent = visiblePages.length > 1 ? `Páginas ${activePage + 1}–${finalPage} de ${activeAlbum.pages.length}` : `Página ${activePage + 1} de ${activeAlbum.pages.length}`;
-          if (format) format.textContent = `Formato ${activeAlbum.format.replace('x', ' por ')}`;
-          if (filled) filled.textContent = `${activeAlbum.occupiedSlots} cartas posicionadas`;
-          if (previousButton) previousButton.disabled = activePage === 0;
-          if (nextButton) nextButton.disabled = activePage + perView >= activeAlbum.pages.length;
-        };
-        const openAlbum = (id, trigger) => {
-          activeAlbum = albums.find((album) => String(album.id) === String(id));
-          if (!activeAlbum || !modal) return;
-          window.clearTimeout(closeTimer);
-          returnFocus = trigger || document.activeElement;
-          activePage = 0;
-          const title = albumRoot.querySelector('[data-public-album-title]');
-          const description = albumRoot.querySelector('[data-public-album-description]');
-          if (title) title.textContent = activeAlbum.name;
-          if (description) description.textContent = activeAlbum.description || 'Álbum virtual organizado pelo colecionador.';
-          modal.hidden = false;
-          modal.setAttribute('aria-hidden', 'false');
-          document.body.classList.add('public-album-open');
-          renderAlbum();
-          requestAnimationFrame(() => {
-            modal.classList.add('open');
-            modal.querySelector('.public-album-dialog')?.focus?.();
-          });
-        };
-        const closeAlbum = () => {
-          if (!modal || modal.hidden) return;
-          modal.classList.remove('open');
-          modal.setAttribute('aria-hidden', 'true');
-          document.body.classList.remove('public-album-open');
-          closeTimer = window.setTimeout(() => {
-            modal.hidden = true;
-            activeAlbum = null;
-            returnFocus?.focus?.();
-          }, 180);
-        };
-        albumRoot.addEventListener('click', (event) => {
-          const target = event.target instanceof Element ? event.target : null;
-          if (!target) return;
-          const opener = target.closest('[data-open-album]');
-          if (opener) { openAlbum(opener.dataset.openAlbum, opener); return; }
-          if (target.closest('[data-close-public-album]')) { closeAlbum(); return; }
-          const step = pagesPerView();
-          if (target.closest('[data-public-album-previous]') && activePage > 0) { activePage -= step; renderAlbum(-1); return; }
-          if (target.closest('[data-public-album-next]') && activeAlbum && activePage + step < activeAlbum.pages.length) { activePage += step; renderAlbum(1); }
-        });
-        document.addEventListener('keydown', (event) => {
-          if (!modal || modal.hidden) return;
-          const step = pagesPerView();
-          if (event.key === 'Escape') closeAlbum();
-          if (event.key === 'ArrowLeft' && activePage > 0) { activePage -= step; renderAlbum(-1); }
-          if (event.key === 'ArrowRight' && activeAlbum && activePage + step < activeAlbum.pages.length) { activePage += step; renderAlbum(1); }
-        });
-        compactAlbum.addEventListener?.('change', () => { if (activeAlbum) renderAlbum(0); });
-      }
 
       const dynamicImage = (candidates, alt = '') => {
         const urls = (Array.isArray(candidates) ? candidates : []).map(imageUrl);
