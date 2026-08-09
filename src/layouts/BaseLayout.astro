@@ -324,8 +324,16 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
               image.src = valid[index];
               const seed = [...(image.alt || '')].reduce((sum, char) => sum + char.charCodeAt(0), 0);
               const swapGalleryImage = (url) => {
-                image.classList.add('image-swapping');
-                window.setTimeout(() => { image.src = url; }, 120);
+                const preload = new Image();
+                preload.onload = () => {
+                  image.classList.add('image-swapping');
+                  image.src = url;
+                };
+                preload.onerror = () => {
+                  image.classList.add('image-swapping');
+                  image.src = url;
+                };
+                preload.src = url;
               };
               image.addEventListener('load', () => {
                 if (!image.classList.contains('image-swapping')) return;
@@ -454,8 +462,96 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         const modalKitList = modal?.querySelector('[data-modal-kit-list]');
         const modalKitDiscount = modal?.querySelector('[data-modal-kit-discount]');
         const modalTags = modal?.querySelector('[data-modal-tags]');
+        const rarityTier = (value = '') => {
+          const rarity = normalize(value);
+          const compact = rarity.replace(/[^a-z0-9]+/g, '');
+          const premium = ['full art','ultra rara','ultra rare','secret','secreta','gold','dourad','rainbow','illustration rare','ilustracao rara','arte rara','special illustration','sir','alt art','galeria de treinador','trainer gallery','shiny rare','shiny ultra','hyper rare'].some((token) => rarity.includes(token)) || ['ru','sr','re'].includes(rarity);
+          if (premium) return 'premium';
+          const holo = ['holo','foil','reverse','radiante','radiant','vmax','v-astro','vstar','mega ex',' ex','gx',' v','rh','rl','rd'].some((token) => rarity.includes(token)) || /^(?:mega\s+)?(?:ex|gx|v(?:max|star|-astro|-union)?)(?:\b|\s|—|-)/.test(rarity) || /^(?:ex|gx|v|vmax|vstar|v-astro|megaex|rh|rl|rd|s)$/.test(compact);
+          return holo ? 'holo' : 'basic';
+        };
         let activeProductCard = null;
         let modalReturnFocus = null;
+
+        const buildKitEntryVisual = (entry) => {
+          const isCardEntry = entry?.kind !== 'boosters';
+          const visual = document.createElement('div');
+          visual.className = isCardEntry ? `collectible-visual detail-visual foil-tier-${rarityTier(entry?.type || '')}` : 'collectible-visual booster-visual detail-visual';
+          visual.dataset.tilt = '';
+          visual.dataset.tiltStrength = isCardEntry ? '8' : '5';
+          const stage = document.createElement('div');
+          stage.className = 'image-stage';
+          const candidates = Array.isArray(entry?.imageCandidates) ? entry.imageCandidates.map((value) => String(value || '')).filter(Boolean) : [];
+          if (candidates.length) {
+            let cursor = 0;
+            const image = document.createElement('img');
+            image.alt = entry?.name || 'Item do kit';
+            image.loading = 'lazy';
+            image.decoding = 'async';
+            image.dataset.imageCandidates = JSON.stringify(candidates.slice(1));
+            image.src = imageUrl(candidates[cursor]);
+            image.addEventListener('error', () => {
+              cursor += 1;
+              if (candidates[cursor]) image.src = imageUrl(candidates[cursor]);
+              else image.remove();
+            });
+            stage.appendChild(image);
+          } else {
+            const fallback = document.createElement('span');
+            fallback.className = 'kit-gallery-fallback';
+            fallback.textContent = String(entry?.name || 'TC').slice(0, 2).toUpperCase();
+            stage.appendChild(fallback);
+          }
+          if (isCardEntry) {
+            const holoBand = document.createElement('span'); holoBand.className = 'holo-band';
+            const foil = document.createElement('span'); foil.className = 'foil-spectrum';
+            const glare = document.createElement('span'); glare.className = 'glare';
+            stage.append(holoBand, foil, glare);
+          }
+          visual.appendChild(stage);
+          initTilt(visual);
+          return visual;
+        };
+
+        const createVirtualProductCard = (entry = {}) => {
+          const isCardEntry = entry?.kind !== 'boosters';
+          const article = document.createElement('article');
+          article.dataset.kind = isCardEntry ? 'card' : 'booster';
+          article.dataset.name = String(entry?.name || 'Item do kit');
+          article.dataset.number = String(entry?.number || '');
+          article.dataset.collection = String(entry?.collection || '');
+          article.dataset.language = String(entry?.language || '');
+          article.dataset.condition = String(entry?.condition || '');
+          article.dataset.year = String(entry?.year || '');
+          article.dataset.type = isCardEntry ? String(entry?.type || 'Carta') : 'Booster avulso';
+          article.dataset.description = isCardEntry ? 'Carta incluída neste kit.' : 'Booster incluído neste kit.';
+          article.dataset.contents = '';
+          article.dataset.linkLiga = String(entry?.linkLiga || '');
+          article.dataset.kitItems = '[]';
+          article.dataset.kitDiscount = '0';
+          article.dataset.kitSourceTotal = '';
+          article.dataset.owner = String(entry?.ownerName || activeProductCard?.dataset?.owner || 'Colecionador');
+          article.dataset.ownerCollection = String(entry?.ownerCollectionName || activeProductCard?.dataset?.ownerCollection || 'Coleção');
+          article.dataset.ownerSlug = String(entry?.ownerCollectionSlug || activeProductCard?.dataset?.ownerSlug || '');
+          article.dataset.ownerPhone = String(entry?.ownerPhone || activeProductCard?.dataset?.ownerPhone || '');
+          article.dataset.proposalPolicy = 'none';
+          article.dataset.proposalFlexible = 'false';
+          article.dataset.proposalTiers = '[]';
+          article.dataset.proposalAllowed = 'false';
+          const priceValue = Number(entry?.unitPrice);
+          article.dataset.priceValue = Number.isFinite(priceValue) ? String(priceValue) : '';
+          article.dataset.priceLabel = Number.isFinite(priceValue) ? formatBRL(priceValue) : 'Consultar';
+          article.dataset.stock = String(Math.max(1, Number(entry?.quantity) || 1));
+          article.dataset.forSale = 'false';
+          article.dataset.showQuantity = 'false';
+          article.appendChild(buildKitEntryVisual(entry));
+          return article;
+        };
+
+        const openKitEntryPreview = (entry, trigger) => {
+          const virtualCard = createVirtualProductCard(entry || {});
+          openModal(virtualCard, trigger);
+        };
 
         const setSpec = (selector, value, visible = true) => {
           const row = modal?.querySelector(selector);
@@ -498,7 +594,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           modal.classList.toggle('booster-modal', isBooster);
           modal.classList.toggle('kit-modal', isKit);
           modal.classList.toggle('sealed-product-modal', isProduct);
-          if (modalTags) modalTags.hidden = isCard;
+          if (modalTags) modalTags.hidden = isCard || isKit;
           if (modalName) modalName.textContent = card.dataset.name || '';
           if (modalNumber) {
             modalNumber.hidden = isCard;
@@ -506,9 +602,9 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           }
           if (modalType) { modalType.hidden = isCard || isKit; modalType.textContent = card.dataset.type || ''; }
           if (modalStock) {
-            const showQuantity = isKit && card.dataset.showQuantity !== 'false';
+            const showQuantity = !isKit && card.dataset.showQuantity === 'true';
             modalStock.hidden = !showQuantity;
-            modalStock.textContent = `${card.dataset.stock || '0'} ${card.dataset.stock === '1' ? 'unidade' : 'unidades'}`;
+            modalStock.textContent = showQuantity ? `${card.dataset.stock || '0'} ${card.dataset.stock === '1' ? 'unidade' : 'unidades'}` : '';
           }
           if (modalDescription) modalDescription.textContent = card.dataset.description || (isCard
             ? 'Carta publicada por um colecionador da comunidade Nexus TCG.'
@@ -548,51 +644,34 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
               }
               if (modalKitGallery) {
                 modalKitGallery.innerHTML = '';
-                const rarityTier = (value = '') => {
-                  const rarity = normalize(value);
-                  const compact = rarity.replace(/[^a-z0-9]+/g, '');
-                  const premium = ['full art','ultra rara','ultra rare','secret','secreta','gold','dourad','rainbow','illustration rare','ilustracao rara','arte rara','special illustration','sir','alt art','galeria de treinador','trainer gallery','shiny rare','shiny ultra','hyper rare'].some((token) => rarity.includes(token)) || ['ru','sr','re'].includes(rarity);
-                  if (premium) return 'premium';
-                  const holo = ['holo','foil','reverse','radiante','radiant','vmax','v-astro','vstar','mega ex',' ex','gx',' v','rh','rl','rd'].some((token) => rarity.includes(token)) || /^(?:mega\s+)?(?:ex|gx|v(?:max|star|-astro|-union)?)(?:\b|\s|—|-)/.test(rarity) || /^(?:ex|gx|v|vmax|vstar|v-astro|megaex|rh|rl|rd|s)$/.test(compact);
-                  return holo ? 'holo' : 'basic';
-                };
                 kitItems.forEach((entry) => {
                   const figure = document.createElement('figure');
-                  const candidates = Array.isArray(entry.imageCandidates) ? entry.imageCandidates.map((value) => String(value || '')).filter(Boolean) : [];
                   const isKitCard = entry.kind !== 'boosters';
-                  const visual = document.createElement('div');
-                  visual.className = isKitCard ? `collectible-visual kit-gallery-card foil-tier-${rarityTier(entry.type || '')}` : 'collectible-visual booster-visual kit-gallery-booster';
-                  visual.dataset.tilt = '';
-                  visual.dataset.tiltStrength = isKitCard ? '7' : '4';
-                  const stage = document.createElement('div');
-                  stage.className = 'image-stage';
-                  if (candidates.length) {
-                    let cursor = 0;
-                    const image = document.createElement('img');
-                    image.alt = entry.name || 'Item do kit';
-                    image.loading = 'lazy';
-                    image.src = imageUrl(candidates[cursor]);
-                    image.addEventListener('error', () => { cursor += 1; if (candidates[cursor]) image.src = imageUrl(candidates[cursor]); else image.remove(); });
-                    stage.appendChild(image);
-                  } else {
-                    const fallback = document.createElement('span');
-                    fallback.className = 'kit-gallery-fallback';
-                    fallback.textContent = String(entry.name || 'TC').slice(0, 2).toUpperCase();
-                    stage.appendChild(fallback);
-                  }
+                  const visual = buildKitEntryVisual(entry);
                   if (isKitCard) {
-                    const holoBand = document.createElement('span'); holoBand.className = 'holo-band';
-                    const foil = document.createElement('span'); foil.className = 'foil-spectrum';
-                    const glare = document.createElement('span'); glare.className = 'glare';
-                    stage.append(holoBand, foil, glare);
+                    figure.tabIndex = 0;
+                    figure.setAttribute('role', 'button');
+                    figure.setAttribute('aria-label', `Abrir detalhes de ${entry.name || 'carta do kit'}`);
+                    figure.classList.add('modal-kit-gallery-entry');
+                    figure.addEventListener('click', () => openKitEntryPreview(entry, figure));
+                    figure.addEventListener('keydown', (event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        openKitEntryPreview(entry, figure);
+                      }
+                    });
                   }
-                  visual.appendChild(stage);
                   figure.appendChild(visual);
                   const caption = document.createElement('figcaption');
                   caption.textContent = entry.name || 'Item';
                   figure.appendChild(caption);
+                  if (isKitCard) {
+                    const hint = document.createElement('small');
+                    hint.className = 'modal-kit-gallery-hint';
+                    hint.textContent = 'Abrir carta';
+                    figure.appendChild(hint);
+                  }
                   modalKitGallery.appendChild(figure);
-                  initTilt(visual);
                 });
               }
               if (modalKitList) {

@@ -82,11 +82,22 @@ export interface BoosterItem extends OwnedItemBase {
 export interface KitContentItem {
   kind: 'cards' | 'boosters';
   itemId: string;
+  slug?: string;
   name: string;
   quantity: number;
   unitPrice: number | null;
   imageCandidates?: string[];
   type?: string;
+  number?: string;
+  collection?: string;
+  language?: string;
+  condition?: string;
+  year?: string;
+  linkLiga?: string;
+  ownerName?: string;
+  ownerCollectionName?: string;
+  ownerCollectionSlug?: string;
+  ownerPhone?: string;
 }
 
 export interface KitItem extends OwnedItemBase {
@@ -767,11 +778,22 @@ export const getCollections = (): CollectorCollection[] => {
           return {
             kind,
             itemId: source?.id || itemId,
+            slug: source?.slug,
             name: source?.name || entryName,
             quantity: parseQuantity(entry.quantity ?? entry.quantidade) || 1,
             unitPrice: parseDecimal(entry.unitPrice ?? entry.precoUnitario) ?? source?.price ?? null,
             imageCandidates: source?.imageCandidates,
             type: kind === 'cards' && source?.kind === 'card' ? source.type : String(entry.type ?? entry.tipoCarta ?? ''),
+            number: kind === 'cards' && source?.kind === 'card' ? source.number : '',
+            collection: kind === 'cards' && source?.kind === 'card' ? source.collection : '',
+            language: kind === 'cards' && source?.kind === 'card' ? source.language : '',
+            condition: kind === 'cards' && source?.kind === 'card' ? source.condition : '',
+            year: kind === 'cards' && source?.kind === 'card' ? source.year : '',
+            linkLiga: source && 'linkLiga' in source ? source.linkLiga : '',
+            ownerName: source?.ownerName || owner,
+            ownerCollectionName: source?.ownerCollectionName || title,
+            ownerCollectionSlug: source?.ownerCollectionSlug || collectionSlug,
+            ownerPhone: source?.ownerPhone || ownerPhone,
           };
         });
       const legacyContents = typeof row['Conteúdo'] === 'string' ? row['Conteúdo'] : '';

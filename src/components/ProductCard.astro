@@ -18,7 +18,7 @@ const number = item.kind === 'card' ? item.number : '';
 const pokemonCollection = item.kind === 'card' ? item.collection : item.name;
 const description = item.kind === 'kit' || item.kind === 'product' ? item.description : '';
 const contents = item.kind === 'kit' ? item.contents : '';
-const kitItems = item.kind === 'kit' ? item.contentItems.map((entry) => ({ kind: entry.kind, name: entry.name, quantity: entry.quantity, type: entry.type || '', imageCandidates: entry.imageCandidates || [] })) : [];
+const kitItems = item.kind === 'kit' ? item.contentItems.map((entry) => ({ ...entry, type: entry.type || '', imageCandidates: entry.imageCandidates || [] })) : [];
 const kitDiscount = item.kind === 'kit' && item.sourceTotal && item.price !== null && item.sourceTotal > 0
   ? Math.max(0, ((item.sourceTotal - item.price) / item.sourceTotal) * 100)
   : 0;

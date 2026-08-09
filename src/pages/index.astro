@@ -24,12 +24,12 @@ const totalUnits = [...cards, ...boosters, ...kits, ...products].reduce((total, 
 
 // O fundo da abertura usa o mesmo princípio visual das coleções: várias colunas
 // de cartas subindo continuamente, só que inclinado para a direita e sem hover.
-const wallSource = shuffleItems(cards.filter((card) => card.imageCandidates.length > 0)).slice(0, 35);
+const wallSource = shuffleItems(cards.filter((card) => card.imageCandidates.length > 0)).slice(0, 42);
 const rotate = (items: typeof wallSource, amount: number) => items.length
   ? [...items.slice(amount % items.length), ...items.slice(0, amount % items.length)]
   : [];
-const wallLanes = Array.from({ length: 5 }, (_, laneIndex) => {
-  const lane = wallSource.filter((_, cardIndex) => cardIndex % 5 === laneIndex);
+const wallLanes = Array.from({ length: 6 }, (_, laneIndex) => {
+  const lane = wallSource.filter((_, cardIndex) => cardIndex % 6 === laneIndex);
   return rotate(lane, laneIndex + 1);
 });
 ---
