@@ -14,5 +14,11 @@
     "policy": "flexible",
     "flexibleDiscounts": true,
     "discountTiers": []
-  }
+  },
+  "palette": [
+    "#d84049",
+    "#08090d",
+    "#721b22"
+  ],
+  "priceDisplayFallback": "league_average_then_lowest"
 }

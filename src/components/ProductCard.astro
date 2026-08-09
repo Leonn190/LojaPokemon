@@ -13,17 +13,18 @@ const { item, compact = false, catalog = false, hideOwner = false } = Astro.prop
 const price = getItemPrice(item);
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
-const itemType = item.kind === 'card' ? item.type : item.kind === 'booster' ? 'Booster avulso' : 'Kit personalizado';
+const itemType = item.kind === 'card' ? item.type : item.kind === 'booster' ? 'Booster avulso' : item.kind === 'kit' ? 'Kit personalizado' : 'Produto lacrado';
 const number = item.kind === 'card' ? item.number : '';
 const pokemonCollection = item.kind === 'card' ? item.collection : item.name;
-const description = item.kind === 'kit' ? item.description : '';
+const description = item.kind === 'kit' || item.kind === 'product' ? item.description : '';
 const contents = item.kind === 'kit' ? item.contents : '';
-const kitItems = item.kind === 'kit' ? item.contentItems.map((entry) => ({ name: entry.name, imageCandidates: entry.imageCandidates || [] })) : [];
+const kitItems = item.kind === 'kit' ? item.contentItems.map((entry) => ({ name: entry.name, quantity: entry.quantity, imageCandidates: entry.imageCandidates || [] })) : [];
 const kitDiscount = item.kind === 'kit' && item.sourceTotal && item.price !== null && item.sourceTotal > 0
   ? Math.max(0, ((item.sourceTotal - item.price) / item.sourceTotal) * 100)
   : 0;
 const blocksDefinedPrice = item.proposalTerms.policy === 'no_defined_price' || item.proposalTerms.policy === 'fixed_price_multi_only';
 const canPropose = item.forSale && item.proposalTerms.policy !== 'none' && !(item.kind === 'card' && price !== null && blocksDefinedPrice);
+const showPublicQuantity = item.kind === 'kit' && item.showQuantity;
 ---
 
 <article
@@ -40,6 +41,7 @@ const canPropose = item.forSale && item.proposalTerms.policy !== 'none' && !(ite
   data-type={itemType}
   data-description={description}
   data-contents={contents}
+  data-link-liga={item.kind === 'card' || item.kind === 'booster' || item.kind === 'product' ? item.linkLiga : ''}
   data-kit-items={item.kind === 'kit' ? JSON.stringify(kitItems) : ''}
   data-kit-discount={item.kind === 'kit' ? kitDiscount.toFixed(1) : ''}
   data-kit-source-total={item.kind === 'kit' && item.sourceTotal !== null ? String(item.sourceTotal) : ''}
@@ -55,7 +57,7 @@ const canPropose = item.forSale && item.proposalTerms.policy !== 'none' && !(ite
   data-price-label={formatBRL(price)}
   data-stock={String(item.quantity)}
   data-for-sale={item.forSale ? 'true' : 'false'}
-  data-show-quantity={item.showQuantity ? 'true' : 'false'}
+  data-show-quantity={showPublicQuantity ? 'true' : 'false'}
   data-catalog-item={catalog ? '' : undefined}
   data-search={catalog ? item.searchText : undefined}
   data-price={catalog ? String(price ?? -1) : undefined}
@@ -68,7 +70,7 @@ const canPropose = item.forSale && item.proposalTerms.policy !== 'none' && !(ite
   <button class="product-open-button" type="button" data-open-product aria-label={`Ver detalhes de ${item.name}`}>
     <div class="product-card-media">
       <ProductImage item={item} />
-      {item.showQuantity && <span class="quantity-chip">{item.quantity} {item.quantity === 1 ? 'unidade' : 'unidades'}</span>}
+      {showPublicQuantity && <span class="quantity-chip">{item.quantity} {item.quantity === 1 ? 'unidade' : 'unidades'}</span>}
     </div>
 
     <div class="product-card-body">
@@ -84,6 +86,8 @@ const canPropose = item.forSale && item.proposalTerms.policy !== 'none' && !(ite
         <p class="product-description"><strong>{item.number}</strong><span>•</span>{item.collection}</p>
       ) : item.kind === 'kit' ? (
         <p class="product-description">{item.description}</p>
+      ) : item.kind === 'product' ? (
+        <p class="product-description">{item.description || 'Produto Pokémon lacrado.'}</p>
       ) : (
         <p class="product-description">Pacote lacrado publicado pelo colecionador.</p>
       )}

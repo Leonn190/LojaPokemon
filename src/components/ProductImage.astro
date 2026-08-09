@@ -18,6 +18,8 @@ const primaryImage = imageUrls[0] || '';
 const fallbackImages = imageUrls.slice(1);
 const isCard = item.kind === 'card';
 const isKit = item.kind === 'kit';
+const isBooster = item.kind === 'booster';
+const isProduct = item.kind === 'product';
 const initials = isKit
   ? 'KIT'
   : item.name
@@ -27,8 +29,8 @@ const initials = isKit
       .map((word) => word[0])
       .join('')
       .toUpperCase();
-const fallbackLabel = isCard ? 'Carta Pokémon' : item.kind === 'booster' ? 'Booster Pokémon' : 'Kit personalizado';
-const isInteractive = interactive && (isCard || isKit);
+const fallbackLabel = isCard ? 'Carta Pokémon' : isBooster ? 'Booster Pokémon' : isKit ? 'Kit personalizado' : 'Produto Pokémon';
+const isInteractive = interactive && (isCard || isKit || isBooster || isProduct);
 
 const kitContent = isKit ? item.contentItems : [];
 const kitPreviewItems = kitContent
@@ -47,13 +49,14 @@ const hasKitComposition = isKit && kitPreviewItems.length > 0;
 <div
   class:list={[
     'collectible-visual',
-    item.kind === 'booster' && 'booster-visual',
+    isBooster && 'booster-visual',
     isKit && 'kit-visual',
+    isProduct && 'sealed-product-visual',
     hasKitComposition && 'kit-composite-visual',
     detail && 'detail-visual',
   ]}
   data-tilt={isInteractive ? '' : undefined}
-  data-tilt-strength={isInteractive ? (detail ? (isKit ? '8' : '11') : (isKit ? '4' : '5')) : undefined}
+  data-tilt-strength={isInteractive ? (detail ? (isKit ? '8' : isBooster ? '5' : isProduct ? '6' : '11') : (isKit ? '4' : isBooster ? '3' : isProduct ? '4' : '5')) : undefined}
 >
   <div class:list={['image-stage', hasKitComposition && 'kit-image-stage']}>
     <span class="image-fallback" aria-hidden="true">
@@ -92,7 +95,7 @@ const hasKitComposition = isKit && kitPreviewItems.length > 0;
     ) : primaryImage ? (
       <img
         src={primaryImage}
-        alt={isCard ? `${item.name}, ${item.number}` : item.kind === 'booster' ? `Booster ${item.name}` : `Kit ${item.name}`}
+        alt={isCard ? `${item.name}, ${item.number}` : isBooster ? `Booster ${item.name}` : isKit ? `Kit ${item.name}` : `Produto ${item.name}`}
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
         fetchpriority={eager ? 'high' : 'auto'}

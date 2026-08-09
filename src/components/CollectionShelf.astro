@@ -14,11 +14,11 @@ interface Props {
 
 const { kind, eyebrow, title, description, items, endpoint, alternate = false } = Astro.props;
 const preview = items.slice(0, 8);
-const icon = kind === 'card' ? '◇' : kind === 'booster' ? '▱' : '▦';
-const emptyLabel = kind === 'card' ? 'Nenhuma carta cadastrada nesta coleção.' : kind === 'booster' ? 'Nenhum booster cadastrado nesta coleção.' : 'Nenhum kit publicado ainda.';
+const icon = kind === 'card' ? '◇' : kind === 'booster' ? '▱' : kind === 'kit' ? '▦' : '▣';
+const emptyLabel = kind === 'card' ? 'Nenhuma carta cadastrada nesta coleção.' : kind === 'booster' ? 'Nenhum booster cadastrado nesta coleção.' : kind === 'kit' ? 'Nenhum kit publicado ainda.' : 'Nenhum produto publicado ainda.';
 ---
 
-<section id={kind === 'card' ? 'cartas' : kind === 'booster' ? 'boosters' : 'kits'} class:list={['collection-catalog-block', alternate && 'alternate-collection-block']} data-collection-shelf data-kind={kind} data-endpoint={endpoint}>
+<section id={kind === 'card' ? 'cartas' : kind === 'booster' ? 'boosters' : kind === 'kit' ? 'kits' : 'produtos'} class:list={['collection-catalog-block', alternate && 'alternate-collection-block']} data-collection-shelf data-kind={kind} data-endpoint={endpoint}>
   <div class="shell collection-block-heading collection-shelf-heading" data-reveal>
     <div><span class="section-eyebrow">{eyebrow}</span><h2>{title}</h2><p>{description}</p></div>
     {items.length > 0 && <button type="button" class="collection-expand-button" data-expand-shelf><span>Ver todos e pesquisar</span><b>＋</b></button>}
@@ -26,7 +26,7 @@ const emptyLabel = kind === 'card' ? 'Nenhuma carta cadastrada nesta coleção.'
 
   {items.length > 0 ? (
     <>
-      <div class="shell collection-preview-shell">
+      <div class="shell collection-preview-shell" data-shelf-preview>
         <div class="carousel-track collection-profile-carousel" data-random-carousel aria-label={`${title}: seleção da coleção`}>
           <div class="carousel-belt">
             <div class="carousel-sequence">
@@ -40,7 +40,7 @@ const emptyLabel = kind === 'card' ? 'Nenhuma carta cadastrada nesta coleção.'
       </div>
       <div class="shell collection-expanded-catalog" data-expanded-catalog hidden>
         <div class="collection-expanded-toolbar">
-          <label class="collection-expanded-search"><span>⌕</span><input type="search" placeholder={`Pesquisar ${kind === 'card' ? 'cartas' : kind === 'booster' ? 'boosters' : 'kits'}...`} data-shelf-search /></label>
+          <label class="collection-expanded-search"><span>⌕</span><input type="search" placeholder={`Pesquisar ${kind === 'card' ? 'cartas' : kind === 'booster' ? 'boosters' : kind === 'kit' ? 'kits' : 'produtos'}...`} data-shelf-search /></label>
           <div class="collection-expanded-filters" data-shelf-filters></div>
           <span class="collection-expanded-count" data-shelf-count>Carregando…</span>
         </div>

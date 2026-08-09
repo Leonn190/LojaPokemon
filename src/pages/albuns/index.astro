@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AlbumCard from '../../components/AlbumCard.astro';
+import { getAlbums } from '../../lib/catalog';
+const albums = getAlbums();
+---
+<BaseLayout title="Álbuns da comunidade" description="Explore os álbuns virtuais organizados pelos colecionadores do Nexus TCG." active="albums">
+  <section class="catalog-hero album-catalog-hero"><div class="shell catalog-hero-grid"><div data-reveal><span class="hero-badge"><i></i> Organização visual</span><h1>Álbuns virtuais</h1><p>Cada álbum organiza cartas em páginas e formatos próprios. Abra um item para entrar na coleção e navegar pelo álbum completo.</p></div><div class="catalog-hero-stats" data-reveal><div><strong>{albums.length}</strong><span>álbuns publicados</span></div><div><strong>{albums.reduce((sum, album) => sum + album.occupiedSlots, 0)}</strong><span>cartas posicionadas</span></div></div></div></section>
+  <section class="shell albums-catalog" data-album-catalog><div class="albums-catalog-toolbar"><label><span>⌕</span><input type="search" placeholder="Buscar álbum ou colecionador..." data-album-search /></label><strong data-album-count>{albums.length} {albums.length === 1 ? 'álbum' : 'álbuns'}</strong></div><div class="albums-catalog-grid">{albums.map((album) => <div data-album-entry data-search={album.searchText}><AlbumCard album={album} /></div>)}</div><div class="empty-state" data-album-empty><span>▤</span><h2>Nenhum álbum encontrado</h2><p>Tente pesquisar por outro nome.</p></div></section>
+  <script is:inline>(()=>{const root=document.querySelector('[data-album-catalog]');const input=root?.querySelector('[data-album-search]');const entries=[...(root?.querySelectorAll('[data-album-entry]')||[])];const count=root?.querySelector('[data-album-count]');const empty=root?.querySelector('[data-album-empty]');const n=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();const apply=()=>{const q=n(input?.value);let visible=0;entries.forEach(e=>{const show=!q||n(e.dataset.search).includes(q);e.hidden=!show;if(show)visible++;});if(count)count.textContent=`${visible} ${visible===1?'álbum':'álbuns'}`;empty?.classList.toggle('show',visible===0);};input?.addEventListener('input',apply);})();</script>
+</BaseLayout>

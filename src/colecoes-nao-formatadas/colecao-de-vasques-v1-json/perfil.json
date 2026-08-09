@@ -15,5 +15,11 @@
     "discountTiers": []
   },
   "collectionId": "colecao-de-vasques",
-  "generatedAt": "2026-08-07T19:12:58.499Z"
+  "generatedAt": "2026-08-07T19:12:58.499Z",
+  "palette": [
+    "#0b2942",
+    "#030912",
+    "#24506d"
+  ],
+  "priceDisplayFallback": "league_average_then_lowest"
 }

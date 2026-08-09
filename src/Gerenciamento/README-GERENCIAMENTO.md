@@ -7,6 +7,7 @@ Os inventários ativos são listas de objetos JSON:
 - `inventario-cartas.json`
 - `inventario-boosters.json`
 - `inventario-kits.json`
+- `inventario-produtos.json`
 - `inventario-albuns.json`
 
 CSV existe apenas como **compatibilidade de migração**. Pacotes novos gerados pelo site usam JSON.
@@ -115,9 +116,10 @@ Updates JSON podem conter:
 - `inventario-cartas.json`;
 - `inventario-boosters.json`;
 - `inventario-kits.json`;
+- `inventario-produtos.json`;
 - `inventario-albuns.json`.
 
-Novas cartas/boosters são consultadas antes de alterar o inventário. Se alguma consulta falhar, a atualização do inventário é cancelada. Quando tudo termina, perfil, cartas, boosters, kits e álbuns são promovidos na mesma transação. `updateId` impede aplicação duplicada.
+Novas cartas/boosters são consultadas antes de alterar o inventário. Se alguma consulta falhar, a atualização do inventário é cancelada. Quando tudo termina, perfil, cartas, boosters, kits, produtos e álbuns são promovidos na mesma transação. `updateId` impede aplicação duplicada.
 
 Kits enviados com `operation: "upsert"` substituem a versão do mesmo `Id`; álbuns de update também representam o estado completo do álbum. Edições de usuário em cartas/boosters podem usar `operation: "patch"`; nesse caso somente campos controlados pelo usuário (como `Preço`, quantidade, disponibilidade e favorito de carta) são aplicados, sem sobrescrever referências de mercado.
 

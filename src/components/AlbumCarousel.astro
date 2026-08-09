@@ -1,0 +1,14 @@
+---
+import AlbumCard from './AlbumCard.astro';
+import type { AlbumItem } from '../lib/catalog';
+interface Props { albums: AlbumItem[]; viewAllHref: string; }
+const { albums, viewAllHref } = Astro.props;
+const preview = albums.slice(0, 14);
+---
+<section class="carousel-section album-carousel-section">
+  <div class="shell carousel-heading" data-reveal>
+    <div><span class="section-eyebrow">Álbuns da comunidade</span><h2>Organizações que também contam uma história.</h2><p>Álbuns virtuais aparecem como uma categoria própria e levam direto à coleção de quem os montou.</p></div>
+    <a class="text-link" href={viewAllHref}>Ver todos os álbuns <span>↗</span></a>
+  </div>
+  {preview.length ? <div class="carousel-track album-carousel-track" data-random-carousel><div class="carousel-belt"><div class="carousel-sequence">{preview.map((album) => <AlbumCard album={album} compact />)}</div><div class="carousel-sequence" aria-hidden="true">{preview.map((album) => <AlbumCard album={album} compact />)}</div></div></div> : <div class="shell standalone-empty-state"><span>▤</span><div><small>Nenhum álbum publicado</small><h2>Os álbuns aparecerão aqui.</h2><p>Quando um colecionador organizar um álbum, ele passa a fazer parte desta vitrine.</p></div></div>}
+</section>

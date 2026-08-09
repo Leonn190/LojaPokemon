@@ -25,13 +25,18 @@ const serialize = (item: CatalogItem) => ({
     type: item.type,
   } : item.kind === 'booster' ? {
     collection: item.name,
+    linkLiga: item.linkLiga,
     type: 'Booster avulso',
-  } : {
+  } : item.kind === 'kit' ? {
     description: item.description,
     contents: item.contents,
     contentItems: item.contentItems,
     sourceTotal: item.sourceTotal,
     type: 'Kit personalizado',
+  } : {
+    description: item.description,
+    linkLiga: item.linkLiga,
+    type: 'Produto lacrado',
   }),
 });
 
@@ -39,6 +44,7 @@ export const getStaticPaths: GetStaticPaths = () => getCollections().flatMap((co
   { params: { slug: collection.slug, kind: 'cards' }, props: { items: collection.cards } },
   { params: { slug: collection.slug, kind: 'boosters' }, props: { items: collection.boosters } },
   { params: { slug: collection.slug, kind: 'kits' }, props: { items: collection.kits } },
+  { params: { slug: collection.slug, kind: 'produtos' }, props: { items: collection.products } },
 ]));
 
 export const GET: APIRoute = ({ props }) => new Response(JSON.stringify((props.items as CatalogItem[]).map(serialize)), {

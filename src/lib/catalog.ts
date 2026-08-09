@@ -1,7 +1,8 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-export type CatalogKind = 'card' | 'booster' | 'kit';
+export type CatalogKind = 'card' | 'booster' | 'kit' | 'product';
+export type PublicPriceFallback = 'league_average_then_lowest' | 'league_lowest_then_average' | 'consult';
 export type ProposalPolicy = 'flexible' | 'none' | 'fixed_price_multi_only' | 'no_defined_price' | 'multi_only';
 
 export interface ProposalDiscountTier {
@@ -95,7 +96,13 @@ export interface KitItem extends OwnedItemBase {
   sourceTotal: number | null;
 }
 
-export type CatalogItem = CardItem | BoosterItem | KitItem;
+export interface ProductItem extends OwnedItemBase {
+  kind: 'product';
+  linkLiga: string;
+  description: string;
+}
+
+export type CatalogItem = CardItem | BoosterItem | KitItem | ProductItem;
 
 export interface AlbumCardReference {
   itemId: string;
@@ -115,6 +122,10 @@ export interface AlbumPage {
 
 export interface AlbumItem {
   id: string;
+  ownerName: string;
+  ownerCollectionName: string;
+  ownerCollectionSlug: string;
+  searchText: string;
   name: string;
   description: string;
   format: string;
@@ -140,7 +151,9 @@ export interface CollectorCollection {
   cards: CardItem[];
   boosters: BoosterItem[];
   kits: KitItem[];
+  products: ProductItem[];
   albums: AlbumItem[];
+  priceDisplayFallback: PublicPriceFallback;
   totalItems: number;
   totalUnits: number;
   estimatedValue: number;
@@ -162,6 +175,8 @@ type ProfileData = {
   password?: string;
   profilePhoto?: string;
   palette?: string[] | { primary?: string; secondary?: string; accent?: string };
+  priceDisplayFallback?: PublicPriceFallback;
+  pricingMode?: string;
   proposalTerms?: {
     policy?: ProposalPolicy;
     flexibleDiscounts?: boolean;
@@ -368,9 +383,9 @@ const readImageFiles = (folder: string): string[] => {
 };
 
 const imagePool = (collectionSlug: string, kind: CatalogKind): string[] => {
-  const localFolder = `colecoes/${collectionSlug}/${kind === 'card' ? 'imagens' : kind === 'booster' ? 'imagensboosters' : 'imagenskits'}`;
-  const globalFolder = kind === 'card' ? 'imagens' : kind === 'booster' ? 'imagensboosters' : 'imagenskits';
-  return unique([...readImageFiles(localFolder), ...readImageFiles(globalFolder)]);
+  const folderByKind: Record<CatalogKind, string> = { card: 'imagens', booster: 'imagensboosters', kit: 'imagenskits', product: 'imagensprodutos' };
+  const folder = folderByKind[kind];
+  return unique([...readImageFiles(`colecoes/${collectionSlug}/${folder}`), ...readImageFiles(folder)]);
 };
 
 const compactImageKey = (value: string): string => normalizeText(value).replace(/\s+/g, '');
@@ -480,6 +495,29 @@ const kitImageCandidates = (collectionSlug: string, name: string, explicit: stri
   return unique([...explicitCandidates, ...existing, ...generated]);
 };
 
+const productImageCandidates = (collectionSlug: string, name: string, explicit: string): string[] => {
+  const pool = imagePool(collectionSlug, 'product');
+  const explicitCandidates = explicit ? [explicit.includes('/') || /^(?:https?:|data:|blob:)/i.test(explicit) ? explicit : `imagensprodutos/${explicit}`] : [];
+  const key = normalizeText(name);
+  const existing = pool.filter((path) => normalizeText(stemOf(path)).includes(key));
+  const stems = unique([cleanFilePart(name), asciiFilePart(name), slugify(name)]);
+  const generated = stems.flatMap((stem) => ['jpg', 'jpeg', 'png', 'webp', 'avif'].map((extension) => `imagensprodutos/${stem}.${extension}`));
+  return unique([...explicitCandidates, ...existing, ...generated]);
+};
+
+const normalizePriceFallback = (profile: ProfileData): PublicPriceFallback => {
+  if (profile.priceDisplayFallback === 'league_lowest_then_average' || profile.priceDisplayFallback === 'consult') return profile.priceDisplayFallback;
+  if (normalizeText(String(profile.pricingMode ?? '')) === 'menor') return 'league_lowest_then_average';
+  return 'league_average_then_lowest';
+};
+
+const resolvePublicPrice = (finalPrice: number | null, average: number | null, lowest: number | null, fallback: PublicPriceFallback): number | null => {
+  if (finalPrice !== null) return finalPrice;
+  if (fallback === 'consult') return null;
+  if (fallback === 'league_lowest_then_average') return lowest ?? average;
+  return average ?? lowest;
+};
+
 const normalizeReferenceLink = (value: string): string => {
   const raw = value.trim();
   if (!raw) return '';
@@ -580,6 +618,7 @@ export const getCollections = (): CollectorCollection[] => {
     const usedImages = new Map<string, number>();
     const palette = normalizePalette(profile);
     const profilePhoto = String(profile.profilePhoto ?? '').trim();
+    const priceDisplayFallback = normalizePriceFallback(profile);
     const rawCardHistory = readJsonLines(join(folder, 'historico', 'cartas.jsonl'));
     const cardHistory = new Map<string, PriceHistoryEntry[]>();
     rawCardHistory.forEach((entry) => {
@@ -614,7 +653,7 @@ export const getCollections = (): CollectorCollection[] => {
       const leaguePrice = parseDecimal(row['Menor Liga']) ?? parseDecimal(row['Preço Liga mais barato']);
       const averageLeaguePrice = parseDecimal(row['Media Liga']) ?? parseDecimal(row['Preço Médio Liga']) ?? parseDecimal(row['Preço médio Liga']);
       const finalPrice = parseDecimal(row['Preço']);
-      const price = finalPrice;
+      const price = resolvePublicPrice(finalPrice, averageLeaguePrice, leaguePrice, priceDisplayFallback);
       const forSale = profile.selling !== false && parseBoolean(row['À venda'] ?? row['Venda'], true);
       const imageKey = normalizeText(`${name} ${number}`);
       const duplicateIndex = usedImages.get(imageKey) ?? 0;
@@ -673,7 +712,7 @@ export const getCollections = (): CollectorCollection[] => {
         const leaguePrice = parseDecimal(row['Preço Liga mais barato']) ?? parseDecimal(row['Preço Mais Baixo Liga']) ?? parseDecimal(row['Menor Liga']);
         const averageLeaguePrice = parseDecimal(row['Media Liga']) ?? parseDecimal(row['Preço médio Liga']) ?? parseDecimal(row['Preço Médio Liga']);
         const finalPrice = parseDecimal(row['Preço']);
-        const price = finalPrice;
+        const price = resolvePublicPrice(finalPrice, averageLeaguePrice, leaguePrice, priceDisplayFallback);
         const forSale = profile.selling !== false && parseBoolean(row['À venda'] ?? row['Venda'], true);
         const localSlug = createUniqueSlug(slugify(name), globalSlugs, `${owner}-${quantity}`);
         const id = String(row['Id'] ?? row['ID'] ?? '').trim() || `${collectionSlug}:booster:${normalizeText(`${row['Link Liga'] ?? ''}|${name}`)}`;
@@ -763,15 +802,35 @@ export const getCollections = (): CollectorCollection[] => {
       };
     });
 
+    const products: ProductItem[] = readInventory(folder, 'inventario-produtos').map((row, productIndex) => {
+      const name = String(row['Nome'] ?? row['Produto'] ?? '').trim() || `Produto ${productIndex + 1}`;
+      const price = parseDecimal(row['Preço']);
+      const linkLiga = String(row['Link Liga'] ?? '').trim();
+      const description = String(row['Descrição'] ?? '').trim() || 'Produto Pokémon lacrado.';
+      const forSale = profile.selling !== false && parseBoolean(row['À venda'] ?? row['Venda'], true);
+      const localSlug = createUniqueSlug(slugify(name), globalSlugs, owner);
+      const id = String(row['Id'] ?? row['ID'] ?? '').trim() || `${collectionSlug}:product:${normalizeText(`${linkLiga}|${name}`)}`;
+      return {
+        id, kind: 'product', name, description, quantity: 1, price, forSale, showQuantity: false, linkLiga,
+        slug: `${collectionSlug}-${localSlug}`, image: String(row['Imagem'] ?? ''),
+        imageCandidates: productImageCandidates(collectionSlug, name, String(row['Imagem'] ?? '')),
+        ownerName: owner, ownerCollectionName: title, ownerCollectionSlug: collectionSlug, ownerPhone, proposalTerms,
+        searchText: normalizeText(`${name} ${description} produto lacrado ${owner} ${title}`),
+      };
+    });
+
     const albums: AlbumItem[] = readInventory(folder, 'inventario-albuns').map((row, albumIndex) => {
       const layout = albumFormat(String(row['Formato'] ?? '3x3'));
       const rawPages = Array.isArray(row['Páginas']) ? row['Páginas'] : row['Páginas JSON'] ?? row['Paginas JSON'] ?? [];
       const pages = parseAlbumPages(rawPages, layout.columns, layout.rows, cards);
       const occupiedSlots = pages.reduce((total, page) => total + page.slots.filter(Boolean).length, 0);
       const firstCard = pages.flatMap((page) => page.slots).find(Boolean);
+      const albumName = String(row['Nome'] ?? '').trim() || `Álbum ${albumIndex + 1}`;
       return {
         id: String(row['Id'] ?? row['ID'] ?? '').trim() || `${collectionSlug}-album-${albumIndex + 1}`,
-        name: String(row['Nome'] ?? '').trim() || `Álbum ${albumIndex + 1}`,
+        ownerName: owner, ownerCollectionName: title, ownerCollectionSlug: collectionSlug,
+        searchText: normalizeText(`${albumName} ${row['Descrição'] ?? ''} ${owner} ${title}`),
+        name: albumName,
         description: String(row['Descrição'] ?? ''),
         format: layout.format,
         columns: layout.columns,
@@ -783,9 +842,9 @@ export const getCollections = (): CollectorCollection[] => {
       };
     });
 
-    const allItems: CatalogItem[] = [...cards, ...boosters, ...kits];
+    const allItems: CatalogItem[] = [...cards, ...boosters, ...kits, ...products];
     const totalUnits = allItems.reduce((total, item) => total + item.quantity, 0);
-    const estimatedValue = [...cards, ...boosters].reduce((total, item) => total + (item.price ?? 0) * item.quantity, 0);
+    const estimatedValue = [...cards, ...boosters, ...products].reduce((total, item) => total + (item.price ?? 0) * item.quantity, 0);
     const coverItems = [...allItems]
       .sort((a, b) => (b.price ?? 0) - (a.price ?? 0))
       .slice(0, 4);
@@ -804,7 +863,9 @@ export const getCollections = (): CollectorCollection[] => {
       cards,
       boosters,
       kits,
+      products,
       albums,
+      priceDisplayFallback,
       totalItems: allItems.length,
       totalUnits,
       estimatedValue,
@@ -839,12 +900,14 @@ export const getEditableCollections = () => getCollections().map((collection) =>
       collectionId: folderName,
       profilePhoto: collection.profilePhoto,
       palette: collection.palette,
+      priceDisplayFallback: collection.priceDisplayFallback,
     },
     cards: collection.cards.map(({ id, name, number, collection: set, language, condition, year, type, quantity, finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, averageLeaguePrice, favorite, priceHistory, advancedData, image, imageCandidates }) => ({
       id, name, number, collection: set, language, condition, year, type, quantity, price: finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, averageLeaguePrice, favorite, priceHistory, advancedData, image, imageCandidates,
     })),
     boosters: collection.boosters.map(({ id, name, quantity, finalPrice, forSale, linkLiga, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, averageLeaguePrice, image, imageCandidates }) => ({ id, name, quantity, price: finalPrice, forSale, linkLiga, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, averageLeaguePrice, image, imageCandidates })),
     kits: collection.kits.map(({ id, name, description, contents, contentItems, sourceTotal, quantity, price, forSale, image, imageCandidates }) => ({ id, name, description, contents, contentItems, sourceTotal, quantity, price, forSale, image, imageCandidates })),
+    products: collection.products.map(({ id, name, description, price, forSale, linkLiga, image, imageCandidates }) => ({ id, name, description, price, forSale, linkLiga, image, imageCandidates })),
     albums: collection.albums.map((album) => ({
       albumId: album.id,
       name: album.name,
@@ -871,7 +934,17 @@ export const getKits = (collectionSlug?: string): KitItem[] => {
   return collections.flatMap((collection) => collection.kits);
 };
 
-export const getAllItems = (): CatalogItem[] => [...getCards(), ...getBoosters(), ...getKits()];
+export const getProducts = (collectionSlug?: string): ProductItem[] => {
+  const collections = collectionSlug ? getCollections().filter((item) => item.slug === collectionSlug) : getCollections();
+  return collections.flatMap((collection) => collection.products);
+};
+
+export const getAlbums = (collectionSlug?: string): AlbumItem[] => {
+  const collections = collectionSlug ? getCollections().filter((item) => item.slug === collectionSlug) : getCollections();
+  return collections.flatMap((collection) => collection.albums);
+};
+
+export const getAllItems = (): CatalogItem[] => [...getCards(), ...getBoosters(), ...getKits(), ...getProducts()];
 
 export const shuffleItems = <T>(items: T[]): T[] => {
   const result = [...items];

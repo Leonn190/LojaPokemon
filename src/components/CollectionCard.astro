@@ -25,9 +25,11 @@ const imageUrl = (path: string) => /^(?:https?:|data:|blob:)/i.test(path) ? path
     <h3>{collection.title}</h3>
     <p>{collection.description}</p>
     <div class="collection-card-stats">
-      <span><strong>{collection.cards.length}</strong> cartas</span>
-      <span><strong>{collection.boosters.length}</strong> boosters</span>
-      <span><strong>{collection.kits.length}</strong> kits</span>
+      {collection.cards.length > 0 && <span><strong>{collection.cards.length}</strong> cartas</span>}
+      {collection.boosters.length > 0 && <span><strong>{collection.boosters.length}</strong> boosters</span>}
+      {collection.kits.length > 0 && <span><strong>{collection.kits.length}</strong> kits</span>}
+      {collection.products.length > 0 && <span><strong>{collection.products.length}</strong> produtos</span>}
+      {collection.albums.length > 0 && <span><strong>{collection.albums.length}</strong> álbuns</span>}
     </div>
   </div>
 </a>

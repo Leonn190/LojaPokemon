@@ -2,8 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Carousel from '../components/Carousel.astro';
 import CollectionCarousel from '../components/CollectionCarousel.astro';
+import AlbumCarousel from '../components/AlbumCarousel.astro';
 import ProductImage from '../components/ProductImage.astro';
-import { getBoosters, getCards, getCollections, getKits, shuffleItems } from '../lib/catalog';
+import { getAlbums, getBoosters, getCards, getCollections, getKits, getProducts, shuffleItems } from '../lib/catalog';
 import { siteConfig } from '../config';
 
 const rawBase = import.meta.env.BASE_URL || '/';
@@ -11,12 +12,16 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 const cards = getCards();
 const boosters = getBoosters();
 const kits = getKits();
+const products = getProducts();
+const albums = getAlbums();
 const collections = getCollections();
 const featuredCards = shuffleItems(cards).slice(0, 14);
 const featuredBoosters = shuffleItems(boosters).slice(0, 14);
 const featuredKits = shuffleItems(kits).slice(0, 14);
+const featuredProducts = shuffleItems(products).slice(0, 14);
+const featuredAlbums = shuffleItems(albums).slice(0, 14);
 const featuredCollections = [...collections].sort((a, b) => Number(b.featured) - Number(a.featured));
-const totalUnits = [...cards, ...boosters, ...kits].reduce((total, item) => total + item.quantity, 0);
+const totalUnits = [...cards, ...boosters, ...kits, ...products].reduce((total, item) => total + item.quantity, 0);
 const heroItems = collections.flatMap((collection) => collection.coverItems).slice(0, 3);
 ---
 
@@ -63,12 +68,13 @@ const heroItems = collections.flatMap((collection) => collection.coverItems).sli
     <div class="platform-intro-copy">
       <span class="section-eyebrow">Uma plataforma para colecionadores</span>
       <h2>Guarde para você.<br />Venda quando quiser.</h2>
-      <p>O perfil de cada colecionador funciona como uma coleção digital completa. Cartas e boosters podem ficar apenas catalogados ou ser publicados com preço, e os kits permitem combinar vários itens em uma única oferta.</p>
+      <p>O perfil de cada colecionador funciona como uma coleção digital completa. Cartas, boosters e produtos lacrados podem ficar apenas catalogados ou ser publicados com preço; kits combinam itens e álbuns organizam as cartas visualmente.</p>
     </div>
     <div class="platform-features">
       <article><span>◆</span><div><strong>Coleção online</strong><p>Registre cartas e boosters mesmo quando eles não estiverem à venda.</p></div></article>
       <article><span>↗</span><div><strong>Vitrine pessoal</strong><p>Mostre seus itens em uma página exclusiva com seu nome e seus dados.</p></div></article>
       <article><span>▦</span><div><strong>Kits personalizados</strong><p>Combine cartas e boosters e defina um preço para o conjunto inteiro.</p></div></article>
+      <article><span>▤</span><div><strong>Álbuns virtuais</strong><p>Organize as cartas em páginas e mostre sua coleção como um álbum real.</p></div></article>
     </div>
   </section>
 
@@ -86,6 +92,16 @@ const heroItems = collections.flatMap((collection) => collection.coverItems).sli
     <a class="navigation-card kits-navigation" href={`${base}kits/`}>
       <div class="navigation-icon" aria-hidden="true"><span>▦</span></div>
       <div><small>Ofertas combinadas</small><h2>Kits</h2><p>Encontre conjuntos personalizados de cartas e boosters por um preço único.</p></div>
+      <span class="navigation-arrow">↗</span>
+    </a>
+    <a class="navigation-card products-navigation" href={`${base}produtos/`}>
+      <div class="navigation-icon" aria-hidden="true"><span>▣</span></div>
+      <div><small>Produtos fechados</small><h2>Produtos</h2><p>Boxes e produtos Pokémon lacrados com informações padronizadas.</p></div>
+      <span class="navigation-arrow">↗</span>
+    </a>
+    <a class="navigation-card albums-navigation" href={`${base}albuns/`}>
+      <div class="navigation-icon" aria-hidden="true"><span>▤</span></div>
+      <div><small>Organização visual</small><h2>Álbuns</h2><p>Explore álbuns virtuais montados pelos colecionadores da comunidade.</p></div>
       <span class="navigation-arrow">↗</span>
     </a>
     <a class="navigation-card collections-navigation" href={`${base}colecoes/`}>
@@ -123,6 +139,19 @@ const heroItems = collections.flatMap((collection) => collection.coverItems).sli
     emptyTitle="O primeiro kit ainda não foi publicado"
     emptyDescription="Leon19 já pode combinar cartas e boosters da coleção e criar a primeira oferta do Nexus."
   />
+
+  <Carousel
+    eyebrow="Produtos lacrados"
+    title="Produtos Pokémon fechados."
+    description="Boxes, coleções especiais e outros produtos lacrados entram em uma categoria própria."
+    items={featuredProducts}
+    viewAllHref={`${base}produtos/`}
+    viewAllLabel="Ver produtos"
+    emptyTitle="Nenhum produto publicado ainda"
+    emptyDescription="A categoria já está pronta para receber os primeiros produtos lacrados."
+  />
+
+  <AlbumCarousel albums={featuredAlbums} viewAllHref={`${base}albuns/`} />
 
   <CollectionCarousel collections={featuredCollections} viewAllHref={`${base}colecoes/`} />
 

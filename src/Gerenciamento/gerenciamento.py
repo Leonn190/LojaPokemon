@@ -236,6 +236,23 @@ def normalizar_booster_existente(linha: dict[str, Any]) -> dict[str, Any]:
     return booster
 
 
+def normalizar_produto(linha: dict[str, Any]) -> dict[str, Any]:
+    produto = dict(linha)
+    nome = texto(primeiro(linha, "Nome", "Produto")) or "Produto Pokémon"
+    produto.update({
+        "Nome": nome,
+        "Link Liga": texto(primeiro(linha, "Link Liga", "Liga", "Link")),
+        "Preço": numero(primeiro(linha, "Preço")),
+        "Imagem": texto(primeiro(linha, "Imagem")),
+        "À venda": _sim_nao(primeiro(linha, "À venda", "Venda"), True),
+    })
+    produto["Id"] = texto(primeiro(linha, "Id", "ID")) or f"PRODUTO-{chave_texto(nome) or hashlib.sha1(nome.encode('utf-8')).hexdigest()[:12].upper()}"
+    produto.pop("ID", None)
+    produto.pop("Quantidade", None)
+    produto.pop("quantity", None)
+    return produto
+
+
 def _conteudo_legado(conteudo: str) -> list[dict[str, Any]]:
     itens: list[dict[str, Any]] = []
     for trecho in re.split(r"\s*[|;]\s*", conteudo):
@@ -835,11 +852,13 @@ def formatar_nova_colecao(item: Path, modo: str) -> Path:
             return destino
 
         kits_origem = [normalizar_kit(x) for x in ler_inventario(origem, "kits")]
+        produtos = [normalizar_produto(x) for x in ler_inventario(origem, "produtos")]
         albuns_origem = [normalizar_album(x) for x in ler_inventario(origem, "albuns")]
         kits_origem, albuns_origem = _remapear_referencias_ids(kits_origem, albuns_origem, mapa_ids)
         kits = atualizar_kits(kits_origem, cartas, boosters)
         albuns = atualizar_albuns(albuns_origem, cartas)
         escrever_inventario(destino, "kits", kits)
+        escrever_inventario(destino, "produtos", produtos)
         escrever_inventario(destino, "albuns", albuns)
         perfil.pop("formattingPending", None)
         perfil.update({"updatedAt": agora_iso(), "formattingComplete": True})
@@ -957,6 +976,22 @@ def _mesclar_kits(existentes: list[dict[str, Any]], novos: list[dict[str, Any]])
                     atual[chave] = valor
 
 
+def _mesclar_produtos(existentes: list[dict[str, Any]], novos: list[dict[str, Any]]) -> None:
+    indice = {normalizar_produto(x)["Id"]: x for x in existentes}
+    for novo_bruto in novos:
+        novo = normalizar_produto(novo_bruto)
+        atual = indice.get(novo["Id"])
+        if atual is None:
+            atual = next((x for x in existentes if chave_texto(x.get("Nome")) == chave_texto(novo.get("Nome"))), None)
+        if atual is None:
+            existentes.append(novo)
+            indice[novo["Id"]] = novo
+        else:
+            # Produtos enviados pelo editor são registros completos (upsert).
+            atual.clear()
+            atual.update(novo)
+
+
 def _mesclar_albuns(existentes: list[dict[str, Any]], novos: list[dict[str, Any]]) -> None:
     indice = {normalizar_album(x)["Id"]: x for x in existentes}
     for novo_bruto in novos:
@@ -974,7 +1009,7 @@ def _mesclar_albuns(existentes: list[dict[str, Any]], novos: list[dict[str, Any]
 def _mesclar_perfil_editavel(perfil: dict[str, Any], perfil_update: dict[str, Any]) -> None:
     campos = (
         "owner", "title", "description", "email", "phone", "password",
-        "selling", "showQuantity", "featured", "proposalTerms", "profilePhoto", "palette",
+        "selling", "showQuantity", "featured", "proposalTerms", "profilePhoto", "palette", "priceDisplayFallback",
     )
     for campo in campos:
         if campo in perfil_update:
@@ -1007,6 +1042,7 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
         cartas = [normalizar_carta_existente(x) for x in ler_inventario(destino, "cartas")]
         boosters = [normalizar_booster_existente(x) for x in ler_inventario(destino, "boosters")]
         kits = [normalizar_kit(x) for x in ler_inventario(destino, "kits")]
+        produtos = [normalizar_produto(x) for x in ler_inventario(destino, "produtos")]
         albuns = [normalizar_album(x) for x in ler_inventario(destino, "albuns")]
         todas_cartas_update = ler_inventario(origem, "cartas")
         todos_boosters_update = ler_inventario(origem, "boosters")
@@ -1015,6 +1051,7 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
         novas_cartas_src = [x for x in todas_cartas_update if not _operacao_patch(x)]
         novos_boosters_src = [x for x in todos_boosters_update if not _operacao_patch(x)]
         novos_kits_src = ler_inventario(origem, "kits")
+        novos_produtos_src = ler_inventario(origem, "produtos")
         novos_albuns_src = ler_inventario(origem, "albuns")
         cotacao_id = f"update-{update_id}"
         data = texto(metadados.get("generatedAt")) or agora_iso()
@@ -1064,11 +1101,13 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
         _aplicar_patches_usuario(cartas, patches_cartas, "cartas")
         _aplicar_patches_usuario(boosters, patches_boosters, "boosters")
         novos_kits = [normalizar_kit(x) for x in novos_kits_src]
+        novos_produtos = [normalizar_produto(x) for x in novos_produtos_src]
         novos_albuns = [normalizar_album(x) for x in novos_albuns_src]
         novos_kits, novos_albuns = _remapear_referencias_ids(novos_kits, novos_albuns, mapa_ids)
         _mesclar_cartas(cartas, novas_cartas)
         _mesclar_boosters(boosters, novos_boosters)
         _mesclar_kits(kits, novos_kits)
+        _mesclar_produtos(produtos, novos_produtos)
         _mesclar_albuns(albuns, novos_albuns)
         kits = atualizar_kits(kits, cartas, boosters)
         albuns = atualizar_albuns(albuns, cartas)
@@ -1086,6 +1125,7 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
             escrever_inventario(staging, "cartas", cartas)
             escrever_inventario(staging, "boosters", boosters)
             escrever_inventario(staging, "kits", kits)
+            escrever_inventario(staging, "produtos", produtos)
             escrever_inventario(staging, "albuns", albuns)
         if historico_cartas:
             anexar_historico(destino, "cartas", historico_cartas)

@@ -21,6 +21,7 @@ ARQUIVOS_INVENTARIO = {
     "cartas": "inventario-cartas.json",
     "boosters": "inventario-boosters.json",
     "kits": "inventario-kits.json",
+    "produtos": "inventario-produtos.json",
     "albuns": "inventario-albuns.json",
 }
 ARQUIVOS_HISTORICO = {
@@ -31,6 +32,7 @@ ARQUIVOS_LEGADOS = {
     "cartas": "inventario-cartas.csv",
     "boosters": "inventario-boosters.csv",
     "kits": "inventario-kits.csv",
+    "produtos": "inventario-produtos.csv",
     "albuns": "inventario-albuns.csv",
 }
 

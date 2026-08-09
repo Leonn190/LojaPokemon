@@ -18,5 +18,11 @@
   "generatedAt": "2026-08-07T19:12:58.499Z",
   "pricingMode": "media",
   "updatedAt": "2026-08-08T16:58:24-03:00",
-  "formattingComplete": true
+  "formattingComplete": true,
+  "palette": [
+    "#0b2942",
+    "#030912",
+    "#24506d"
+  ],
+  "priceDisplayFallback": "league_average_then_lowest"
 }

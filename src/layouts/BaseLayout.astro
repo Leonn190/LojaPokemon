@@ -5,7 +5,7 @@ import '../styles/global.css';
 interface Props {
   title?: string;
   description?: string;
-  active?: 'home' | 'cards' | 'boosters' | 'kits' | 'collections' | 'signup';
+  active?: 'home' | 'cards' | 'boosters' | 'kits' | 'products' | 'albums' | 'collections' | 'signup';
   bodyClass?: string;
 }
 
@@ -51,6 +51,8 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             <a class:list={[{ active: active === 'cards' }]} href={`${base}cartas/`}>Cartas</a>
             <a class:list={[{ active: active === 'boosters' }]} href={`${base}boosters/`}>Boosters</a>
             <a class:list={[{ active: active === 'kits' }]} href={`${base}kits/`}>Kits</a>
+            <a class:list={[{ active: active === 'products' }]} href={`${base}produtos/`}>Produtos</a>
+            <a class:list={[{ active: active === 'albums' }]} href={`${base}albuns/`}>Álbuns</a>
           </div>
 
           <a class:list={['collector-nav-cta', { active: active === 'signup' }]} href={`${base}cadastro/`}>Criar coleção</a>
@@ -85,6 +87,8 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           <a href={`${base}cartas/`}>Cartas</a>
           <a href={`${base}boosters/`}>Boosters</a>
           <a href={`${base}kits/`}>Kits</a>
+          <a href={`${base}produtos/`}>Produtos</a>
+          <a href={`${base}albuns/`}>Álbuns</a>
           <a href={`${base}cadastro/`}>Criar coleção</a>
         </div>
       </div>
@@ -99,7 +103,10 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
       <section class="product-modal-panel" role="dialog" aria-modal="true" aria-labelledby="product-modal-title" tabindex="-1">
         <button class="modal-close-button" type="button" data-modal-close aria-label="Fechar detalhes">×</button>
         <div class="product-modal-grid">
-          <div class="product-modal-media" data-modal-media></div>
+          <div class="product-modal-media-column">
+            <div class="product-modal-media" data-modal-media></div>
+            <div class="modal-kit-gallery" data-modal-kit-gallery hidden></div>
+          </div>
           <article class="product-modal-content">
             <div class="detail-tags">
               <span data-modal-type></span>
@@ -129,11 +136,10 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
               <div data-spec-year><dt>Ano</dt><dd></dd></div>
               <div data-spec-type><dt>Tipo</dt><dd></dd></div>
               <div data-spec-contents><dt>Conteúdo do kit</dt><dd></dd></div>
-              <div data-spec-quantity><dt>Quantidade</dt><dd></dd></div>
+              <div data-spec-liga><dt>Referência Liga</dt><dd><a href="#" target="_blank" rel="noreferrer" data-modal-liga>Ver na Liga ↗</a></dd></div>
             </dl>
             <section class="modal-kit-details" data-modal-kit-details hidden>
-              <header><div><small>Conteúdo visual</small><strong>Itens deste kit</strong></div><span data-modal-kit-discount></span></header>
-              <div class="modal-kit-gallery" data-modal-kit-gallery></div>
+              <header><div><small>Composição do conjunto</small><strong>Itens deste kit</strong></div><span data-modal-kit-discount></span></header>
               <ul class="modal-kit-list" data-modal-kit-list></ul>
             </section>
 
@@ -160,7 +166,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         <div class="proposal-empty" data-proposal-empty>
           <span aria-hidden="true">◇</span>
           <h3>Nenhum item selecionado</h3>
-          <p>Adicione cartas, boosters ou kits. Itens de colecionadores diferentes serão separados automaticamente.</p>
+          <p>Adicione cartas, boosters, kits ou produtos. Itens de colecionadores diferentes serão separados automaticamente.</p>
         </div>
 
         <section class="proposal-editor" data-proposal-editor hidden>
@@ -440,6 +446,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         const modalKitGallery = modal?.querySelector('[data-modal-kit-gallery]');
         const modalKitList = modal?.querySelector('[data-modal-kit-list]');
         const modalKitDiscount = modal?.querySelector('[data-modal-kit-discount]');
+        const modalLiga = modal?.querySelector('[data-modal-liga]');
         let activeProductCard = null;
         let modalReturnFocus = null;
 
@@ -464,6 +471,8 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           const kind = card.dataset.kind || 'card';
           const isCard = kind === 'card';
           const isBooster = kind === 'booster';
+          const isKit = kind === 'kit';
+          const isProduct = kind === 'product';
           const visual = card.querySelector('.collectible-visual');
           modalMedia.innerHTML = visual ? visual.outerHTML : '';
           const clonedVisual = modalMedia.querySelector('[data-tilt]');
@@ -479,18 +488,19 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           });
 
           modal.classList.toggle('booster-modal', isBooster);
-          modal.classList.toggle('kit-modal', kind === 'kit');
+          modal.classList.toggle('kit-modal', isKit);
+          modal.classList.toggle('sealed-product-modal', isProduct);
           if (modalName) modalName.textContent = card.dataset.name || '';
-          if (modalNumber) modalNumber.textContent = isCard ? (card.dataset.number || '') : isBooster ? 'Pacote lacrado' : 'Kit personalizado';
-          if (modalType) modalType.textContent = card.dataset.type || '';
+          if (modalNumber) modalNumber.textContent = isCard ? (card.dataset.number || '') : isBooster ? 'Pacote lacrado' : isKit ? 'Conjunto personalizado' : 'Produto lacrado';
+          if (modalType) { modalType.hidden = isKit; modalType.textContent = card.dataset.type || ''; }
           if (modalStock) {
-            const showQuantity = card.dataset.showQuantity !== 'false';
+            const showQuantity = isKit && card.dataset.showQuantity !== 'false';
             modalStock.hidden = !showQuantity;
             modalStock.textContent = `${card.dataset.stock || '0'} ${card.dataset.stock === '1' ? 'unidade' : 'unidades'}`;
           }
           if (modalDescription) modalDescription.textContent = card.dataset.description || (isCard
             ? 'Carta publicada por um colecionador da comunidade Nexus TCG.'
-            : isBooster ? 'Booster lacrado publicado por um colecionador da comunidade.' : 'Conjunto personalizado pelo dono da coleção.');
+            : isBooster ? 'Booster lacrado publicado por um colecionador da comunidade.' : isKit ? 'Conjunto personalizado pelo dono da coleção.' : 'Produto Pokémon lacrado publicado pelo colecionador.');
           if (modalPrice) modalPrice.textContent = card.dataset.priceLabel || 'Consultar';
           modalPricePanel?.classList.toggle('booster-price-panel', isBooster);
           if (modalPurchaseActions) modalPurchaseActions.hidden = card.dataset.proposalAllowed === 'false';
@@ -511,13 +521,17 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           setSpec('[data-spec-language]', card.dataset.language || '', isCard);
           setSpec('[data-spec-condition]', card.dataset.condition || '', isCard);
           setSpec('[data-spec-year]', card.dataset.year || '', isCard);
-          setSpec('[data-spec-type]', card.dataset.type || '', true);
+          setSpec('[data-spec-type]', card.dataset.type || '', !isKit);
           setSpec('[data-spec-contents]', card.dataset.contents || '', false);
-          setSpec('[data-spec-quantity]', card.dataset.stock || '0', kind !== 'kit' && card.dataset.showQuantity !== 'false');
+          const ligaRow = modal?.querySelector('[data-spec-liga]');
+          const ligaUrl = card.dataset.linkLiga || '';
+          if (ligaRow) ligaRow.hidden = !ligaUrl;
+          if (modalLiga && ligaUrl) modalLiga.href = ligaUrl;
 
           if (modalKitDetails) {
-            modalKitDetails.hidden = kind !== 'kit';
-            if (kind === 'kit') {
+            modalKitDetails.hidden = !isKit;
+            if (modalKitGallery) modalKitGallery.hidden = !isKit;
+            if (isKit) {
               let kitItems = [];
               try { kitItems = JSON.parse(card.dataset.kitItems || '[]'); } catch (_) { kitItems = []; }
               if (modalKitDiscount) {
@@ -550,7 +564,16 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
               }
               if (modalKitList) {
                 modalKitList.innerHTML = '';
-                kitItems.forEach((entry) => { const li = document.createElement('li'); li.textContent = entry.name || 'Item'; modalKitList.appendChild(li); });
+                kitItems.forEach((entry) => {
+                  const li = document.createElement('li');
+                  const qty = Math.max(1, Number(entry.quantity) || 1);
+                  const amount = document.createElement('strong');
+                  const name = document.createElement('span');
+                  amount.textContent = `${qty}×`;
+                  name.textContent = String(entry.name || 'Item');
+                  li.append(amount, name);
+                  modalKitList.appendChild(li);
+                });
               }
             }
           }
@@ -607,7 +630,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         const activeGroup = () => proposals.find((group) => group.ownerSlug === activeOwnerSlug) || proposals[0] || null;
         const groupQuantity = (group) => group.items.reduce((sum, item) => sum + item.quantity, 0);
         const groupTotal = (group) => group.items.reduce((sum, item) => Number.isFinite(item.price) ? sum + item.price * item.quantity : sum, 0);
-        const itemLabel = (item) => item.number || (item.kind === 'kit' ? 'Kit' : item.kind === 'card' ? 'Carta avulsa' : 'Booster avulso');
+        const itemLabel = (item) => item.number || (item.kind === 'kit' ? 'Kit' : item.kind === 'card' ? 'Carta avulsa' : item.kind === 'booster' ? 'Booster avulso' : 'Produto lacrado');
         const requiresMultiple = (policy) => policy === 'multi_only' || policy === 'fixed_price_multi_only';
         const maxDiscountFor = (group) => {
           if (!group) return 0;

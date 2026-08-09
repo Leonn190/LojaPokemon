@@ -95,7 +95,7 @@ const publishedCollections = getEditableCollections();
       <section class="editor-control-center" aria-label="Configurações gerais da coleção">
         <label class="editor-setting-card">
           <span class="setting-icon">#</span>
-          <span><strong>Mostrar quantidades</strong><small>Exibe o estoque nas páginas públicas.</small></span>
+          <span><strong>Mostrar quantidade de kits</strong><small>Cartas e boosters nunca exibem estoque publicamente; este controle vale para kits.</small></span>
           <span class="switch"><input type="checkbox" data-show-quantity checked /><i></i></span>
         </label>
         <label class="editor-setting-card">
@@ -131,6 +131,7 @@ const publishedCollections = getEditableCollections();
         <header><div><span class="section-eyebrow">Negociação</span><h3>Termos de propostas da coleção</h3><p>Essas regras são exibidas publicamente e usadas pelo site para bloquear propostas incompatíveis.</p></div><span class="proposal-settings-badge">Pix após aceite</span></header>
         <div class="workspace-proposal-grid">
           <label><span>Regra principal</span><select data-proposal-policy><option value="flexible">Sou flexível quanto às regras</option><option value="none">Não aceito nenhuma proposta</option><option value="fixed_price_multi_only">Sem proposta para cartas precificadas e somente com mais de um produto</option><option value="no_defined_price">Sem proposta para cartas com preço definido</option><option value="multi_only">Propostas apenas com mais de um produto</option></select></label>
+          <label><span>Preço exibido quando “Preço” estiver vazio</span><select data-price-display-fallback><option value="league_average_then_lowest">Média Liga; se faltar, Menor Liga</option><option value="league_lowest_then_average">Menor Liga; se faltar, Média Liga</option><option value="consult">Mostrar “Consultar”</option></select></label>
           <label class="proposal-flexible-check"><input type="checkbox" data-flexible-discounts /><span><strong>Descontos flexíveis</strong><small>Permite que o comprador sugira qualquer percentual.</small></span></label>
         </div>
         <div class="workspace-tier-heading"><div><strong>Marcos máximos de desconto</strong><small>O maior marco alcançado pelo valor da proposta define o limite.</small></div><button type="button" data-add-discount-tier><span>＋</span> Adicionar marco</button></div>
@@ -142,6 +143,7 @@ const publishedCollections = getEditableCollections();
           <button type="button" class="editor-command-card" data-open-modal="card"><span>◇</span><strong>Adicionar carta</strong><small>Cadastre pelo link da Liga e estado.</small><b>＋</b></button>
           <button type="button" class="editor-command-card" data-open-modal="booster"><span>▱</span><strong>Adicionar booster</strong><small>Inclua pacotes lacrados no estoque.</small><b>＋</b></button>
           <button type="button" class="editor-command-card is-kit" data-open-modal="kit"><span>▦</span><strong>Adicionar kit</strong><small>Monte visualmente com drag and drop.</small><b>＋</b></button>
+          <button type="button" class="editor-command-card is-product" data-open-modal="product"><span>▣</span><strong>Adicionar produto</strong><small>Cadastre um produto Pokémon fechado.</small><b>＋</b></button>
           <button type="button" class="editor-command-card is-album" data-open-modal="album"><span>▤</span><strong>Adicionar álbum</strong><small>Escolha o formato e organize carta por carta.</small><b>＋</b></button>
         </div>
       </section>
@@ -156,6 +158,7 @@ const publishedCollections = getEditableCollections();
           <button type="button" class="active" data-inventory-tab="cards"><span>Cartas</span><b data-tab-count="cards">0</b></button>
           <button type="button" data-inventory-tab="boosters"><span>Boosters</span><b data-tab-count="boosters">0</b></button>
           <button type="button" data-inventory-tab="kits"><span>Kits</span><b data-tab-count="kits">0</b></button>
+          <button type="button" data-inventory-tab="products"><span>Produtos</span><b data-tab-count="products">0</b></button>
           <button type="button" data-inventory-tab="albums"><span>Álbuns</span><b data-tab-count="albums">0</b></button>
         </nav>
 
@@ -163,7 +166,7 @@ const publishedCollections = getEditableCollections();
       </section>
 
       <div class="editor-export-panel">
-        <div><span class="section-eyebrow">Pronto para aprovação</span><h3>Baixe o ZIP da versão <b data-version-number>1</b></h3><p>Os inventários são exportados em JSON. Para coleção nova, o ZIP sai pronto para a pasta de não formatadas; em coleções existentes, o update leva perfil, novas cartas/boosters e kits/álbuns alterados.</p></div>
+        <div><span class="section-eyebrow">Pronto para aprovação</span><h3>Baixe o ZIP da versão <b data-version-number>1</b></h3><p>Os inventários são exportados em JSON. Para coleção nova, o ZIP sai pronto para a pasta de não formatadas; em coleções existentes, o update leva perfil, novas cartas/boosters/produtos e kits/álbuns alterados.</p></div>
         <div class="editor-export-actions"><button type="button" class="secondary-cta" data-download-update hidden><span>Baixar só o update</span><b>＋</b></button><button type="button" class="primary-cta" data-download-zip><span>Baixar ZIP JSON</span><b>↓</b></button></div>
       </div>
     </section>
@@ -204,7 +207,7 @@ const publishedCollections = getEditableCollections();
               <div class="card-chart-legend" data-card-chart-legend></div>
             </section>
             <section class="card-variation-panel"><header><strong>Valorização / desvalorização</strong><small>Comparação entre o primeiro e o último ponto disponível.</small></header><div data-card-variations></div></section>
-            <details class="card-json-panel"><summary>Ver todas as informações do JSON</summary><pre data-card-json></pre></details>
+            <details class="card-json-panel"><summary>Ver todas as informações do JSON</summary><div class="card-json-blocks" data-card-json></div></details>
           </main>
         </div>
       </section>
@@ -213,7 +216,7 @@ const publishedCollections = getEditableCollections();
     <div class="editor-modal" data-editor-modal="booster" hidden>
       <button class="editor-modal-backdrop" type="button" data-close-modal aria-label="Fechar"></button>
       <section class="editor-modal-dialog editor-form-dialog" role="dialog" aria-modal="true" aria-labelledby="booster-modal-title">
-        <header class="editor-modal-header"><div><span class="section-eyebrow">Novo booster</span><h2 id="booster-modal-title">Adicionar booster</h2><p>Cadastre o link e a quantidade. As demais informações podem ser completadas pelo formatador.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
+        <header class="editor-modal-header"><div><span class="section-eyebrow">Novo booster</span><h2 id="booster-modal-title">Adicionar booster</h2><p>Cadastre o link e o estoque interno. A quantidade não será exibida publicamente.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
         <form class="editor-item-form editor-modal-form" data-booster-form>
           <div class="modal-form-grid">
             <label class="wide"><span>Link da Liga</span><input name="linkLiga" type="url" required placeholder="https://www.ligapokemon.com.br/..." /></label>
@@ -222,6 +225,23 @@ const publishedCollections = getEditableCollections();
           </div>
           <label class="modal-sale-check"><input name="forSale" type="checkbox" checked /><span><strong>Disponível para venda</strong><small>Pode ser alterado individualmente no inventário.</small></span></label>
           <footer class="modal-form-actions"><button type="button" class="secondary-cta" data-close-modal><span>Cancelar</span><b>×</b></button><button type="submit" class="primary-cta"><span>Adicionar booster</span><b>＋</b></button></footer>
+        </form>
+      </section>
+    </div>
+
+    <div class="editor-modal" data-editor-modal="product" hidden>
+      <button class="editor-modal-backdrop" type="button" data-close-modal aria-label="Fechar"></button>
+      <section class="editor-modal-dialog editor-form-dialog" role="dialog" aria-modal="true" aria-labelledby="product-modal-editor-title">
+        <header class="editor-modal-header"><div><span class="section-eyebrow">Novo produto lacrado</span><h2 id="product-modal-editor-title">Adicionar produto</h2><p>Para produtos fechados, mantenha apenas as informações basilares padronizadas.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
+        <form class="editor-item-form editor-modal-form" data-product-form>
+          <div class="modal-form-grid">
+            <label class="wide"><span>Nome do produto</span><input name="name" required placeholder="Ex.: Elite Trainer Box" /></label>
+            <label class="wide"><span>Link da Liga</span><input name="linkLiga" type="url" required placeholder="https://www.ligapokemon.com.br/..." /></label>
+            <label><span>Preço</span><input name="price" type="number" min="0" step="0.01" required /></label>
+            <label><span>Imagem</span><input name="image" required placeholder="URL ou caminho da imagem" /></label>
+          </div>
+          <label class="modal-sale-check"><input name="forSale" type="checkbox" checked /><span><strong>Disponível para venda</strong><small>Pode ser alterado depois no inventário.</small></span></label>
+          <footer class="modal-form-actions"><button type="button" class="secondary-cta" data-close-modal><span>Cancelar</span><b>×</b></button><button type="submit" class="primary-cta"><span>Adicionar produto</span><b>＋</b></button></footer>
         </form>
       </section>
     </div>
@@ -352,6 +372,7 @@ const publishedCollections = getEditableCollections();
         return `${stableIdPart(edition || 'COLECAO')}-${stableIdPart(number || 'SEM-NUMERO')}-${stableLanguage(item.language || 'BR')}-${stableIdPart(item.condition || 'NM')}`;
       };
       const stableBoosterId = (item = {}) => { let edition = ''; try { edition = new URL(item.linkLiga || '').searchParams.get('ed') || ''; } catch (_) {} return `BOOSTER-${stableIdPart(edition || item.name || 'BOOSTER')}`; };
+      const stableProductId = (item = {}) => `PRODUTO-${stableIdPart(item.name || getNameFromLink(item.linkLiga || '', 'PRODUTO'))}`;
       const getNameFromLink = (link, fallback) => {
         try {
           const url = new URL(link);
@@ -372,7 +393,7 @@ const publishedCollections = getEditableCollections();
         return `<div class="inventory-thumb"><span>${escapeHtml(initials)}</span>${urls[0] ? `<img src="${escapeHtml(urls[0])}" alt="${escapeHtml(name)}" loading="lazy" data-image-candidates="${escapeHtml(JSON.stringify(urls.slice(1)))}" data-image-index="0" />` : ''}</div>`;
       };
       const itemPrice = (item) => item?.price ?? item?.leaguePrice ?? null;
-      const itemName = (item, kind) => item?.name || item?.collection || getNameFromLink(item?.linkLiga || '', kind === 'cards' ? 'Carta da Liga' : 'Booster da Liga');
+      const itemName = (item, kind) => item?.name || item?.collection || getNameFromLink(item?.linkLiga || '', kind === 'cards' ? 'Carta da Liga' : kind === 'products' ? 'Produto Pokémon' : 'Booster da Liga');
 
       const normalizeCard = (item = {}, isNew = false) => {
         const normalized = {
@@ -397,6 +418,24 @@ const publishedCollections = getEditableCollections();
           linkLiga: item.linkLiga || '', forSale: item.forSale !== false, image: item.image || '', imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : [],
         };
         normalized._id = item._id || item.id || item.Id || stableBoosterId(normalized);
+        normalized._isNew = item._isNew ?? isNew;
+        normalized._isDirty = item._isDirty ?? false;
+        return normalized;
+      };
+      const normalizeProduct = (item = {}, isNew = false) => {
+        const image = clean(item.image || item.Imagem || '');
+        const normalized = {
+          ...item,
+          name: item.name || item.Nome || getNameFromLink(item.linkLiga || item['Link Liga'] || '', 'Produto Pokémon'),
+          description: item.description || item['Descrição'] || '',
+          linkLiga: item.linkLiga || item['Link Liga'] || '',
+          price: toPrice(item.price ?? item['Preço']),
+          quantity: 1,
+          forSale: item.forSale !== false && item['À venda'] !== false && item['À venda'] !== 'Não',
+          image,
+          imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : image ? [image] : [],
+        };
+        normalized._id = item._id || item.id || item.Id || stableProductId(normalized);
         normalized._isNew = item._isNew ?? isNew;
         normalized._isDirty = item._isDirty ?? false;
         return normalized;
@@ -485,13 +524,15 @@ const publishedCollections = getEditableCollections();
       const makeState = (profile, items = {}, source = 'new') => {
         const cards = (items.cards || []).map((item) => normalizeCard(item, false));
         const boosters = (items.boosters || []).map((item) => normalizeBooster(item, false));
-        const normalizedProfile = { owner: '', title: '', description: '', email: '', phone: '', password: '', selling: true, showQuantity: true, featured: false, version: 1, profilePhoto: '', palette: ['#54e8df', '#bc91ff', '#f4c25c'], ...profile };
+        const normalizedProfile = { owner: '', title: '', description: '', email: '', phone: '', password: '', selling: true, showQuantity: true, featured: false, version: 1, profilePhoto: '', palette: ['#54e8df', '#bc91ff', '#f4c25c'], priceDisplayFallback: 'league_average_then_lowest', ...profile };
+        if (!['league_average_then_lowest', 'league_lowest_then_average', 'consult'].includes(normalizedProfile.priceDisplayFallback)) normalizedProfile.priceDisplayFallback = 'league_average_then_lowest';
         normalizedProfile.palette = Array.isArray(normalizedProfile.palette) && normalizedProfile.palette.length >= 3 ? normalizedProfile.palette.slice(0, 3) : ['#54e8df', '#bc91ff', '#f4c25c'];
         normalizedProfile.profilePhoto = clean(normalizedProfile.profilePhoto);
         normalizedProfile.proposalTerms = normalizeProposalTerms(profile?.proposalTerms);
         return {
           profile: normalizedProfile,
           cards, boosters,
+          products: (items.products || []).map((item) => normalizeProduct(item, false)),
           kits: (items.kits || []).map((item) => normalizeKit(item, cards, boosters)),
           albums: (items.albums || []).map((item) => normalizeAlbum(item, cards)),
           kitDraft: [], source,
@@ -536,6 +577,7 @@ const publishedCollections = getEditableCollections();
         root.querySelector('[data-show-quantity]').checked = state.profile.showQuantity !== false;
         root.querySelector('[data-collection-selling]').checked = state.profile.selling !== false;
         root.querySelector('[data-proposal-policy]').value = state.profile.proposalTerms.policy;
+        const fallbackSelect = root.querySelector('[data-price-display-fallback]'); if (fallbackSelect) fallbackSelect.value = state.profile.priceDisplayFallback;
         root.querySelector('[data-flexible-discounts]').checked = state.profile.proposalTerms.flexibleDiscounts;
         renderDiscountTiers();
         renderPersonalization();
@@ -547,11 +589,11 @@ const publishedCollections = getEditableCollections();
         workspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
 
-      const tabLabel = { cards: 'Cartas', boosters: 'Boosters', kits: 'Kits', albums: 'Álbuns' };
-      const allPricedItems = () => state ? [...state.cards, ...state.boosters, ...state.kits] : [];
+      const tabLabel = { cards: 'Cartas', boosters: 'Boosters', kits: 'Kits', products: 'Produtos', albums: 'Álbuns' };
+      const allPricedItems = () => state ? [...state.cards, ...state.boosters, ...state.kits, ...state.products] : [];
       const updateOverview = () => {
         if (!state) return;
-        const totalUnits = [...state.cards, ...state.boosters, ...state.kits].reduce((sum, item) => sum + toQuantity(item.quantity), 0);
+        const totalUnits = [...state.cards, ...state.boosters, ...state.kits, ...state.products].reduce((sum, item) => sum + toQuantity(item.quantity), 0);
         const value = allPricedItems().reduce((sum, item) => sum + (itemPrice(item) || 0) * toQuantity(item.quantity), 0);
         root.querySelector('[data-overview-units]').textContent = `${totalUnits} ${totalUnits === 1 ? 'unidade' : 'unidades'}`;
         root.querySelector('[data-overview-value]').textContent = `${prettyPrice(value)} em preços definidos`;
@@ -573,7 +615,7 @@ const publishedCollections = getEditableCollections();
         return available.map((entry) => `<a href="${escapeHtml(entry.url)}" target="_blank" rel="noreferrer">${escapeHtml(entry.label)} <span>↗</span></a>`).join('');
       };
       const matchesSearch = (item) => !inventoryQuery || normalizeText(JSON.stringify(item)).includes(inventoryQuery);
-      const emptyInventory = (kind) => `<div class="inventory-tab-empty"><span>${kind === 'cards' ? '◇' : kind === 'boosters' ? '▱' : kind === 'kits' ? '▦' : '▤'}</span><strong>Nenhum item nesta aba</strong><p>Use uma das ações acima para adicionar ${tabLabel[kind].toLowerCase()}.</p><button type="button" class="primary-cta" data-empty-add="${kind === 'cards' ? 'card' : kind === 'boosters' ? 'booster' : kind === 'kits' ? 'kit' : 'album'}"><span>Adicionar agora</span><b>＋</b></button></div>`;
+      const emptyInventory = (kind) => `<div class="inventory-tab-empty"><span>${kind === 'cards' ? '◇' : kind === 'boosters' ? '▱' : kind === 'kits' ? '▦' : kind === 'products' ? '▣' : '▤'}</span><strong>Nenhum item nesta aba</strong><p>Use uma das ações acima para adicionar ${tabLabel[kind].toLowerCase()}.</p><button type="button" class="primary-cta" data-empty-add="${kind === 'cards' ? 'card' : kind === 'boosters' ? 'booster' : kind === 'kits' ? 'kit' : kind === 'products' ? 'product' : 'album'}"><span>Adicionar agora</span><b>＋</b></button></div>`;
 
       const renderCards = () => {
         const rows = state.cards.map((item, index) => ({ item, index })).filter(({ item }) => matchesSearch(item));
@@ -625,11 +667,38 @@ const publishedCollections = getEditableCollections();
           const chunks = []; let current = [];
           points.forEach((point, index) => { const value = toPrice(point[metric.key]); if (value === null) { if (current.length) chunks.push(current); current = []; } else current.push(`${x(index)},${y(value)}`); });
           if (current.length) chunks.push(current);
-          return chunks.map((chunk) => `<polyline points="${chunk.join(' ')}" fill="none" stroke="${metric.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
+          return chunks.filter((chunk) => chunk.length > 1).map((chunk) => `<polyline points="${chunk.join(' ')}" fill="none" stroke="${metric.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
         }).join('');
+        const dots = cardMetrics.map((metric) => points.map((point, index) => {
+          const value = toPrice(point[metric.key]);
+          if (value === null) return '';
+          return `<circle cx="${x(index)}" cy="${y(value)}" r="${points.length === 1 ? 5.2 : 3.6}" fill="${metric.color}" stroke="rgba(4,12,22,.9)" stroke-width="2"><title>${escapeHtml(metric.label)}: ${escapeHtml(prettyPrice(value))}</title></circle>`;
+        }).join('')).join('');
         const firstDate = points[0]?.date ? new Date(points[0].date).toLocaleDateString('pt-BR') : 'Início';
         const lastDate = points[points.length - 1]?.date ? new Date(points[points.length - 1].date).toLocaleDateString('pt-BR') : 'Atual';
-        return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Histórico das referências de preço">${grid}${lines}<text x="${left}" y="${height-9}" text-anchor="start">${escapeHtml(firstDate)}</text><text x="${width-right}" y="${height-9}" text-anchor="end">${escapeHtml(lastDate)}</text></svg>`;
+        return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Histórico das referências de preço">${grid}${lines}${dots}<text x="${left}" y="${height-9}" text-anchor="start">${escapeHtml(firstDate)}</text><text x="${width-right}" y="${height-9}" text-anchor="end">${escapeHtml(lastDate)}</text></svg>`;
+      };
+      const renderJsonBlocks = (data) => {
+        const groups = [
+          ['Identificação', ['Id', 'Nome', 'Número', 'Coleção', 'Ano', 'Tipo', 'Idioma', 'Estado', 'Favorita', 'À venda']],
+          ['Mercado', ['Minimo Certeiro', 'Minimo', 'Menor Liga', 'Media Liga', 'Venda Rapida', 'Preço']],
+          ['Referências', ['Link Liga', 'Link MYP', 'Link Cardmarket', 'Link Tcgplayer', 'Link PriceCharting', 'Imagem']],
+        ];
+        const used = new Set(groups.flatMap(([, keys]) => keys));
+        const extras = Object.keys(data).filter((key) => !used.has(key));
+        if (extras.length) groups.push(['Dados adicionais', extras]);
+        const valueMarkup = (key, value) => {
+          if (value === null || value === undefined || value === '') return '<span class="json-empty">—</span>';
+          const text = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
+          if (/^Link /i.test(key) && /^https?:\/\//i.test(text)) return `<a href="${escapeHtml(text)}" target="_blank" rel="noreferrer">Abrir referência <span>↗</span></a>`;
+          if (typeof value === 'object') return `<pre>${escapeHtml(text)}</pre>`;
+          return `<span>${escapeHtml(text)}</span>`;
+        };
+        return groups.map(([title, keys]) => {
+          const entries = keys.filter((key) => Object.prototype.hasOwnProperty.call(data, key));
+          if (!entries.length) return '';
+          return `<section class="card-json-group"><header><strong>${escapeHtml(title)}</strong><small>${entries.length} ${entries.length === 1 ? 'campo' : 'campos'}</small></header><div>${entries.map((key) => `<article><span>${escapeHtml(key)}</span>${valueMarkup(key, data[key])}</article>`).join('')}</div></section>`;
+        }).join('');
       };
       const openCardDetails = (index) => {
         const item = state?.cards?.[index]; if (!item) return;
@@ -654,8 +723,10 @@ const publishedCollections = getEditableCollections();
           const direction = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
           return `<article class="${direction}"><span>${escapeHtml(metric.label)}</span><strong>${delta > 0 ? '+' : ''}${escapeHtml(prettyPrice(delta))}</strong><small>${pct === null ? '—' : `${pct > 0 ? '+' : ''}${pct.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`}</small></article>`;
         }).join('');
-        const jsonData = { ...(item.advancedData || {}), Id: item._id, Nome: item.name, Número: item.number, Coleção: item.collection, Ano: item.year, Tipo: item.type, Idioma: item.language, Estado: item.condition, Quantidade: item.quantity, 'Minimo Certeiro': item.certainMinimumPrice, Minimo: item.minimumPrice, 'Menor Liga': item.leaguePrice, 'Media Liga': item.averageLeaguePrice, 'Venda Rapida': item.quickSalePrice, Preço: item.price, Favorita: item.favorite, 'À venda': item.forSale, 'Link Liga': item.linkLiga, 'Link MYP': item.linkMyp, 'Link Cardmarket': item.linkCardmarket, 'Link Tcgplayer': item.linkTcgplayer, 'Link PriceCharting': item.linkPriceCharting, Imagem: item.image };
-        modal.querySelector('[data-card-json]').textContent = JSON.stringify(jsonData, null, 2);
+        const advancedData = { ...(item.advancedData || {}) };
+        Object.keys(advancedData).forEach((key) => { if (/^(?:quantidade|quantity|qtd\.?)(?:\s|$)/i.test(key.trim())) delete advancedData[key]; });
+        const jsonData = { ...advancedData, Id: item._id, Nome: item.name, Número: item.number, Coleção: item.collection, Ano: item.year, Tipo: item.type, Idioma: item.language, Estado: item.condition, 'Minimo Certeiro': item.certainMinimumPrice, Minimo: item.minimumPrice, 'Menor Liga': item.leaguePrice, 'Media Liga': item.averageLeaguePrice, 'Venda Rapida': item.quickSalePrice, Preço: item.price, Favorita: item.favorite, 'À venda': item.forSale, 'Link Liga': item.linkLiga, 'Link MYP': item.linkMyp, 'Link Cardmarket': item.linkCardmarket, 'Link Tcgplayer': item.linkTcgplayer, 'Link PriceCharting': item.linkPriceCharting, Imagem: item.image };
+        modal.querySelector('[data-card-json]').innerHTML = renderJsonBlocks(jsonData);
         openModal('card-details');
       };
 
@@ -688,6 +759,20 @@ const publishedCollections = getEditableCollections();
           return `<article class="kit-inventory-record">
             <header><div><span class="kit-record-icon">▦</span><div><strong>${escapeHtml(item.name)}</strong><p>${escapeHtml(item.description || 'Kit personalizado')}</p></div></div>${removeButton('kits', index, item.name)}</header>
             <div class="kit-record-body"><section><span class="inventory-cell-label">Conteúdo</span>${renderKitContents(item)}</section><aside><div><span>Preço bruto</span><strong>${prettyPrice(gross)}</strong></div><label><span>Preço final</span><input type="number" min="0" step="0.01" value="${item.price ?? ''}" data-item-edit="kits:${index}:price" /></label><div class="kit-discount-card"><span>Desconto</span><strong>${prettyPrice(discountValue)}</strong><small>${discountPercent}% abaixo do bruto</small></div>${quantityInput('kits', index, item.quantity)}${saleToggle('kits', index, item.forSale)}</aside></div>
+          </article>`;
+        }).join('')}</div>`;
+      };
+
+      const renderProducts = () => {
+        const rows = state.products.map((item, index) => ({ item, index })).filter(({ item }) => matchesSearch(item));
+        if (!rows.length) return emptyInventory('products');
+        return `<div class="inventory-sheet product-inventory-sheet"><div class="inventory-sheet-head"><span>Imagem e produto</span><span>Referência</span><span>Preço</span><span>Controle</span></div>${rows.map(({ item, index }) => {
+          const name = itemName(item, 'products');
+          return `<article class="inventory-record product-inventory-record">
+            <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>${escapeHtml(item.description || 'Produto Pokémon lacrado')}</small></div></div>
+            <div class="inventory-links-cell">${linkButtons([{ label: 'Liga', url: item.linkLiga }])}</div>
+            <div class="inventory-prices-cell product-price-cell">${priceInput('products', index, 'price', 'Preço', item.price)}</div>
+            <div class="inventory-control-cell">${saleToggle('products', index, item.forSale)}${removeButton('products', index, name)}</div>
           </article>`;
         }).join('')}</div>`;
       };
@@ -773,7 +858,7 @@ const publishedCollections = getEditableCollections();
 
       const renderInventory = () => {
         if (!state) return;
-        inventory.innerHTML = activeTab === 'cards' ? renderCards() : activeTab === 'boosters' ? renderBoosters() : activeTab === 'kits' ? renderKits() : renderAlbums();
+        inventory.innerHTML = activeTab === 'cards' ? renderCards() : activeTab === 'boosters' ? renderBoosters() : activeTab === 'kits' ? renderKits() : activeTab === 'products' ? renderProducts() : renderAlbums();
       };
 
       const sourceProducts = () => state ? [
@@ -870,6 +955,13 @@ const publishedCollections = getEditableCollections();
         state.boosters.push(normalizeBooster({ linkLiga, name: getNameFromLink(linkLiga, 'Booster da Liga'), quantity: data.get('quantity'), price: data.get('price'), forSale: data.get('forSale') === 'on' }, true));
         form.reset(); form.querySelector('[name="quantity"]').value = 1; form.querySelector('[name="forSale"]').checked = true;
         activeTab = 'boosters'; closeModals(); render(); inventorySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      root.querySelector('[data-product-form]')?.addEventListener('submit', (event) => {
+        event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
+        const data = new FormData(form);
+        state.products.push(normalizeProduct({ name: clean(data.get('name')), linkLiga: clean(data.get('linkLiga')), price: data.get('price'), image: clean(data.get('image')), forSale: data.get('forSale') === 'on' }, true));
+        form.reset(); form.querySelector('[name="forSale"]').checked = true;
+        activeTab = 'products'; closeModals(); render(); inventorySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
       root.querySelector('[data-album-form]')?.addEventListener('submit', (event) => {
         event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
@@ -1039,6 +1131,7 @@ const publishedCollections = getEditableCollections();
       root.querySelector('[data-show-quantity]')?.addEventListener('change', (event) => { if (state) state.profile.showQuantity = event.target.checked; });
       root.querySelector('[data-collection-selling]')?.addEventListener('change', (event) => { if (state) state.profile.selling = event.target.checked; });
       root.querySelector('[data-proposal-policy]')?.addEventListener('change', (event) => { if (state) state.profile.proposalTerms.policy = event.target.value; });
+      root.querySelector('[data-price-display-fallback]')?.addEventListener('change', (event) => { if (state) state.profile.priceDisplayFallback = event.target.value; });
       root.querySelector('[data-flexible-discounts]')?.addEventListener('change', (event) => { if (state) state.profile.proposalTerms.flexibleDiscounts = event.target.checked; });
       root.querySelector('[data-add-discount-tier]')?.addEventListener('click', () => { if (!state) return; state.profile.proposalTerms.discountTiers.push({ minValue: 0, maxDiscount: 0 }); renderDiscountTiers(); });
       root.querySelector('[data-discount-tier-list]')?.addEventListener('input', (event) => {
@@ -1087,6 +1180,11 @@ const publishedCollections = getEditableCollections();
         if (operation) result.operation = operation;
         return result;
       };
+      const productJson = (item, operation = '') => {
+        const result = { 'Id': item._id || stableProductId(item), 'Nome': item.name || '', 'Link Liga': item.linkLiga || '', 'Preço': item.price ?? null, 'Imagem': item.image || '', 'À venda': item.forSale !== false };
+        if (operation) result.operation = operation;
+        return result;
+      };
       const kitJson = (item, operation = '') => {
         const gross = toPrice(item.sourceTotal) || 0;
         const discount = gross > 0 && item.price !== null ? Math.max(0, gross - item.price) : 0;
@@ -1130,6 +1228,10 @@ const publishedCollections = getEditableCollections();
         id: row['Id'] || row['ID'] || '', name: row['Tipo de pacote'] || row['Coleção'] || row['Nome'], quantity: row['Quantidade'], certainMinimumPrice: row['Minimo Certeiro'] ?? row['Mínimo Certeiro'], minimumPrice: row['Minimo'] ?? row['Preço mínimo'], quickSalePrice: row['Venda Rapida'] ?? row['Venda rápida'], leaguePrice: row['Menor Liga'] ?? row['Preço Liga mais barato'], averageLeaguePrice: row['Media Liga'] ?? row['Preço médio Liga'] ?? row['Preço Médio Liga'], price: row['Preço'],
         forSale: typeof row['À venda'] === 'boolean' ? row['À venda'] : row['À venda'] !== 'Não', linkLiga: row['Link Liga'], image: importedImage(row['Imagem']), imageCandidates: importedImage(row['Imagem']) ? [importedImage(row['Imagem'])] : [],
       });
+      const importProductRow = (row) => ({
+        id: row['Id'] || row['ID'] || '', name: row['Nome'], description: row['Descrição'] || '', linkLiga: row['Link Liga'] || '', price: row['Preço'],
+        forSale: typeof row['À venda'] === 'boolean' ? row['À venda'] : row['À venda'] !== 'Não', image: importedImage(row['Imagem']), imageCandidates: importedImage(row['Imagem']) ? [importedImage(row['Imagem'])] : [],
+      });
       const importKitRow = (row) => {
         let contentItems = Array.isArray(row['Conteúdo']) ? row['Conteúdo'] : [];
         if (!contentItems.length && row['Conteúdo JSON']) contentItems = parseJsonArray(row['Conteúdo JSON']);
@@ -1149,9 +1251,10 @@ const publishedCollections = getEditableCollections();
           const cards = inventoryRowsFromZip(files, 'inventario-cartas.json', 'inventario-cartas.csv').map(importCardRow);
           const boosters = inventoryRowsFromZip(files, 'inventario-boosters.json', 'inventario-boosters.csv').map(importBoosterRow);
           const kits = inventoryRowsFromZip(files, 'inventario-kits.json', 'inventario-kits.csv').map(importKitRow);
+          const products = inventoryRowsFromZip(files, 'inventario-produtos.json', 'inventario-produtos.csv').map(importProductRow);
           const albums = inventoryRowsFromZip(files, 'inventario-albuns.json', 'inventario-albuns.csv').map(importAlbumRow);
           feedback.textContent = '';
-          activate({ ...profile, version: Number(profile.version || 0) + 1 }, { cards, boosters, kits, albums }, 'import');
+          activate({ ...profile, version: Number(profile.version || 0) + 1 }, { cards, boosters, kits, products, albums }, 'import');
         } catch (error) { feedback.textContent = error.message || 'Não foi possível abrir este ZIP.'; }
       };
 
@@ -1168,6 +1271,7 @@ const publishedCollections = getEditableCollections();
         const cards = state.cards.map((item) => cardJson(item));
         const boosters = state.boosters.map((item) => boosterJson(item));
         const kits = state.kits.map((item) => kitJson(item));
+        const products = state.products.map((item) => productJson(item));
         const albums = state.albums.map((item) => albumJson(item));
         const profile = { ...state.profile, generatedAt: new Date().toISOString(), collectionId: state.profile.collectionId || safeSlug(state.profile.title) };
         const zip = zipStore([
@@ -1175,6 +1279,7 @@ const publishedCollections = getEditableCollections();
           ['inventario-cartas.json', JSON.stringify(cards, null, 2)],
           ['inventario-boosters.json', JSON.stringify(boosters, null, 2)],
           ['inventario-kits.json', JSON.stringify(kits, null, 2)],
+          ['inventario-produtos.json', JSON.stringify(products, null, 2)],
           ['inventario-albuns.json', JSON.stringify(albums, null, 2)],
         ]);
         const suffix = state.source === 'new' ? `nao-formatada-v${state.profile.version}` : `v${state.profile.version}`;
@@ -1185,6 +1290,7 @@ const publishedCollections = getEditableCollections();
         const cards = state.cards.filter((item) => item._isNew || item._isDirty).map((item) => item._isNew ? cardJson(item, true) : cardJson(item, false, 'patch'));
         const boosters = state.boosters.filter((item) => item._isNew || item._isDirty).map((item) => item._isNew ? boosterJson(item, true) : boosterJson(item, false, 'patch'));
         const kits = state.kits.filter((item) => item._isNew || item._isDirty).map((item) => kitJson(item, 'upsert'));
+        const products = state.products.filter((item) => item._isNew || item._isDirty).map((item) => productJson(item, 'upsert'));
         const albums = state.albums.filter((item) => item._isNew || item._isDirty).map(albumJson);
         const generatedAt = new Date().toISOString();
         const collectionId = state.profile.collectionId || safeSlug(state.profile.title);
@@ -1196,6 +1302,7 @@ const publishedCollections = getEditableCollections();
           ['inventario-cartas.json', JSON.stringify(cards, null, 2)],
           ['inventario-boosters.json', JSON.stringify(boosters, null, 2)],
           ['inventario-kits.json', JSON.stringify(kits, null, 2)],
+          ['inventario-produtos.json', JSON.stringify(products, null, 2)],
           ['inventario-albuns.json', JSON.stringify(albums, null, 2)],
         ]);
         downloadZip(zip, `${safeSlug(collectionId)}-update-v${metadata.version}.zip`);

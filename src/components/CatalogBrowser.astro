@@ -3,7 +3,7 @@ import ProductCard from './ProductCard.astro';
 import type { CardItem, CatalogItem } from '../lib/catalog';
 
 interface Props {
-  kind: 'card' | 'booster' | 'kit';
+  kind: 'card' | 'booster' | 'kit' | 'product';
   items: CatalogItem[];
   showOwnerFilter?: boolean;
   hideOwnerOnCards?: boolean;
@@ -16,13 +16,15 @@ const conditions = [...new Set(cards.map((item) => item.condition))].sort((a, b)
 const types = [...new Set(cards.map((item) => item.type))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 const owners = [...new Map(items.map((item) => [item.ownerCollectionSlug, item.ownerCollectionName])).entries()]
   .sort((a, b) => a[1].localeCompare(b[1], 'pt-BR'));
-const noun = kind === 'card' ? 'cartas' : kind === 'booster' ? 'boosters' : 'kits';
-const nounSingular = kind === 'card' ? 'carta' : kind === 'booster' ? 'booster' : 'kit';
+const noun = kind === 'card' ? 'cartas' : kind === 'booster' ? 'boosters' : kind === 'kit' ? 'kits' : 'produtos';
+const nounSingular = kind === 'card' ? 'carta' : kind === 'booster' ? 'booster' : kind === 'kit' ? 'kit' : 'produto';
 const placeholder = kind === 'card'
   ? 'Nome, número, coleção, tipo...'
   : kind === 'booster'
     ? 'Nome da coleção ou do booster...'
-    : 'Nome, descrição ou conteúdo do kit...';
+    : kind === 'kit'
+      ? 'Nome, descrição ou conteúdo do kit...'
+      : 'Nome do produto lacrado...';
 ---
 
 <section class="shell catalog-section" data-catalog-root>
@@ -98,7 +100,6 @@ const placeholder = kind === 'card'
           <option value="price-desc">Maior preço</option>
           <option value="price-asc">Menor preço</option>
           <option value="name-asc">Nome A–Z</option>
-          <option value="quantity-desc">Maior quantidade</option>
         </select>
         <svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg>
       </div>

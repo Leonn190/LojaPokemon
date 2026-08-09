@@ -43,7 +43,6 @@ const related = allCards
         <div class="detail-tags">
           <span>{card.type}</span>
           <span class={`condition-badge condition-${card.condition.toLowerCase()}`}>{card.condition}</span>
-          <span>{card.quantity} {card.quantity === 1 ? 'unidade' : 'unidades'}</span>
         </div>
         <span class="detail-number">{card.number}</span>
         <h1>{card.name}</h1>
@@ -61,7 +60,6 @@ const related = allCards
           <div><dt>Estado</dt><dd>{card.condition}</dd></div>
           <div><dt>Ano</dt><dd>{card.year}</dd></div>
           <div><dt>Tipo</dt><dd>{card.type}</dd></div>
-          <div><dt>Quantidade</dt><dd>{card.quantity}</dd></div>
         </dl>
 
         <a class="back-catalog-button" href={`${base}cartas/`}><span>←</span> Voltar para todas as cartas</a>

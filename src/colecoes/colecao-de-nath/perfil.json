@@ -31,5 +31,11 @@
       }
     ]
   },
-  "quotedAt": "2026-08-08T16:18:32-03:00"
+  "quotedAt": "2026-08-08T16:18:32-03:00",
+  "palette": [
+    "#f078ad",
+    "#371126",
+    "#f4afcf"
+  ],
+  "priceDisplayFallback": "league_average_then_lowest"
 }

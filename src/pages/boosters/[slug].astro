@@ -19,7 +19,7 @@ const related = getBoosters()
 
 <BaseLayout
   title={booster.name}
-  description={`Booster ${booster.name}: veja imagem, quantidade disponível e preço final registrado no inventário.`}
+  description={`Booster ${booster.name}: veja imagem e preço final registrado no inventário.`}
   active="boosters"
   bodyClass="detail-page"
 >
@@ -35,7 +35,7 @@ const related = getBoosters()
       </div>
 
       <article class="detail-content" data-reveal>
-        <div class="detail-tags"><span>Booster avulso</span><span>{booster.quantity} {booster.quantity === 1 ? 'unidade' : 'unidades'}</span></div>
+        <div class="detail-tags"><span>Booster avulso</span><span>Pacote lacrado</span></div>
         <span class="detail-number">Pacote lacrado</span>
         <h1>{booster.name}</h1>
         <p class="detail-lead">Visualização direta do booster com somente o preço final definido no inventário.</p>
@@ -48,7 +48,6 @@ const related = getBoosters()
         <dl class="detail-specs booster-specs">
           <div><dt>Produto</dt><dd>Booster avulso</dd></div>
           <div><dt>Coleção</dt><dd>{booster.name}</dd></div>
-          <div><dt>Quantidade</dt><dd>{booster.quantity}</dd></div>
           <div><dt>Preço exibido</dt><dd>Somente o preço final</dd></div>
         </dl>
 
