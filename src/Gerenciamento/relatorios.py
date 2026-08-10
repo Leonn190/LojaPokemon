@@ -37,10 +37,13 @@ def registrar_variacoes(nome: str, item_id: str, tipo: str, anterior: dict[str, 
             anterior.get("Menor Liga") or anterior.get("Preço Liga mais barato"),
             atual.get("Menor Liga") or atual.get("Preço Liga mais barato"),
         ),
+        "Segundo Menor Liga": _variacao(anterior.get("Segundo Menor Liga"), atual.get("Segundo Menor Liga")),
+        "Terceiro Menor Liga": _variacao(anterior.get("Terceiro Menor Liga"), atual.get("Terceiro Menor Liga")),
         "Media Liga": _variacao(
             anterior.get("Media Liga") or anterior.get("Preço Médio Liga") or anterior.get("Preço médio Liga"),
             atual.get("Media Liga") or atual.get("Preço Médio Liga") or atual.get("Preço médio Liga"),
         ),
+        "Mediana Liga": _variacao(anterior.get("Mediana Liga"), atual.get("Mediana Liga")),
         "Venda Rapida": _variacao(
             anterior.get("Venda Rapida") or anterior.get("Venda rápida"),
             atual.get("Venda Rapida") or atual.get("Venda rápida"),
@@ -101,6 +104,7 @@ def salvar_relatorio(
     buylist_total = _somar_total(cartas_depois, "Minimo", "Preço mínimo") + _somar_total(boosters_depois, "Minimo", "Preço mínimo")
     menor_total = _somar_total(cartas_depois, "Menor Liga", "Preço Liga mais barato") + _somar_total(boosters_depois, "Menor Liga", "Preço Liga mais barato")
     media_total = _somar_total(cartas_depois, "Media Liga", "Preço Médio Liga") + _somar_total(boosters_depois, "Media Liga", "Preço médio Liga")
+    mediana_total = _somar_total(cartas_depois, "Mediana Liga") + _somar_total(boosters_depois, "Mediana Liga")
     venda_rapida_total = _somar_total(cartas_depois, "Venda Rapida", "Venda rápida") + _somar_total(boosters_depois, "Venda Rapida", "Venda rápida")
 
     diferenca = round(preco_novo - preco_antigo, 2)
@@ -129,6 +133,7 @@ def salvar_relatorio(
         "buylistTotal": round(buylist_total, 2),
         "menorLigaTotal": round(menor_total, 2),
         "mediaLigaTotal": round(media_total, 2),
+        "medianaLigaTotal": round(mediana_total, 2),
         "vendaRapidaTotal": round(venda_rapida_total, 2),
     }
 
@@ -167,6 +172,7 @@ def salvar_relatorio(
         f"Buylist total: {_fmt(buylist_total)}",
         f"Total pelo menor preço da Liga: {_fmt(menor_total)}",
         f"Total pela média da Liga: {_fmt(media_total)}",
+        f"Total pela mediana da Liga: {_fmt(mediana_total)}",
         f"Venda rápida total: {_fmt(venda_rapida_total)}",
         "",
         "VARIAÇÃO POR ITEM",
@@ -178,7 +184,10 @@ def salvar_relatorio(
             f"  Minimo Certeiro: {_fmt_var(r['Minimo Certeiro'])}",
             f"  Minimo / buylist: {_fmt_var(r['Minimo (buylist)'])}",
             f"  Menor Liga: {_fmt_var(r['Menor Liga'])}",
+            f"  Segundo Menor Liga: {_fmt_var(r['Segundo Menor Liga'])}",
+            f"  Terceiro Menor Liga: {_fmt_var(r['Terceiro Menor Liga'])}",
             f"  Media Liga: {_fmt_var(r['Media Liga'])}",
+            f"  Mediana Liga: {_fmt_var(r['Mediana Liga'])}",
             f"  Venda Rapida: {_fmt_var(r['Venda Rapida'])}",
             f"  Status: {(r.get('Status') or {}).get('nível', 'OK')}",
         ])

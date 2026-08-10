@@ -1029,8 +1029,30 @@ def resumir_precos(
             return None
         return (sum(valores, Decimal("0")) / Decimal(len(valores))).quantize(Decimal("0.01"))
 
-    menor = min((o["preco"] for o in vendas), default=None)
+    def _mediana(ofertas: list[dict[str, Any]], campo: str) -> Decimal | None:
+        valores = sorted(o[campo] for o in ofertas if o.get(campo) is not None)
+        if not valores:
+            return None
+        meio = len(valores) // 2
+        if len(valores) % 2:
+            return valores[meio].quantize(Decimal("0.01"))
+        return ((valores[meio - 1] + valores[meio]) / Decimal("2")).quantize(Decimal("0.01"))
+
+    def _menores(ofertas: list[dict[str, Any]], campo: str) -> tuple[Decimal | None, Decimal | None, Decimal | None]:
+        valores = sorted(o[campo] for o in ofertas if o.get(campo) is not None)
+        return tuple((valores[i] if i < len(valores) else None) for i in range(3))  # type: ignore[return-value]
+
+    def _quantidade_participantes(ofertas: list[dict[str, Any]]) -> int:
+        chaves: set[str] = set()
+        for indice, oferta in enumerate(ofertas):
+            loja = chave_texto(str(oferta.get("loja") or ""))
+            oferta_id = str(oferta.get("oferta_id") or "").strip()
+            chaves.add(f"loja:{loja}" if loja else (f"oferta:{oferta_id}" if oferta_id else f"linha:{indice}"))
+        return len(chaves)
+
+    menor, segundo_menor, terceiro_menor = _menores(vendas, "preco")
     medio = _media(vendas, "preco")
+    mediana = _mediana(vendas, "preco")
 
     # Correção de variante da buylist: algumas cartas têm ofertas Normal e Foil
     # misturadas na mesma página. Só fazemos essa segunda checagem quando o maior
@@ -1058,8 +1080,9 @@ def resumir_precos(
     minimo_certeiro = (menor * Decimal(str(MINIMO_CERTEIRO))).quantize(Decimal("0.01")) if menor is not None else None
     venda_rapida = (menor * Decimal(str(VENDA_RAPIDA))).quantize(Decimal("0.01")) if menor is not None else None
 
-    menor_coletado = min((o.get("preco_original", o["preco"]) for o in vendas), default=None)
+    menor_coletado, segundo_menor_coletado, terceiro_menor_coletado = _menores(vendas, "preco_original")
     medio_coletado = _media(vendas, "preco_original")
+    mediana_coletada = _mediana(vendas, "preco_original")
     minimo_coletado = max((o.get("preco_original", o["preco"]) for o in compras_filtradas), default=None)
     minimo_certeiro_coletado = (menor_coletado * Decimal(str(MINIMO_CERTEIRO))).quantize(Decimal("0.01")) if menor_coletado is not None else None
     venda_rapida_coletado = (menor_coletado * Decimal(str(VENDA_RAPIDA))).quantize(Decimal("0.01")) if menor_coletado is not None else None
@@ -1069,20 +1092,45 @@ def resumir_precos(
     idiomas_encontrados = sorted({str(o.get("idioma_original") or o.get("idioma") or "") for o in vendas if str(o.get("idioma_original") or o.get("idioma") or "")})
     estados_encontrados = sorted({str(o.get("estado_original") or o.get("estado") or "") for o in vendas if str(o.get("estado_original") or o.get("estado") or "")})
     houve_estimativa = any(bool(o.get("foi_estimado")) for o in [*vendas, *compras_filtradas])
+
+    idioma_normalizado = normalizar_idioma(idioma or "") if idioma else ""
+    estado_normalizado = normalizar_estado(estado) if estado else ""
+    chave_idioma = chave_texto(idioma_normalizado) if idioma_normalizado else ""
+    vendas_especificas = [
+        o for o in marketplace
+        if (not chave_idioma or (o.get("idioma") and chave_texto(normalizar_idioma(str(o.get("idioma") or ""))) == chave_idioma))
+        and (not estado_normalizado or str(o.get("estado") or "").upper() == estado_normalizado)
+    ]
+    compras_especificas = [
+        o for o in buylist
+        if (not chave_idioma or (o.get("idioma") and chave_texto(normalizar_idioma(str(o.get("idioma") or ""))) == chave_idioma))
+        and (not estado_normalizado or str(o.get("estado") or "").upper() == estado_normalizado)
+    ]
+
     return {
         "menor": menor,
+        "segundo_menor": segundo_menor,
+        "terceiro_menor": terceiro_menor,
         "medio": medio,
+        "mediana": mediana,
         "minimo": minimo,
         "minimo_certeiro": minimo_certeiro,
         "venda_rapida": venda_rapida,
         "menor_coletado": menor_coletado,
+        "segundo_menor_coletado": segundo_menor_coletado,
+        "terceiro_menor_coletado": terceiro_menor_coletado,
         "medio_coletado": medio_coletado,
+        "mediana_coletada": mediana_coletada,
         "minimo_coletado": minimo_coletado,
         "minimo_certeiro_coletado": minimo_certeiro_coletado,
         "venda_rapida_coletado": venda_rapida_coletado,
         "alteracao": "; ".join(dict.fromkeys(notas)),
         "quantidade_ofertas": len(vendas),
         "quantidade_buylist": len(compras_filtradas),
+        "vendedores_geral": _quantidade_participantes(marketplace),
+        "vendedores_especificos": _quantidade_participantes(vendas_especificas),
+        "compradores_geral": _quantidade_participantes(buylist),
+        "compradores_especificos": _quantidade_participantes(compras_especificas),
         "idiomas_encontrados": idiomas_encontrados,
         "estados_encontrados": estados_encontrados,
         "houve_estimativa": houve_estimativa,
@@ -1197,23 +1245,46 @@ class SessaoLiga:
             return dict(self._cache[chave])
         dados, marketplace, stats_marketplace = self._coletar_pagina(normalizar_url_liga(url, 1), "marketplace", True)
         _, buylist, stats_buylist = self._coletar_pagina(normalizar_url_liga(url, 10), "buylist", False)
-        valores_venda = [o["preco"] for o in marketplace]
-        valores_compra = [o["preco"] for o in buylist]
-        menor = min(valores_venda, default=None)
+        valores_venda = sorted(o["preco"] for o in marketplace if o.get("preco") is not None)
+        valores_compra = [o["preco"] for o in buylist if o.get("preco") is not None]
+        menor = valores_venda[0] if valores_venda else None
+        segundo_menor = valores_venda[1] if len(valores_venda) > 1 else None
+        terceiro_menor = valores_venda[2] if len(valores_venda) > 2 else None
         medio = None
+        mediana = None
         if valores_venda:
             medio = (sum(valores_venda, Decimal("0")) / Decimal(len(valores_venda))).quantize(Decimal("0.01"))
+            meio = len(valores_venda) // 2
+            mediana = (
+                valores_venda[meio]
+                if len(valores_venda) % 2
+                else (valores_venda[meio - 1] + valores_venda[meio]) / Decimal("2")
+            ).quantize(Decimal("0.01"))
         minimo = max(valores_compra, default=None)
+
+        def quantidade_participantes(ofertas: list[dict[str, Any]]) -> int:
+            chaves: set[str] = set()
+            for indice, oferta in enumerate(ofertas):
+                loja = chave_texto(str(oferta.get("loja") or ""))
+                oferta_id = str(oferta.get("oferta_id") or "").strip()
+                chaves.add(f"loja:{loja}" if loja else (f"oferta:{oferta_id}" if oferta_id else f"linha:{indice}"))
+            return len(chaves)
         minimo_certeiro = (menor * Decimal(str(MINIMO_CERTEIRO))).quantize(Decimal("0.01")) if menor is not None else None
         resultado = {
             **dados,
             "menor": menor,
+            "segundo_menor": segundo_menor,
+            "terceiro_menor": terceiro_menor,
             "medio": medio,
+            "mediana": mediana,
             "minimo": minimo,
             "minimo_certeiro": minimo_certeiro,
             "venda_rapida": (menor * Decimal(str(VENDA_RAPIDA))).quantize(Decimal("0.01")) if menor is not None else None,
             "menor_coletado": menor,
+            "segundo_menor_coletado": segundo_menor,
+            "terceiro_menor_coletado": terceiro_menor,
             "medio_coletado": medio,
+            "mediana_coletada": mediana,
             "minimo_coletado": minimo,
             "minimo_certeiro_coletado": minimo_certeiro,
             "venda_rapida_coletado": (menor * Decimal(str(VENDA_RAPIDA))).quantize(Decimal("0.01")) if menor is not None else None,
@@ -1223,6 +1294,10 @@ class SessaoLiga:
             "alteracao": "",
             "quantidade_ofertas": len(valores_venda),
             "quantidade_buylist": len(valores_compra),
+            "vendedores_geral": quantidade_participantes(marketplace),
+            "vendedores_especificos": quantidade_participantes(marketplace),
+            "compradores_geral": quantidade_participantes(buylist),
+            "compradores_especificos": quantidade_participantes(buylist),
             "marketplace": marketplace,
             "buylist": buylist,
             "coleta": {"marketplace": stats_marketplace, "buylist": stats_buylist},

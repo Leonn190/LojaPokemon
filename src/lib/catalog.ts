@@ -40,8 +40,15 @@ export interface PriceHistoryEntry {
   minimumCertain: number | null;
   minimumBuylist: number | null;
   leagueLowest: number | null;
+  leagueSecond: number | null;
+  leagueThird: number | null;
   leagueAverage: number | null;
+  leagueMedian: number | null;
   quickSale: number | null;
+  sellersGeneral: number;
+  sellersSpecific: number;
+  buyersGeneral: number;
+  buyersSpecific: number;
 }
 
 export interface CardItem extends OwnedItemBase {
@@ -61,7 +68,14 @@ export interface CardItem extends OwnedItemBase {
   minimumPrice: number | null;
   quickSalePrice: number | null;
   leaguePrice: number | null;
+  secondLeaguePrice: number | null;
+  thirdLeaguePrice: number | null;
   averageLeaguePrice: number | null;
+  medianLeaguePrice: number | null;
+  sellersGeneral: number;
+  sellersSpecific: number;
+  buyersGeneral: number;
+  buyersSpecific: number;
   finalPrice: number | null;
   favorite: boolean;
   priceHistory: PriceHistoryEntry[];
@@ -75,8 +89,17 @@ export interface BoosterItem extends OwnedItemBase {
   minimumPrice: number | null;
   quickSalePrice: number | null;
   leaguePrice: number | null;
+  secondLeaguePrice: number | null;
+  thirdLeaguePrice: number | null;
   averageLeaguePrice: number | null;
+  medianLeaguePrice: number | null;
+  sellersGeneral: number;
+  sellersSpecific: number;
+  buyersGeneral: number;
+  buyersSpecific: number;
   finalPrice: number | null;
+  priceHistory: PriceHistoryEntry[];
+  advancedData: Record<string, unknown>;
 }
 
 export interface KitContentItem {
@@ -642,14 +665,47 @@ export const getCollections = (): CollectorCollection[] => {
         minimumCertain: parseDecimal(entry['Minimo Certeiro'] ?? entry['Mínimo Certeiro']),
         minimumBuylist: parseDecimal(entry['Minimo'] ?? entry['Preço mínimo']),
         leagueLowest: parseDecimal(entry['Menor Liga'] ?? entry['Preço Liga mais barato']),
+        leagueSecond: parseDecimal(entry['Segundo Menor Liga']),
+        leagueThird: parseDecimal(entry['Terceiro Menor Liga']),
         leagueAverage: parseDecimal(entry['Media Liga'] ?? entry['Preço Médio Liga'] ?? entry['Preço médio Liga']),
+        leagueMedian: parseDecimal(entry['Mediana Liga']),
         quickSale: parseDecimal(entry['Venda Rapida'] ?? entry['Venda rápida']),
+        sellersGeneral: parseQuantity(entry['Vendedores Geral']),
+        sellersSpecific: parseQuantity(entry['Vendedores Específicos']),
+        buyersGeneral: parseQuantity(entry['Compradores Geral']),
+        buyersSpecific: parseQuantity(entry['Compradores Específicos']),
       };
       const list = cardHistory.get(itemId) ?? [];
       list.push(historyEntry);
       cardHistory.set(itemId, list);
     });
     cardHistory.forEach((entries) => entries.sort((left, right) => left.date.localeCompare(right.date)));
+
+    const rawBoosterHistory = readJsonLines(join(folder, 'historico', 'boosters.jsonl'));
+    const boosterHistory = new Map<string, PriceHistoryEntry[]>();
+    rawBoosterHistory.forEach((entry) => {
+      const itemId = String(entry.itemId ?? entry.Id ?? '').trim();
+      if (!itemId || entry.sucesso === false || entry.erro) return;
+      const historyEntry: PriceHistoryEntry = {
+        date: String(entry.data ?? ''),
+        minimumCertain: parseDecimal(entry['Minimo Certeiro'] ?? entry['Mínimo Certeiro']),
+        minimumBuylist: parseDecimal(entry['Minimo'] ?? entry['Preço mínimo']),
+        leagueLowest: parseDecimal(entry['Menor Liga'] ?? entry['Preço Liga mais barato']),
+        leagueSecond: parseDecimal(entry['Segundo Menor Liga']),
+        leagueThird: parseDecimal(entry['Terceiro Menor Liga']),
+        leagueAverage: parseDecimal(entry['Media Liga'] ?? entry['Preço Médio Liga'] ?? entry['Preço médio Liga']),
+        leagueMedian: parseDecimal(entry['Mediana Liga']),
+        quickSale: parseDecimal(entry['Venda Rapida'] ?? entry['Venda rápida']),
+        sellersGeneral: parseQuantity(entry['Vendedores Geral']),
+        sellersSpecific: parseQuantity(entry['Vendedores Específicos']),
+        buyersGeneral: parseQuantity(entry['Compradores Geral']),
+        buyersSpecific: parseQuantity(entry['Compradores Específicos']),
+      };
+      const list = boosterHistory.get(itemId) ?? [];
+      list.push(historyEntry);
+      boosterHistory.set(itemId, list);
+    });
+    boosterHistory.forEach((entries) => entries.sort((left, right) => left.date.localeCompare(right.date)));
 
     const cards: CardItem[] = readInventory(folder, 'inventario-cartas').map((row) => {
       const name = String(row['Nome'] ?? '').trim() || 'Carta sem nome';
@@ -664,7 +720,14 @@ export const getCollections = (): CollectorCollection[] => {
       const minimumPrice = parseDecimal(row['Minimo']) ?? parseDecimal(row['Preço mínimo']);
       const quickSalePrice = parseDecimal(row['Venda Rapida']) ?? parseDecimal(row['Venda rápida']);
       const leaguePrice = parseDecimal(row['Menor Liga']) ?? parseDecimal(row['Preço Liga mais barato']);
+      const secondLeaguePrice = parseDecimal(row['Segundo Menor Liga']);
+      const thirdLeaguePrice = parseDecimal(row['Terceiro Menor Liga']);
       const averageLeaguePrice = parseDecimal(row['Media Liga']) ?? parseDecimal(row['Preço Médio Liga']) ?? parseDecimal(row['Preço médio Liga']);
+      const medianLeaguePrice = parseDecimal(row['Mediana Liga']);
+      const sellersGeneral = parseQuantity(row['Vendedores Geral']);
+      const sellersSpecific = parseQuantity(row['Vendedores Específicos']);
+      const buyersGeneral = parseQuantity(row['Compradores Geral']);
+      const buyersSpecific = parseQuantity(row['Compradores Específicos']);
       const finalPrice = parseDecimal(row['Preço']);
       const price = resolvePublicPrice(finalPrice, averageLeaguePrice, leaguePrice, priceDisplayFallback);
       const forSale = profile.selling !== false && parseBoolean(row['À venda'] ?? row['Venda'], true);
@@ -697,7 +760,14 @@ export const getCollections = (): CollectorCollection[] => {
         minimumPrice,
         quickSalePrice,
         leaguePrice,
+        secondLeaguePrice,
+        thirdLeaguePrice,
         averageLeaguePrice,
+        medianLeaguePrice,
+        sellersGeneral,
+        sellersSpecific,
+        buyersGeneral,
+        buyersSpecific,
         finalPrice,
         favorite: parseBoolean(row['Favorita'] ?? row['Favorito'], false),
         priceHistory: cardHistory.get(id) ?? [],
@@ -723,7 +793,14 @@ export const getCollections = (): CollectorCollection[] => {
         const minimumPrice = parseDecimal(row['Preço mínimo']) ?? parseDecimal(row['Minimo']);
         const quickSalePrice = parseDecimal(row['Venda rápida']) ?? parseDecimal(row['Venda Rapida']);
         const leaguePrice = parseDecimal(row['Preço Liga mais barato']) ?? parseDecimal(row['Preço Mais Baixo Liga']) ?? parseDecimal(row['Menor Liga']);
+        const secondLeaguePrice = parseDecimal(row['Segundo Menor Liga']);
+        const thirdLeaguePrice = parseDecimal(row['Terceiro Menor Liga']);
         const averageLeaguePrice = parseDecimal(row['Media Liga']) ?? parseDecimal(row['Preço médio Liga']) ?? parseDecimal(row['Preço Médio Liga']);
+        const medianLeaguePrice = parseDecimal(row['Mediana Liga']);
+        const sellersGeneral = parseQuantity(row['Vendedores Geral']);
+        const sellersSpecific = parseQuantity(row['Vendedores Específicos']);
+        const buyersGeneral = parseQuantity(row['Compradores Geral']);
+        const buyersSpecific = parseQuantity(row['Compradores Específicos']);
         const finalPrice = parseDecimal(row['Preço']);
         const price = resolvePublicPrice(finalPrice, averageLeaguePrice, leaguePrice, priceDisplayFallback);
         const forSale = profile.selling !== false && parseBoolean(row['À venda'] ?? row['Venda'], true);
@@ -742,8 +819,17 @@ export const getCollections = (): CollectorCollection[] => {
           minimumPrice,
           quickSalePrice,
           leaguePrice,
+          secondLeaguePrice,
+          thirdLeaguePrice,
           averageLeaguePrice,
+          medianLeaguePrice,
+          sellersGeneral,
+          sellersSpecific,
+          buyersGeneral,
+          buyersSpecific,
           finalPrice,
+          priceHistory: boosterHistory.get(id) ?? [],
+          advancedData: { ...row },
           slug: `${collectionSlug}-${localSlug}`,
           image: String(row['Imagem'] ?? ''),
           imageCandidates: boosterImageCandidates(collectionSlug, name, String(row['Imagem'] ?? '')),
@@ -929,10 +1015,10 @@ export const getEditableCollections = () => getCollections().map((collection) =>
       palette: collection.palette,
       priceDisplayFallback: collection.priceDisplayFallback,
     },
-    cards: collection.cards.map(({ id, name, number, collection: set, language, condition, year, type, quantity, finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, averageLeaguePrice, favorite, priceHistory, advancedData, image, imageCandidates }) => ({
-      id, name, number, collection: set, language, condition, year, type, quantity, price: finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, averageLeaguePrice, favorite, priceHistory, advancedData, image, imageCandidates,
+    cards: collection.cards.map(({ id, name, number, collection: set, language, condition, year, type, quantity, finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, favorite, priceHistory, advancedData, image, imageCandidates }) => ({
+      id, name, number, collection: set, language, condition, year, type, quantity, price: finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, favorite, priceHistory, advancedData, image, imageCandidates,
     })),
-    boosters: collection.boosters.map(({ id, name, quantity, finalPrice, forSale, linkLiga, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, averageLeaguePrice, image, imageCandidates }) => ({ id, name, quantity, price: finalPrice, forSale, linkLiga, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, averageLeaguePrice, image, imageCandidates })),
+    boosters: collection.boosters.map(({ id, name, quantity, finalPrice, forSale, linkLiga, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, priceHistory, advancedData, image, imageCandidates }) => ({ id, name, quantity, price: finalPrice, forSale, linkLiga, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, priceHistory, advancedData, image, imageCandidates })),
     kits: collection.kits.map(({ id, name, description, contents, contentItems, sourceTotal, quantity, price, forSale, image, imageCandidates }) => ({ id, name, description, contents, contentItems, sourceTotal, quantity, price, forSale, image, imageCandidates })),
     products: collection.products.map(({ id, name, description, price, forSale, linkLiga, image, imageCandidates }) => ({ id, name, description, price, forSale, linkLiga, image, imageCandidates })),
     albums: collection.albums.map((album) => ({

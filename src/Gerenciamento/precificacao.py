@@ -362,6 +362,15 @@ def gerar_status_carta(dados: dict[str, Any], idioma: str, estado: str) -> dict[
             "marketplace": stats_market,
             "buylist": _stats_coleta(dados, "buylist"),
         },
+        "mercado": {
+            "vendedoresGeral": int(dados.get("vendedores_geral") or 0),
+            "vendedoresEspecificos": int(dados.get("vendedores_especificos") or 0),
+            "compradoresGeral": int(dados.get("compradores_geral") or 0),
+            "compradoresEspecificos": int(dados.get("compradores_especificos") or 0),
+            "segundoMenorLiga": numero(dados.get("segundo_menor")),
+            "terceiroMenorLiga": numero(dados.get("terceiro_menor")),
+            "medianaLiga": numero(dados.get("mediana")),
+        },
     }
 
 
@@ -404,17 +413,38 @@ def gerar_status_booster(dados: dict[str, Any]) -> dict[str, Any]:
             },
         })
     nivel = "Suspeita" if any(m["nivel"] == "suspeita" for m in motivos) else ("Suspeita leve" if motivos else "OK")
-    return {"nível": nivel, "motivos": motivos, "coleta": {"marketplace": stats_market, "buylist": stats_buy}}
+    return {
+        "nível": nivel,
+        "motivos": motivos,
+        "coleta": {"marketplace": stats_market, "buylist": stats_buy},
+        "mercado": {
+            "vendedoresGeral": int(dados.get("vendedores_geral") or 0),
+            "vendedoresEspecificos": int(dados.get("vendedores_especificos") or 0),
+            "compradoresGeral": int(dados.get("compradores_geral") or 0),
+            "compradoresEspecificos": int(dados.get("compradores_especificos") or 0),
+            "segundoMenorLiga": numero(dados.get("segundo_menor")),
+            "terceiroMenorLiga": numero(dados.get("terceiro_menor")),
+            "medianaLiga": numero(dados.get("mediana")),
+        },
+    }
 
 
 def preco_objeto(dados: dict[str, Any], estimado: bool) -> dict[str, Any]:
     sufixo = "" if estimado else "_coletado"
+    mediana_chave = "mediana" if estimado else "mediana_coletada"
     return {
         "Minimo Certeiro": numero(dados.get(f"minimo_certeiro{sufixo}")),
         "Minimo": numero(dados.get(f"minimo{sufixo}")),
         "Menor Liga": numero(dados.get(f"menor{sufixo}")),
+        "Segundo Menor Liga": numero(dados.get(f"segundo_menor{sufixo}")),
+        "Terceiro Menor Liga": numero(dados.get(f"terceiro_menor{sufixo}")),
         "Media Liga": numero(dados.get(f"medio{sufixo}")),
+        "Mediana Liga": numero(dados.get(mediana_chave)),
         "Venda Rapida": numero(dados.get(f"venda_rapida{sufixo}")),
+        "Vendedores Geral": int(dados.get("vendedores_geral") or 0),
+        "Vendedores Específicos": int(dados.get("vendedores_especificos") or 0),
+        "Compradores Geral": int(dados.get("compradores_geral") or 0),
+        "Compradores Específicos": int(dados.get("compradores_especificos") or 0),
         "Idioma encontrado": list(dados.get("idiomas_encontrados") or []),
         "Estado encontrado": list(dados.get("estados_encontrados") or []),
         "é estimativa": bool(dados.get("houve_estimativa")) if estimado else False,
@@ -439,8 +469,15 @@ def registrar_historico(
         "Minimo Certeiro": numero(item.get("Minimo Certeiro") or item.get("Mínimo Certeiro")),
         "Minimo": numero(item.get("Minimo") or item.get("Preço mínimo")),
         "Menor Liga": numero(item.get("Menor Liga") or item.get("Preço Liga mais barato")),
+        "Segundo Menor Liga": numero(item.get("Segundo Menor Liga")),
+        "Terceiro Menor Liga": numero(item.get("Terceiro Menor Liga")),
         "Media Liga": numero(item.get("Media Liga") or item.get("Preço Médio Liga") or item.get("Preço médio Liga")),
+        "Mediana Liga": numero(item.get("Mediana Liga")),
         "Venda Rapida": numero(item.get("Venda Rapida") or item.get("Venda rápida")),
+        "Vendedores Geral": int(item.get("Vendedores Geral") or 0),
+        "Vendedores Específicos": int(item.get("Vendedores Específicos") or 0),
+        "Compradores Geral": int(item.get("Compradores Geral") or 0),
+        "Compradores Específicos": int(item.get("Compradores Específicos") or 0),
         "Preço coletado": item.get("Preço coletado", {}),
         "Preço estimado": item.get("Preço estimado", {}),
         "Status": status,

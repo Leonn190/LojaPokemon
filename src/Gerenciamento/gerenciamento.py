@@ -74,6 +74,16 @@ def inteiro(valor: Any, padrao: int = 1) -> int:
     return max(1, int(encontrado.group(0))) if encontrado else padrao
 
 
+def inteiro_nao_negativo(valor: Any, padrao: int = 0) -> int:
+    """Inteiro para contadores de mercado, onde zero é um valor válido."""
+    if isinstance(valor, bool):
+        return int(valor)
+    if isinstance(valor, (int, float)):
+        return max(0, int(valor))
+    encontrado = re.search(r"\d+", texto(valor))
+    return max(0, int(encontrado.group(0))) if encontrado else padrao
+
+
 def _sim_nao(valor: Any, padrao: bool = True) -> bool:
     if isinstance(valor, bool):
         return valor
@@ -158,14 +168,24 @@ def _precos_atuais(dados: dict[str, Any], modo: str, preservar: dict[str, Any] |
     minimo_certeiro = numero(dados.get("minimo_certeiro"))
     minimo = numero(dados.get("minimo"))
     menor = numero(dados.get("menor"))
+    segundo_menor = numero(dados.get("segundo_menor"))
+    terceiro_menor = numero(dados.get("terceiro_menor"))
     medio = numero(dados.get("medio"))
+    mediana = numero(dados.get("mediana"))
     rapida = numero(dados.get("venda_rapida"))
     return {
         "Minimo Certeiro": minimo_certeiro if minimo_certeiro is not None else numero(primeiro(preservar, "Minimo Certeiro", "Mínimo Certeiro")),
         "Minimo": minimo if minimo is not None else numero(primeiro(preservar, "Minimo", "Mínimo", "Preço mínimo")),
         "Menor Liga": menor if menor is not None else numero(primeiro(preservar, "Menor Liga", "Preço Liga mais barato")),
+        "Segundo Menor Liga": segundo_menor if segundo_menor is not None else numero(primeiro(preservar, "Segundo Menor Liga")),
+        "Terceiro Menor Liga": terceiro_menor if terceiro_menor is not None else numero(primeiro(preservar, "Terceiro Menor Liga")),
         "Media Liga": medio if medio is not None else numero(primeiro(preservar, "Media Liga", "Preço Médio Liga", "Preço médio Liga")),
+        "Mediana Liga": mediana if mediana is not None else numero(primeiro(preservar, "Mediana Liga")),
         "Venda Rapida": rapida if rapida is not None else numero(primeiro(preservar, "Venda Rapida", "Venda Rápida", "Venda rápida")),
+        "Vendedores Geral": int(dados["vendedores_geral"] if dados.get("vendedores_geral") is not None else (primeiro(preservar, "Vendedores Geral") or 0)),
+        "Vendedores Específicos": int(dados["vendedores_especificos"] if dados.get("vendedores_especificos") is not None else (primeiro(preservar, "Vendedores Específicos") or 0)),
+        "Compradores Geral": int(dados["compradores_geral"] if dados.get("compradores_geral") is not None else (primeiro(preservar, "Compradores Geral") or 0)),
+        "Compradores Específicos": int(dados["compradores_especificos"] if dados.get("compradores_especificos") is not None else (primeiro(preservar, "Compradores Específicos") or 0)),
         "Preço": numero(primeiro(preservar, "Preço")),
         "Alteração de preço": texto(dados.get("alteracao")) or texto(primeiro(preservar, "Alteração de preço")),
     }
@@ -189,8 +209,15 @@ def normalizar_carta_existente(linha: dict[str, Any]) -> dict[str, Any]:
         "Minimo Certeiro": numero(primeiro(linha, "Minimo Certeiro", "Mínimo Certeiro")),
         "Minimo": numero(primeiro(linha, "Minimo", "Mínimo", "Preço mínimo")),
         "Menor Liga": numero(primeiro(linha, "Menor Liga", "Preço Liga mais barato")),
+        "Segundo Menor Liga": numero(primeiro(linha, "Segundo Menor Liga")),
+        "Terceiro Menor Liga": numero(primeiro(linha, "Terceiro Menor Liga")),
         "Media Liga": numero(primeiro(linha, "Media Liga", "Preço Médio Liga", "Preço médio Liga")),
+        "Mediana Liga": numero(primeiro(linha, "Mediana Liga")),
         "Venda Rapida": numero(primeiro(linha, "Venda Rapida", "Venda Rápida", "Venda rápida")),
+        "Vendedores Geral": inteiro_nao_negativo(primeiro(linha, "Vendedores Geral")),
+        "Vendedores Específicos": inteiro_nao_negativo(primeiro(linha, "Vendedores Específicos")),
+        "Compradores Geral": inteiro_nao_negativo(primeiro(linha, "Compradores Geral")),
+        "Compradores Específicos": inteiro_nao_negativo(primeiro(linha, "Compradores Específicos")),
         "Preço": numero(primeiro(linha, "Preço")),
         "Alteração de preço": texto(primeiro(linha, "Alteração de preço")),
         "Quantidade": inteiro(primeiro(linha, "Quantidade")),
@@ -217,8 +244,15 @@ def normalizar_booster_existente(linha: dict[str, Any]) -> dict[str, Any]:
         "Minimo Certeiro": numero(primeiro(linha, "Minimo Certeiro", "Mínimo Certeiro")),
         "Minimo": numero(primeiro(linha, "Minimo", "Preço mínimo", "Mínimo")),
         "Menor Liga": numero(primeiro(linha, "Menor Liga", "Preço Liga mais barato")),
+        "Segundo Menor Liga": numero(primeiro(linha, "Segundo Menor Liga")),
+        "Terceiro Menor Liga": numero(primeiro(linha, "Terceiro Menor Liga")),
         "Media Liga": numero(primeiro(linha, "Media Liga", "Preço médio Liga", "Preço Médio Liga")),
+        "Mediana Liga": numero(primeiro(linha, "Mediana Liga")),
         "Venda Rapida": numero(primeiro(linha, "Venda Rapida", "Venda rápida", "Venda Rápida")),
+        "Vendedores Geral": inteiro_nao_negativo(primeiro(linha, "Vendedores Geral")),
+        "Vendedores Específicos": inteiro_nao_negativo(primeiro(linha, "Vendedores Específicos")),
+        "Compradores Geral": inteiro_nao_negativo(primeiro(linha, "Compradores Geral")),
+        "Compradores Específicos": inteiro_nao_negativo(primeiro(linha, "Compradores Específicos")),
         "Preço": numero(primeiro(linha, "Preço")),
         "Alteração de preço": texto(primeiro(linha, "Alteração de preço")),
         "Link Liga": texto(primeiro(linha, "Link Liga", "Liga", "Link")),
@@ -899,7 +933,9 @@ def _mesclar_cartas(existentes: list[dict[str, Any]], novas: list[dict[str, Any]
             if not texto(atual.get(campo)) and texto(nova.get(campo)):
                 atual[campo] = nova[campo]
         for campo in (
-            "Minimo Certeiro", "Minimo", "Menor Liga", "Media Liga", "Venda Rapida",
+            "Minimo Certeiro", "Minimo", "Menor Liga", "Segundo Menor Liga", "Terceiro Menor Liga",
+            "Media Liga", "Mediana Liga", "Venda Rapida",
+            "Vendedores Geral", "Vendedores Específicos", "Compradores Geral", "Compradores Específicos",
             "Alteração de preço", "Preço coletado", "Preço estimado", "Status", "Última cotação",
         ):
             if nova.get(campo) not in (None, "", {}, []):
@@ -920,7 +956,9 @@ def _mesclar_boosters(existentes: list[dict[str, Any]], novos: list[dict[str, An
         if not texto(atual.get("Imagem")) and texto(novo.get("Imagem")):
             atual["Imagem"] = novo["Imagem"]
         for campo in (
-            "Minimo Certeiro", "Minimo", "Menor Liga", "Media Liga", "Venda Rapida",
+            "Minimo Certeiro", "Minimo", "Menor Liga", "Segundo Menor Liga", "Terceiro Menor Liga",
+            "Media Liga", "Mediana Liga", "Venda Rapida",
+            "Vendedores Geral", "Vendedores Específicos", "Compradores Geral", "Compradores Específicos",
             "Alteração de preço", "Preço coletado", "Preço estimado", "Status", "Última cotação",
         ):
             if novo.get(campo) not in (None, "", {}, []):
@@ -933,7 +971,7 @@ def _operacao_patch(linha: dict[str, Any]) -> bool:
 
 
 def _aplicar_patches_usuario(existentes: list[dict[str, Any]], patches: list[dict[str, Any]], tipo: str) -> None:
-    """Aplica apenas campos controlados pelo usuário, sem consultar nem sobrescrever referências de mercado."""
+    """Aplica edições manuais e invalida a cotização quando a identidade de mercado muda."""
     normalizador = normalizar_carta_existente if tipo == "cartas" else normalizar_booster_existente
     indice = {normalizador(item)["Id"]: item for item in existentes}
     for patch in patches:
@@ -943,14 +981,62 @@ def _aplicar_patches_usuario(existentes: list[dict[str, Any]], patches: list[dic
         atual = indice.get(patch_id)
         if atual is None:
             raise ValueError(f"Patch de {tipo} aponta para item inexistente: {patch_id}")
+
+        identidade_alterada = False
+        if tipo == "cartas":
+            campos_texto = {
+                "Nome": "Nome", "Número": "Número", "Coleção": "Coleção", "Ano": "Ano", "Tipo": "Tipo",
+                "Idioma": "Idioma", "Estado": "Estado", "Link Liga": "Link Liga", "Link MYP": "Link MYP",
+                "Link Cardmarket": "Link Cardmarket", "Link Tcgplayer": "Link Tcgplayer",
+                "Link PriceCharting": "Link PriceCharting", "Imagem": "Imagem",
+            }
+            for origem, destino in campos_texto.items():
+                if origem not in patch:
+                    continue
+                novo_valor = texto(patch.get(origem))
+                if destino == "Estado" and novo_valor:
+                    novo_valor = normalizar_estado(novo_valor)
+                if destino == "Idioma" and novo_valor:
+                    novo_valor = idioma_saida(novo_valor)
+                if destino in {"Idioma", "Estado", "Link Liga"} and texto(atual.get(destino)) != novo_valor:
+                    identidade_alterada = True
+                atual[destino] = novo_valor
+            if "Favorita" in patch or "Favorito" in patch:
+                atual["Favorita"] = _sim_nao(primeiro(patch, "Favorita", "Favorito"), False)
+        else:
+            if "Tipo de pacote" in patch:
+                atual["Tipo de pacote"] = texto(patch.get("Tipo de pacote"))
+            if "Imagem" in patch:
+                atual["Imagem"] = texto(patch.get("Imagem"))
+            if "Link Liga" in patch:
+                novo_link = texto(patch.get("Link Liga"))
+                identidade_alterada = texto(atual.get("Link Liga")) != novo_link
+                atual["Link Liga"] = novo_link
+
         if "Preço" in patch:
             atual["Preço"] = numero(patch.get("Preço"))
         if "Quantidade" in patch:
             atual["Quantidade"] = inteiro(patch.get("Quantidade"))
         if "À venda" in patch or "Venda" in patch:
             atual["À venda"] = _sim_nao(primeiro(patch, "À venda", "Venda"), True)
-        if tipo == "cartas" and ("Favorita" in patch or "Favorito" in patch):
-            atual["Favorita"] = _sim_nao(primeiro(patch, "Favorita", "Favorito"), False)
+
+        if identidade_alterada:
+            for campo in (
+                "Minimo Certeiro", "Minimo", "Menor Liga", "Segundo Menor Liga", "Terceiro Menor Liga",
+                "Media Liga", "Mediana Liga", "Venda Rapida", "Vendedores Geral", "Vendedores Específicos",
+                "Compradores Geral", "Compradores Específicos", "Preço coletado", "Preço estimado", "Última cotação",
+            ):
+                atual.pop(campo, None)
+            atual["Alteração de preço"] = "Cadastro de mercado editado; recotização necessária"
+            atual["Status"] = {
+                "nível": "Suspeita leve",
+                "motivos": [{
+                    "nivel": "suspeita_leve",
+                    "codigo": "cotizacao_desatualizada_por_edicao",
+                    "mensagem": "Link, idioma ou estado foi editado. Faça uma nova cotização antes de usar as referências de mercado.",
+                    "evidencia": {"itemId": patch_id},
+                }],
+            }
 
 
 def _mesclar_kits(existentes: list[dict[str, Any]], novos: list[dict[str, Any]]) -> None:

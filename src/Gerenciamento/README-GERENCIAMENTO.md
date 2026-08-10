@@ -20,7 +20,7 @@ historico/
 └── boosters.jsonl
 ```
 
-Cada linha é uma cotização independente com `itemId`, `cotacaoId`, data, preços, status, erro e `sucesso`. O histórico de mercado guarda `Minimo Certeiro`, `Minimo`, `Menor Liga`, `Media Liga` e `Venda Rapida`; o campo `Preço` não entra no histórico porque é uma escolha manual do colecionador. O inventário mantém apenas `Última cotação` quando houve sucesso. Assim, uma falha não faz o item parecer atualizado e o inventário não cresce indefinidamente.
+Cada linha é uma cotização independente com `itemId`, `cotacaoId`, data, preços, status, erro e `sucesso`. O histórico de mercado guarda `Minimo Certeiro`, `Minimo`, `Menor Liga`, `Segundo Menor Liga`, `Terceiro Menor Liga`, `Media Liga`, `Mediana Liga`, `Venda Rapida` e os contadores de compradores/vendedores; o campo `Preço` não entra no histórico porque é uma escolha manual do colecionador. O inventário mantém apenas `Última cotação` quando houve sucesso. Assim, uma falha não faz o item parecer atualizado e o inventário não cresce indefinidamente.
 
 ## IDs e referências
 
@@ -71,13 +71,17 @@ Os fatores padrão ficam em `config.json`:
 
 A conversão entre estados usa a diferença direta entre os fatores. Exemplo: SP = 0,90 para NM = 1,00 resulta em **+10%** sobre o preço SP. O valor coletado e o valor estimado continuam separados.
 
-As cinco referências calculadas pelo gerenciador são:
+As referências calculadas pelo gerenciador são:
 
 - `Minimo Certeiro` = `Menor Liga × 0,60`;
 - `Minimo` = maior buylist compatível;
 - `Menor Liga` = menor oferta compatível;
+- `Segundo Menor Liga` e `Terceiro Menor Liga` = próximas ofertas compatíveis, úteis para medir profundidade;
 - `Media Liga` = média das ofertas compatíveis;
-- `Venda Rapida` = `Menor Liga × 0,95`.
+- `Mediana Liga` = mediana das ofertas compatíveis;
+- `Venda Rapida` = `Menor Liga × 0,95`;
+- `Vendedores Geral` / `Compradores Geral` = participantes encontrados no mercado inteiro;
+- `Vendedores Específicos` / `Compradores Específicos` = participantes da mesma combinação de idioma + estado da carta (para boosters, o próprio produto).
 
 `Preço` nunca é recalculado pelo gerenciador: somente o usuário altera esse campo.
 
@@ -121,7 +125,7 @@ Updates JSON podem conter:
 
 Novas cartas/boosters são consultadas antes de alterar o inventário. Se alguma consulta falhar, a atualização do inventário é cancelada. Quando tudo termina, perfil, cartas, boosters, kits, produtos e álbuns são promovidos na mesma transação. `updateId` impede aplicação duplicada.
 
-Kits enviados com `operation: "upsert"` substituem a versão do mesmo `Id`; álbuns de update também representam o estado completo do álbum. Edições de usuário em cartas/boosters podem usar `operation: "patch"`; nesse caso somente campos controlados pelo usuário (como `Preço`, quantidade, disponibilidade e favorito de carta) são aplicados, sem sobrescrever referências de mercado.
+Kits enviados com `operation: "upsert"` substituem a versão do mesmo `Id`; álbuns de update também representam o estado completo do álbum. Edições de usuário em cartas/boosters podem usar `operation: "patch"`. Campos cadastrais e links também podem ser corrigidos; se link da Liga, idioma ou estado mudar, as referências de mercado atuais são invalidadas e o item passa a exigir nova cotização.
 
 ## Relatórios
 
@@ -130,7 +134,7 @@ Cada cotização concluída salva em `relatorios/`:
 - `cotizacao-<data>.json`;
 - `cotizacao-<data>.txt`.
 
-Os relatórios contêm totais e variações das cinco referências de mercado, além de itens sem oferta, erros e status por item.
+Os relatórios contêm totais e variações das referências de mercado, incluindo média e mediana, além de itens sem oferta, erros e status por item.
 
 ## Configuração
 
