@@ -41,11 +41,29 @@ def escolher(titulo: str, itens: list[T], rotulo) -> T:
             print("Digite um número válido da lista.")
 
 
+
+
+def escolher_velocidade_liga() -> int:
+    print("\nVelocidade das consultas à Liga Pokémon")
+    print("  1. Conservador  — 1 worker / 1 Chrome")
+    print("  2. Normal       — 2 workers / 2 Chromes")
+    print("  3. Rápido       — 3 workers / 3 Chromes")
+    print("  4. Turbo        — 4 workers / 4 Chromes")
+    print("  5. Super Turbo  — 5 workers / 5 Chromes")
+    print("Cada worker usa Chrome, Selenium, OCR e cache independentes.")
+    while True:
+        resposta = input("Escolha 1 a 5: ").strip()
+        if resposta in {"1", "2", "3", "4", "5"}:
+            return int(resposta)
+        print("Digite um número de 1 a 5.")
+
+
 def executar_formatacao() -> None:
     from configuracao import ARQUIVO_PERFIL
     from gerenciamento import formatar_nova_colecao, listar_pacotes
     pacote = escolher("Coleções não formatadas disponíveis", listar_pacotes(ARQUIVO_PERFIL), lambda item: item.name)
-    destino = formatar_nova_colecao(pacote, "menor")
+    workers = escolher_velocidade_liga()
+    destino = formatar_nova_colecao(pacote, "menor", workers=workers)
     import json
     perfil = json.loads((destino / "perfil.json").read_text(encoding="utf-8"))
     if perfil.get("formattingComplete") is False:
@@ -60,7 +78,8 @@ def executar_atualizacao() -> None:
     from configuracao import ARQUIVO_ATUALIZACAO
     from gerenciamento import atualizar_colecao, listar_pacotes
     pacote = escolher("Atualizações disponíveis", listar_pacotes(ARQUIVO_ATUALIZACAO), lambda item: item.name)
-    destino = atualizar_colecao(pacote)
+    workers = escolher_velocidade_liga()
+    destino = atualizar_colecao(pacote, workers=workers)
     print(f"\nAtualização aplicada integralmente em:\n{destino}")
 
 
@@ -91,23 +110,24 @@ def escolher_escopo() -> tuple[str, int | None]:
 def executar_cotizacao() -> None:
     from gerenciamento import cotizacao_pendente, cotizar_colecao, listar_colecoes
     colecao = escolher("Coleções disponíveis para cotização", listar_colecoes(), lambda item: item.name)
+    workers = escolher_velocidade_liga()
     if cotizacao_pendente(colecao):
         print("\nExiste uma cotização incompleta salva para esta coleção.")
         while True:
             resposta = input("Continuar de onde parou? [S/N]: ").strip().upper()
             if resposta in {"S", "SIM"}:
-                destino = cotizar_colecao(colecao, retomar=True)
+                destino = cotizar_colecao(colecao, retomar=True, workers=workers)
                 break
             if resposta in {"N", "NAO", "NÃO"}:
                 # Uma nova sessão substitui apenas o arquivo de progresso; os preços já salvos continuam no histórico.
                 (colecao / "cotizacao-em-andamento.json").unlink(missing_ok=True)
                 opcao, dias = escolher_escopo()
-                destino = cotizar_colecao(colecao, opcao=opcao, dias=dias, retomar=False)
+                destino = cotizar_colecao(colecao, opcao=opcao, dias=dias, retomar=False, workers=workers)
                 break
             print("Responda S ou N.")
     else:
         opcao, dias = escolher_escopo()
-        destino = cotizar_colecao(colecao, opcao=opcao, dias=dias)
+        destino = cotizar_colecao(colecao, opcao=opcao, dias=dias, workers=workers)
     if cotizacao_pendente(destino):
         print(f"\nCotização salva parcialmente em:\n{destino}")
         print("Existem itens pendentes; execute a cotização novamente para retomar somente o que falhou.")

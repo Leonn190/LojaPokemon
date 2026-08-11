@@ -14,5 +14,7 @@
     "HP": 0.5,
     "D": 0.3
   },
-  "minimoCerteiro": 0.6
+  "minimoCerteiro": 0.6,
+  "jitterWorkers": 0.3,
+  "esperaEstabilidadeMax": 5.0
 }

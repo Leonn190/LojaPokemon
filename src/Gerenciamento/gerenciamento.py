@@ -6,13 +6,15 @@ import json
 import re
 import tempfile
 import time
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import uuid
 import zipfile
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Callable, Iterator
 from urllib.parse import parse_qsl, urlsplit, urlunsplit
 
 from armazenamento import (
@@ -32,6 +34,7 @@ from configuracao import (
     ARQUIVO_PERFIL,
     ARQUIVOS_INVENTARIO,
     SALVAR_PARCIAL,
+    JITTER_WORKERS,
     chave_texto,
     pasta_colecoes,
     pasta_nao_formatadas,
@@ -47,12 +50,265 @@ from precificacao import (
     preco_objeto,
     registrar_historico,
 )
-from relatorios import registrar_variacoes, salvar_relatorio
+from relatorios import registrar_variacoes, salvar_relatorio, salvar_relatorio_execucao_liga
 
 MODO_MENOR = "menor"
 MODO_MEDIA = "media"
 ARQUIVO_COTIZACAO_PARCIAL = "cotizacao-em-andamento.json"
 ARQUIVO_FORMATACAO_PARCIAL = "formatacao-em-andamento.json"
+
+
+MODOS_VELOCIDADE = {
+    1: "Conservador",
+    2: "Normal",
+    3: "Rápido",
+    4: "Turbo",
+    5: "Super Turbo",
+}
+
+
+def nome_modo_velocidade(workers: int) -> str:
+    return MODOS_VELOCIDADE.get(max(1, min(5, int(workers))), f"Personalizado ({workers})")
+
+
+def _fmt_tempo(segundos: float) -> str:
+    segundos = max(0, int(round(segundos)))
+    h, resto = divmod(segundos, 3600)
+    m, s = divmod(resto, 60)
+    if h:
+        return f"{h}h {m:02d}m {s:02d}s"
+    if m:
+        return f"{m}m {s:02d}s"
+    return f"{s}s"
+
+
+def _fmt_preco_console(valor: Any) -> str:
+    n = numero(valor)
+    if n is None:
+        return "—"
+    return (f"R$ {n:,.2f}").replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+class PoolLiga:
+    """Pool de threads em que cada thread mantém seu próprio Chrome/Selenium/OCR."""
+
+    def __init__(self, workers: int) -> None:
+        self.workers = max(1, min(5, int(workers)))
+        self._executor: ThreadPoolExecutor | None = None
+        self._local = threading.local()
+        self._lock = threading.Lock()
+        self._proximo_worker = 1
+        self._sessoes: list[SessaoLiga] = []
+
+    def __enter__(self) -> "PoolLiga":
+        self._executor = ThreadPoolExecutor(max_workers=self.workers, thread_name_prefix="LigaWorker")
+        return self
+
+    def _sessao_da_thread(self) -> tuple[SessaoLiga, int]:
+        sessao = getattr(self._local, "sessao", None)
+        worker_id = getattr(self._local, "worker_id", None)
+        if sessao is not None and worker_id is not None:
+            return sessao, worker_id
+        with self._lock:
+            worker_id = self._proximo_worker
+            self._proximo_worker += 1
+        self._local.worker_id = worker_id
+        sessao = SessaoLiga(worker_id=worker_id, atraso_inicial=(worker_id - 1) * JITTER_WORKERS)
+        sessao.__enter__()
+        self._local.sessao = sessao
+        with self._lock:
+            self._sessoes.append(sessao)
+        return sessao, worker_id
+
+    def _rodar(
+        self,
+        indice: int,
+        trabalho: Any,
+        consulta: Callable[[Any, SessaoLiga], tuple[dict[str, Any], str]],
+    ) -> dict[str, Any]:
+        inicio = time.monotonic()
+        worker_id = int(getattr(self._local, "worker_id", 0) or 0)
+        try:
+            sessao, worker_id = self._sessao_da_thread()
+            dados, erro = consulta(trabalho, sessao)
+        except Exception as exc:
+            dados, erro = {}, str(exc)
+        return {
+            "indice": indice,
+            "trabalho": trabalho,
+            "dados": dados,
+            "erro": erro,
+            "worker": worker_id or int(getattr(self._local, "worker_id", 0) or 0),
+            "duracao": time.monotonic() - inicio,
+        }
+
+    def executar(
+        self,
+        trabalhos: list[Any],
+        consulta: Callable[[Any, SessaoLiga], tuple[dict[str, Any], str]],
+    ) -> Iterator[dict[str, Any]]:
+        if not trabalhos:
+            return
+        if self._executor is None:
+            raise RuntimeError("PoolLiga não foi aberto.")
+        futuros = {
+            self._executor.submit(self._rodar, indice, trabalho, consulta): indice
+            for indice, trabalho in enumerate(trabalhos, 1)
+        }
+        for futuro in as_completed(futuros):
+            try:
+                yield futuro.result()
+            except Exception as exc:
+                indice = futuros[futuro]
+                yield {"indice": indice, "trabalho": trabalhos[indice - 1], "dados": {}, "erro": str(exc), "worker": 0, "duracao": 0.0}
+
+    def __exit__(self, exc_type: Any, exc: Any, traceback: Any) -> None:
+        if self._executor is not None:
+            self._executor.shutdown(wait=True, cancel_futures=False)
+            self._executor = None
+        for sessao in self._sessoes:
+            try:
+                sessao.fechar()
+            except Exception:
+                pass
+        self._sessoes.clear()
+
+
+class MonitorOperacao:
+    """Barra de progresso, ETA, telemetria e resumo por item."""
+
+    def __init__(self, total: int, operacao: str, workers: int) -> None:
+        self.total = max(0, int(total))
+        self.operacao = operacao
+        self.workers = max(1, min(5, int(workers)))
+        self.modo = nome_modo_velocidade(self.workers)
+        self.inicio_mono = time.monotonic()
+        self.iniciado_em = agora_iso()
+        self.concluidos = 0
+        self.sucessos = 0
+        self.erros = 0
+        self.repeticoes = 0
+        self.itens: list[dict[str, Any]] = []
+
+    def falha_temporaria(self, nome: str, tipo: str, erro: str, worker: int, tentativa: int) -> None:
+        self.repeticoes += 1
+        print(f"⚠ [{tipo}] {nome} | W{worker or '?'} | tentativa {tentativa}: {erro} — será repetido")
+
+    def registrar(
+        self,
+        nome: str,
+        tipo: str,
+        dados: dict[str, Any],
+        erro: str,
+        worker: int,
+        duracao: float,
+        variacao: dict[str, Any] | None = None,
+        status: dict[str, Any] | None = None,
+    ) -> None:
+        self.concluidos += 1
+        if erro:
+            self.erros += 1
+        else:
+            self.sucessos += 1
+        preco = {
+            "menor": numero(dados.get("menor")),
+            "segundoMenor": numero(dados.get("segundo_menor")),
+            "terceiroMenor": numero(dados.get("terceiro_menor")),
+            "media": numero(dados.get("medio")),
+            "mediana": numero(dados.get("mediana")),
+            "buylist": numero(dados.get("minimo")),
+            "vendaRapida": numero(dados.get("venda_rapida")),
+        }
+        mercado = {
+            "vendedoresGeral": int(dados.get("vendedores_geral") or 0),
+            "vendedoresEspecificos": int(dados.get("vendedores_especificos") or 0),
+            "compradoresGeral": int(dados.get("compradores_geral") or 0),
+            "compradoresEspecificos": int(dados.get("compradores_especificos") or 0),
+            "ofertasLidas": int(dados.get("quantidade_ofertas") or 0),
+            "buylistLida": int(dados.get("quantidade_buylist") or 0),
+        }
+        variacao_menor = (variacao or {}).get("Menor Liga") if isinstance(variacao, dict) else None
+        item = {
+            "nome": nome,
+            "tipo": tipo,
+            "status": "ERRO" if erro else str((status or {}).get("nível") or "OK"),
+            "erro": erro,
+            "worker": worker,
+            "duracaoSegundos": round(float(duracao), 3),
+            "precos": preco,
+            "mercado": mercado,
+            "variacaoMenorLiga": variacao_menor,
+            "statusDetalhes": status or {},
+            "observacao": texto(dados.get("alteracao")),
+        }
+        self.itens.append(item)
+
+        simbolo = "✗" if erro else "✓"
+        print(f"{simbolo} [{tipo}] {nome} | W{worker or '?'} | {_fmt_tempo(duracao)}")
+        if erro:
+            print(f"  Erro: {erro}")
+        else:
+            print(
+                "  Preços: menor {0} | 2º {1} | 3º {2} | média {3} | mediana {4} | buylist {5}".format(
+                    _fmt_preco_console(preco["menor"]), _fmt_preco_console(preco["segundoMenor"]),
+                    _fmt_preco_console(preco["terceiroMenor"]), _fmt_preco_console(preco["media"]),
+                    _fmt_preco_console(preco["mediana"]), _fmt_preco_console(preco["buylist"]),
+                )
+            )
+            print(
+                f"  Mercado: {mercado['vendedoresGeral']} vendedores ({mercado['vendedoresEspecificos']} específicos) | "
+                f"{mercado['compradoresGeral']} compradores ({mercado['compradoresEspecificos']} específicos)"
+            )
+            nivel = str((status or {}).get("nível") or "OK")
+            if nivel != "OK":
+                print(f"  Status: {nivel}")
+                for motivo in list((status or {}).get("motivos") or [])[:3]:
+                    if isinstance(motivo, dict) and motivo.get("mensagem"):
+                        print(f"    - {motivo['mensagem']}")
+            if texto(dados.get("alteracao")):
+                print(f"  Observação: {texto(dados.get('alteracao'))}")
+            if isinstance(variacao_menor, dict) and variacao_menor.get("diferença") is not None:
+                dif = float(variacao_menor.get("diferença") or 0)
+                pct = variacao_menor.get("percentual")
+                pct_txt = "" if pct is None else f" ({float(pct):+.2f}%)"
+                print(f"  Variação desde a última cotização: {dif:+.2f}{pct_txt}")
+        self.imprimir_barra()
+
+    def imprimir_barra(self) -> None:
+        if self.total <= 0:
+            return
+        decorrido = time.monotonic() - self.inicio_mono
+        frac = min(1.0, self.concluidos / self.total)
+        largura = 28
+        cheios = int(round(largura * frac))
+        barra = "█" * cheios + "░" * (largura - cheios)
+        media = decorrido / self.concluidos if self.concluidos else 0.0
+        eta = media * max(0, self.total - self.concluidos)
+        print(
+            f"  [{barra}] {self.concluidos}/{self.total} ({frac*100:5.1f}%) | "
+            f"decorrido {_fmt_tempo(decorrido)} | ETA {_fmt_tempo(eta)} | "
+            f"{self.sucessos} OK / {self.erros} erros\n"
+        )
+
+    def resumo(self) -> dict[str, Any]:
+        fim = time.monotonic()
+        duracao = fim - self.inicio_mono
+        return {
+            "iniciadoEm": self.iniciado_em,
+            "finalizadoEm": agora_iso(),
+            "modoVelocidade": self.modo,
+            "workers": self.workers,
+            "total": self.total,
+            "concluidos": self.concluidos,
+            "sucessos": self.sucessos,
+            "erros": self.erros,
+            "duracaoSegundos": round(duracao, 3),
+            "duracaoFormatada": _fmt_tempo(duracao),
+            "mediaSegundosPorItem": round(duracao / self.concluidos, 3) if self.concluidos else 0.0,
+            "itensPorMinuto": round((self.concluidos / duracao) * 60, 2) if duracao > 0 else 0.0,
+            "repeticoes": self.repeticoes,
+            "tentativasConsultaItens": self.total + self.repeticoes,
+        }
 
 
 def texto(valor: Any) -> str:
@@ -743,7 +999,7 @@ def _upsert_id(itens: list[dict[str, Any]], novo: dict[str, Any]) -> None:
     itens.append(novo)
 
 
-def formatar_nova_colecao(item: Path, modo: str) -> Path:
+def formatar_nova_colecao(item: Path, modo: str, workers: int = 1) -> Path:
     with abrir_pacote(item, ARQUIVO_PERFIL) as origem:
         perfil = ler_json_obj(origem / ARQUIVO_PERFIL)
         identificador = identificar_colecao(perfil, origem.name)
@@ -808,71 +1064,88 @@ def formatar_nova_colecao(item: Path, modo: str) -> Path:
             if identificador_booster(normalizar_booster_existente(linha)) not in processados_boosters
         ]
 
+        total_consultas = len(pendentes_cartas) + len(pendentes_boosters)
+        monitor = MonitorOperacao(total_consultas, "formatacao", workers)
+
         if pendentes_cartas or pendentes_boosters:
-            with SessaoLiga() as sessao:
-                # Uma tentativa normal + uma repetição automática apenas dos que falharam.
+            trabalhos: list[dict[str, Any]] = [
+                {"tipo": "carta", "indice": indice, "linha": linha, "chave": chave_pre}
+                for indice, linha, chave_pre in pendentes_cartas
+            ] + [
+                {"tipo": "booster", "indice": indice, "linha": linha, "chave": chave_pre}
+                for indice, linha, chave_pre in pendentes_boosters
+            ]
+
+            def consultar_trabalho(trabalho: dict[str, Any], sessao: SessaoLiga) -> tuple[dict[str, Any], str]:
+                if trabalho["tipo"] == "carta":
+                    return _consultar_uma_carta(trabalho["linha"], sessao)
+                return _consultar_um_booster(trabalho["linha"], sessao)
+
+            with PoolLiga(workers) as pool:
+                pendentes_tentativa = trabalhos
                 for tentativa in (1, 2):
-                    falhas_cartas: list[tuple[int, dict[str, Any], str]] = []
-                    for indice, linha, chave_pre in pendentes_cartas:
-                        if chave_pre in processadas:
-                            continue
-                        prefixo = "Repetindo" if tentativa == 2 else "Carta"
-                        print(f"{prefixo} {indice}/{len(cartas_origem)}: {texto(primeiro(linha, 'Nome')) or primeiro(linha, 'Link Liga', 'Link')}")
-                        dados, erro = _consultar_uma_carta(linha, sessao)
+                    falhas: list[dict[str, Any]] = []
+                    for retorno in pool.executar(pendentes_tentativa, consultar_trabalho):
+                        trabalho = retorno["trabalho"]
+                        tipo = trabalho["tipo"]
+                        linha = trabalho["linha"]
+                        chave_pre = trabalho["chave"]
+                        dados, erro = retorno["dados"], retorno["erro"]
+                        worker = int(retorno.get("worker") or 0)
+                        duracao = float(retorno.get("duracao") or 0.0)
+                        nome = (
+                            texto(primeiro(linha, "Nome")) or texto(primeiro(linha, "Link Liga", "Link"))
+                            if tipo == "carta"
+                            else texto(primeiro(linha, "Tipo de pacote", "Nome")) or texto(primeiro(linha, "Link Liga", "Link"))
+                        )
+                        historico_tipo = "cartas" if tipo == "carta" else "boosters"
                         if erro:
-                            estado["errosPendentes"]["cartas"][chave_pre] = {"erro": erro, "tentativa": tentativa, "em": agora_iso()}
-                            anexar_historico(destino, "cartas", _registro_falha(linha, "cartas", cotacao_id, erro))
-                            falhas_cartas.append((indice, linha, chave_pre))
+                            estado["errosPendentes"][historico_tipo][chave_pre] = {"erro": erro, "tentativa": tentativa, "em": agora_iso()}
+                            anexar_historico(destino, historico_tipo, _registro_falha(linha, historico_tipo, cotacao_id, erro))
                             salvar_estado()
+                            if tentativa == 1:
+                                falhas.append(trabalho)
+                                monitor.falha_temporaria(nome, tipo, erro, worker, tentativa)
+                            else:
+                                monitor.registrar(nome, tipo, dados, erro, worker, duracao)
                             continue
-                        nova, registro = montar_carta_nova(linha, dados, modo, cotacao_id, data)
-                        imagem = baixar_imagem(texto(dados.get("imagem")), f"{nova['Nome']}_{nova['Número']}")
-                        if imagem:
-                            nova["Imagem"] = imagem
-                        _upsert_id(cartas, nova)
-                        mapa_ids[chave_pre] = nova["Id"]
-                        id_origem = texto(linha.get("Id") or linha.get("id"))
-                        if id_origem:
-                            mapa_ids[id_origem] = nova["Id"]
-                        anexar_historico(destino, "cartas", registro)
-                        processadas.add(chave_pre)
-                        estado["errosPendentes"]["cartas"].pop(chave_pre, None)
-                        salvar_estado()
 
-                    falhas_boosters: list[tuple[int, dict[str, Any], str]] = []
-                    for indice, linha, chave_pre in pendentes_boosters:
-                        if chave_pre in processados_boosters:
-                            continue
-                        prefixo = "Repetindo booster" if tentativa == 2 else "Booster"
-                        print(f"{prefixo} {indice}/{len(boosters_origem)}: {texto(primeiro(linha, 'Tipo de pacote', 'Nome')) or primeiro(linha, 'Link Liga', 'Link')}")
-                        dados, erro = _consultar_um_booster(linha, sessao)
-                        if erro:
-                            estado["errosPendentes"]["boosters"][chave_pre] = {"erro": erro, "tentativa": tentativa, "em": agora_iso()}
-                            anexar_historico(destino, "boosters", _registro_falha(linha, "boosters", cotacao_id, erro))
-                            falhas_boosters.append((indice, linha, chave_pre))
-                            salvar_estado()
-                            continue
-                        novo, registro = montar_booster_novo(linha, dados, modo, cotacao_id, data)
-                        imagem = baixar_imagem(texto(dados.get("imagem")), f"Booster_{novo['Tipo de pacote']}")
-                        if imagem:
-                            novo["Imagem"] = imagem
-                        _upsert_id(boosters, novo)
-                        mapa_ids[chave_pre] = novo["Id"]
-                        id_origem = texto(linha.get("Id") or linha.get("id"))
-                        if id_origem:
-                            mapa_ids[id_origem] = novo["Id"]
-                        anexar_historico(destino, "boosters", registro)
-                        processados_boosters.add(chave_pre)
-                        estado["errosPendentes"]["boosters"].pop(chave_pre, None)
+                        if tipo == "carta":
+                            nova, registro = montar_carta_nova(linha, dados, modo, cotacao_id, data)
+                            imagem = baixar_imagem(texto(dados.get("imagem")), f"{nova['Nome']}_{nova['Número']}")
+                            if imagem:
+                                nova["Imagem"] = imagem
+                            _upsert_id(cartas, nova)
+                            mapa_ids[chave_pre] = nova["Id"]
+                            id_origem = texto(linha.get("Id") or linha.get("id"))
+                            if id_origem:
+                                mapa_ids[id_origem] = nova["Id"]
+                            anexar_historico(destino, "cartas", registro)
+                            processadas.add(chave_pre)
+                            estado["errosPendentes"]["cartas"].pop(chave_pre, None)
+                            status = nova.get("Status") if isinstance(nova.get("Status"), dict) else {}
+                        else:
+                            novo, registro = montar_booster_novo(linha, dados, modo, cotacao_id, data)
+                            imagem = baixar_imagem(texto(dados.get("imagem")), f"Booster_{novo['Tipo de pacote']}")
+                            if imagem:
+                                novo["Imagem"] = imagem
+                            _upsert_id(boosters, novo)
+                            mapa_ids[chave_pre] = novo["Id"]
+                            id_origem = texto(linha.get("Id") or linha.get("id"))
+                            if id_origem:
+                                mapa_ids[id_origem] = novo["Id"]
+                            anexar_historico(destino, "boosters", registro)
+                            processados_boosters.add(chave_pre)
+                            estado["errosPendentes"]["boosters"].pop(chave_pre, None)
+                            status = novo.get("Status") if isinstance(novo.get("Status"), dict) else {}
                         salvar_estado()
+                        monitor.registrar(nome, tipo, dados, "", worker, duracao, status=status)
 
-                    if not falhas_cartas and not falhas_boosters:
+                    if not falhas:
                         break
                     if tentativa == 1:
-                        total_falhas = len(falhas_cartas) + len(falhas_boosters)
-                        print(f"{total_falhas} item(ns) falharam; repetindo somente esses itens...")
-                        pendentes_cartas = falhas_cartas
-                        pendentes_boosters = falhas_boosters
+                        print(f"{len(falhas)} item(ns) falharam; repetindo somente esses itens em paralelo...")
+                        pendentes_tentativa = falhas
 
         escrever_inventario(destino, "cartas", cartas)
         escrever_inventario(destino, "boosters", boosters)
@@ -883,6 +1156,8 @@ def formatar_nova_colecao(item: Path, modo: str) -> Path:
             perfil.update({"updatedAt": agora_iso(), "formattingComplete": False, "formattingPending": total_pendentes})
             escrever_json_obj(destino / ARQUIVO_PERFIL, perfil)
             print(f"Formatação parcial salva: {total_pendentes} item(ns) ainda pendente(s). Execute novamente para retomar.")
+            if total_consultas:
+                salvar_relatorio_execucao_liga(destino, "formatacao-parcial", monitor.resumo(), monitor.itens, {"pendentes": total_pendentes})
             return destino
 
         kits_origem = [normalizar_kit(x) for x in ler_inventario(origem, "kits")]
@@ -899,6 +1174,9 @@ def formatar_nova_colecao(item: Path, modo: str) -> Path:
         escrever_json_obj(destino / ARQUIVO_PERFIL, perfil)
         estado_path.unlink(missing_ok=True)
         arquivar_csvs_legados(destino)
+        if total_consultas:
+            rel_json, rel_txt = salvar_relatorio_execucao_liga(destino, "formatacao", monitor.resumo(), monitor.itens)
+            print(f"Relatório final: {rel_txt.name} | {rel_json.name}")
         return destino
 
 def _localizar_destino(identificador: str) -> Path:
@@ -1102,7 +1380,7 @@ def _mesclar_perfil_editavel(perfil: dict[str, Any], perfil_update: dict[str, An
             perfil[campo] = perfil_update[campo]
 
 
-def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual: Path | None = None) -> Path:
+def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual: Path | None = None, workers: int = 1) -> Path:
     with abrir_pacote(item, ARQUIVO_ATUALIZACAO) as origem:
         metadados = ler_json_obj(origem / ARQUIVO_ATUALIZACAO)
         identificador = texto(primeiro(metadados, "collectionId", "collection_id", "colecao"))
@@ -1147,42 +1425,107 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
         historico_boosters: list[dict[str, Any]] = []
         mapa_ids: dict[str, str] = {}
 
+        total_consultas = len(novas_cartas_src) + len(novos_boosters_src)
+        monitor = MonitorOperacao(total_consultas, "atualizacao", workers)
+
         if novas_cartas_src or novos_boosters_src:
-            with SessaoLiga() as sessao:
-                for i, linha in enumerate(novas_cartas_src, 1):
-                    print(f"Carta de atualização {i}/{len(novas_cartas_src)}")
-                    dados, erro = _consultar_uma_carta(linha, sessao)
-                    if erro:
-                        anexar_historico(destino, "cartas", _registro_falha(linha, "cartas", cotacao_id, erro))
-                        raise RuntimeError(f"Atualização cancelada sem alterar inventário: falha na carta {i}: {erro}")
-                    nova, registro = montar_carta_nova(linha, dados, modo, cotacao_id, data)
-                    imagem = baixar_imagem(texto(dados.get("imagem")), f"{nova['Nome']}_{nova['Número']}")
-                    if imagem:
-                        nova["Imagem"] = imagem
-                    novas_cartas.append(nova)
-                    chave_pre = identificador_carta(normalizar_carta_existente(linha))
-                    mapa_ids[chave_pre] = nova["Id"]
-                    id_origem = texto(linha.get("Id") or linha.get("id"))
-                    if id_origem:
-                        mapa_ids[id_origem] = nova["Id"]
-                    historico_cartas.append(registro)
-                for i, linha in enumerate(novos_boosters_src, 1):
-                    print(f"Booster de atualização {i}/{len(novos_boosters_src)}")
-                    dados, erro = _consultar_um_booster(linha, sessao)
-                    if erro:
-                        anexar_historico(destino, "boosters", _registro_falha(linha, "boosters", cotacao_id, erro))
-                        raise RuntimeError(f"Atualização cancelada sem alterar inventário: falha no booster {i}: {erro}")
-                    novo, registro = montar_booster_novo(linha, dados, modo, cotacao_id, data)
-                    imagem = baixar_imagem(texto(dados.get("imagem")), f"Booster_{novo['Tipo de pacote']}")
-                    if imagem:
-                        novo["Imagem"] = imagem
-                    novos_boosters.append(novo)
-                    chave_pre = identificador_booster(normalizar_booster_existente(linha))
-                    mapa_ids[chave_pre] = novo["Id"]
-                    id_origem = texto(linha.get("Id") or linha.get("id"))
-                    if id_origem:
-                        mapa_ids[id_origem] = novo["Id"]
-                    historico_boosters.append(registro)
+            trabalhos: list[dict[str, Any]] = [
+                {"tipo": "carta", "ordem": i, "linha": linha}
+                for i, linha in enumerate(novas_cartas_src, 1)
+            ] + [
+                {"tipo": "booster", "ordem": i, "linha": linha}
+                for i, linha in enumerate(novos_boosters_src, 1)
+            ]
+            cartas_ordenadas: list[tuple[int, dict[str, Any]]] = []
+            boosters_ordenados: list[tuple[int, dict[str, Any]]] = []
+            historico_cartas_ordenado: list[tuple[int, dict[str, Any]]] = []
+            historico_boosters_ordenado: list[tuple[int, dict[str, Any]]] = []
+
+            def consultar_trabalho_update(trabalho: dict[str, Any], sessao: SessaoLiga) -> tuple[dict[str, Any], str]:
+                return (
+                    _consultar_uma_carta(trabalho["linha"], sessao)
+                    if trabalho["tipo"] == "carta"
+                    else _consultar_um_booster(trabalho["linha"], sessao)
+                )
+
+            falhas_finais: list[dict[str, Any]] = []
+            with PoolLiga(workers) as pool:
+                pendentes_tentativa = trabalhos
+                for tentativa in (1, 2):
+                    falhas: list[dict[str, Any]] = []
+                    for retorno in pool.executar(pendentes_tentativa, consultar_trabalho_update):
+                        trabalho = retorno["trabalho"]
+                        tipo = trabalho["tipo"]
+                        ordem = int(trabalho["ordem"])
+                        linha = trabalho["linha"]
+                        dados, erro = retorno["dados"], retorno["erro"]
+                        worker = int(retorno.get("worker") or 0)
+                        duracao = float(retorno.get("duracao") or 0.0)
+                        nome = (
+                            texto(primeiro(linha, "Nome")) or texto(primeiro(linha, "Link Liga", "Link"))
+                            if tipo == "carta"
+                            else texto(primeiro(linha, "Tipo de pacote", "Nome")) or texto(primeiro(linha, "Link Liga", "Link"))
+                        )
+                        if erro:
+                            hist_tipo = "cartas" if tipo == "carta" else "boosters"
+                            anexar_historico(destino, hist_tipo, _registro_falha(linha, hist_tipo, cotacao_id, erro))
+                            if tentativa == 1:
+                                falhas.append(trabalho)
+                                monitor.falha_temporaria(nome, tipo, erro, worker, tentativa)
+                            else:
+                                falhas_finais.append({"trabalho": trabalho, "erro": erro})
+                                monitor.registrar(nome, tipo, dados, erro, worker, duracao)
+                            continue
+
+                        if tipo == "carta":
+                            nova, registro = montar_carta_nova(linha, dados, modo, cotacao_id, data)
+                            imagem = baixar_imagem(texto(dados.get("imagem")), f"{nova['Nome']}_{nova['Número']}")
+                            if imagem:
+                                nova["Imagem"] = imagem
+                            cartas_ordenadas.append((ordem, nova))
+                            historico_cartas_ordenado.append((ordem, registro))
+                            chave_pre = identificador_carta(normalizar_carta_existente(linha))
+                            mapa_ids[chave_pre] = nova["Id"]
+                            id_origem = texto(linha.get("Id") or linha.get("id"))
+                            if id_origem:
+                                mapa_ids[id_origem] = nova["Id"]
+                            status = nova.get("Status") if isinstance(nova.get("Status"), dict) else {}
+                        else:
+                            novo, registro = montar_booster_novo(linha, dados, modo, cotacao_id, data)
+                            imagem = baixar_imagem(texto(dados.get("imagem")), f"Booster_{novo['Tipo de pacote']}")
+                            if imagem:
+                                novo["Imagem"] = imagem
+                            boosters_ordenados.append((ordem, novo))
+                            historico_boosters_ordenado.append((ordem, registro))
+                            chave_pre = identificador_booster(normalizar_booster_existente(linha))
+                            mapa_ids[chave_pre] = novo["Id"]
+                            id_origem = texto(linha.get("Id") or linha.get("id"))
+                            if id_origem:
+                                mapa_ids[id_origem] = novo["Id"]
+                            status = novo.get("Status") if isinstance(novo.get("Status"), dict) else {}
+                        monitor.registrar(nome, tipo, dados, "", worker, duracao, status=status)
+
+                    if not falhas:
+                        break
+                    if tentativa == 1:
+                        print(f"{len(falhas)} item(ns) falharam; repetindo somente esses itens em paralelo...")
+                        pendentes_tentativa = falhas
+
+            novas_cartas = [x for _, x in sorted(cartas_ordenadas, key=lambda x: x[0])]
+            novos_boosters = [x for _, x in sorted(boosters_ordenados, key=lambda x: x[0])]
+            historico_cartas = [x for _, x in sorted(historico_cartas_ordenado, key=lambda x: x[0])]
+            historico_boosters = [x for _, x in sorted(historico_boosters_ordenado, key=lambda x: x[0])]
+            if falhas_finais:
+                rel_json, rel_txt = salvar_relatorio_execucao_liga(
+                    destino, "atualizacao-cancelada", monitor.resumo(), monitor.itens,
+                    {"updateId": update_id, "motivo": "Uma ou mais consultas falharam após a repetição; inventário oficial não alterado."},
+                )
+                primeiro_erro = falhas_finais[0]
+                t = primeiro_erro["trabalho"]
+                raise RuntimeError(
+                    f"Atualização cancelada sem alterar inventário: falha em {t['tipo']} #{t['ordem']}: {primeiro_erro['erro']}. "
+                    f"Relatório: {rel_txt.name}"
+                )
 
         _aplicar_patches_usuario(cartas, patches_cartas, "cartas")
         _aplicar_patches_usuario(boosters, patches_boosters, "boosters")
@@ -1218,6 +1561,11 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
         if historico_boosters:
             anexar_historico(destino, "boosters", historico_boosters)
         arquivar_csvs_legados(destino)
+        if total_consultas:
+            rel_json, rel_txt = salvar_relatorio_execucao_liga(
+                destino, "atualizacao", monitor.resumo(), monitor.itens, {"updateId": update_id}
+            )
+            print(f"Relatório final: {rel_txt.name} | {rel_json.name}")
         return destino
 
 def cotizacao_pendente(colecao: Path) -> bool:
@@ -1274,7 +1622,7 @@ def _totais_snapshot(cartas: list[dict[str, Any]], boosters: list[dict[str, Any]
     }
 
 
-def cotizar_colecao(colecao: Path, modo_padrao: str = MODO_MENOR, opcao: str = "1", dias: int | None = None, retomar: bool = True) -> Path:
+def cotizar_colecao(colecao: Path, modo_padrao: str = MODO_MENOR, opcao: str = "1", dias: int | None = None, retomar: bool = True, workers: int = 1) -> Path:
     recuperar_transacoes_pendentes(colecao)
     migrados = migrar_inventarios_legados(colecao)
     if migrados:
@@ -1346,35 +1694,71 @@ def cotizar_colecao(colecao: Path, modo_padrao: str = MODO_MENOR, opcao: str = "
         salvar_progresso()
 
     pendentes_execucao = [alvo for alvo in selecionados if f"{alvo.get('tipo')}:{alvo.get('id')}" not in processados]
+    monitor = MonitorOperacao(len(pendentes_execucao), "cotizacao", workers)
 
     if pendentes_execucao:
-        with SessaoLiga() as liga:
+        trabalhos: list[dict[str, Any]] = []
+        for alvo in pendentes_execucao:
+            tipo, item_id = alvo.get("tipo"), alvo.get("id")
+            chave = f"{tipo}:{item_id}"
+            if tipo == "carta":
+                idx = mapa_cartas.get(item_id)
+                if idx is None:
+                    mensagem = f"Carta {item_id}: não encontrada no inventário"
+                    if mensagem not in sessao["errosFatais"]:
+                        sessao["errosFatais"].append(mensagem)
+                    processados.add(chave)
+                    monitor.registrar(str(item_id), "carta", {}, mensagem, 0, 0.0)
+                    salvar_progresso()
+                    continue
+                linha = cartas[idx]
+                nome = texto(linha.get("Nome")) or str(item_id)
+            else:
+                idx = mapa_boosters.get(item_id)
+                if idx is None:
+                    mensagem = f"Booster {item_id}: não encontrado no inventário"
+                    if mensagem not in sessao["errosFatais"]:
+                        sessao["errosFatais"].append(mensagem)
+                    processados.add(chave)
+                    monitor.registrar(str(item_id), "booster", {}, mensagem, 0, 0.0)
+                    salvar_progresso()
+                    continue
+                linha = boosters[idx]
+                nome = texto(linha.get("Tipo de pacote")) or str(item_id)
+            trabalhos.append({"alvo": alvo, "tipo": tipo, "id": item_id, "chave": chave, "idx": idx, "linha": linha, "nome": nome})
+
+        def consultar_trabalho_cotizacao(trabalho: dict[str, Any], liga: SessaoLiga) -> tuple[dict[str, Any], str]:
+            return (
+                _consultar_uma_carta(trabalho["linha"], liga)
+                if trabalho["tipo"] == "carta"
+                else _consultar_um_booster(trabalho["linha"], liga)
+            )
+
+        with PoolLiga(workers) as pool:
+            pendentes_tentativa = trabalhos
             for tentativa in (1, 2):
                 falharam: list[dict[str, Any]] = []
-                for pos, alvo in enumerate(pendentes_execucao, 1):
-                    tipo, item_id = alvo.get("tipo"), alvo.get("id")
-                    chave = f"{tipo}:{item_id}"
-                    if chave in processados:
+                for retorno in pool.executar(pendentes_tentativa, consultar_trabalho_cotizacao):
+                    trabalho = retorno["trabalho"]
+                    alvo = trabalho["alvo"]
+                    tipo, item_id, chave = trabalho["tipo"], trabalho["id"], trabalho["chave"]
+                    idx, nome = int(trabalho["idx"]), trabalho["nome"]
+                    dados, erro = retorno["dados"], retorno["erro"]
+                    worker = int(retorno.get("worker") or 0)
+                    duracao = float(retorno.get("duracao") or 0.0)
+
+                    if erro:
+                        linha_atual = cartas[idx] if tipo == "carta" else boosters[idx]
+                        registrar_falha(alvo, chave, nome, erro, tentativa, linha_atual)
+                        if tentativa == 1:
+                            falharam.append(trabalho)
+                            monitor.falha_temporaria(nome, tipo, erro, worker, tentativa)
+                        else:
+                            monitor.registrar(nome, tipo, dados, erro, worker, duracao)
                         continue
 
                     if tipo == "carta":
-                        idx = mapa_cartas.get(item_id)
-                        if idx is None:
-                            mensagem = f"Carta {item_id}: não encontrada no inventário"
-                            if mensagem not in sessao["errosFatais"]:
-                                sessao["errosFatais"].append(mensagem)
-                            processados.add(chave)
-                            salvar_progresso()
-                            continue
                         anterior = copy.deepcopy(cartas[idx])
-                        nome = cartas[idx]["Nome"]
-                        prefixo = "Repetindo" if tentativa == 2 else "Cotização"
-                        print(f"{prefixo} {pos}/{len(pendentes_execucao)} — carta: {nome}")
-                        dados, erro = _consultar_uma_carta(cartas[idx], liga)
-                        if erro:
-                            registrar_falha(alvo, chave, nome, erro, tentativa, cartas[idx])
-                            falharam.append(alvo)
-                            continue
                         nova, registro = cotizar_carta(cartas[idx], dados, modo, sessao["cotacaoId"], sessao["dataCotacao"])
                         if not texto(nova.get("Imagem")):
                             imagem = baixar_imagem(texto(dados.get("imagem")), f"{nova['Nome']}_{nova['Número']}")
@@ -1384,24 +1768,9 @@ def cotizar_colecao(colecao: Path, modo_padrao: str = MODO_MENOR, opcao: str = "
                         anexar_historico(colecao, "cartas", registro)
                         resultado = registrar_variacoes(nome, item_id, "carta", anterior, nova)
                         escrever_inventario(colecao, "cartas", cartas)
+                        status = nova.get("Status") if isinstance(nova.get("Status"), dict) else {}
                     else:
-                        idx = mapa_boosters.get(item_id)
-                        if idx is None:
-                            mensagem = f"Booster {item_id}: não encontrado no inventário"
-                            if mensagem not in sessao["errosFatais"]:
-                                sessao["errosFatais"].append(mensagem)
-                            processados.add(chave)
-                            salvar_progresso()
-                            continue
                         anterior = copy.deepcopy(boosters[idx])
-                        nome = boosters[idx]["Tipo de pacote"]
-                        prefixo = "Repetindo" if tentativa == 2 else "Cotização"
-                        print(f"{prefixo} {pos}/{len(pendentes_execucao)} — booster: {nome}")
-                        dados, erro = _consultar_um_booster(boosters[idx], liga)
-                        if erro:
-                            registrar_falha(alvo, chave, nome, erro, tentativa, boosters[idx])
-                            falharam.append(alvo)
-                            continue
                         novo, registro = cotizar_booster(boosters[idx], dados, modo, sessao["cotacaoId"], sessao["dataCotacao"])
                         if not texto(novo.get("Imagem")):
                             imagem = baixar_imagem(texto(dados.get("imagem")), f"Booster_{novo['Tipo de pacote']}")
@@ -1411,7 +1780,17 @@ def cotizar_colecao(colecao: Path, modo_padrao: str = MODO_MENOR, opcao: str = "
                         anexar_historico(colecao, "boosters", registro)
                         resultado = registrar_variacoes(nome, item_id, "booster", anterior, novo)
                         escrever_inventario(colecao, "boosters", boosters)
+                        status = novo.get("Status") if isinstance(novo.get("Status"), dict) else {}
 
+                    resultado["execucao"] = {"worker": worker, "duracaoSegundos": round(duracao, 3)}
+                    resultado["mercado"] = {
+                        "vendedoresGeral": int(dados.get("vendedores_geral") or 0),
+                        "vendedoresEspecificos": int(dados.get("vendedores_especificos") or 0),
+                        "compradoresGeral": int(dados.get("compradores_geral") or 0),
+                        "compradoresEspecificos": int(dados.get("compradores_especificos") or 0),
+                        "ofertasLidas": int(dados.get("quantidade_ofertas") or 0),
+                        "buylistLida": int(dados.get("quantidade_buylist") or 0),
+                    }
                     sessao["resultados"] = [
                         r for r in sessao.get("resultados", [])
                         if r.get("id") != item_id or r.get("tipo") != tipo
@@ -1426,12 +1805,21 @@ def cotizar_colecao(colecao: Path, modo_padrao: str = MODO_MENOR, opcao: str = "
                     sessao["semOfertas"] = sorted(sem)
                     processados.add(chave)
                     salvar_progresso()
+                    monitor.registrar(nome, tipo, dados, "", worker, duracao, variacao=resultado, status=status)
 
                 if not falharam:
                     break
                 if tentativa == 1:
-                    print(f"{len(falharam)} item(ns) falharam; repetindo somente esses itens...")
-                    pendentes_execucao = falharam
+                    print(f"{len(falharam)} item(ns) falharam; repetindo somente esses itens em paralelo...")
+                    pendentes_tentativa = falharam
+
+    execucao_atual = monitor.resumo()
+    sessao.setdefault("execucoes", [])
+    sessao["execucoes"].append(execucao_atual)
+    sessao["ultimaExecucao"] = execucao_atual
+    sessao["modoVelocidade"] = execucao_atual["modoVelocidade"]
+    sessao["workers"] = execucao_atual["workers"]
+    salvar_progresso()
 
     kits = atualizar_kits(kits, cartas, boosters)
     albuns = atualizar_albuns(albuns, cartas)
@@ -1448,6 +1836,10 @@ def cotizar_colecao(colecao: Path, modo_padrao: str = MODO_MENOR, opcao: str = "
 
     if pendentes:
         print(f"Cotização parcial salva: {len(pendentes)} item(ns) ainda pendente(s). Execute novamente para retomar.")
+        rel_json, rel_txt = salvar_relatorio_execucao_liga(
+            colecao, "cotizacao-parcial", execucao_atual, monitor.itens, {"cotacaoId": sessao.get("cotacaoId"), "pendentes": len(pendentes)}
+        )
+        print(f"Relatório desta execução: {rel_txt.name} | {rel_json.name}")
         return colecao
 
     perfil = ler_json_obj(colecao / ARQUIVO_PERFIL)

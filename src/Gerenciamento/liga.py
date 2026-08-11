@@ -18,7 +18,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from configuracao import (
     ESTADOS_ORDEM,
     FATORES_ESTADO,
-    ESPERA_PAGINA,
+    ESPERA_ESTABILIDADE_MAX,
     INTERVALO_TENTATIVA,
     MAX_TENTATIVAS_PAGINA,
     MINIMO_CERTEIRO,
@@ -245,7 +245,7 @@ def pagina_liga_pronta(navegador: webdriver.Chrome) -> bool:
             };
             """
         )
-        return bool(dados["completa"] and not dados["verificando"] and dados["temCarta"])
+        return bool(dados["completa"] and not dados["verificando"] and dados["temCarta"] and dados["temMercado"])
     except Exception:
         return False
 
@@ -266,6 +266,32 @@ def esperar_pagina(navegador: webdriver.Chrome) -> None:
         "A página da Liga não ficou disponível. Verifique a janela do Chrome "
         "e conclua manualmente qualquer verificação de segurança."
     )
+
+
+def esperar_ofertas_estaveis(navegador: webdriver.Chrome, timeout: float = ESPERA_ESTABILIDADE_MAX) -> None:
+    """Espera somente o necessário até a quantidade de ofertas parar de mudar.
+
+    Substitui o antigo sleep fixo: páginas rápidas seguem quase imediatamente e
+    páginas lentas podem usar até ``timeout`` segundos para estabilizar.
+    """
+
+    inicio = time.monotonic()
+    limite = inicio + max(0.8, float(timeout))
+    anterior: int | None = None
+    estaveis = 0
+    while time.monotonic() < limite:
+        try:
+            atual = len(_elementos_ofertas(navegador))
+        except Exception:
+            atual = -1
+        if atual == anterior:
+            estaveis += 1
+            if estaveis >= 3 and (time.monotonic() - inicio) >= 0.8:
+                return
+        else:
+            anterior = atual
+            estaveis = 0
+        time.sleep(0.20)
 
 
 def mostrar_todas_as_ofertas(navegador: webdriver.Chrome) -> None:
@@ -290,7 +316,7 @@ def mostrar_todas_as_ofertas(navegador: webdriver.Chrome) -> None:
             """
         )
 
-        time.sleep(0.4)
+        time.sleep(0.25)
 
         quantidade_depois = len(
             navegador.find_elements(
@@ -789,6 +815,8 @@ def _extrair_extra(oferta: WebElement) -> str:
 def obter_todas_as_ofertas(
     navegador: webdriver.Chrome,
     origem: str,
+    ocr: ddddocr.DdddOcr | None = None,
+    cache_digitos: dict[str, str] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Lê todas as ofertas visíveis e informa também falhas de leitura/OCR.
 
@@ -805,8 +833,10 @@ def obter_todas_as_ofertas(
     if not elementos:
         return [], estatisticas
 
-    ocr = ddddocr.DdddOcr(show_ad=False, beta=True)
-    cache_digitos: dict[str, str] = {}
+    if ocr is None:
+        ocr = ddddocr.DdddOcr(show_ad=False, beta=True)
+    if cache_digitos is None:
+        cache_digitos = {}
     ofertas: list[dict[str, Any]] = []
 
     for indice, oferta in enumerate(elementos, start=1):
@@ -1140,20 +1170,29 @@ def resumir_precos(
 
 
 class SessaoLiga:
-    """Mantém um Chrome aberto e usa abas temporárias para todas as consultas."""
+    """Mantém um Chrome independente por worker e reutiliza a mesma aba."""
 
-    def __init__(self) -> None:
+    def __init__(self, worker_id: int = 1, atraso_inicial: float = 0.0) -> None:
+        self.worker_id = max(1, int(worker_id))
+        self.atraso_inicial = max(0.0, float(atraso_inicial))
         self._pasta_perfil_temporario: Path | None = None
         self.navegador: webdriver.Chrome | None = None
         self.processo: subprocess.Popen[Any] | None = None
         self.aba_base: str | None = None
         self._cache: dict[tuple[str, str, str], dict[str, Any]] = {}
+        # OCR e cache persistem durante toda a vida do worker.
+        self._ocr: ddddocr.DdddOcr | None = None
+        self._cache_digitos: dict[str, str] = {}
 
     def __enter__(self) -> "SessaoLiga":
-        print("Abrindo um único Chrome para todo o gerenciamento...")
-        self._pasta_perfil_temporario = Path(tempfile.mkdtemp(prefix="nexus-tcg-chrome-"))
+        if self.atraso_inicial:
+            time.sleep(self.atraso_inicial)
+        print(f"[Worker {self.worker_id}] Abrindo Chrome independente...")
+        self._pasta_perfil_temporario = Path(tempfile.mkdtemp(prefix=f"nexus-tcg-w{self.worker_id}-"))
         self.navegador, self.processo = abrir_navegador("about:blank", self._pasta_perfil_temporario)
         self.aba_base = self.navegador.current_window_handle
+        if USAR_OCR:
+            self._ocr = ddddocr.DdddOcr(show_ad=False, beta=True)
         return self
 
     def __exit__(self, exc_type: Any, exc: Any, traceback: Any) -> None:
@@ -1164,55 +1203,30 @@ class SessaoLiga:
             raise RuntimeError("A sessão da Liga ainda não foi aberta.")
         return self.navegador
 
-    def _abrir_aba(self, url: str) -> str:
-        navegador = self._exigir_navegador()
-        if self.aba_base in navegador.window_handles:
-            navegador.switch_to.window(self.aba_base)
-        elif navegador.window_handles:
-            self.aba_base = navegador.window_handles[0]
-            navegador.switch_to.window(self.aba_base)
-        else:
-            raise RuntimeError("O Chrome ficou sem nenhuma aba aberta.")
-        navegador.switch_to.new_window("tab")
-        identificador = navegador.current_window_handle
-        navegador.get(url)
-        return identificador
-
-    def _fechar_aba(self, identificador: str) -> None:
-        navegador = self._exigir_navegador()
-        try:
-            if identificador in navegador.window_handles:
-                navegador.switch_to.window(identificador)
-                if len(navegador.window_handles) > 1:
-                    navegador.close()
-        finally:
-            handles = navegador.window_handles
-            if not handles:
-                raise RuntimeError("O Chrome ficou sem abas após a consulta.")
-            if self.aba_base not in handles:
-                self.aba_base = handles[0]
-            navegador.switch_to.window(self.aba_base)
-
     def _coletar_pagina(self, url: str, origem: str, coletar_dados: bool) -> tuple[dict[str, str], list[dict[str, Any]], dict[str, Any]]:
+        """Navega na mesma aba do worker e usa espera adaptativa, sem sleep fixo."""
         ultimo_erro: Exception | None = None
         for tentativa in range(1, TENTATIVAS + 1):
             navegador = self._exigir_navegador()
-            aba = self._abrir_aba(url)
             try:
-                print(f"  Abrindo {origem} (tentativa {tentativa}/{TENTATIVAS})...")
+                print(f"  [W{self.worker_id}] Abrindo {origem} (tentativa {tentativa}/{TENTATIVAS})...")
+                if self.aba_base in navegador.window_handles:
+                    navegador.switch_to.window(self.aba_base)
+                navegador.get(url)
                 esperar_pagina(navegador)
-                if ESPERA_PAGINA > 0:
-                    time.sleep(ESPERA_PAGINA)
+                esperar_ofertas_estaveis(navegador)
                 mostrar_todas_as_ofertas(navegador)
                 dados = obter_dados_carta(navegador) if coletar_dados else {}
-                ofertas, estatisticas = obter_todas_as_ofertas(navegador, origem)
+                ofertas, estatisticas = obter_todas_as_ofertas(
+                    navegador, origem, ocr=self._ocr, cache_digitos=self._cache_digitos
+                )
+                estatisticas["worker"] = self.worker_id
                 return dados, ofertas, estatisticas
             except Exception as erro:
                 ultimo_erro = erro
                 if tentativa < TENTATIVAS:
-                    print(f"  Falha temporária: {erro}. Tentando novamente...")
-            finally:
-                self._fechar_aba(aba)
+                    print(f"  [W{self.worker_id}] Falha temporária: {erro}. Tentando novamente...")
+                    time.sleep(min(1.0, INTERVALO_TENTATIVA))
         if ultimo_erro is not None:
             raise ultimo_erro
         raise RuntimeError("Falha desconhecida ao coletar página da Liga.")
@@ -1322,6 +1336,8 @@ class SessaoLiga:
                 except Exception:
                     pass
         self.processo = None
+        self._ocr = None
+        self._cache_digitos.clear()
         if self._pasta_perfil_temporario is not None:
             for _ in range(5):
                 shutil.rmtree(self._pasta_perfil_temporario, ignore_errors=True)

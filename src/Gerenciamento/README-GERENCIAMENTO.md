@@ -143,3 +143,29 @@ Os relatórios contêm totais e variações das referências de mercado, incluin
 ```bash
 pip install -r requirements.txt
 ```
+
+## Modos de velocidade da Liga
+
+Toda operação que consulta a Liga (formatação, atualização de novos itens e cotização) agora pergunta o modo de execução:
+
+1. Conservador — 1 worker / 1 Chrome
+2. Normal — 2 workers / 2 Chromes
+3. Rápido — 3 workers / 3 Chromes
+4. Turbo — 4 workers / 4 Chromes
+5. Super Turbo — 5 workers / 5 Chromes
+
+Cada worker possui Chrome, WebDriver, perfil temporário, OCR e cache próprios. Os workers coletam em paralelo, mas os inventários/históricos continuam sendo gravados pela thread principal para evitar corrupção de JSON.
+
+### Otimizações adicionais
+
+- OCR inicializado uma única vez por worker e cache de dígitos reaproveitado entre páginas.
+- A mesma aba do Chrome é reutilizada pelo worker em vez de abrir/fechar uma aba para cada marketplace/buylist.
+- A espera fixa após o carregamento foi substituída por espera adaptativa de estabilidade das ofertas.
+- Workers começam com pequeno `jitter` para não disparar todos os acessos no mesmo instante.
+- Falhas são repetidas somente para os itens que falharam.
+
+### Progresso e relatórios
+
+Durante as consultas o terminal mostra, por item: worker, duração, menor/2º/3º preço, média, mediana, buylist, vendedores/compradores e, na cotização, variação desde a cotização anterior. Também mostra barra de progresso, percentual, tempo decorrido e ETA.
+
+Ao final são gravados relatórios JSON e TXT em `relatorios/`, com modo, quantidade de workers, duração, quantidade de itens, sucessos/erros e detalhes por item. Cotizações retomadas acumulam as métricas das execuções até a conclusão.

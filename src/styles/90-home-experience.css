@@ -31,7 +31,7 @@
   position: absolute;
   inset: -46% -7% -46% -6%;
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: clamp(10px, 1.05vw, 18px);
   transform: perspective(1250px) rotateX(7deg) rotateZ(7.5deg) translate3d(0,0,0);
   transform-origin: center;
@@ -50,6 +50,8 @@
 .nexus-hero-flow-lane-4 { transform: translateY(-5%) translateZ(8px); opacity: .84; }
 .nexus-hero-flow-lane-5 { transform: translateY(5%) translateZ(-12px); opacity: .66; }
 .nexus-hero-flow-lane-6 { transform: translateY(-2%) translateZ(18px); opacity: .78; }
+.nexus-hero-flow-lane-7 { transform: translateY(3%) translateZ(22px); opacity: .86; }
+.nexus-hero-flow-lane-8 { transform: translateY(-4%) translateZ(-8px); opacity: .72; }
 .nexus-hero-flow-track {
   display: flex;
   flex-direction: column;
@@ -63,6 +65,8 @@
 .nexus-hero-flow-lane-4 .nexus-hero-flow-track { animation-duration: 68s; animation-delay: -11s; }
 .nexus-hero-flow-lane-5 .nexus-hero-flow-track { animation-duration: 79s; animation-delay: -47s; }
 .nexus-hero-flow-lane-6 .nexus-hero-flow-track { animation-duration: 61s; animation-delay: -23s; }
+.nexus-hero-flow-lane-7 .nexus-hero-flow-track { animation-duration: 71s; animation-delay: -34s; }
+.nexus-hero-flow-lane-8 .nexus-hero-flow-track { animation-duration: 66s; animation-delay: -41s; }
 .nexus-hero-flow-set {
   display: grid;
   gap: clamp(11px, 1vw, 18px);
@@ -229,7 +233,9 @@
     opacity: .43;
   }
   .nexus-hero-flow-lane-5,
-  .nexus-hero-flow-lane-6 { display: none; }
+  .nexus-hero-flow-lane-6,
+  .nexus-hero-flow-lane-7,
+  .nexus-hero-flow-lane-8 { display: none; }
   .nexus-hero-flow-vignette {
     background:
       linear-gradient(90deg, rgba(5,10,18,.98) 0%, rgba(5,10,18,.9) 45%, rgba(5,10,18,.5) 100%),
@@ -256,7 +262,9 @@
   }
   .nexus-hero-flow-lane-4,
   .nexus-hero-flow-lane-5,
-  .nexus-hero-flow-lane-6 { display: none; }
+  .nexus-hero-flow-lane-6,
+  .nexus-hero-flow-lane-7,
+  .nexus-hero-flow-lane-8 { display: none; }
   .nexus-home-copy h1 { font-size: clamp(3.75rem, 19vw, 5.4rem); }
   .nexus-home-tagline { font-size: 1.45rem; }
   .nexus-home-copy > .nexus-home-description { font-size: .93rem; line-height: 1.62; }
@@ -294,12 +302,13 @@ body.modal-open .collection-album-belt { animation-play-state: paused !important
    ========================================================================== */
 
 /* Densidade do paredão da abertura.
-   As medidas ficam centralizadas aqui para que tamanho e espaçamento possam
-   ser calibrados sem espalhar novos overrides pelo arquivo. */
+   No desktop usamos oito fileiras: com 82% da largura de cada fileira,
+   a carta renderizada fica ~10% menor do que no layout anterior de seis
+   fileiras. Os dois espaçamentos também foram reduzidos em ~40%. */
 .nexus-home-hero.home-hero {
-  --hero-flow-card-width: 68%;
-  --hero-flow-lane-gap: clamp(6px, .58vw, 10px);
-  --hero-flow-card-gap: clamp(5px, .46vw, 8px);
+  --hero-flow-card-width: 82%;
+  --hero-flow-lane-gap: clamp(4px, .35vw, 6px);
+  --hero-flow-card-gap: clamp(3px, .28vw, 5px);
   min-height: max(860px, 100svh);
 }
 .nexus-hero-flow-plane {
