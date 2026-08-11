@@ -766,3 +766,32 @@ body.editor-modal-open { overflow: hidden; }
   .album-inventory-card .inventory-thumb { width: 74px; height: 102px; }
 }
 
+
+/* Ação rápida de venda: reduz uma unidade sem apagar o registro. */
+.inventory-sold {
+  min-height: 31px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid rgba(124, 229, 164, .24);
+  border-radius: 9px;
+  color: #9af0ba;
+  background: rgba(124, 229, 164, .07);
+  font-size: .61rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.inventory-sold:hover:not(:disabled) {
+  border-color: rgba(124, 229, 164, .5);
+  background: rgba(124, 229, 164, .13);
+}
+.inventory-sold:disabled {
+  cursor: default;
+  opacity: .56;
+  color: var(--muted);
+  border-color: var(--line);
+  background: rgba(255,255,255,.025);
+}
+.inventory-sold span { font-size: .72rem; }

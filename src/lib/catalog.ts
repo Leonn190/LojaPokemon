@@ -845,7 +845,7 @@ export const getCollections = (): CollectorCollection[] => {
     const kits: KitItem[] = readInventory(folder, 'inventario-kits').map((row) => {
       const name = String(row['Nome'] ?? '').trim() || 'Kit sem nome';
       const description = String(row['Descrição'] ?? '').trim() || 'Conjunto personalizado pelo colecionador.';
-      const quantity = parseQuantity(row['Quantidade']) || 1;
+      const quantity = row['Quantidade'] === undefined || row['Quantidade'] === null || row['Quantidade'] === '' ? 1 : parseQuantity(row['Quantidade']);
       const price = parseDecimal(row['Preço']);
       const sourceTotal = parseDecimal(row['Valor avulso'] ?? row['Preço bruto']);
       let rawContents: unknown = row['Conteúdo'];
@@ -918,11 +918,12 @@ export const getCollections = (): CollectorCollection[] => {
       const price = parseDecimal(row['Preço']);
       const linkLiga = String(row['Link Liga'] ?? '').trim();
       const description = String(row['Descrição'] ?? '').trim() || 'Produto Pokémon lacrado.';
+      const quantity = row['Quantidade'] === undefined || row['Quantidade'] === null || row['Quantidade'] === '' ? 1 : parseQuantity(row['Quantidade']);
       const forSale = profile.selling !== false && parseBoolean(row['À venda'] ?? row['Venda'], true);
       const localSlug = createUniqueSlug(slugify(name), globalSlugs, owner);
       const id = String(row['Id'] ?? row['ID'] ?? '').trim() || `${collectionSlug}:product:${normalizeText(`${linkLiga}|${name}`)}`;
       return {
-        id, kind: 'product', name, description, quantity: 1, price, forSale, showQuantity: false, linkLiga,
+        id, kind: 'product', name, description, quantity, price, forSale, showQuantity: false, linkLiga,
         slug: `${collectionSlug}-${localSlug}`, image: String(row['Imagem'] ?? ''),
         imageCandidates: productImageCandidates(collectionSlug, name, String(row['Imagem'] ?? '')),
         ownerName: owner, ownerCollectionName: title, ownerCollectionSlug: collectionSlug, ownerPhone, proposalTerms,
@@ -1020,7 +1021,7 @@ export const getEditableCollections = () => getCollections().map((collection) =>
     })),
     boosters: collection.boosters.map(({ id, name, quantity, finalPrice, forSale, linkLiga, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, priceHistory, advancedData, image, imageCandidates }) => ({ id, name, quantity, price: finalPrice, forSale, linkLiga, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, priceHistory, advancedData, image, imageCandidates })),
     kits: collection.kits.map(({ id, name, description, contents, contentItems, sourceTotal, quantity, price, forSale, image, imageCandidates }) => ({ id, name, description, contents, contentItems, sourceTotal, quantity, price, forSale, image, imageCandidates })),
-    products: collection.products.map(({ id, name, description, price, forSale, linkLiga, image, imageCandidates }) => ({ id, name, description, price, forSale, linkLiga, image, imageCandidates })),
+    products: collection.products.map(({ id, name, description, quantity, price, forSale, linkLiga, image, imageCandidates }) => ({ id, name, description, quantity, price, forSale, linkLiga, image, imageCandidates })),
     albums: collection.albums.map((album) => ({
       albumId: album.id,
       name: album.name,

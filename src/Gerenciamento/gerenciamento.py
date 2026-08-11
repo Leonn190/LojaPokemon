@@ -476,7 +476,7 @@ def normalizar_carta_existente(linha: dict[str, Any]) -> dict[str, Any]:
         "Compradores Específicos": inteiro_nao_negativo(primeiro(linha, "Compradores Específicos")),
         "Preço": numero(primeiro(linha, "Preço")),
         "Alteração de preço": texto(primeiro(linha, "Alteração de preço")),
-        "Quantidade": inteiro(primeiro(linha, "Quantidade")),
+        "Quantidade": inteiro_nao_negativo(primeiro(linha, "Quantidade"), 1),
         "Imagem": texto(primeiro(linha, "Imagem")),
         "À venda": _sim_nao(primeiro(linha, "À venda", "Venda"), True),
     })
@@ -496,7 +496,7 @@ def normalizar_booster_existente(linha: dict[str, Any]) -> dict[str, Any]:
     booster = dict(linha)
     booster.update({
         "Tipo de pacote": texto(primeiro(linha, "Tipo de pacote", "Coleção", "Nome")),
-        "Quantidade": inteiro(primeiro(linha, "Quantidade")),
+        "Quantidade": inteiro_nao_negativo(primeiro(linha, "Quantidade"), 1),
         "Minimo Certeiro": numero(primeiro(linha, "Minimo Certeiro", "Mínimo Certeiro")),
         "Minimo": numero(primeiro(linha, "Minimo", "Preço mínimo", "Mínimo")),
         "Menor Liga": numero(primeiro(linha, "Menor Liga", "Preço Liga mais barato")),
@@ -533,12 +533,12 @@ def normalizar_produto(linha: dict[str, Any]) -> dict[str, Any]:
         "Nome": nome,
         "Link Liga": texto(primeiro(linha, "Link Liga", "Liga", "Link")),
         "Preço": numero(primeiro(linha, "Preço")),
+        "Quantidade": inteiro_nao_negativo(primeiro(linha, "Quantidade"), 1),
         "Imagem": texto(primeiro(linha, "Imagem")),
         "À venda": _sim_nao(primeiro(linha, "À venda", "Venda"), True),
     })
     produto["Id"] = texto(primeiro(linha, "Id", "ID")) or f"PRODUTO-{chave_texto(nome) or hashlib.sha1(nome.encode('utf-8')).hexdigest()[:12].upper()}"
     produto.pop("ID", None)
-    produto.pop("Quantidade", None)
     produto.pop("quantity", None)
     return produto
 
@@ -595,7 +595,7 @@ def normalizar_kit(linha: dict[str, Any]) -> dict[str, Any]:
         "Nome": nome,
         "Descrição": texto(primeiro(linha, "Descrição")),
         "Preço": numero(primeiro(linha, "Preço")),
-        "Quantidade": inteiro(primeiro(linha, "Quantidade")),
+        "Quantidade": inteiro_nao_negativo(primeiro(linha, "Quantidade"), 1),
         "Conteúdo": conteudo,
         "Valor avulso": numero(primeiro(linha, "Valor avulso", "Preço bruto")),
         "Desconto": primeiro(linha, "Desconto"),
@@ -1202,7 +1202,7 @@ def _mesclar_cartas(existentes: list[dict[str, Any]], novas: list[dict[str, Any]
             existentes.append(nova)
             indice[nova["Id"]] = nova
             continue
-        atual["Quantidade"] = inteiro(atual.get("Quantidade")) + inteiro(nova.get("Quantidade"))
+        atual["Quantidade"] = inteiro_nao_negativo(atual.get("Quantidade"), 0) + inteiro_nao_negativo(nova.get("Quantidade"), 0)
         # Metadados existentes nunca são apagados por campos vazios da atualização.
         for campo in (
             "Nome", "Número", "Coleção", "Idioma", "Estado", "Ano", "Tipo",
@@ -1230,7 +1230,7 @@ def _mesclar_boosters(existentes: list[dict[str, Any]], novos: list[dict[str, An
             existentes.append(novo)
             indice[novo["Id"]] = novo
             continue
-        atual["Quantidade"] = inteiro(atual.get("Quantidade")) + inteiro(novo.get("Quantidade"))
+        atual["Quantidade"] = inteiro_nao_negativo(atual.get("Quantidade"), 0) + inteiro_nao_negativo(novo.get("Quantidade"), 0)
         if not texto(atual.get("Imagem")) and texto(novo.get("Imagem")):
             atual["Imagem"] = novo["Imagem"]
         for campo in (
@@ -1246,6 +1246,25 @@ def _mesclar_boosters(existentes: list[dict[str, Any]], novos: list[dict[str, An
 
 def _operacao_patch(linha: dict[str, Any]) -> bool:
     return chave_texto(linha.get("operation") or linha.get("_operation")) in {"PATCH", "EDIT", "EDITAR"}
+
+
+def _operacao_remover(linha: dict[str, Any]) -> bool:
+    return chave_texto(linha.get("operation") or linha.get("_operation")) in {"REMOVE", "DELETE", "REMOVER", "EXCLUIR"}
+
+
+def _aplicar_remocoes(existentes: list[dict[str, Any]], remocoes: list[dict[str, Any]], normalizador, tipo: str) -> None:
+    if not remocoes:
+        return
+    indice = {normalizador(item)["Id"]: item for item in existentes}
+    for remocao in remocoes:
+        item_id = texto(remocao.get("Id") or remocao.get("ID") or remocao.get("id"))
+        if not item_id:
+            item_id = normalizador(remocao)["Id"]
+        atual = indice.get(item_id)
+        if atual is None:
+            raise ValueError(f"Remoção de {tipo} aponta para item inexistente: {item_id}")
+        existentes.remove(atual)
+        indice.pop(item_id, None)
 
 
 def _aplicar_patches_usuario(existentes: list[dict[str, Any]], patches: list[dict[str, Any]], tipo: str) -> None:
@@ -1294,7 +1313,7 @@ def _aplicar_patches_usuario(existentes: list[dict[str, Any]], patches: list[dic
         if "Preço" in patch:
             atual["Preço"] = numero(patch.get("Preço"))
         if "Quantidade" in patch:
-            atual["Quantidade"] = inteiro(patch.get("Quantidade"))
+            atual["Quantidade"] = inteiro_nao_negativo(patch.get("Quantidade"), 0)
         if "À venda" in patch or "Venda" in patch:
             atual["À venda"] = _sim_nao(primeiro(patch, "À venda", "Venda"), True)
 
@@ -1334,7 +1353,7 @@ def _mesclar_kits(existentes: list[dict[str, Any]], novos: list[dict[str, Any]])
             atual.clear()
             atual.update(novo)
         else:
-            atual["Quantidade"] = inteiro(atual.get("Quantidade")) + inteiro(novo.get("Quantidade"))
+            atual["Quantidade"] = inteiro_nao_negativo(atual.get("Quantidade"), 0) + inteiro_nao_negativo(novo.get("Quantidade"), 0)
             for chave, valor in novo.items():
                 if chave not in {"Quantidade", "operation", "_operation"} and valor not in (None, "", [], {}):
                     atual[chave] = valor
@@ -1410,17 +1429,35 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
         albuns = [normalizar_album(x) for x in ler_inventario(destino, "albuns")]
         todas_cartas_update = ler_inventario(origem, "cartas")
         todos_boosters_update = ler_inventario(origem, "boosters")
+        todos_kits_update = ler_inventario(origem, "kits")
+        todos_produtos_update = ler_inventario(origem, "produtos")
+        todos_albuns_update = ler_inventario(origem, "albuns")
+
+        remocoes_cartas = [x for x in todas_cartas_update if _operacao_remover(x)]
+        remocoes_boosters = [x for x in todos_boosters_update if _operacao_remover(x)]
+        remocoes_kits = [x for x in todos_kits_update if _operacao_remover(x)]
+        remocoes_produtos = [x for x in todos_produtos_update if _operacao_remover(x)]
+        remocoes_albuns = [x for x in todos_albuns_update if _operacao_remover(x)]
+
         patches_cartas = [x for x in todas_cartas_update if _operacao_patch(x)]
         patches_boosters = [x for x in todos_boosters_update if _operacao_patch(x)]
-        novas_cartas_src = [x for x in todas_cartas_update if not _operacao_patch(x)]
-        novos_boosters_src = [x for x in todos_boosters_update if not _operacao_patch(x)]
-        novos_kits_src = ler_inventario(origem, "kits")
-        novos_produtos_src = ler_inventario(origem, "produtos")
-        novos_albuns_src = ler_inventario(origem, "albuns")
+        novas_cartas_src_todas = [x for x in todas_cartas_update if not _operacao_patch(x) and not _operacao_remover(x)]
+        novos_boosters_src_todos = [x for x in todos_boosters_update if not _operacao_patch(x) and not _operacao_remover(x)]
+        novas_cartas_sem_cotacao = [x for x in novas_cartas_src_todas if inteiro_nao_negativo(primeiro(x, "Quantidade"), 1) == 0]
+        novos_boosters_sem_cotacao = [x for x in novos_boosters_src_todos if inteiro_nao_negativo(primeiro(x, "Quantidade"), 1) == 0]
+        novas_cartas_src = [x for x in novas_cartas_src_todas if inteiro_nao_negativo(primeiro(x, "Quantidade"), 1) > 0]
+        novos_boosters_src = [x for x in novos_boosters_src_todos if inteiro_nao_negativo(primeiro(x, "Quantidade"), 1) > 0]
+        novos_kits_src = [x for x in todos_kits_update if not _operacao_remover(x)]
+        novos_produtos_src = [x for x in todos_produtos_update if not _operacao_remover(x)]
+        novos_albuns_src = [x for x in todos_albuns_update if not _operacao_remover(x)]
         cotacao_id = f"update-{update_id}"
         data = texto(metadados.get("generatedAt")) or agora_iso()
-        novas_cartas: list[dict[str, Any]] = []
-        novos_boosters: list[dict[str, Any]] = []
+        novas_cartas: list[dict[str, Any]] = [normalizar_carta_existente(x) for x in novas_cartas_sem_cotacao]
+        novos_boosters: list[dict[str, Any]] = [normalizar_booster_existente(x) for x in novos_boosters_sem_cotacao]
+        for item_zero in novas_cartas:
+            item_zero["À venda"] = False
+        for item_zero in novos_boosters:
+            item_zero["À venda"] = False
         historico_cartas: list[dict[str, Any]] = []
         historico_boosters: list[dict[str, Any]] = []
         mapa_ids: dict[str, str] = {}
@@ -1511,8 +1548,8 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
                         print(f"{len(falhas)} item(ns) falharam; repetindo somente esses itens em paralelo...")
                         pendentes_tentativa = falhas
 
-            novas_cartas = [x for _, x in sorted(cartas_ordenadas, key=lambda x: x[0])]
-            novos_boosters = [x for _, x in sorted(boosters_ordenados, key=lambda x: x[0])]
+            novas_cartas.extend(x for _, x in sorted(cartas_ordenadas, key=lambda x: x[0]))
+            novos_boosters.extend(x for _, x in sorted(boosters_ordenados, key=lambda x: x[0]))
             historico_cartas = [x for _, x in sorted(historico_cartas_ordenado, key=lambda x: x[0])]
             historico_boosters = [x for _, x in sorted(historico_boosters_ordenado, key=lambda x: x[0])]
             if falhas_finais:
@@ -1527,6 +1564,11 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
                     f"Relatório: {rel_txt.name}"
                 )
 
+        _aplicar_remocoes(cartas, remocoes_cartas, normalizar_carta_existente, "cartas")
+        _aplicar_remocoes(boosters, remocoes_boosters, normalizar_booster_existente, "boosters")
+        _aplicar_remocoes(kits, remocoes_kits, normalizar_kit, "kits")
+        _aplicar_remocoes(produtos, remocoes_produtos, normalizar_produto, "produtos")
+        _aplicar_remocoes(albuns, remocoes_albuns, normalizar_album, "álbuns")
         _aplicar_patches_usuario(cartas, patches_cartas, "cartas")
         _aplicar_patches_usuario(boosters, patches_boosters, "boosters")
         novos_kits = [normalizar_kit(x) for x in novos_kits_src]
@@ -1591,12 +1633,18 @@ def _ultima_cotacao(item: dict[str, Any]) -> datetime | None:
     return None
 
 def _selecionar_escopo(cartas: list[dict[str, Any]], boosters: list[dict[str, Any]], opcao: str, dias: int | None) -> tuple[list[dict[str, str]], str]:
-    pares: list[tuple[str, dict[str, Any]]] = [("carta", x) for x in cartas] + [("booster", x) for x in boosters]
+    # Quantidade zero significa vendido/esgotado: o registro fica no histórico da coleção,
+    # mas não deve consumir consulta nem receber novas referências de mercado.
+    pares: list[tuple[str, dict[str, Any]]] = [
+        ("carta", x) for x in cartas if inteiro_nao_negativo(x.get("Quantidade"), 0) > 0
+    ] + [
+        ("booster", x) for x in boosters if inteiro_nao_negativo(x.get("Quantidade"), 0) > 0
+    ]
     descricao = "Coleção inteira"
     if opcao == "2":
-        pares, descricao = [("carta", x) for x in cartas], "Apenas cartas"
+        pares, descricao = [(t, x) for t, x in pares if t == "carta"], "Apenas cartas"
     elif opcao == "3":
-        pares, descricao = [("booster", x) for x in boosters], "Apenas boosters"
+        pares, descricao = [(t, x) for t, x in pares if t == "booster"], "Apenas boosters"
     elif opcao == "4":
         pares, descricao = [(t, x) for t, x in pares if _sim_nao(x.get("À venda"), True)], "Apenas itens à venda"
     elif opcao == "5":
@@ -1611,7 +1659,7 @@ def _selecionar_escopo(cartas: list[dict[str, Any]], boosters: list[dict[str, An
 
 def _totais_snapshot(cartas: list[dict[str, Any]], boosters: list[dict[str, Any]]) -> dict[str, float]:
     def soma(itens: list[dict[str, Any]], campo: str) -> float:
-        return round(sum((numero(x.get(campo)) or 0) * inteiro(x.get("Quantidade")) for x in itens), 2)
+        return round(sum((numero(x.get(campo)) or 0) * inteiro_nao_negativo(x.get("Quantidade"), 0) for x in itens), 2)
     return {
         "preço": soma(cartas, "Preço") + soma(boosters, "Preço"),
         "minimoCerteiro": soma(cartas, "Minimo Certeiro") + soma(boosters, "Minimo Certeiro"),
@@ -1667,6 +1715,19 @@ def cotizar_colecao(colecao: Path, modo_padrao: str = MODO_MENOR, opcao: str = "
     mapa_cartas = {x["Id"]: i for i, x in enumerate(cartas)}
     mapa_boosters = {x["Id"]: i for i, x in enumerate(boosters)}
     selecionados = list(sessao.get("selecionados") or [])
+    selecionados = [
+        alvo for alvo in selecionados
+        if (
+            alvo.get("tipo") == "carta"
+            and alvo.get("id") in mapa_cartas
+            and inteiro_nao_negativo(cartas[mapa_cartas[alvo.get("id")]].get("Quantidade"), 0) > 0
+        ) or (
+            alvo.get("tipo") == "booster"
+            and alvo.get("id") in mapa_boosters
+            and inteiro_nao_negativo(boosters[mapa_boosters[alvo.get("id")]].get("Quantidade"), 0) > 0
+        )
+    ]
+    sessao["selecionados"] = selecionados
 
     # Salva a migração/IDs antes de começar; daí em diante cada sucesso é retomável.
     escrever_inventario(colecao, "cartas", cartas)

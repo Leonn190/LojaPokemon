@@ -1,8 +1,19 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import AlbumCard from '../../components/AlbumCard.astro';
+import CollectionCard from '../../components/CollectionCard.astro';
+import { getAlbums, getBoosters, getCards, getCollections, getKits, getProducts } from '../../lib/catalog';
 
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const cards = getCards();
+const boosters = getBoosters();
+const kits = getKits();
+const products = getProducts();
+const albums = getAlbums();
+const collections = getCollections();
+const totalSearchable = cards.length + boosters.length + kits.length + products.length + albums.length + collections.length;
 ---
 
 <BaseLayout
@@ -14,11 +25,62 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
     <div class="shell explore-hub-heading" data-reveal>
       <span class="hero-badge"><i></i> Nexus TCG</span>
       <h1>Explorar</h1>
-      <p>Escolha uma área da comunidade. Cada caminho abre um catálogo próprio sem perder o acesso às coleções de origem.</p>
+      <p>Escolha uma área da comunidade ou use a busca global para encontrar qualquer item, álbum ou coleção em um só lugar.</p>
     </div>
   </section>
 
-  <section class="shell navigation-cards marketplace-navigation explore-hub-navigation" aria-label="Áreas para explorar" data-reveal>
+  <section class="shell explore-global-search" data-explore-search data-reveal>
+    <label class="explore-search-field" for="explore-global-search">
+      <span aria-hidden="true">⌕</span>
+      <input id="explore-global-search" type="search" autocomplete="off" placeholder="Buscar cartas, boosters, kits, produtos, álbuns ou coleções..." data-explore-search-input />
+      <kbd>/</kbd>
+    </label>
+    <div class="explore-search-meta" data-explore-search-meta hidden>
+      <strong data-explore-result-count>0</strong>
+      <span data-explore-result-label>resultados encontrados</span>
+    </div>
+
+    <div class="explore-search-results" data-explore-search-results hidden>
+      <div class="explore-search-grid">
+        {cards.map((item) => (
+          <div class="explore-search-entry" data-explore-search-entry data-search={`${item.searchText} carta cartas`} data-kind="Carta" hidden>
+            <ProductCard item={item} compact />
+          </div>
+        ))}
+        {boosters.map((item) => (
+          <div class="explore-search-entry" data-explore-search-entry data-search={`${item.searchText} booster boosters pacote pacotes`} data-kind="Booster" hidden>
+            <ProductCard item={item} compact />
+          </div>
+        ))}
+        {kits.map((item) => (
+          <div class="explore-search-entry" data-explore-search-entry data-search={`${item.searchText} kit kits`} data-kind="Kit" hidden>
+            <ProductCard item={item} compact />
+          </div>
+        ))}
+        {products.map((item) => (
+          <div class="explore-search-entry" data-explore-search-entry data-search={`${item.searchText} produto produtos`} data-kind="Produto" hidden>
+            <ProductCard item={item} compact />
+          </div>
+        ))}
+        {albums.map((album) => (
+          <div class="explore-search-entry" data-explore-search-entry data-search={`${album.searchText} album albuns álbum álbuns`} data-kind="Álbum" hidden>
+            <AlbumCard album={album} compact />
+          </div>
+        ))}
+        {collections.map((collection) => (
+          <div class="explore-search-entry" data-explore-search-entry data-search={`${collection.searchText} colecao colecoes coleção coleções`} data-kind="Coleção" hidden>
+            <CollectionCard collection={collection} compact />
+          </div>
+        ))}
+      </div>
+      <div class="empty-state explore-search-empty" data-explore-search-empty>
+        <span>⌕</span><h2>Nada encontrado</h2><p>Tente outro nome, coleção, número de carta ou colecionador.</p>
+      </div>
+    </div>
+    <span class="explore-search-index" aria-hidden="true">{totalSearchable} registros pesquisáveis</span>
+  </section>
+
+  <section class="shell navigation-cards marketplace-navigation explore-hub-navigation" aria-label="Áreas para explorar" data-explore-navigation data-reveal>
     <a class="navigation-card cards-navigation" href={`${base}cartas/`}>
       <div class="navigation-icon" aria-hidden="true"><span>◆</span></div>
       <div><small>Todos os colecionadores</small><h2>Cartas</h2><p>Explore cartas publicadas em todas as coleções e descubra quem possui cada item.</p></div>
@@ -50,4 +112,46 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       <span class="navigation-arrow">↗</span>
     </a>
   </section>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector('[data-explore-search]');
+      const input = root?.querySelector('[data-explore-search-input]');
+      const navigation = document.querySelector('[data-explore-navigation]');
+      const results = root?.querySelector('[data-explore-search-results]');
+      const entries = [...(root?.querySelectorAll('[data-explore-search-entry]') || [])];
+      const count = root?.querySelector('[data-explore-result-count]');
+      const label = root?.querySelector('[data-explore-result-label]');
+      const meta = root?.querySelector('[data-explore-search-meta]');
+      const empty = root?.querySelector('[data-explore-search-empty]');
+      const normalize = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+      const apply = () => {
+        const query = normalize(input?.value);
+        const searching = query.length > 0;
+        if (navigation) navigation.hidden = searching;
+        if (results) results.hidden = !searching;
+        if (meta) meta.hidden = !searching;
+        root?.classList.toggle('is-searching', searching);
+
+        let visible = 0;
+        entries.forEach((entry) => {
+          const matches = searching && normalize(entry.dataset.search).includes(query);
+          entry.hidden = !matches;
+          if (matches) visible += 1;
+        });
+        if (count) count.textContent = String(visible);
+        if (label) label.textContent = visible === 1 ? 'resultado encontrado' : 'resultados encontrados';
+        empty?.classList.toggle('show', searching && visible === 0);
+      };
+
+      input?.addEventListener('input', apply);
+      document.addEventListener('keydown', (event) => {
+        if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName || '')) {
+          event.preventDefault(); input?.focus();
+        }
+      });
+      apply();
+    })();
+  </script>
 </BaseLayout>

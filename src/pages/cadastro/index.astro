@@ -371,7 +371,7 @@ const publishedCollections = getEditableCollections();
       };
       const toQuantity = (value, fallback = 1) => {
         const parsed = Number(value);
-        return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+        return Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : fallback;
       };
       const prettyPrice = (value) => value === null || value === undefined ? '—' : priceFormatter.format(Number(value));
       const safeSlug = (value) => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/gi, '-').replace(/(^-|-$)/g, '').toLowerCase() || 'colecao';
@@ -446,7 +446,7 @@ const publishedCollections = getEditableCollections();
           description: item.description || item['Descrição'] || '',
           linkLiga: item.linkLiga || item['Link Liga'] || '',
           price: toPrice(item.price ?? item['Preço']),
-          quantity: 1,
+          quantity: toQuantity(item.quantity ?? item['Quantidade'], 1),
           forSale: item.forSale !== false && item['À venda'] !== false && item['À venda'] !== 'Não',
           image,
           imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : image ? [image] : [],
@@ -551,6 +551,7 @@ const publishedCollections = getEditableCollections();
           products: (items.products || []).map((item) => normalizeProduct(item, false)),
           kits: (items.kits || []).map((item) => normalizeKit(item, cards, boosters)),
           albums: (items.albums || []).map((item) => normalizeAlbum(item, cards)),
+          removed: { cards: [], boosters: [], kits: [], products: [], albums: [] },
           kitDraft: [], source,
         };
       };
@@ -629,8 +630,9 @@ const publishedCollections = getEditableCollections();
 
       const priceInput = (kind, index, field, label, value) => `<label class="inventory-price-field editable"><span>${label}</span><input type="number" min="0" step="0.01" value="${value ?? ''}" placeholder="—" data-item-edit="${kind}:${index}:${field}" /></label>`;
       const priceReadout = (label, value) => `<div class="inventory-price-field read-only"><span>${label}</span><strong>${escapeHtml(prettyPrice(value))}</strong></div>`;
-      const quantityInput = (kind, index, value) => `<label class="inventory-quantity-field"><span>Quantidade</span><input type="number" min="1" step="1" value="${value}" data-item-edit="${kind}:${index}:quantity" /></label>`;
+      const quantityInput = (kind, index, value) => `<label class="inventory-quantity-field"><span>Quantidade</span><input type="number" min="0" step="1" value="${value}" data-item-edit="${kind}:${index}:quantity" /></label>`;
       const saleToggle = (kind, index, checked) => `<label class="inventory-sale-toggle"><input type="checkbox" data-sale-edit="${kind}:${index}" ${checked ? 'checked' : ''} /><span><i></i><b>${checked ? 'À venda' : 'Exposição'}</b></span></label>`;
+      const soldButton = (kind, index, quantity) => `<button type="button" class="inventory-sold" data-mark-sold="${kind}:${index}" ${toQuantity(quantity, 0) <= 0 ? 'disabled' : ''}><span>✓</span>${toQuantity(quantity, 0) <= 0 ? 'Vendido' : 'Vendi 1'}</button>`;
       const removeButton = (kind, index, name) => `<button type="button" class="inventory-remove" data-remove-item="${kind}:${index}" aria-label="Remover ${escapeHtml(name)}">×</button>`;
       const linkButtons = (links) => {
         const available = links.filter((entry) => entry.url);
@@ -650,7 +652,7 @@ const publishedCollections = getEditableCollections();
             <div class="inventory-info-cell"><span>${escapeHtml(item.year || 'Ano —')}</span><span>${escapeHtml(item.condition || 'Estado —')}</span><span>${escapeHtml(item.language || 'Idioma —')}</span><span>${escapeHtml(item.type || 'Tipo —')}</span></div>
             <div class="inventory-links-cell">${linkButtons([{ label: 'Liga', url: item.linkLiga }, { label: 'MYP', url: item.linkMyp }, { label: 'Cardmarket', url: item.linkCardmarket }, { label: 'TCGplayer', url: item.linkTcgplayer }, { label: 'PriceCharting', url: item.linkPriceCharting }])}</div>
             <div class="inventory-prices-cell">${priceReadout('Mín. certeiro', item.certainMinimumPrice)}${priceReadout('Mínimo', item.minimumPrice)}${priceReadout('Menor Liga', item.leaguePrice)}${priceReadout('Média Liga', item.averageLeaguePrice)}${priceReadout('Mediana Liga', item.medianLeaguePrice)}${priceReadout('Venda rápida', item.quickSalePrice)}${priceInput('cards', index, 'price', 'Preço', item.price)}${quoteSummaryMarkup(item)}</div>
-            <div class="inventory-control-cell"><button type="button" class="inventory-favorite ${item.favorite ? 'active' : ''}" data-favorite-card="${index}" title="Favoritar carta"><span>${item.favorite ? '★' : '☆'}</span>${item.favorite ? 'Favorita' : 'Favoritar'}</button><button type="button" class="inventory-edit-button" data-edit-item="cards:${index}"><span>✎</span> Editar</button><button type="button" class="inventory-details-button" data-card-details="${index}"><span>↗</span> Análise</button>${quantityInput('cards', index, item.quantity)}${saleToggle('cards', index, item.forSale)}${removeButton('cards', index, name)}</div>
+            <div class="inventory-control-cell"><button type="button" class="inventory-favorite ${item.favorite ? 'active' : ''}" data-favorite-card="${index}" title="Favoritar carta"><span>${item.favorite ? '★' : '☆'}</span>${item.favorite ? 'Favorita' : 'Favoritar'}</button><button type="button" class="inventory-edit-button" data-edit-item="cards:${index}"><span>✎</span> Editar</button><button type="button" class="inventory-details-button" data-card-details="${index}"><span>↗</span> Análise</button>${quantityInput('cards', index, item.quantity)}${soldButton('cards', index, item.quantity)}${saleToggle('cards', index, item.forSale)}${removeButton('cards', index, name)}</div>
           </article>`;
         }).join('')}</div>`;
       };
@@ -846,7 +848,7 @@ const publishedCollections = getEditableCollections();
             editField('type', 'Tipo', item.type),
             editField('condition', 'Estado', item.condition || 'NM', { select: ['M', 'NM', 'SP', 'MP', 'HP', 'D'], required: true }),
             editField('language', 'Idioma', item.language || 'Português (PT-BR)', { required: true }),
-            editField('quantity', 'Quantidade', toQuantity(item.quantity), { type: 'number', min: 1, step: '1' }),
+            editField('quantity', 'Quantidade', toQuantity(item.quantity), { type: 'number', min: 0, step: '1' }),
             editField('price', 'Preço final', item.price ?? '', { type: 'number', min: 0, step: '0.01' }),
             editField('linkLiga', 'Link da Liga', item.linkLiga, { type: 'url', wide: true, hint: 'Alterar este link exige uma nova cotização.' }),
             editField('linkMyp', 'Link MYP', item.linkMyp, { type: 'url', wide: true }),
@@ -859,7 +861,7 @@ const publishedCollections = getEditableCollections();
         } else {
           fields.innerHTML = [
             editField('name', 'Tipo de pacote', item.name, { required: true, wide: true }),
-            editField('quantity', 'Quantidade', toQuantity(item.quantity), { type: 'number', min: 1, step: '1' }),
+            editField('quantity', 'Quantidade', toQuantity(item.quantity), { type: 'number', min: 0, step: '1' }),
             editField('price', 'Preço final', item.price ?? '', { type: 'number', min: 0, step: '0.01' }),
             editField('linkLiga', 'Link da Liga', item.linkLiga, { type: 'url', wide: true, hint: 'Alterar este link exige uma nova cotização.' }),
             editField('image', 'Imagem', item.image, { wide: true }),
@@ -886,7 +888,7 @@ const publishedCollections = getEditableCollections();
         item.linkLiga = clean(data.get('linkLiga'));
         item.image = clean(data.get('image'));
         item.imageCandidates = item.image ? [item.image] : [];
-        item.forSale = data.get('forSale') === 'on';
+        item.forSale = item.quantity > 0 && data.get('forSale') === 'on';
         if (activeEditKind === 'cards') {
           item.number = clean(data.get('number')); item.collection = clean(data.get('collection')); item.year = clean(data.get('year')); item.type = clean(data.get('type'));
           item.language = clean(data.get('language')) || 'Português (PT-BR)'; item.condition = clean(data.get('condition')) || 'NM';
@@ -908,7 +910,7 @@ const publishedCollections = getEditableCollections();
             <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>Pacote lacrado</small></div></div>
             <div class="inventory-links-cell">${linkButtons([{ label: 'Liga', url: item.linkLiga }])}</div>
             <div class="inventory-prices-cell">${priceReadout('Mín. certeiro', item.certainMinimumPrice)}${priceReadout('Mínimo', item.minimumPrice)}${priceReadout('Menor Liga', item.leaguePrice)}${priceReadout('Média Liga', item.averageLeaguePrice)}${priceReadout('Mediana Liga', item.medianLeaguePrice)}${priceReadout('Venda rápida', item.quickSalePrice)}${priceInput('boosters', index, 'price', 'Preço', item.price)}${quoteSummaryMarkup(item)}</div>
-            <div class="inventory-control-cell"><button type="button" class="inventory-edit-button" data-edit-item="boosters:${index}"><span>✎</span> Editar</button><button type="button" class="inventory-details-button" data-booster-details="${index}"><span>↗</span> Análise</button>${quantityInput('boosters', index, item.quantity)}${saleToggle('boosters', index, item.forSale)}${removeButton('boosters', index, name)}</div>
+            <div class="inventory-control-cell"><button type="button" class="inventory-edit-button" data-edit-item="boosters:${index}"><span>✎</span> Editar</button><button type="button" class="inventory-details-button" data-booster-details="${index}"><span>↗</span> Análise</button>${quantityInput('boosters', index, item.quantity)}${soldButton('boosters', index, item.quantity)}${saleToggle('boosters', index, item.forSale)}${removeButton('boosters', index, name)}</div>
           </article>`;
         }).join('')}</div>`;
       };
@@ -927,7 +929,7 @@ const publishedCollections = getEditableCollections();
           const discountPercent = gross > 0 && item.price !== null ? Math.max(0, Math.round((gross - item.price) / gross * 100)) : 0;
           return `<article class="kit-inventory-record">
             <header><div><span class="kit-record-icon">▦</span><div><strong>${escapeHtml(item.name)}</strong><p>${escapeHtml(item.description || 'Kit personalizado')}</p></div></div>${removeButton('kits', index, item.name)}</header>
-            <div class="kit-record-body"><section><span class="inventory-cell-label">Conteúdo</span>${renderKitContents(item)}</section><aside><div><span>Preço bruto</span><strong>${prettyPrice(gross)}</strong></div><label><span>Preço final</span><input type="number" min="0" step="0.01" value="${item.price ?? ''}" data-item-edit="kits:${index}:price" /></label><div class="kit-discount-card"><span>Desconto</span><strong>${prettyPrice(discountValue)}</strong><small>${discountPercent}% abaixo do bruto</small></div>${quantityInput('kits', index, item.quantity)}${saleToggle('kits', index, item.forSale)}</aside></div>
+            <div class="kit-record-body"><section><span class="inventory-cell-label">Conteúdo</span>${renderKitContents(item)}</section><aside><div><span>Preço bruto</span><strong>${prettyPrice(gross)}</strong></div><label><span>Preço final</span><input type="number" min="0" step="0.01" value="${item.price ?? ''}" data-item-edit="kits:${index}:price" /></label><div class="kit-discount-card"><span>Desconto</span><strong>${prettyPrice(discountValue)}</strong><small>${discountPercent}% abaixo do bruto</small></div>${quantityInput('kits', index, item.quantity)}${soldButton('kits', index, item.quantity)}${saleToggle('kits', index, item.forSale)}</aside></div>
           </article>`;
         }).join('')}</div>`;
       };
@@ -941,7 +943,7 @@ const publishedCollections = getEditableCollections();
             <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>${escapeHtml(item.description || 'Produto Pokémon lacrado')}</small></div></div>
             <div class="inventory-links-cell">${linkButtons([{ label: 'Liga', url: item.linkLiga }])}</div>
             <div class="inventory-prices-cell product-price-cell">${priceInput('products', index, 'price', 'Preço', item.price)}</div>
-            <div class="inventory-control-cell">${saleToggle('products', index, item.forSale)}${removeButton('products', index, name)}</div>
+            <div class="inventory-control-cell">${quantityInput('products', index, item.quantity)}${soldButton('products', index, item.quantity)}${saleToggle('products', index, item.forSale)}${removeButton('products', index, name)}</div>
           </article>`;
         }).join('')}</div>`;
       };
@@ -1247,8 +1249,10 @@ const publishedCollections = getEditableCollections();
         const target = event.target;
         const [kind, rawIndex, field] = (target.dataset.itemEdit || '').split(':');
         if (!kind || !field || !state?.[kind]?.[Number(rawIndex)]) return;
-        state[kind][Number(rawIndex)][field] = field === 'quantity' ? toQuantity(target.value) : toPrice(target.value);
-        if (!state[kind][Number(rawIndex)]._isNew) state[kind][Number(rawIndex)]._isDirty = true;
+        const editedItem = state[kind][Number(rawIndex)];
+        editedItem[field] = field === 'quantity' ? toQuantity(target.value) : toPrice(target.value);
+        if (field === 'quantity' && editedItem.quantity === 0) editedItem.forSale = false;
+        if (!editedItem._isNew) editedItem._isDirty = true;
         updateOverview();
         if (kind === 'kits' || field === 'price' || field === 'leaguePrice') renderKitBuilder();
       });
@@ -1278,9 +1282,29 @@ const publishedCollections = getEditableCollections();
         if (row && !event.target.closest('a, button, input, label, select, textarea')) { openCardDetails(Number(row.dataset.cardDetailsRow)); return; }
         const boosterRow = event.target.closest('[data-booster-details-row]');
         if (boosterRow && !event.target.closest('a, button, input, label, select, textarea')) { openBoosterDetails(Number(boosterRow.dataset.boosterDetailsRow)); return; }
+        const sold = event.target.closest('[data-mark-sold]');
+        if (sold && state) {
+          const [kind, rawIndex] = sold.dataset.markSold.split(':');
+          const item = state?.[kind]?.[Number(rawIndex)];
+          if (!item) return;
+          const current = toQuantity(item.quantity, 0);
+          if (current <= 0) return;
+          item.quantity = Math.max(0, current - 1);
+          if (item.quantity === 0) item.forSale = false;
+          if (!item._isNew) item._isDirty = true;
+          render();
+          return;
+        }
         const button = event.target.closest('[data-remove-item]'); if (!button || !state) return;
         const [kind, rawIndex] = button.dataset.removeItem.split(':');
-        state[kind].splice(Number(rawIndex), 1); render();
+        const index = Number(rawIndex);
+        const item = state?.[kind]?.[index];
+        if (!item) return;
+        if (!item._isNew) {
+          const id = item._id || item.albumId || item.id || '';
+          state.removed[kind].push({ Id: id, operation: 'remove' });
+        }
+        state[kind].splice(index, 1); render();
       });
 
       root.addEventListener('load', (event) => { if (event.target.matches?.('.inventory-thumb img')) event.target.parentElement.classList.add('has-image'); }, true);
@@ -1347,7 +1371,7 @@ const publishedCollections = getEditableCollections();
         return result;
       };
       const productJson = (item, operation = '') => {
-        const result = { 'Id': item._id || stableProductId(item), 'Nome': item.name || '', 'Link Liga': item.linkLiga || '', 'Preço': item.price ?? null, 'Imagem': item.image || '', 'À venda': item.forSale !== false };
+        const result = { 'Id': item._id || stableProductId(item), 'Nome': item.name || '', 'Link Liga': item.linkLiga || '', 'Quantidade': toQuantity(item.quantity, 1), 'Preço': item.price ?? null, 'Imagem': item.image || '', 'À venda': item.forSale !== false };
         if (operation) result.operation = operation;
         return result;
       };
@@ -1408,7 +1432,7 @@ const publishedCollections = getEditableCollections();
         forSale: typeof row['À venda'] === 'boolean' ? row['À venda'] : row['À venda'] !== 'Não', linkLiga: row['Link Liga'], image: importedImage(row['Imagem']), imageCandidates: importedImage(row['Imagem']) ? [importedImage(row['Imagem'])] : [],
       });
       const importProductRow = (row) => ({
-        id: row['Id'] || row['ID'] || '', name: row['Nome'], description: row['Descrição'] || '', linkLiga: row['Link Liga'] || '', price: row['Preço'],
+        id: row['Id'] || row['ID'] || '', name: row['Nome'], description: row['Descrição'] || '', linkLiga: row['Link Liga'] || '', quantity: row['Quantidade'], price: row['Preço'],
         forSale: typeof row['À venda'] === 'boolean' ? row['À venda'] : row['À venda'] !== 'Não', image: importedImage(row['Imagem']), imageCandidates: importedImage(row['Imagem']) ? [importedImage(row['Imagem'])] : [],
       });
       const importKitRow = (row) => {
@@ -1470,11 +1494,11 @@ const publishedCollections = getEditableCollections();
       });
       updateButton?.addEventListener('click', () => {
         if (!state) return;
-        const cards = state.cards.filter((item) => item._isNew || item._isDirty).map((item) => item._isNew ? cardJson(item, true) : cardJson(item, false, 'patch'));
-        const boosters = state.boosters.filter((item) => item._isNew || item._isDirty).map((item) => item._isNew ? boosterJson(item, true) : boosterJson(item, false, 'patch'));
-        const kits = state.kits.filter((item) => item._isNew || item._isDirty).map((item) => kitJson(item, 'upsert'));
-        const products = state.products.filter((item) => item._isNew || item._isDirty).map((item) => productJson(item, 'upsert'));
-        const albums = state.albums.filter((item) => item._isNew || item._isDirty).map(albumJson);
+        const cards = [...state.cards.filter((item) => item._isNew || item._isDirty).map((item) => item._isNew ? cardJson(item, true) : cardJson(item, false, 'patch')), ...state.removed.cards];
+        const boosters = [...state.boosters.filter((item) => item._isNew || item._isDirty).map((item) => item._isNew ? boosterJson(item, true) : boosterJson(item, false, 'patch')), ...state.removed.boosters];
+        const kits = [...state.kits.filter((item) => item._isNew || item._isDirty).map((item) => kitJson(item, 'upsert')), ...state.removed.kits];
+        const products = [...state.products.filter((item) => item._isNew || item._isDirty).map((item) => productJson(item, 'upsert')), ...state.removed.products];
+        const albums = [...state.albums.filter((item) => item._isNew || item._isDirty).map(albumJson), ...state.removed.albums];
         const generatedAt = new Date().toISOString();
         const collectionId = state.profile.collectionId || safeSlug(state.profile.title);
         const metadata = { type: 'collection-update', format: 'json-v2', collectionId, baseVersion: Math.max(1, Number(state.profile.version || 1) - 1), version: Number(state.profile.version || 1), generatedAt, updateId: `${collectionId}-${Number(state.profile.version || 1)}-${Date.now()}`, includesProfile: true };
