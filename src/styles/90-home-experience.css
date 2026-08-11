@@ -1,0 +1,477 @@
+/* Hero/home, hub explorar e ajustes visuais finais da vitrine.
+   Extraído do antigo global.css preservando a ordem da cascata. */
+
+/* ===== Home v3 — abertura integrada ao acervo, 09/08/2026 =====
+   O hero deixou de ser uma splash separada: o conteúdo principal já nasce
+   sobre o fluxo de cartas, usando a mesma linguagem visual das coleções. */
+.nexus-home-hero.home-hero {
+  min-height: clamp(730px, calc(100svh - 58px), 980px);
+  display: grid;
+  align-items: center;
+  padding: clamp(76px, 9vh, 108px) 0 clamp(88px, 10vh, 126px);
+  overflow: hidden;
+  isolation: isolate;
+  border-bottom: 1px solid rgba(180,211,255,.11);
+  background:
+    radial-gradient(circle at 73% 26%, rgba(84,232,223,.105), transparent 34rem),
+    radial-gradient(circle at 88% 76%, rgba(188,145,255,.085), transparent 31rem),
+    linear-gradient(135deg, #050b14 0%, #07101c 52%, #050a12 100%);
+}
+.nexus-home-hero.home-hero::before { content: none; }
+
+.nexus-hero-card-flow {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  perspective: 1300px;
+}
+.nexus-hero-flow-plane {
+  position: absolute;
+  inset: -46% -7% -46% -6%;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(10px, 1.05vw, 18px);
+  transform: perspective(1250px) rotateX(7deg) rotateZ(7.5deg) translate3d(0,0,0);
+  transform-origin: center;
+  opacity: .55;
+  filter: saturate(.88) brightness(.72) contrast(1.04);
+}
+.nexus-hero-flow-lane {
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+.nexus-hero-flow-lane-1 { transform: translateY(4%) translateZ(-18px); opacity: .68; }
+.nexus-hero-flow-lane-2 { transform: translateY(-3%) translateZ(14px); opacity: .9; }
+.nexus-hero-flow-lane-3 { transform: translateY(2%) translateZ(28px); }
+.nexus-hero-flow-lane-4 { transform: translateY(-5%) translateZ(8px); opacity: .84; }
+.nexus-hero-flow-lane-5 { transform: translateY(5%) translateZ(-12px); opacity: .66; }
+.nexus-hero-flow-lane-6 { transform: translateY(-2%) translateZ(18px); opacity: .78; }
+.nexus-hero-flow-track {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  will-change: transform;
+  animation: nexus-hero-flow-up 62s linear infinite;
+}
+.nexus-hero-flow-lane-1 .nexus-hero-flow-track { animation-duration: 74s; animation-delay: -29s; }
+.nexus-hero-flow-lane-2 .nexus-hero-flow-track { animation-duration: 64s; animation-delay: -17s; }
+.nexus-hero-flow-lane-3 .nexus-hero-flow-track { animation-duration: 57s; animation-delay: -38s; }
+.nexus-hero-flow-lane-4 .nexus-hero-flow-track { animation-duration: 68s; animation-delay: -11s; }
+.nexus-hero-flow-lane-5 .nexus-hero-flow-track { animation-duration: 79s; animation-delay: -47s; }
+.nexus-hero-flow-lane-6 .nexus-hero-flow-track { animation-duration: 61s; animation-delay: -23s; }
+.nexus-hero-flow-set {
+  display: grid;
+  gap: clamp(11px, 1vw, 18px);
+  padding-bottom: clamp(11px, 1vw, 18px);
+}
+.nexus-hero-flow-card {
+  min-width: 0;
+  transform: translateZ(0);
+  filter: drop-shadow(0 20px 28px rgba(0,0,0,.44));
+}
+.nexus-hero-flow-card .collectible-visual {
+  width: 88%;
+  margin-inline: auto;
+  transform: none !important;
+  filter: none !important;
+  transition: none !important;
+  pointer-events: none;
+}
+.nexus-hero-flow-card .image-stage {
+  border-radius: 7px;
+  box-shadow: 0 17px 34px rgba(0,0,0,.52), inset 0 0 0 1px rgba(255,255,255,.07);
+}
+.nexus-hero-flow-card .foil-spectrum,
+.nexus-hero-flow-card .glare,
+.nexus-hero-flow-card .holo-band { display: none !important; }
+.nexus-hero-flow-glow {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  background:
+    radial-gradient(circle at 73% 35%, rgba(84,232,223,.14), transparent 28rem),
+    radial-gradient(circle at 88% 70%, rgba(188,145,255,.12), transparent 28rem);
+  filter: blur(8px);
+}
+.nexus-hero-flow-vignette {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(5,10,18,.965) 0%, rgba(5,10,18,.9) 22%, rgba(5,10,18,.74) 41%, rgba(5,10,18,.3) 67%, rgba(5,10,18,.58) 100%),
+    linear-gradient(180deg, rgba(5,10,18,.26) 0%, transparent 29%, rgba(5,10,18,.18) 67%, rgba(5,10,18,.91) 100%);
+  box-shadow: inset 0 -95px 110px rgba(2,6,12,.52);
+}
+
+.nexus-home-copy {
+  position: relative;
+  z-index: 5;
+  width: var(--shell);
+  max-width: none;
+  margin: 0 auto;
+  padding: 0;
+  text-align: left;
+  opacity: 1;
+  animation: nexus-home-content-enter .72s .08s cubic-bezier(.2,.78,.2,1) both;
+}
+.nexus-home-copy .hero-badge {
+  background: rgba(7,17,28,.58);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 12px 32px rgba(0,0,0,.16);
+}
+.nexus-home-copy h1 {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 .18em;
+  max-width: 900px;
+  margin: 22px 0 0;
+  font-size: clamp(4.9rem, 9.3vw, 9.6rem);
+  line-height: .78;
+  letter-spacing: -.085em;
+  text-transform: uppercase;
+  text-shadow: 0 22px 55px rgba(0,0,0,.58);
+}
+.nexus-home-copy h1 span { color: #f7fbff; }
+.nexus-home-copy h1 em {
+  display: inline;
+  font-style: normal;
+  background: linear-gradient(105deg, #53e3dc, #c8fff2 44%, #d7c7ff 82%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.nexus-home-tagline {
+  margin: 24px 0 10px;
+  color: #f3f7fb;
+  font-size: clamp(1.55rem, 2.7vw, 2.65rem);
+  line-height: 1;
+  letter-spacing: -.045em;
+}
+.nexus-home-copy > .nexus-home-description {
+  max-width: 720px;
+  margin: 0;
+  color: #aebdcd;
+  font-size: clamp(.98rem, 1.15vw, 1.08rem);
+  line-height: 1.7;
+  text-wrap: pretty;
+}
+.nexus-home-copy .hero-actions {
+  justify-content: flex-start;
+  margin-top: 28px;
+}
+.nexus-home-copy .primary-cta,
+.nexus-home-copy .secondary-cta {
+  min-height: 54px;
+  backdrop-filter: blur(12px);
+}
+.nexus-home-copy .secondary-cta { background: rgba(7,15,25,.58); }
+.nexus-home-copy .hero-metrics {
+  width: min(720px, 100%);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 36px;
+  padding-top: 23px;
+  border-top: 1px solid rgba(180,211,255,.14);
+}
+.nexus-home-copy .hero-metrics > div {
+  min-width: 0;
+  padding: 0 24px;
+  border-left: 1px solid rgba(180,211,255,.13);
+}
+.nexus-home-copy .hero-metrics > div:first-child { padding-left: 0; border-left: 0; }
+.nexus-home-copy .hero-metrics strong { font-size: clamp(1.65rem, 2.4vw, 2.15rem); }
+.nexus-home-copy .hero-metrics span { color: #8192a6; }
+
+/* O bloco das seis categorias fica claramente separado do hero. */
+.marketplace-navigation { margin-top: clamp(78px, 8.5vw, 122px); }
+
+/* O carrossel de álbuns segue a mesma largura/alinhamento dos demais blocos. */
+.album-carousel-viewport { overflow: hidden; }
+.album-carousel-track {
+  --carousel-card-width: clamp(340px, 30vw, 380px);
+  width: 100%;
+}
+.album-carousel-track .album-product-card {
+  width: 100%;
+  height: 100%;
+  flex-basis: auto;
+}
+
+@keyframes nexus-hero-flow-up {
+  to { transform: translate3d(0, -50%, 0); }
+}
+@keyframes nexus-home-content-enter {
+  from { opacity: 0; transform: translate3d(0, 24px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 1040px) {
+  .nexus-home-hero.home-hero { min-height: 760px; }
+  .nexus-hero-flow-plane { inset: -42% -18% -42% -4%; gap: 14px; opacity: .5; }
+  .nexus-home-copy h1 { font-size: clamp(4.6rem, 12vw, 7.8rem); }
+}
+
+@media (max-width: 760px) {
+  .nexus-home-hero.home-hero {
+    min-height: auto;
+    padding: 66px 0 78px;
+  }
+  .nexus-hero-flow-plane {
+    inset: -28% -38% -28% -8%;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    transform: perspective(1100px) rotateX(6deg) rotateZ(7deg);
+    opacity: .43;
+  }
+  .nexus-hero-flow-lane-5,
+  .nexus-hero-flow-lane-6 { display: none; }
+  .nexus-hero-flow-vignette {
+    background:
+      linear-gradient(90deg, rgba(5,10,18,.98) 0%, rgba(5,10,18,.9) 45%, rgba(5,10,18,.5) 100%),
+      linear-gradient(180deg, rgba(5,10,18,.2), transparent 35%, rgba(5,10,18,.85) 100%);
+  }
+  .nexus-home-copy h1 {
+    gap: .04em .18em;
+    font-size: clamp(4rem, 17vw, 6.6rem);
+  }
+  .nexus-home-tagline { margin-top: 21px; }
+  .nexus-home-copy .hero-actions { align-items: stretch; flex-direction: column; }
+  .nexus-home-copy .hero-actions a { width: 100%; }
+  .nexus-home-copy .hero-metrics > div { padding-inline: 14px; }
+  .marketplace-navigation { margin-top: 58px; }
+  .album-carousel-track { --carousel-card-width: min(86vw, 360px); -webkit-mask-image: none; mask-image: none; }
+}
+
+@media (max-width: 520px) {
+  .nexus-home-hero.home-hero { padding: 56px 0 66px; }
+  .nexus-hero-flow-plane {
+    inset: -22% -58% -22% -14%;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    opacity: .38;
+  }
+  .nexus-hero-flow-lane-4,
+  .nexus-hero-flow-lane-5,
+  .nexus-hero-flow-lane-6 { display: none; }
+  .nexus-home-copy h1 { font-size: clamp(3.75rem, 19vw, 5.4rem); }
+  .nexus-home-tagline { font-size: 1.45rem; }
+  .nexus-home-copy > .nexus-home-description { font-size: .93rem; line-height: 1.62; }
+  .nexus-home-copy .hero-metrics {
+    grid-template-columns: 1fr;
+    gap: 13px;
+    padding-top: 18px;
+  }
+  .nexus-home-copy .hero-metrics > div,
+  .nexus-home-copy .hero-metrics > div:first-child {
+    display: grid;
+    grid-template-columns: 64px minmax(0,1fr);
+    align-items: baseline;
+    gap: 12px;
+    padding: 0;
+    border: 0;
+  }
+  .nexus-home-copy .hero-metrics strong { font-size: 1.5rem; }
+  .nexus-home-copy .hero-metrics span { margin: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nexus-hero-flow-track { animation: none !important; transform: translateY(-12%); }
+  .nexus-home-copy { animation: none !important; opacity: 1; }
+}
+
+/* Evita que a regra antiga de largura do hero limite os três indicadores. */
+.nexus-home-copy .hero-metrics { max-width: 720px; }
+
+body.modal-open .carousel-belt,
+body.modal-open .collection-album-belt { animation-play-state: paused !important; }
+
+/* ========================================================================== 
+   Ajustes finais 09/08/2026 — home, explorar, boosters, kits e modais
+   ========================================================================== */
+
+/* Densidade do paredão da abertura.
+   As medidas ficam centralizadas aqui para que tamanho e espaçamento possam
+   ser calibrados sem espalhar novos overrides pelo arquivo. */
+.nexus-home-hero.home-hero {
+  --hero-flow-card-width: 68%;
+  --hero-flow-lane-gap: clamp(6px, .58vw, 10px);
+  --hero-flow-card-gap: clamp(5px, .46vw, 8px);
+  min-height: max(860px, 100svh);
+}
+.nexus-hero-flow-plane {
+  gap: var(--hero-flow-lane-gap);
+}
+.nexus-hero-flow-set {
+  gap: var(--hero-flow-card-gap);
+  padding-bottom: var(--hero-flow-card-gap);
+}
+.nexus-hero-flow-card .collectible-visual {
+  width: var(--hero-flow-card-width);
+}
+
+/* Hub único de exploração. */
+.explore-hub-hero {
+  padding: clamp(76px, 8vw, 112px) 0 clamp(46px, 5vw, 70px);
+  background:
+    radial-gradient(circle at 16% 18%, rgba(84,232,223,.11), transparent 28rem),
+    radial-gradient(circle at 86% 32%, rgba(188,145,255,.09), transparent 30rem),
+    linear-gradient(180deg, #07111f, #050a13);
+}
+.explore-hub-heading { max-width: 900px; }
+.explore-hub-heading h1 {
+  margin: 20px 0 14px;
+  font-size: clamp(4rem, 8vw, 7.8rem);
+  line-height: .86;
+  letter-spacing: -.075em;
+}
+.explore-hub-heading p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(1rem, 1.35vw, 1.12rem);
+  line-height: 1.72;
+}
+.explore-hub-navigation {
+  margin-top: clamp(48px, 5vw, 72px);
+  margin-bottom: 116px;
+}
+.explore-hub-navigation .navigation-card {
+  min-height: 276px;
+  padding-block: 38px;
+}
+
+/* O escurecimento da coleção fica sempre acima das cartas, inclusive quando
+   o fluxo cresce no hover. */
+.collection-card-preview > .collection-flow { z-index: 1; }
+.collection-card-preview::after {
+  z-index: 20;
+  height: 40%;
+  background: linear-gradient(transparent 0%, rgba(4,9,17,.86) 68%, rgba(4,9,17,.99) 100%);
+}
+.collection-status { z-index: 30; }
+
+/* Preço bruto do kit: discreto, mas legível antes do valor com desconto. */
+.kit-original-price {
+  display: block;
+  width: max-content;
+  margin-top: 5px;
+  color: var(--muted-2);
+  font-size: .72rem;
+  font-weight: 760;
+  line-height: 1;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: rgba(255,111,125,.78);
+}
+.price-block .kit-original-price + strong { margin-top: 5px; }
+
+/* Estado da carta em um bloco próprio no canto superior direito do modal. */
+.modal-card-condition[hidden] { display: none !important; }
+.modal-card-condition {
+  position: absolute;
+  z-index: 10;
+  top: 24px;
+  right: 76px;
+  min-width: 88px;
+  display: grid;
+  gap: 3px;
+  padding: 9px 12px;
+  border: 1px solid rgba(124,229,164,.26);
+  border-radius: 12px;
+  background: rgba(10,22,31,.82);
+  box-shadow: 0 12px 28px rgba(0,0,0,.26), inset 0 0 18px rgba(124,229,164,.035);
+  backdrop-filter: blur(13px);
+}
+.modal-card-condition small {
+  color: var(--muted-2);
+  font-size: .56rem;
+  font-weight: 850;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+.modal-card-condition strong {
+  color: var(--success);
+  font-size: .9rem;
+  letter-spacing: .04em;
+}
+.modal-card-condition.condition-sp,
+.modal-card-condition.condition-mp,
+.modal-card-condition.condition-hp {
+  border-color: rgba(255,203,98,.28);
+  box-shadow: 0 12px 28px rgba(0,0,0,.26), inset 0 0 18px rgba(255,203,98,.035);
+}
+.modal-card-condition.condition-sp strong,
+.modal-card-condition.condition-mp strong,
+.modal-card-condition.condition-hp strong { color: var(--gold); }
+.modal-card-condition.condition-d {
+  border-color: rgba(255,111,125,.3);
+  box-shadow: 0 12px 28px rgba(0,0,0,.26), inset 0 0 18px rgba(255,111,125,.04);
+}
+.modal-card-condition.condition-d strong { color: var(--danger); }
+
+/* Booster no modal: moldura mais alta e sem recortar as extremidades do
+   pacotinho. O brilho de embalagem continua nos cards do catálogo. */
+.booster-modal .product-modal-media .detail-visual { width: min(100%, 300px); }
+.booster-modal .detail-visual.booster-visual .image-stage {
+  aspect-ratio: .535;
+  overflow: visible;
+  border-radius: 5px;
+  background: transparent;
+  box-shadow: none;
+}
+.booster-modal .detail-visual.booster-visual .image-stage::before,
+.booster-modal .detail-visual.booster-visual .image-stage::after { display: none; }
+.booster-modal .detail-visual.booster-visual .image-stage > img:not(.gallery-transition-image) {
+  filter: drop-shadow(0 28px 38px rgba(0,0,0,.5));
+}
+
+/* Crossfade real entre artes de booster: a próxima arte já está carregada e
+   entra por cima da atual, evitando qualquer flash do placeholder. */
+.image-stage > img.gallery-transition-image {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  opacity: 0;
+  transform: none;
+  filter: none;
+  transition: opacity .42s ease;
+}
+.image-stage > img.gallery-transition-image.is-visible { opacity: 1; }
+.image-stage > img.gallery-transition-image.is-settled { opacity: 1; transition: none; }
+
+/* A página de boosters ficou com dois indicadores após retirar o bloco privado. */
+.booster-catalog-hero .catalog-hero-stats { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+
+/* O reflexo que escapava da capa para o fundo inteiro da página do álbum foi
+   removido. */
+.album-cover-sweep { display: none !important; }
+
+@media (max-width: 760px) {
+  .nexus-home-hero.home-hero {
+    min-height: auto;
+    padding: 66px 0 78px;
+  }
+  .nexus-home-hero.home-hero { --hero-flow-card-width: 72%; }
+  .explore-hub-navigation .navigation-card { min-height: 248px; }
+  .modal-card-condition { top: 16px; right: 68px; min-width: 78px; padding: 8px 10px; }
+  .booster-modal .product-modal-media .detail-visual { width: min(100%, 235px); }
+}
+
+@media (max-width: 520px) {
+  .nexus-home-hero.home-hero { padding: 56px 0 66px; }
+  .explore-hub-hero { padding: 58px 0 38px; }
+  .explore-hub-navigation { margin-top: 36px; margin-bottom: 82px; }
+  .explore-hub-navigation .navigation-card { min-height: 225px; padding-block: 30px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image-stage > img.gallery-transition-image { transition: none; }
+}
+

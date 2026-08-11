@@ -1,0 +1,120 @@
+/* Interações de cartões, modais públicos e ações do catálogo.
+   Extraído do antigo global.css preservando a ordem da cascata. */
+
+/* Interações do catálogo: subtela, propostas e cartões sem redirecionamento */
+.nav-actions { display: flex; align-items: center; gap: 10px; }
+.product-open-button {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+.product-open-button:focus-visible { outline: 2px solid var(--cyan); outline-offset: -3px; border-radius: inherit; }
+.product-open-button .product-card-body { width: 100%; }
+.open-arrow { font-size: 1rem; }
+
+.not-for-sale-label { display: block; margin: 14px 16px 16px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; color: var(--muted-2); text-align: center; font-size: .72rem; font-weight: 800; }
+
+.product-modal[hidden] { display: none !important; }
+body.modal-open { overflow: hidden; }
+.product-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .18s ease, visibility .18s ease;
+}
+.product-modal.open { opacity: 1; visibility: visible; }
+.product-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(2,7,13,.72);
+  backdrop-filter: blur(17px) saturate(115%);
+}
+.product-modal-panel {
+  width: min(1120px, 100%);
+  max-height: min(90vh, 850px);
+  position: relative;
+  z-index: 2;
+  overflow: auto;
+  border: 1px solid var(--line-strong);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(84,232,223,.1), transparent 26rem),
+    linear-gradient(145deg, rgba(16,29,47,.98), rgba(6,13,23,.98));
+  box-shadow: 0 40px 120px rgba(0,0,0,.7);
+  transform: translateY(18px) scale(.985);
+  transition: transform .22s cubic-bezier(.2,.8,.2,1);
+}
+.product-modal.open .product-modal-panel { transform: translateY(0) scale(1); }
+.modal-close-button {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: rgba(5,12,21,.78);
+  color: var(--text);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.product-modal-panel > .modal-close-button { position: sticky; z-index: 8; top: 15px; float: right; margin: 15px 15px -58px 0; backdrop-filter: blur(12px); }
+.product-modal-grid {
+  min-height: 620px;
+  display: grid;
+  grid-template-columns: minmax(330px, .82fr) minmax(0, 1.18fr);
+  gap: clamp(34px, 5vw, 70px);
+  align-items: center;
+  padding: 52px clamp(28px, 5vw, 66px);
+}
+.product-modal-media {
+  min-height: 500px;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+.product-modal-media::before {
+  content: "";
+  width: min(460px, 100%);
+  aspect-ratio: 1;
+  position: absolute;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle, transparent 0 33px, rgba(84,232,223,.06) 34px 35px), radial-gradient(circle, rgba(84,232,223,.13), transparent 68%);
+}
+.booster-modal .product-modal-media::before { background: repeating-radial-gradient(circle, transparent 0 33px, rgba(255,141,77,.06) 34px 35px), radial-gradient(circle, rgba(255,141,77,.13), transparent 68%); }
+.product-modal-media > * { position: relative; z-index: 2; }
+.product-modal-media .detail-visual { width: min(100%, 350px); }
+.booster-modal .product-modal-media .detail-visual { width: min(100%, 285px); }
+.product-modal-content h2 { margin: 8px 0 16px; font-size: clamp(2.8rem, 5vw, 5rem); line-height: .9; letter-spacing: -.065em; text-wrap: balance; }
+.product-modal-content .detail-price-panel { margin: 25px 0; }
+
+@media (max-width: 880px) {
+  .nav-actions { margin-left: auto; }
+  .product-modal { padding: 12px; }
+  .product-modal-panel { max-height: 94vh; border-radius: 22px; }
+  .product-modal-grid { grid-template-columns: 1fr; gap: 15px; padding: 44px 24px 30px; }
+  .product-modal-media { min-height: 390px; }
+  .product-modal-media .detail-visual { width: min(100%, 255px); }
+  .booster-modal .product-modal-media .detail-visual { width: min(100%, 220px); }
+  .product-modal-content h2 { font-size: clamp(2.7rem, 11vw, 4.5rem); }
+}
+
+@media (max-width: 600px) {
+  .product-card-media { min-height: 340px; }
+  .product-modal-grid { padding-inline: 17px; }
+  .product-modal-media { min-height: 330px; }
+  .product-modal-content .detail-specs { grid-template-columns: 1fr 1fr; }
+  .product-modal-content .detail-specs div { min-height: 70px; }
+}
+

@@ -1,0 +1,140 @@
+/* Gerenciamento: preços, cotização, histórico e análise avançada.
+   Extraído do antigo global.css preservando a ordem da cascata. */
+
+/* Gerenciamento — cotização ampliada, histórico de valorização e análise de boosters.
+   A grade prioriza caber inteira no painel desktop: a coluna de preços ficou
+   mais enxuta e a coluna de controle permanece sempre visível. */
+.inventory-card-sheet .inventory-sheet-head,
+.card-inventory-record {
+  grid-template-columns: minmax(235px, 1.06fr) minmax(145px, .62fr) minmax(115px, .5fr) minmax(400px, 1.5fr) minmax(165px, .62fr);
+}
+.booster-inventory-sheet .inventory-sheet-head,
+.booster-inventory-record {
+  grid-template-columns: minmax(250px, 1.08fr) minmax(115px, .5fr) minmax(400px, 1.5fr) minmax(165px, .62fr);
+}
+.inventory-sheet-head,
+.inventory-record { min-width: 1080px; }
+.booster-inventory-record { cursor: pointer; }
+.inventory-prices-cell {
+  grid-template-columns: repeat(4, minmax(68px, 1fr));
+  gap: 5px;
+}
+.inventory-prices-cell .inventory-price-field.read-only { padding: 6px 7px; }
+.inventory-prices-cell .inventory-price-field.editable input { padding: 6px 7px; }
+.inventory-edit-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--muted);
+  background: rgba(255,255,255,.025);
+  font: inherit;
+  font-size: .58rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+.inventory-edit-button:hover { color: var(--text); border-color: rgba(188,145,255,.34); }
+.inventory-edit-button span { color: #bc91ff; }
+
+.inventory-quote-summary {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1.25fr repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 2px;
+  padding-top: 7px;
+  border-top: 1px solid rgba(255,255,255,.055);
+}
+.inventory-quote-summary > div {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 7px;
+  align-items: baseline;
+  padding: 7px 8px;
+  border: 1px solid rgba(255,255,255,.05);
+  border-radius: 9px;
+  background: rgba(255,255,255,.016);
+}
+.inventory-quote-summary span {
+  color: var(--muted-2);
+  font-size: .49rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.inventory-quote-summary strong { min-width: 0; color: var(--text); font-size: .61rem; text-align: right; }
+.inventory-quote-summary small { grid-column: 1 / -1; color: var(--muted-2); font-size: .47rem; }
+.inventory-quote-summary strong.up,
+.inventory-quote-summary small.up { color: var(--success); }
+.inventory-quote-summary strong.down,
+.inventory-quote-summary small.down { color: var(--danger); }
+.inventory-quote-summary strong.flat,
+.inventory-quote-summary small.flat { color: var(--muted); }
+.inventory-quote-summary .quote-date { grid-template-columns: 1fr; }
+.inventory-quote-summary .quote-date strong { text-align: left; white-space: nowrap; }
+
+.card-market-metrics { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.card-variation-panel > div { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.card-market-depth-panel {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(3,10,19,.38);
+}
+.card-market-depth-panel > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.card-market-depth-panel header strong,
+.card-market-depth-panel header small { display: block; }
+.card-market-depth-panel header small { margin-top: 4px; color: var(--muted-2); font-size: .59rem; }
+.card-market-depth-panel > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.card-market-depth-panel article {
+  min-width: 0;
+  padding: 13px 15px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.card-market-depth-panel article:nth-child(3n) { border-right: 0; }
+.card-market-depth-panel article:nth-last-child(-n+3) { border-bottom: 0; }
+.card-market-depth-panel article span,
+.card-market-depth-panel article strong,
+.card-market-depth-panel article small { display: block; }
+.card-market-depth-panel article span { color: var(--muted-2); font-size: .54rem; font-weight: 850; }
+.card-market-depth-panel article strong { margin-top: 5px; font-size: .78rem; }
+.card-market-depth-panel article small { margin-top: 3px; color: var(--muted-2); font-size: .52rem; }
+.edit-favorite-check { grid-column: 1 / -1; margin: 0; }
+
+@media (max-width: 1040px) {
+  .card-market-metrics,
+  .card-variation-panel > div { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .card-market-depth-panel > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card-market-depth-panel article:nth-child(3n) { border-right: 1px solid var(--line); }
+  .card-market-depth-panel article:nth-child(2n) { border-right: 0; }
+  .card-market-depth-panel article:nth-last-child(-n+3) { border-bottom: 1px solid var(--line); }
+  .card-market-depth-panel article:nth-last-child(-n+2) { border-bottom: 0; }
+}
+
+@media (max-width: 700px) {
+  .inventory-quote-summary { grid-template-columns: 1fr; }
+  .card-market-metrics,
+  .card-variation-panel > div,
+  .card-market-depth-panel > div { grid-template-columns: 1fr; }
+  .card-market-depth-panel article,
+  .card-market-depth-panel article:nth-child(2n),
+  .card-market-depth-panel article:nth-child(3n),
+  .card-market-depth-panel article:nth-last-child(-n+2),
+  .card-market-depth-panel article:nth-last-child(-n+3) { border-right: 0; border-bottom: 1px solid var(--line); }
+  .card-market-depth-panel article:last-child { border-bottom: 0; }
+}
