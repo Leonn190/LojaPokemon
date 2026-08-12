@@ -165,6 +165,11 @@ const publishedCollections = getEditableCollections();
         <div class="editor-inventory" data-editor-inventory></div>
       </section>
 
+      <section class="collection-movement-log" aria-label="Linha do tempo da coleção">
+        <header><div><span class="section-eyebrow">Histórico de estoque</span><h3>Linha do tempo da coleção</h3><p>Cada entrada, venda, remoção ou ajuste fica ligado à versão que alterou o inventário.</p></div><span class="movement-log-count" data-movement-log-count>0 eventos</span></header>
+        <div data-collection-movements></div>
+      </section>
+
       <div class="editor-export-panel">
         <div><span class="section-eyebrow">Pronto para aprovação</span><h3>Baixe o ZIP da versão <b data-version-number>1</b></h3><p>Os inventários são exportados em JSON. Para coleção nova, o ZIP sai pronto para a pasta de não formatadas; em coleções existentes, o update leva perfil, novas cartas/boosters/produtos e kits/álbuns alterados.</p></div>
         <div class="editor-export-actions"><button type="button" class="secondary-cta" data-download-update hidden><span>Baixar só o update</span><b>＋</b></button><button type="button" class="primary-cta" data-download-zip><span>Baixar ZIP JSON</span><b>↓</b></button></div>
@@ -207,22 +212,11 @@ const publishedCollections = getEditableCollections();
               <div class="card-chart-legend" data-card-chart-legend></div>
             </section>
             <section class="card-variation-panel"><header><strong>Valorização / desvalorização</strong><small>Comparação entre o primeiro e o último ponto disponível.</small></header><div data-card-variations></div></section>
+            <section class="card-movement-panel"><header><div><strong>Linha do tempo da coleção</strong><small>Entradas, vendas e ajustes de quantidade com data e versão.</small></div></header><div data-card-movements></div></section>
             <section class="card-market-depth-panel"><header><div><strong>Mercado detalhado</strong><small>Profundidade e liquidez da cotização mais recente.</small></div></header><div data-card-market-depth></div></section>
             <details class="card-json-panel"><summary>Ver todas as informações do JSON</summary><div class="card-json-blocks" data-card-json></div></details>
           </main>
         </div>
-      </section>
-    </div>
-
-    <div class="editor-modal" data-editor-modal="item-edit" hidden>
-      <button class="editor-modal-backdrop" type="button" data-close-modal aria-label="Fechar"></button>
-      <section class="editor-modal-dialog editor-form-dialog" role="dialog" aria-modal="true" aria-labelledby="item-edit-title">
-        <header class="editor-modal-header"><div><span class="section-eyebrow">Editar cadastro</span><h2 id="item-edit-title" data-item-edit-title>Editar item</h2><p>Campos manuais podem ser corrigidos aqui. Alterar link, idioma ou estado invalida a cotização anterior e exige uma nova cotização.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
-        <form class="editor-item-form editor-modal-form" data-item-edit-form>
-          <div class="modal-form-grid" data-item-edit-fields></div>
-          <label class="modal-sale-check"><input name="forSale" type="checkbox" /><span><strong>Disponível para venda</strong><small>Controle individual de publicação.</small></span></label>
-          <footer class="modal-form-actions"><button type="button" class="secondary-cta" data-close-modal><span>Cancelar</span><b>×</b></button><button type="submit" class="primary-cta"><span>Salvar alterações</span><b>✓</b></button></footer>
-        </form>
       </section>
     </div>
 
@@ -360,6 +354,7 @@ const publishedCollections = getEditableCollections();
       let activeAlbumPage = 0;
       let albumCardQuery = '';
       let selectedAlbumCardId = '';
+      let activeKitEditIndex = -1;
 
       const clean = (value) => String(value ?? '').trim();
       const toPrice = (value) => {
@@ -408,6 +403,51 @@ const publishedCollections = getEditableCollections();
       };
       const itemPrice = (item) => item?.price ?? item?.leaguePrice ?? null;
       const itemName = (item, kind) => item?.name || item?.collection || getNameFromLink(item?.linkLiga || '', kind === 'cards' ? 'Carta da Liga' : kind === 'products' ? 'Produto Pokémon' : 'Booster da Liga');
+      const allMovements = () => state ? [...(state.movements || []), ...(state.pendingMovements || [])] : [];
+      const queueSaleMovement = (kind, item, before, after) => {
+        if (!state) return;
+        state.pendingMovements.push({
+          eventId: uid('mov'), updateId: '', collectionId: state.profile.collectionId || safeSlug(state.profile.title),
+          version: Number(state.profile.version || 1), date: new Date().toISOString(), eventType: 'venda', itemType: kind,
+          itemId: item._id || item.id || '', name: itemName(item, kind), quantityBefore: before, quantityDelta: after - before,
+          quantityAfter: after, source: 'site', note: 'Venda registrada pelo botão Vendi 1.',
+        });
+      };
+      const movementTimelineMarkup = (item) => {
+        const itemId = clean(item?._id || item?.id);
+        const rows = allMovements().filter((entry) => clean(entry.itemId) === itemId).sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+        if (!rows.length) return '<div class="movement-empty"><span>↕</span><strong>Nenhuma movimentação registrada</strong><p>Entradas e vendas aparecerão aqui a partir dos próximos updates.</p></div>';
+        const labels = { saldo_inicial: 'Saldo inicial', entrada: 'Entrada', venda: 'Venda', ajuste_saida: 'Saída / ajuste', remocao: 'Remoção', ajuste: 'Ajuste' };
+        return `<div class="movement-timeline">${rows.map((entry) => {
+          const delta = Number(entry.quantityDelta || 0);
+          const date = entry.date ? new Date(entry.date).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : 'Data não informada';
+          const label = labels[entry.eventType] || clean(entry.eventType).replace(/_/g, ' ') || 'Movimentação';
+          const version = Number(entry.version || 0);
+          return `<article class="movement-event ${escapeHtml(entry.eventType || 'ajuste')}"><i></i><div><header><strong>${escapeHtml(label)}</strong><span>${escapeHtml(date)}${version ? ` · v${version}` : ''}</span></header><p>${escapeHtml(entry.note || (delta > 0 ? 'Item adicionado à coleção.' : delta < 0 ? 'Item saiu da coleção.' : 'Registro de estoque.'))}</p><footer><span>${toQuantity(entry.quantityBefore, 0)} → ${toQuantity(entry.quantityAfter, 0)}</span><b>${delta > 0 ? '+' : ''}${delta}</b></footer></div></article>`;
+        }).join('')}</div>`;
+      };
+      const renderCollectionTimeline = () => {
+        const target = root.querySelector('[data-collection-movements]');
+        const count = root.querySelector('[data-movement-log-count]');
+        if (!target || !state) return;
+        const rows = allMovements().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+        if (count) count.textContent = `${rows.length} ${rows.length === 1 ? 'evento' : 'eventos'}`;
+        if (!rows.length) {
+          target.innerHTML = '<div class="movement-empty collection-movement-empty"><span>↕</span><strong>A timeline começa no primeiro registro</strong><p>Ao formatar uma coleção nova, os saldos entram automaticamente. Depois, updates registram entradas, vendas, remoções e ajustes.</p></div>';
+          return;
+        }
+        const labels = { saldo_inicial: 'Saldo inicial', entrada: 'Entrada', venda: 'Venda', ajuste_saida: 'Saída / ajuste', remocao: 'Remoção', ajuste: 'Ajuste' };
+        const kindLabels = { cards: 'Carta', cartas: 'Carta', boosters: 'Booster', kits: 'Kit', products: 'Produto', produtos: 'Produto' };
+        target.innerHTML = `<div class="collection-movement-timeline">${rows.slice(0, 80).map((entry) => {
+          const delta = Number(entry.quantityDelta || 0);
+          const dateValue = entry.date ? new Date(entry.date) : null;
+          const date = dateValue && !Number.isNaN(dateValue.getTime()) ? dateValue.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : (entry.date || 'Data não informada');
+          const label = labels[entry.eventType] || clean(entry.eventType).replace(/_/g, ' ') || 'Movimentação';
+          const version = Number(entry.version || 0);
+          const kind = kindLabels[entry.itemType] || clean(entry.itemType) || 'Item';
+          return `<article class="collection-movement-row ${escapeHtml(entry.eventType || 'ajuste')}"><i></i><div class="movement-row-main"><span>${escapeHtml(label)}</span><strong>${escapeHtml(entry.name || entry.itemId || 'Item')}</strong><small>${escapeHtml(kind)}${version ? ` · versão ${version}` : ''}</small></div><div class="movement-row-balance"><strong>${toQuantity(entry.quantityBefore, 0)} → ${toQuantity(entry.quantityAfter, 0)}</strong><b>${delta > 0 ? '+' : ''}${delta}</b></div><time>${escapeHtml(date)}</time></article>`;
+        }).join('')}</div>${rows.length > 80 ? `<p class="movement-log-more">Mostrando os 80 eventos mais recentes de ${rows.length}.</p>` : ''}`;
+      };
 
       const normalizeCard = (item = {}, isNew = false) => {
         const normalized = {
@@ -551,6 +591,8 @@ const publishedCollections = getEditableCollections();
           products: (items.products || []).map((item) => normalizeProduct(item, false)),
           kits: (items.kits || []).map((item) => normalizeKit(item, cards, boosters)),
           albums: (items.albums || []).map((item) => normalizeAlbum(item, cards)),
+          movements: Array.isArray(items.movements) ? items.movements.map((entry) => ({ ...entry })) : [],
+          pendingMovements: [],
           removed: { cards: [], boosters: [], kits: [], products: [], albums: [] },
           kitDraft: [], source,
         };
@@ -652,7 +694,7 @@ const publishedCollections = getEditableCollections();
             <div class="inventory-info-cell"><span>${escapeHtml(item.year || 'Ano —')}</span><span>${escapeHtml(item.condition || 'Estado —')}</span><span>${escapeHtml(item.language || 'Idioma —')}</span><span>${escapeHtml(item.type || 'Tipo —')}</span></div>
             <div class="inventory-links-cell">${linkButtons([{ label: 'Liga', url: item.linkLiga }, { label: 'MYP', url: item.linkMyp }, { label: 'Cardmarket', url: item.linkCardmarket }, { label: 'TCGplayer', url: item.linkTcgplayer }, { label: 'PriceCharting', url: item.linkPriceCharting }])}</div>
             <div class="inventory-prices-cell">${priceReadout('Mín. certeiro', item.certainMinimumPrice)}${priceReadout('Mínimo', item.minimumPrice)}${priceReadout('Menor Liga', item.leaguePrice)}${priceReadout('Média Liga', item.averageLeaguePrice)}${priceReadout('Mediana Liga', item.medianLeaguePrice)}${priceReadout('Venda rápida', item.quickSalePrice)}${priceInput('cards', index, 'price', 'Preço', item.price)}${quoteSummaryMarkup(item)}</div>
-            <div class="inventory-control-cell"><button type="button" class="inventory-favorite ${item.favorite ? 'active' : ''}" data-favorite-card="${index}" title="Favoritar carta"><span>${item.favorite ? '★' : '☆'}</span>${item.favorite ? 'Favorita' : 'Favoritar'}</button><button type="button" class="inventory-edit-button" data-edit-item="cards:${index}"><span>✎</span> Editar</button><button type="button" class="inventory-details-button" data-card-details="${index}"><span>↗</span> Análise</button>${quantityInput('cards', index, item.quantity)}${soldButton('cards', index, item.quantity)}${saleToggle('cards', index, item.forSale)}${removeButton('cards', index, name)}</div>
+            <div class="inventory-control-cell"><button type="button" class="inventory-favorite ${item.favorite ? 'active' : ''}" data-favorite-card="${index}" title="Favoritar carta"><span>${item.favorite ? '★' : '☆'}</span>${item.favorite ? 'Favorita' : 'Favoritar'}</button><button type="button" class="inventory-details-button" data-card-details="${index}"><span>↗</span> Análise</button>${quantityInput('cards', index, item.quantity)}${soldButton('cards', index, item.quantity)}${saleToggle('cards', index, item.forSale)}${removeButton('cards', index, name)}</div>
           </article>`;
         }).join('')}</div>`;
       };
@@ -799,6 +841,7 @@ const publishedCollections = getEditableCollections();
           const direction = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
           return `<article class="${direction}"><span>${escapeHtml(metric.label)}</span><strong>${delta > 0 ? '+' : ''}${escapeHtml(prettyPrice(delta))}</strong><small>${pct === null ? '—' : `${pct > 0 ? '+' : ''}${pct.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`}</small></article>`;
         }).join('');
+        modal.querySelector('[data-card-movements]').innerHTML = movementTimelineMarkup(item);
         modal.querySelector('[data-card-market-depth]').innerHTML = marketDepthMarkup(item, kind);
         const advancedData = { ...(item.advancedData || {}) };
         Object.keys(advancedData).forEach((key) => { if (/^(?:quantidade|quantity|qtd\.?)(?:\s|$)/i.test(key.trim())) delete advancedData[key]; });
@@ -815,92 +858,6 @@ const publishedCollections = getEditableCollections();
       const openCardDetails = (index) => openAssetDetails('cards', index);
       const openBoosterDetails = (index) => openAssetDetails('boosters', index);
 
-      let activeEditKind = '';
-      let activeEditIndex = -1;
-      const editField = (name, label, value, options = {}) => {
-        const wide = options.wide ? ' wide' : '';
-        const required = options.required ? ' required' : '';
-        const type = options.type || 'text';
-        const hint = options.hint ? `<small>${escapeHtml(options.hint)}</small>` : '';
-        if (options.select) {
-          const optionsMarkup = options.select.map((entry) => `<option value="${escapeHtml(entry)}" ${clean(value) === entry ? 'selected' : ''}>${escapeHtml(entry)}</option>`).join('');
-          return `<label class="${wide.trim()}"><span>${escapeHtml(label)}</span><select name="${escapeHtml(name)}"${required}>${optionsMarkup}</select>${hint}</label>`;
-        }
-        const step = options.step ? ` step="${options.step}"` : '';
-        const min = options.min !== undefined ? ` min="${options.min}"` : '';
-        return `<label class="${wide.trim()}"><span>${escapeHtml(label)}</span><input name="${escapeHtml(name)}" type="${type}" value="${escapeHtml(value ?? '')}"${step}${min}${required} />${hint}</label>`;
-      };
-      const openItemEdit = (kind, index) => {
-        const item = kind === 'boosters' ? state?.boosters?.[index] : state?.cards?.[index];
-        if (!item) return;
-        activeEditKind = kind; activeEditIndex = index;
-        const modal = root.querySelector('[data-editor-modal="item-edit"]');
-        const form = modal?.querySelector('[data-item-edit-form]');
-        const fields = modal?.querySelector('[data-item-edit-fields]');
-        if (!modal || !form || !fields) return;
-        modal.querySelector('[data-item-edit-title]').textContent = `Editar ${itemName(item, kind)}`;
-        if (kind === 'cards') {
-          fields.innerHTML = [
-            editField('name', 'Nome', item.name, { required: true }),
-            editField('number', 'Número', item.number),
-            editField('collection', 'Coleção', item.collection),
-            editField('year', 'Ano', item.year),
-            editField('type', 'Tipo', item.type),
-            editField('condition', 'Estado', item.condition || 'NM', { select: ['M', 'NM', 'SP', 'MP', 'HP', 'D'], required: true }),
-            editField('language', 'Idioma', item.language || 'Português (PT-BR)', { required: true }),
-            editField('quantity', 'Quantidade', toQuantity(item.quantity), { type: 'number', min: 0, step: '1' }),
-            editField('price', 'Preço final', item.price ?? '', { type: 'number', min: 0, step: '0.01' }),
-            editField('linkLiga', 'Link da Liga', item.linkLiga, { type: 'url', wide: true, hint: 'Alterar este link exige uma nova cotização.' }),
-            editField('linkMyp', 'Link MYP', item.linkMyp, { type: 'url', wide: true }),
-            editField('linkCardmarket', 'Link Cardmarket', item.linkCardmarket, { type: 'url', wide: true }),
-            editField('linkTcgplayer', 'Link TCGplayer', item.linkTcgplayer, { type: 'url', wide: true }),
-            editField('linkPriceCharting', 'Link PriceCharting', item.linkPriceCharting, { type: 'url', wide: true }),
-            editField('image', 'Imagem', item.image, { wide: true }),
-            `<label class="modal-sale-check edit-favorite-check wide"><input name="favorite" type="checkbox" ${item.favorite ? 'checked' : ''} /><span><strong>Favorita</strong><small>Destacar esta carta no gerenciamento.</small></span></label>`,
-          ].join('');
-        } else {
-          fields.innerHTML = [
-            editField('name', 'Tipo de pacote', item.name, { required: true, wide: true }),
-            editField('quantity', 'Quantidade', toQuantity(item.quantity), { type: 'number', min: 0, step: '1' }),
-            editField('price', 'Preço final', item.price ?? '', { type: 'number', min: 0, step: '0.01' }),
-            editField('linkLiga', 'Link da Liga', item.linkLiga, { type: 'url', wide: true, hint: 'Alterar este link exige uma nova cotização.' }),
-            editField('image', 'Imagem', item.image, { wide: true }),
-          ].join('');
-        }
-        form.elements.forSale.checked = item.forSale !== false;
-        openModal('item-edit');
-      };
-      const invalidateDisplayedQuote = (item) => {
-        ['certainMinimumPrice', 'minimumPrice', 'leaguePrice', 'secondLeaguePrice', 'thirdLeaguePrice', 'averageLeaguePrice', 'medianLeaguePrice', 'quickSalePrice'].forEach((field) => { item[field] = null; });
-        ['sellersGeneral', 'sellersSpecific', 'buyersGeneral', 'buyersSpecific'].forEach((field) => { item[field] = 0; });
-        item.advancedData = { ...(item.advancedData || {}), 'Alteração de preço': 'Cadastro de mercado editado; recotização necessária', Status: { 'nível': 'Suspeita leve', motivos: [{ codigo: 'cotizacao_desatualizada_por_edicao', mensagem: 'Link, idioma ou estado foi editado. Faça uma nova cotização antes de usar as referências de mercado.' }] } };
-        delete item.advancedData['Última cotação'];
-      };
-      root.querySelector('[data-item-edit-form]')?.addEventListener('submit', (event) => {
-        event.preventDefault();
-        if (!state || activeEditIndex < 0 || !['cards', 'boosters'].includes(activeEditKind)) return;
-        const item = state[activeEditKind][activeEditIndex]; if (!item) return;
-        const data = new FormData(event.currentTarget);
-        const oldIdentity = activeEditKind === 'cards' ? [clean(item.linkLiga), clean(item.language), clean(item.condition)].join('|') : clean(item.linkLiga);
-        item.name = clean(data.get('name')) || item.name;
-        item.quantity = toQuantity(data.get('quantity'));
-        item.price = toPrice(data.get('price'));
-        item.linkLiga = clean(data.get('linkLiga'));
-        item.image = clean(data.get('image'));
-        item.imageCandidates = item.image ? [item.image] : [];
-        item.forSale = item.quantity > 0 && data.get('forSale') === 'on';
-        if (activeEditKind === 'cards') {
-          item.number = clean(data.get('number')); item.collection = clean(data.get('collection')); item.year = clean(data.get('year')); item.type = clean(data.get('type'));
-          item.language = clean(data.get('language')) || 'Português (PT-BR)'; item.condition = clean(data.get('condition')) || 'NM';
-          item.linkMyp = clean(data.get('linkMyp')); item.linkCardmarket = clean(data.get('linkCardmarket')); item.linkTcgplayer = clean(data.get('linkTcgplayer')); item.linkPriceCharting = clean(data.get('linkPriceCharting'));
-          item.favorite = data.get('favorite') === 'on';
-        }
-        const newIdentity = activeEditKind === 'cards' ? [clean(item.linkLiga), clean(item.language), clean(item.condition)].join('|') : clean(item.linkLiga);
-        if (oldIdentity !== newIdentity) invalidateDisplayedQuote(item);
-        if (!item._isNew) item._isDirty = true;
-        closeModals(); render();
-      });
-
       const renderBoosters = () => {
         const rows = state.boosters.map((item, index) => ({ item, index })).filter(({ item }) => matchesSearch(item));
         if (!rows.length) return emptyInventory('boosters');
@@ -910,7 +867,7 @@ const publishedCollections = getEditableCollections();
             <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>Pacote lacrado</small></div></div>
             <div class="inventory-links-cell">${linkButtons([{ label: 'Liga', url: item.linkLiga }])}</div>
             <div class="inventory-prices-cell">${priceReadout('Mín. certeiro', item.certainMinimumPrice)}${priceReadout('Mínimo', item.minimumPrice)}${priceReadout('Menor Liga', item.leaguePrice)}${priceReadout('Média Liga', item.averageLeaguePrice)}${priceReadout('Mediana Liga', item.medianLeaguePrice)}${priceReadout('Venda rápida', item.quickSalePrice)}${priceInput('boosters', index, 'price', 'Preço', item.price)}${quoteSummaryMarkup(item)}</div>
-            <div class="inventory-control-cell"><button type="button" class="inventory-edit-button" data-edit-item="boosters:${index}"><span>✎</span> Editar</button><button type="button" class="inventory-details-button" data-booster-details="${index}"><span>↗</span> Análise</button>${quantityInput('boosters', index, item.quantity)}${soldButton('boosters', index, item.quantity)}${saleToggle('boosters', index, item.forSale)}${removeButton('boosters', index, name)}</div>
+            <div class="inventory-control-cell"><button type="button" class="inventory-details-button" data-booster-details="${index}"><span>↗</span> Análise</button>${quantityInput('boosters', index, item.quantity)}${soldButton('boosters', index, item.quantity)}${saleToggle('boosters', index, item.forSale)}${removeButton('boosters', index, name)}</div>
           </article>`;
         }).join('')}</div>`;
       };
@@ -928,7 +885,7 @@ const publishedCollections = getEditableCollections();
           const discountValue = gross > 0 && item.price !== null ? Math.max(0, gross - item.price) : 0;
           const discountPercent = gross > 0 && item.price !== null ? Math.max(0, Math.round((gross - item.price) / gross * 100)) : 0;
           return `<article class="kit-inventory-record">
-            <header><div><span class="kit-record-icon">▦</span><div><strong>${escapeHtml(item.name)}</strong><p>${escapeHtml(item.description || 'Kit personalizado')}</p></div></div>${removeButton('kits', index, item.name)}</header>
+            <header><div><span class="kit-record-icon">▦</span><div><strong>${escapeHtml(item.name)}</strong><p>${escapeHtml(item.description || 'Kit personalizado')}</p></div></div><div class="kit-record-actions"><button type="button" class="inventory-edit-button" data-edit-kit="${index}"><span>✎</span> Editar kit</button>${removeButton('kits', index, item.name)}</div></header>
             <div class="kit-record-body"><section><span class="inventory-cell-label">Conteúdo</span>${renderKitContents(item)}</section><aside><div><span>Preço bruto</span><strong>${prettyPrice(gross)}</strong></div><label><span>Preço final</span><input type="number" min="0" step="0.01" value="${item.price ?? ''}" data-item-edit="kits:${index}:price" /></label><div class="kit-discount-card"><span>Desconto</span><strong>${prettyPrice(discountValue)}</strong><small>${discountPercent}% abaixo do bruto</small></div>${quantityInput('kits', index, item.quantity)}${soldButton('kits', index, item.quantity)}${saleToggle('kits', index, item.forSale)}</aside></div>
           </article>`;
         }).join('')}</div>`;
@@ -1065,7 +1022,38 @@ const publishedCollections = getEditableCollections();
         root.querySelectorAll('[data-kit-filter]').forEach((button) => button.classList.toggle('active', button.dataset.kitFilter === kitFilter));
       };
 
-      const render = () => { updateTabs(); updateOverview(); renderInventory(); renderKitBuilder(); };
+      const resetKitComposer = () => {
+        if (!state) return;
+        activeKitEditIndex = -1;
+        state.kitDraft = [];
+        const form = root.querySelector('[data-kit-form]');
+        if (form) {
+          form.reset();
+          form.querySelector('[name="quantity"]').value = 1;
+          form.querySelector('[name="forSale"]').checked = true;
+        }
+        const title = root.querySelector('#kit-modal-title'); if (title) title.textContent = 'Monte o kit por drag and drop';
+        const submit = root.querySelector('[data-kit-form] .primary-cta span'); if (submit) submit.textContent = 'Salvar kit';
+        renderKitBuilder();
+      };
+      const openKitEditor = (index) => {
+        const kit = state?.kits?.[index];
+        if (!kit) return;
+        activeKitEditIndex = index;
+        state.kitDraft = (kit.contentItems || []).map((entry) => ({ ...entry, imageCandidates: [...(entry.imageCandidates || [])] }));
+        const form = root.querySelector('[data-kit-form]');
+        if (!form) return;
+        form.querySelector('[name="name"]').value = kit.name || '';
+        form.querySelector('[name="description"]').value = kit.description || '';
+        form.querySelector('[name="quantity"]').value = toQuantity(kit.quantity, 1);
+        form.querySelector('[name="price"]').value = kit.price ?? '';
+        form.querySelector('[name="forSale"]').checked = kit.forSale !== false;
+        const title = root.querySelector('#kit-modal-title'); if (title) title.textContent = `Editar ${kit.name || 'kit'}`;
+        const submit = root.querySelector('[data-kit-form] .primary-cta span'); if (submit) submit.textContent = 'Salvar alterações';
+        openModal('kit');
+      };
+
+      const render = () => { updateTabs(); updateOverview(); renderInventory(); renderKitBuilder(); renderCollectionTimeline(); };
 
       const openModal = (kind) => {
         const modal = root.querySelector(`[data-editor-modal="${kind}"]`);
@@ -1078,7 +1066,7 @@ const publishedCollections = getEditableCollections();
         setTimeout(() => modal.querySelector('input:not([type="checkbox"]), textarea, select')?.focus(), 20);
       };
       const closeModals = () => { modalElements.forEach((modal) => { modal.hidden = true; }); document.body.classList.remove('editor-modal-open'); };
-      root.querySelectorAll('[data-open-modal]').forEach((button) => button.addEventListener('click', () => openModal(button.dataset.openModal)));
+      root.querySelectorAll('[data-open-modal]').forEach((button) => button.addEventListener('click', () => { if (button.dataset.openModal === 'kit') resetKitComposer(); openModal(button.dataset.openModal); }));
       root.addEventListener('click', (event) => { const close = event.target.closest('[data-close-modal]'); if (close) closeModals(); });
       document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeModals(); });
 
@@ -1146,8 +1134,16 @@ const publishedCollections = getEditableCollections();
         event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
         if (!state.kitDraft.length) { root.querySelector('[data-kit-drop-zone]')?.classList.add('needs-items'); setTimeout(() => root.querySelector('[data-kit-drop-zone]')?.classList.remove('needs-items'), 900); return; }
         const data = new FormData(form); const contentItems = state.kitDraft.map((entry) => ({ kind: entry.kind, itemId: entry.itemId, name: entry.name, quantity: entry.quantity, unitPrice: entry.unitPrice, imageCandidates: entry.imageCandidates })); const sourceTotal = kitGross();
-        state.kits.push(normalizeKit({ name: clean(data.get('name')), description: clean(data.get('description')), quantity: data.get('quantity'), price: data.get('price'), forSale: data.get('forSale') === 'on', contentItems, sourceTotal, contents: contentItems.map((entry) => `${entry.quantity}x ${entry.name}`).join(' | '), _isNew: true }, state.cards, state.boosters));
-        state.kitDraft = []; form.reset(); form.querySelector('[name="quantity"]').value = 1; form.querySelector('[name="forSale"]').checked = true; activeTab = 'kits'; closeModals(); render(); inventorySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const payload = { name: clean(data.get('name')), description: clean(data.get('description')), quantity: data.get('quantity'), price: data.get('price'), forSale: data.get('forSale') === 'on', contentItems, sourceTotal, contents: contentItems.map((entry) => `${entry.quantity}x ${entry.name}`).join(' | ') };
+        if (activeKitEditIndex >= 0 && state.kits[activeKitEditIndex]) {
+          const current = state.kits[activeKitEditIndex];
+          const edited = normalizeKit({ ...current, ...payload, _id: current._id, _isNew: current._isNew }, state.cards, state.boosters);
+          edited._isDirty = current._isNew ? current._isDirty : true;
+          state.kits[activeKitEditIndex] = edited;
+        } else {
+          state.kits.push(normalizeKit({ ...payload, _isNew: true }, state.cards, state.boosters));
+        }
+        activeKitEditIndex = -1; state.kitDraft = []; form.reset(); form.querySelector('[name="quantity"]').value = 1; form.querySelector('[name="forSale"]').checked = true; activeTab = 'kits'; closeModals(); render(); inventorySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
 
       root.querySelector('[data-kit-product-bank]')?.addEventListener('dragstart', (event) => { const product = event.target.closest('[data-kit-product]'); if (product) event.dataTransfer.setData('text/plain', product.dataset.kitProduct); });
@@ -1275,7 +1271,7 @@ const publishedCollections = getEditableCollections();
         const organize = event.target.closest('[data-organize-album]'); if (organize) { openAlbumOrganizer(Number(organize.dataset.organizeAlbum)); return; }
         const favorite = event.target.closest('[data-favorite-card]');
         if (favorite && state) { const item = state.cards[Number(favorite.dataset.favoriteCard)]; if (item) { item.favorite = !item.favorite; if (!item._isNew) item._isDirty = true; renderInventory(); } return; }
-        const edit = event.target.closest('[data-edit-item]'); if (edit) { const [kind, rawIndex] = edit.dataset.editItem.split(':'); openItemEdit(kind, Number(rawIndex)); return; }
+        const editKit = event.target.closest('[data-edit-kit]'); if (editKit) { openKitEditor(Number(editKit.dataset.editKit)); return; }
         const details = event.target.closest('[data-card-details]'); if (details) { openCardDetails(Number(details.dataset.cardDetails)); return; }
         const boosterDetails = event.target.closest('[data-booster-details]'); if (boosterDetails) { openBoosterDetails(Number(boosterDetails.dataset.boosterDetails)); return; }
         const row = event.target.closest('[data-card-details-row]');
@@ -1289,7 +1285,9 @@ const publishedCollections = getEditableCollections();
           if (!item) return;
           const current = toQuantity(item.quantity, 0);
           if (current <= 0) return;
-          item.quantity = Math.max(0, current - 1);
+          const next = Math.max(0, current - 1);
+          queueSaleMovement(kind, item, current, next);
+          item.quantity = next;
           if (item.quantity === 0) item.forSale = false;
           if (!item._isNew) item._isDirty = true;
           render();
@@ -1458,8 +1456,9 @@ const publishedCollections = getEditableCollections();
           const albums = inventoryRowsFromZip(files, 'inventario-albuns.json', 'inventario-albuns.csv').map(importAlbumRow);
           attachImportedHistory(cards, parseJsonLines(files['historico/cartas.jsonl'] || files['cartas.jsonl'] || ''));
           attachImportedHistory(boosters, parseJsonLines(files['historico/boosters.jsonl'] || files['boosters.jsonl'] || ''));
+          const movements = parseJsonLines(files['historico/movimentacoes.jsonl'] || files['movimentacoes.jsonl'] || '');
           feedback.textContent = '';
-          activate({ ...profile, version: Number(profile.version || 0) + 1 }, { cards, boosters, kits, products, albums }, 'import');
+          activate({ ...profile, version: Number(profile.version || 0) + 1 }, { cards, boosters, kits, products, albums, movements }, 'import');
         } catch (error) { feedback.textContent = error.message || 'Não foi possível abrir este ZIP.'; }
       };
 
@@ -1488,6 +1487,7 @@ const publishedCollections = getEditableCollections();
           ['inventario-albuns.json', JSON.stringify(albums, null, 2)],
           ['historico/cartas.jsonl', jsonLines(historyRowsForExport(state.cards))],
           ['historico/boosters.jsonl', jsonLines(historyRowsForExport(state.boosters))],
+          ['historico/movimentacoes.jsonl', jsonLines([...(state.movements || []), ...(state.pendingMovements || []).map((entry) => ({ ...entry, updateId: entry.updateId || `editor-${profile.collectionId}-v${profile.version}`, version: Number(profile.version || 1) }))])],
         ]);
         const suffix = state.source === 'new' ? `nao-formatada-v${state.profile.version}` : `v${state.profile.version}`;
         downloadZip(zip, `${safeSlug(profile.collectionId)}-${suffix}.zip`);
@@ -1503,6 +1503,7 @@ const publishedCollections = getEditableCollections();
         const collectionId = state.profile.collectionId || safeSlug(state.profile.title);
         const metadata = { type: 'collection-update', format: 'json-v2', collectionId, baseVersion: Math.max(1, Number(state.profile.version || 1) - 1), version: Number(state.profile.version || 1), generatedAt, updateId: `${collectionId}-${Number(state.profile.version || 1)}-${Date.now()}`, includesProfile: true };
         const profile = { ...state.profile, collectionId, generatedAt };
+        const movementRows = (state.pendingMovements || []).map((entry, index) => ({ ...entry, eventId: entry.eventId || `mov-${Date.now()}-${index + 1}`, updateId: metadata.updateId, collectionId, version: metadata.version, date: entry.date || generatedAt }));
         const zip = zipStore([
           ['atualizacao.json', JSON.stringify(metadata, null, 2)],
           ['perfil.json', JSON.stringify(profile, null, 2)],
@@ -1511,6 +1512,7 @@ const publishedCollections = getEditableCollections();
           ['inventario-kits.json', JSON.stringify(kits, null, 2)],
           ['inventario-produtos.json', JSON.stringify(products, null, 2)],
           ['inventario-albuns.json', JSON.stringify(albums, null, 2)],
+          ['historico/movimentacoes.jsonl', jsonLines(movementRows)],
         ]);
         downloadZip(zip, `${safeSlug(collectionId)}-update-v${metadata.version}.zip`);
       });

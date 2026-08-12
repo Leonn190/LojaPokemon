@@ -1,0 +1,16 @@
+{
+  "type": "collection-update",
+  "format": "json-v2",
+  "collectionId": "Leon19",
+  "baseVersion": 1,
+  "version": 2,
+  "generatedAt": "2026-08-12T18:53:00.000Z",
+  "updateId": "Leon19-2-20260812T185300Z",
+  "includesProfile": true,
+  "includesMovementHistory": true,
+  "includesInitialPriceHistory": true,
+  "initialPriceSnapshotDate": "2026-08-03T12:00:00-03:00",
+  "correctedFromUpdateId": "Leon19-2-1786560171316",
+  "originalGeneratedAt": "2026-08-12T18:42:51.316Z",
+  "correctedAt": "2026-08-12T18:53:00.000Z"
+}

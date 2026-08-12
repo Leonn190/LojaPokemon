@@ -51,6 +51,24 @@ export interface PriceHistoryEntry {
   buyersSpecific: number;
 }
 
+
+export interface CollectionMovementEntry {
+  eventId: string;
+  updateId: string;
+  collectionId: string;
+  version: number;
+  date: string;
+  eventType: string;
+  itemType: string;
+  itemId: string;
+  name: string;
+  quantityBefore: number;
+  quantityDelta: number;
+  quantityAfter: number;
+  source: string;
+  note: string;
+}
+
 export interface CardItem extends OwnedItemBase {
   kind: 'card';
   number: string;
@@ -189,6 +207,7 @@ export interface CollectorCollection {
   kits: KitItem[];
   products: ProductItem[];
   albums: AlbumItem[];
+  movements: CollectionMovementEntry[];
   priceDisplayFallback: PublicPriceFallback;
   totalItems: number;
   totalUnits: number;
@@ -655,6 +674,22 @@ export const getCollections = (): CollectorCollection[] => {
     const palette = normalizePalette(profile);
     const profilePhoto = String(profile.profilePhoto ?? '').trim();
     const priceDisplayFallback = normalizePriceFallback(profile);
+    const movements: CollectionMovementEntry[] = readJsonLines(join(folder, 'historico', 'movimentacoes.jsonl')).map((entry) => ({
+      eventId: String(entry.eventId ?? ''),
+      updateId: String(entry.updateId ?? entry.sourceId ?? ''),
+      collectionId: String(entry.collectionId ?? folderName),
+      version: parseQuantity(entry.version),
+      date: String(entry.date ?? entry.data ?? ''),
+      eventType: String(entry.eventType ?? entry.tipo ?? 'ajuste'),
+      itemType: String(entry.itemType ?? entry.tipoItem ?? 'cartas'),
+      itemId: String(entry.itemId ?? entry.Id ?? ''),
+      name: String(entry.name ?? entry.nome ?? ''),
+      quantityBefore: parseQuantity(entry.quantityBefore),
+      quantityDelta: Number(entry.quantityDelta ?? entry.delta ?? 0) || 0,
+      quantityAfter: parseQuantity(entry.quantityAfter),
+      source: String(entry.source ?? ''),
+      note: String(entry.note ?? entry.observacao ?? ''),
+    })).filter((entry) => entry.itemId && entry.date).sort((left, right) => left.date.localeCompare(right.date));
     const rawCardHistory = readJsonLines(join(folder, 'historico', 'cartas.jsonl'));
     const cardHistory = new Map<string, PriceHistoryEntry[]>();
     rawCardHistory.forEach((entry) => {
@@ -979,6 +1014,7 @@ export const getCollections = (): CollectorCollection[] => {
       kits,
       products,
       albums,
+      movements,
       priceDisplayFallback,
       totalItems: allItems.length,
       totalUnits,
@@ -1030,6 +1066,7 @@ export const getEditableCollections = () => getCollections().map((collection) =>
       pages: album.pages.map((page) => ({ slots: page.slots.map((slot) => slot ? { ...slot } : null) })),
       imageCandidates: album.coverImageCandidates,
     })),
+    movements: collection.movements.map((movement) => ({ ...movement })),
   };
 });
 

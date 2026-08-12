@@ -17,10 +17,13 @@ O histórico completo não fica mais dentro de cada item. Cada coleção formata
 ```text
 historico/
 ├── cartas.jsonl
-└── boosters.jsonl
+├── boosters.jsonl
+└── movimentacoes.jsonl
 ```
 
-Cada linha é uma cotização independente com `itemId`, `cotacaoId`, data, preços, status, erro e `sucesso`. O histórico de mercado guarda `Minimo Certeiro`, `Minimo`, `Menor Liga`, `Segundo Menor Liga`, `Terceiro Menor Liga`, `Media Liga`, `Mediana Liga`, `Venda Rapida` e os contadores de compradores/vendedores; o campo `Preço` não entra no histórico porque é uma escolha manual do colecionador. O inventário mantém apenas `Última cotação` quando houve sucesso. Assim, uma falha não faz o item parecer atualizado e o inventário não cresce indefinidamente.
+`cartas.jsonl` e `boosters.jsonl` guardam as cotizações. Cada linha é uma cotização independente com `itemId`, `cotacaoId`, data, preços, status, erro e `sucesso`. O histórico de mercado guarda `Minimo Certeiro`, `Minimo`, `Menor Liga`, `Segundo Menor Liga`, `Terceiro Menor Liga`, `Media Liga`, `Mediana Liga`, `Venda Rapida` e os contadores de compradores/vendedores; o campo `Preço` não entra no histórico porque é uma escolha manual do colecionador. O inventário mantém apenas `Última cotação` quando houve sucesso. Assim, uma falha não faz o item parecer atualizado e o inventário não cresce indefinidamente.
+
+`movimentacoes.jsonl` é a timeline de estoque. Cada evento registra `eventId`, `updateId`, `collectionId`, `version`, `date`, `eventType`, `itemType`, `itemId`, nome, saldo anterior, delta, saldo posterior, origem e observação. A primeira formatação gera eventos de `entrada`; updates posteriores inferem entradas/saídas pela diferença de quantidade e preservam eventos explícitos de `venda` criados pelo botão **Vendi 1** do site. Assim, diminuir quantidade não apaga a história do item.
 
 ## IDs e referências
 
@@ -123,7 +126,9 @@ Updates JSON podem conter:
 - `inventario-produtos.json`;
 - `inventario-albuns.json`.
 
-Novas cartas/boosters são consultadas antes de alterar o inventário. Se alguma consulta falhar, a atualização do inventário é cancelada. Quando tudo termina, perfil, cartas, boosters, kits, produtos e álbuns são promovidos na mesma transação. `updateId` impede aplicação duplicada.
+Novas cartas/boosters são consultadas antes de alterar o inventário. A primeira entrada de uma carta/booster, portanto, já executa uma cotização completa e grava essa cotização no histórico normal de preços. Se alguma consulta falhar, a atualização do inventário é cancelada. Quando tudo termina, perfil, cartas, boosters, kits, produtos, álbuns e `historico/movimentacoes.jsonl` são promovidos na mesma transação. `updateId` impede aplicação duplicada.
+
+Um pacote de update também pode trazer `historico/cartas.jsonl`, `historico/boosters.jsonl` e `historico/movimentacoes.jsonl`. Históricos importados são mesclados sem duplicar IDs/cotações já existentes. Eventos explícitos preservam a ordem informada pelo saldo anterior; diferenças não explicadas viram `entrada`, `ajuste_saida` ou `remocao`, mantendo o saldo final auditável.
 
 Kits enviados com `operation: "upsert"` substituem a versão do mesmo `Id`; álbuns de update também representam o estado completo do álbum. Edições de usuário em cartas/boosters podem usar `operation: "patch"`. Campos cadastrais e links também podem ser corrigidos; se link da Liga, idioma ou estado mudar, as referências de mercado atuais são invalidadas e o item passa a exigir nova cotização.
 

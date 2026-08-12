@@ -19,21 +19,27 @@ from urllib.parse import parse_qsl, urlsplit, urlunsplit
 
 from armazenamento import (
     anexar_historico,
+    anexar_movimentacoes,
     arquivar_csvs_legados,
     escrever_inventario,
     escrever_json_obj,
+    ler_historico,
     ler_inventario,
+    ler_movimentacoes,
     ler_json_obj,
     migrar_historicos_embutidos,
     migrar_inventarios_legados,
+    escrever_movimentacoes,
     recuperar_transacoes_pendentes,
     transacao_arquivos,
 )
 from configuracao import (
     ARQUIVO_ATUALIZACAO,
+    ARQUIVO_MOVIMENTACOES,
     ARQUIVO_PERFIL,
     ARQUIVOS_INVENTARIO,
     SALVAR_PARCIAL,
+    PASTA_HISTORICO_NOME,
     JITTER_WORKERS,
     chave_texto,
     pasta_colecoes,
@@ -338,6 +344,16 @@ def inteiro_nao_negativo(valor: Any, padrao: int = 0) -> int:
         return max(0, int(valor))
     encontrado = re.search(r"\d+", texto(valor))
     return max(0, int(encontrado.group(0))) if encontrado else padrao
+
+
+def inteiro_com_sinal(valor: Any, padrao: int = 0) -> int:
+    """Inteiro que preserva o sinal; usado em deltas de movimentação de estoque."""
+    if isinstance(valor, bool):
+        return int(valor)
+    if isinstance(valor, (int, float)):
+        return int(valor)
+    encontrado = re.search(r"[-+]?\d+", texto(valor).replace("−", "-"))
+    return int(encontrado.group(0)) if encontrado else padrao
 
 
 def _sim_nao(valor: Any, padrao: bool = True) -> bool:
@@ -1112,6 +1128,8 @@ def formatar_nova_colecao(item: Path, modo: str, workers: int = 1) -> Path:
 
                         if tipo == "carta":
                             nova, registro = montar_carta_nova(linha, dados, modo, cotacao_id, data)
+                            if inteiro_nao_negativo(nova.get("Quantidade"), 0) == 0:
+                                nova["À venda"] = False
                             imagem = baixar_imagem(texto(dados.get("imagem")), f"{nova['Nome']}_{nova['Número']}")
                             if imagem:
                                 nova["Imagem"] = imagem
@@ -1126,6 +1144,8 @@ def formatar_nova_colecao(item: Path, modo: str, workers: int = 1) -> Path:
                             status = nova.get("Status") if isinstance(nova.get("Status"), dict) else {}
                         else:
                             novo, registro = montar_booster_novo(linha, dados, modo, cotacao_id, data)
+                            if inteiro_nao_negativo(novo.get("Quantidade"), 0) == 0:
+                                novo["À venda"] = False
                             imagem = baixar_imagem(texto(dados.get("imagem")), f"Booster_{novo['Tipo de pacote']}")
                             if imagem:
                                 novo["Imagem"] = imagem
@@ -1172,6 +1192,10 @@ def formatar_nova_colecao(item: Path, modo: str, workers: int = 1) -> Path:
         perfil.pop("formattingPending", None)
         perfil.update({"updatedAt": agora_iso(), "formattingComplete": True})
         escrever_json_obj(destino / ARQUIVO_PERFIL, perfil)
+        anexar_movimentacoes(destino, _movimentacoes_formatacao(
+            {"cartas": cartas, "boosters": boosters, "kits": kits, "produtos": produtos},
+            cotacao_id, identificador, int(perfil.get("version") or 1), data,
+        ))
         estado_path.unlink(missing_ok=True)
         arquivar_csvs_legados(destino)
         if total_consultas:
@@ -1389,6 +1413,265 @@ def _mesclar_albuns(existentes: list[dict[str, Any]], novos: list[dict[str, Any]
             atual.update(novo)
 
 
+
+TIPOS_MOVIMENTACAO = ("cartas", "boosters", "kits", "produtos")
+
+
+def _id_item_movimento(item: dict[str, Any], tipo: str) -> str:
+    if tipo == "cartas":
+        return normalizar_carta_existente(item)["Id"]
+    if tipo == "boosters":
+        return normalizar_booster_existente(item)["Id"]
+    if tipo == "kits":
+        return normalizar_kit(item)["Id"]
+    return normalizar_produto(item)["Id"]
+
+
+def _nome_item_movimento(item: dict[str, Any], tipo: str) -> str:
+    if tipo == "boosters":
+        return texto(primeiro(item, "Tipo de pacote", "Nome", "Coleção")) or "Booster"
+    return texto(primeiro(item, "Nome", "Produto")) or tipo.rstrip("s").title()
+
+
+def _snapshot_movimentacoes(inventarios: dict[str, list[dict[str, Any]]]) -> dict[tuple[str, str], dict[str, Any]]:
+    snapshot: dict[tuple[str, str], dict[str, Any]] = {}
+    for tipo in TIPOS_MOVIMENTACAO:
+        for item in inventarios.get(tipo, []):
+            item_id = _id_item_movimento(item, tipo)
+            snapshot[(tipo, item_id)] = {
+                "itemId": item_id,
+                "itemType": tipo,
+                "name": _nome_item_movimento(item, tipo),
+                "quantity": inteiro_nao_negativo(item.get("Quantidade"), 0),
+            }
+    return snapshot
+
+
+def _evento_movimentacao_id(update_id: str, item_type: str, item_id: str, indice: int, evento: str) -> str:
+    base = f"{update_id}|{item_type}|{item_id}|{indice}|{evento}"
+    return "mov-" + hashlib.sha256(base.encode("utf-8")).hexdigest()[:20]
+
+
+def _normalizar_movimentacao_recebida(
+    bruto: dict[str, Any],
+    update_id_padrao: str,
+    versao_padrao: int,
+    data_padrao: str,
+    collection_id: str,
+    indice: int,
+) -> dict[str, Any]:
+    item_type = texto(bruto.get("itemType") or bruto.get("tipoItem") or bruto.get("kind") or "cartas").lower()
+    aliases = {"card": "cartas", "cards": "cartas", "carta": "cartas", "booster": "boosters", "kit": "kits", "product": "produtos", "produto": "produtos"}
+    item_type = aliases.get(item_type, item_type)
+    if item_type not in TIPOS_MOVIMENTACAO:
+        item_type = "cartas"
+    item_id = texto(bruto.get("itemId") or bruto.get("Id") or bruto.get("id"))
+    evento = texto(bruto.get("eventType") or bruto.get("tipo") or "ajuste").lower().replace(" ", "_")
+    update_id = texto(bruto.get("updateId") or bruto.get("sourceId")) or update_id_padrao
+    data = texto(bruto.get("date") or bruto.get("data")) or data_padrao
+    delta = inteiro_com_sinal(bruto.get("quantityDelta") if bruto.get("quantityDelta") is not None else bruto.get("delta"))
+    antes = inteiro_nao_negativo(bruto.get("quantityBefore"), 0)
+    depois_bruto = bruto.get("quantityAfter")
+    depois = inteiro_nao_negativo(depois_bruto, max(0, antes + delta)) if depois_bruto not in (None, "") else max(0, antes + delta)
+    event_id = texto(bruto.get("eventId")) or _evento_movimentacao_id(update_id, item_type, item_id, indice, evento)
+    before_fornecido = bruto.get("quantityBefore") not in (None, "")
+    return {
+        "eventId": event_id,
+        "updateId": update_id,
+        "collectionId": texto(bruto.get("collectionId")) or collection_id,
+        "version": inteiro(bruto.get("version")) or versao_padrao,
+        "date": data,
+        "eventType": evento,
+        "itemType": item_type,
+        "itemId": item_id,
+        "name": texto(bruto.get("name") or bruto.get("nome")),
+        "quantityBefore": antes,
+        "_quantityBeforeProvided": before_fornecido,
+        "quantityDelta": delta,
+        "quantityAfter": depois,
+        "source": texto(bruto.get("source")) or "site",
+        "note": texto(bruto.get("note") or bruto.get("observacao")),
+    }
+
+
+def _consolidar_movimentacoes_update(
+    antes: dict[str, list[dict[str, Any]]],
+    depois: dict[str, list[dict[str, Any]]],
+    recebidas: list[dict[str, Any]],
+    update_id: str,
+    versao: int,
+    data: str,
+    collection_id: str,
+) -> list[dict[str, Any]]:
+    snap_antes = _snapshot_movimentacoes(antes)
+    snap_depois = _snapshot_movimentacoes(depois)
+    normalizadas = [
+        _normalizar_movimentacao_recebida(bruto, update_id, versao, data, collection_id, indice)
+        for indice, bruto in enumerate(recebidas, 1)
+        if isinstance(bruto, dict)
+    ]
+    atuais_por_item: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    historicas: list[dict[str, Any]] = []
+    for evento in normalizadas:
+        if evento["updateId"] == update_id and evento.get("itemId"):
+            atuais_por_item.setdefault((evento["itemType"], evento["itemId"]), []).append(evento)
+        else:
+            evento.pop("_quantityBeforeProvided", None)
+            historicas.append(evento)
+
+    geradas: list[dict[str, Any]] = [*historicas]
+    chaves = sorted(set(snap_antes) | set(snap_depois))
+    for chave in chaves:
+        anterior = snap_antes.get(chave, {"quantity": 0, "name": snap_depois.get(chave, {}).get("name", "")})
+        atual = snap_depois.get(chave, {"quantity": 0, "name": anterior.get("name", "")})
+        quantidade_antes = int(anterior.get("quantity") or 0)
+        quantidade_depois = int(atual.get("quantity") or 0)
+        delta_total = quantidade_depois - quantidade_antes
+        explicitas = atuais_por_item.pop(chave, [])
+        if delta_total == 0 and not explicitas:
+            continue
+
+        cursor = quantidade_antes
+        indice_auto = 0
+        for indice, evento in enumerate(explicitas, 1):
+            before_fornecido = bool(evento.pop("_quantityBeforeProvided", False))
+            before_declarado = int(evento.get("quantityBefore") or 0)
+
+            # Se o site registrou o saldo imediatamente anterior ao evento, preserva
+            # essa ordem. Isso é importante quando o pacote já trazia outra mudança
+            # de quantidade e depois o usuário clicou em "Vendi 1".
+            if before_fornecido and before_declarado != cursor:
+                gap = before_declarado - cursor
+                indice_auto += 1
+                tipo, item_id = chave
+                gap_tipo = "entrada" if gap > 0 else "ajuste_saida"
+                geradas.append({
+                    "eventId": _evento_movimentacao_id(update_id, tipo, item_id, indice_auto, f"pre_{gap_tipo}"),
+                    "updateId": update_id,
+                    "collectionId": collection_id,
+                    "version": versao,
+                    "date": data,
+                    "eventType": gap_tipo,
+                    "itemType": tipo,
+                    "itemId": item_id,
+                    "name": atual.get("name") or anterior.get("name") or "",
+                    "quantityBefore": cursor,
+                    "quantityDelta": gap,
+                    "quantityAfter": max(0, cursor + gap),
+                    "source": "gerenciador",
+                    "note": "Movimentação inferida antes de um evento explícito para reconciliar o saldo desta atualização.",
+                })
+                cursor = max(0, cursor + gap)
+
+            delta = int(evento.get("quantityDelta") or 0)
+            evento["quantityBefore"] = cursor
+            cursor = max(0, cursor + delta)
+            evento["quantityAfter"] = cursor
+            evento["version"] = versao
+            evento["date"] = evento.get("date") or data
+            evento["collectionId"] = evento.get("collectionId") or collection_id
+            evento["name"] = evento.get("name") or atual.get("name") or anterior.get("name") or ""
+            geradas.append(evento)
+
+        restante = quantidade_depois - cursor
+        if restante:
+            tipo, item_id = chave
+            if restante > 0:
+                evento_tipo = "entrada"
+            elif chave not in snap_depois:
+                evento_tipo = "remocao"
+            else:
+                evento_tipo = "ajuste_saida"
+            before_auto = cursor
+            after_auto = max(0, before_auto + restante)
+            indice_auto += 1
+            geradas.append({
+                "eventId": _evento_movimentacao_id(update_id, tipo, item_id, len(explicitas) + indice_auto, evento_tipo),
+                "updateId": update_id,
+                "collectionId": collection_id,
+                "version": versao,
+                "date": data,
+                "eventType": evento_tipo,
+                "itemType": tipo,
+                "itemId": item_id,
+                "name": atual.get("name") or anterior.get("name") or "",
+                "quantityBefore": before_auto,
+                "quantityDelta": restante,
+                "quantityAfter": after_auto,
+                "source": "gerenciador",
+                "note": "Movimentação inferida pela diferença de quantidade desta atualização.",
+            })
+
+    # Eventos explícitos que apontam para item sem diferença ainda são preservados como auditoria.
+    for eventos in atuais_por_item.values():
+        for evento in eventos:
+            evento.pop("_quantityBeforeProvided", None)
+            geradas.append(evento)
+    return geradas
+
+
+def _movimentacoes_formatacao(
+    inventarios: dict[str, list[dict[str, Any]]],
+    formatacao_id: str,
+    collection_id: str,
+    versao: int,
+    data: str,
+) -> list[dict[str, Any]]:
+    eventos: list[dict[str, Any]] = []
+    for (tipo, item_id), item in _snapshot_movimentacoes(inventarios).items():
+        quantidade = int(item.get("quantity") or 0)
+        if quantidade <= 0:
+            continue
+        eventos.append({
+            "eventId": _evento_movimentacao_id(formatacao_id, tipo, item_id, 1, "entrada"),
+            "updateId": formatacao_id,
+            "collectionId": collection_id,
+            "version": versao,
+            "date": data,
+            "eventType": "entrada",
+            "itemType": tipo,
+            "itemId": item_id,
+            "name": item.get("name") or "",
+            "quantityBefore": 0,
+            "quantityDelta": quantidade,
+            "quantityAfter": quantidade,
+            "source": "formatacao",
+            "note": "Entrada registrada na primeira formatação da coleção.",
+        })
+    return eventos
+
+def _sincronizar_ultima_cotacao_importada(
+    itens: list[dict[str, Any]], registros: list[dict[str, Any]]
+) -> None:
+    """Aponta o inventário para a cotização importada mais recente de cada item."""
+    if not itens or not registros:
+        return
+    indice = {texto(item.get("Id")): item for item in itens if texto(item.get("Id"))}
+    melhores: dict[str, dict[str, Any]] = {}
+    for registro in registros:
+        if not isinstance(registro, dict) or registro.get("sucesso") is False or texto(registro.get("erro")):
+            continue
+        item_id = texto(registro.get("itemId") or registro.get("Id"))
+        data = texto(registro.get("data"))
+        if not item_id or not data or item_id not in indice:
+            continue
+        atual = melhores.get(item_id)
+        if atual is None or data > texto(atual.get("data")):
+            melhores[item_id] = registro
+    for item_id, registro in melhores.items():
+        item = indice[item_id]
+        ultima = item.get("Última cotação") if isinstance(item.get("Última cotação"), dict) else {}
+        data_atual = texto(ultima.get("data"))
+        data_importada = texto(registro.get("data"))
+        if data_atual and data_atual >= data_importada:
+            continue
+        item["Última cotação"] = {
+            "cotacaoId": texto(registro.get("cotacaoId")),
+            "data": data_importada,
+            "sucesso": True,
+        }
+
+
 def _mesclar_perfil_editavel(perfil: dict[str, Any], perfil_update: dict[str, Any]) -> None:
     campos = (
         "owner", "title", "description", "email", "phone", "password",
@@ -1427,6 +1710,15 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
         kits = [normalizar_kit(x) for x in ler_inventario(destino, "kits")]
         produtos = [normalizar_produto(x) for x in ler_inventario(destino, "produtos")]
         albuns = [normalizar_album(x) for x in ler_inventario(destino, "albuns")]
+        inventarios_antes = {
+            "cartas": copy.deepcopy(cartas),
+            "boosters": copy.deepcopy(boosters),
+            "kits": copy.deepcopy(kits),
+            "produtos": copy.deepcopy(produtos),
+        }
+        movimentacoes_recebidas = ler_movimentacoes(origem)
+        historico_importado_cartas = ler_historico(origem, "cartas")
+        historico_importado_boosters = ler_historico(origem, "boosters")
         todas_cartas_update = ler_inventario(origem, "cartas")
         todos_boosters_update = ler_inventario(origem, "boosters")
         todos_kits_update = ler_inventario(origem, "kits")
@@ -1441,23 +1733,17 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
 
         patches_cartas = [x for x in todas_cartas_update if _operacao_patch(x)]
         patches_boosters = [x for x in todos_boosters_update if _operacao_patch(x)]
-        novas_cartas_src_todas = [x for x in todas_cartas_update if not _operacao_patch(x) and not _operacao_remover(x)]
-        novos_boosters_src_todos = [x for x in todos_boosters_update if not _operacao_patch(x) and not _operacao_remover(x)]
-        novas_cartas_sem_cotacao = [x for x in novas_cartas_src_todas if inteiro_nao_negativo(primeiro(x, "Quantidade"), 1) == 0]
-        novos_boosters_sem_cotacao = [x for x in novos_boosters_src_todos if inteiro_nao_negativo(primeiro(x, "Quantidade"), 1) == 0]
-        novas_cartas_src = [x for x in novas_cartas_src_todas if inteiro_nao_negativo(primeiro(x, "Quantidade"), 1) > 0]
-        novos_boosters_src = [x for x in novos_boosters_src_todos if inteiro_nao_negativo(primeiro(x, "Quantidade"), 1) > 0]
+        # Todo item novo recebe uma primeira cotização, mesmo que já entre com saldo 0.
+        # Depois de cadastrado, as cotizações normais continuam ignorando itens zerados.
+        novas_cartas_src = [x for x in todas_cartas_update if not _operacao_patch(x) and not _operacao_remover(x)]
+        novos_boosters_src = [x for x in todos_boosters_update if not _operacao_patch(x) and not _operacao_remover(x)]
         novos_kits_src = [x for x in todos_kits_update if not _operacao_remover(x)]
         novos_produtos_src = [x for x in todos_produtos_update if not _operacao_remover(x)]
         novos_albuns_src = [x for x in todos_albuns_update if not _operacao_remover(x)]
         cotacao_id = f"update-{update_id}"
         data = texto(metadados.get("generatedAt")) or agora_iso()
-        novas_cartas: list[dict[str, Any]] = [normalizar_carta_existente(x) for x in novas_cartas_sem_cotacao]
-        novos_boosters: list[dict[str, Any]] = [normalizar_booster_existente(x) for x in novos_boosters_sem_cotacao]
-        for item_zero in novas_cartas:
-            item_zero["À venda"] = False
-        for item_zero in novos_boosters:
-            item_zero["À venda"] = False
+        novas_cartas: list[dict[str, Any]] = []
+        novos_boosters: list[dict[str, Any]] = []
         historico_cartas: list[dict[str, Any]] = []
         historico_boosters: list[dict[str, Any]] = []
         mapa_ids: dict[str, str] = {}
@@ -1516,6 +1802,8 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
 
                         if tipo == "carta":
                             nova, registro = montar_carta_nova(linha, dados, modo, cotacao_id, data)
+                            if inteiro_nao_negativo(nova.get("Quantidade"), 0) == 0:
+                                nova["À venda"] = False
                             imagem = baixar_imagem(texto(dados.get("imagem")), f"{nova['Nome']}_{nova['Número']}")
                             if imagem:
                                 nova["Imagem"] = imagem
@@ -1529,6 +1817,8 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
                             status = nova.get("Status") if isinstance(nova.get("Status"), dict) else {}
                         else:
                             novo, registro = montar_booster_novo(linha, dados, modo, cotacao_id, data)
+                            if inteiro_nao_negativo(novo.get("Quantidade"), 0) == 0:
+                                novo["À venda"] = False
                             imagem = baixar_imagem(texto(dados.get("imagem")), f"Booster_{novo['Tipo de pacote']}")
                             if imagem:
                                 novo["Imagem"] = imagem
@@ -1577,20 +1867,41 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
         novos_kits, novos_albuns = _remapear_referencias_ids(novos_kits, novos_albuns, mapa_ids)
         _mesclar_cartas(cartas, novas_cartas)
         _mesclar_boosters(boosters, novos_boosters)
+        _sincronizar_ultima_cotacao_importada(cartas, historico_importado_cartas)
+        _sincronizar_ultima_cotacao_importada(boosters, historico_importado_boosters)
         _mesclar_kits(kits, novos_kits)
         _mesclar_produtos(produtos, novos_produtos)
         _mesclar_albuns(albuns, novos_albuns)
         kits = atualizar_kits(kits, cartas, boosters)
         albuns = atualizar_albuns(albuns, cartas)
+        versao_update = max(int(perfil.get("version") or 1) + 1, int(metadados.get("version") or 0))
+        collection_id = identificador or texto(perfil.get("collectionId")) or destino.name
+        inventarios_depois = {"cartas": cartas, "boosters": boosters, "kits": kits, "produtos": produtos}
+        movimentacoes_novas = _consolidar_movimentacoes_update(
+            inventarios_antes, inventarios_depois, movimentacoes_recebidas,
+            update_id, versao_update, data, collection_id,
+        )
+        movimentacoes_existentes = ler_movimentacoes(destino)
+        ids_movimentacoes = {texto(x.get("eventId")) for x in movimentacoes_existentes if texto(x.get("eventId"))}
+        movimentacoes_todas = list(movimentacoes_existentes)
+        for movimento in movimentacoes_novas:
+            evento_id = texto(movimento.get("eventId"))
+            if evento_id and evento_id in ids_movimentacoes:
+                continue
+            if evento_id:
+                ids_movimentacoes.add(evento_id)
+            movimentacoes_todas.append(movimento)
+
         _mesclar_perfil_editavel(perfil, perfil_update)
         perfil.update({
             "pricingMode": modo,
             "updatedAt": data,
-            "version": max(int(perfil.get("version") or 1) + 1, int(metadados.get("version") or 0)),
+            "version": versao_update,
             "appliedUpdates": [*aplicadas, update_id][-100:],
         })
 
-        nomes = [ARQUIVO_PERFIL, *ARQUIVOS_INVENTARIO.values()]
+        arquivo_movimentacoes = str(Path(PASTA_HISTORICO_NOME) / ARQUIVO_MOVIMENTACOES)
+        nomes = [ARQUIVO_PERFIL, *ARQUIVOS_INVENTARIO.values(), arquivo_movimentacoes]
         with transacao_arquivos(destino, nomes) as staging:
             escrever_json_obj(staging / ARQUIVO_PERFIL, perfil)
             escrever_inventario(staging, "cartas", cartas)
@@ -1598,6 +1909,11 @@ def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual:
             escrever_inventario(staging, "kits", kits)
             escrever_inventario(staging, "produtos", produtos)
             escrever_inventario(staging, "albuns", albuns)
+            escrever_movimentacoes(staging, movimentacoes_todas)
+        if historico_importado_cartas:
+            anexar_historico(destino, "cartas", historico_importado_cartas)
+        if historico_importado_boosters:
+            anexar_historico(destino, "boosters", historico_importado_boosters)
         if historico_cartas:
             anexar_historico(destino, "cartas", historico_cartas)
         if historico_boosters:

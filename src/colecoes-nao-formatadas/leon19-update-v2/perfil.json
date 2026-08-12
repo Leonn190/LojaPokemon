@@ -2,29 +2,25 @@
   "owner": "Leon Soto",
   "title": "Coleção do Leon",
   "description": "Uma coleção Pokémon com cartas avulsas e boosters organizados em um catálogo digital.",
-  "selling": true,
-  "featured": true,
   "email": "euleonsoto@gmail.com",
   "phone": "13 99158-5788",
   "password": "SenhaLeon",
+  "selling": true,
   "showQuantity": true,
+  "featured": true,
   "version": 2,
-  "collectionId": "Leon19",
-  "proposalTerms": {
-    "policy": "flexible",
-    "flexibleDiscounts": true,
-    "discountTiers": []
-  },
+  "profilePhoto": "",
   "palette": [
     "#f2384a",
     "#06070a",
     "#8b0f22"
   ],
   "priceDisplayFallback": "league_average_then_lowest",
-  "profilePhoto": "",
-  "pricingMode": "menor",
-  "updatedAt": "2026-08-12T18:53:00.000Z",
-  "appliedUpdates": [
-    "Leon19-2-20260812T185300Z"
-  ]
+  "proposalTerms": {
+    "policy": "flexible",
+    "flexibleDiscounts": true,
+    "discountTiers": []
+  },
+  "collectionId": "Leon19",
+  "generatedAt": "2026-08-12T18:53:00.000Z"
 }

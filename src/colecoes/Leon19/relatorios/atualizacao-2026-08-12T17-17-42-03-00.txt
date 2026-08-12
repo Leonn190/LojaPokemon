@@ -1,0 +1,121 @@
+ATUALIZACAO — RELATÓRIO DE EXECUÇÃO
+========================================================================================
+Início: 2026-08-12T16:22:21-03:00
+Fim: 2026-08-12T17:17:42-03:00
+Modo: Conservador | Workers: 1
+Tempo total: 55m 21s (3320.603 s)
+Itens: 25 | Sucessos: 25 | Erros: 0
+Média por item concluído: 132.824 s | throughput: 0.45 itens/min
+Repetições por falha: 0 | tentativas de item: 25
+
+ITENS
+========================================================================================
+[OK] CARTA | Team Rocket's Mewtwo ex | W1 | 70.24s
+  Liga: menor R$ 7,00 | 2º R$ 8,00 | 3º R$ 9,00 | média R$ 14,07 | mediana R$ 12,90 | buylist R$ 5,60
+  Mercado: vendedores 53 geral / 41 específicos | compradores 23 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Mega Audino ex | W1 | 139.90s
+  Liga: menor R$ 5,90 | 2º R$ 6,95 | 3º R$ 6,99 | média R$ 12,32 | mediana R$ 11,45 | buylist R$ 4,19
+  Mercado: vendedores 62 geral / 47 específicos | compradores 23 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Iono's Bellibolt ex | W1 | 31.14s
+  Liga: menor R$ 9,99 | 2º R$ 9,99 | 3º R$ 9,99 | média R$ 20,36 | mediana R$ 19,90 | buylist R$ 7,09
+  Mercado: vendedores 34 geral / 30 específicos | compradores 15 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Fezandipiti ex | W1 | 73.10s
+  Liga: menor R$ 274,00 | 2º R$ 279,88 | 3º R$ 290,00 | média R$ 448,31 | mediana R$ 396,50 | buylist R$ 200,00
+  Mercado: vendedores 52 geral / 40 específicos | compradores 24 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Registeel ex | W1 | 322.24s
+  Liga: menor R$ 3,90 | 2º R$ 3,90 | 3º R$ 3,92 | média R$ 8,61 | mediana R$ 9,49 | buylist R$ 2,77
+  Mercado: vendedores 94 geral / 73 específicos | compradores 23 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[OK] CARTA | Mega Lucario ex | W1 | 62.49s
+  Liga: menor R$ 43,00 | 2º R$ 44,30 | 3º R$ 44,70 | média R$ 69,03 | mediana R$ 66,00 | buylist R$ 38,98
+  Mercado: vendedores 52 geral / 43 específicos | compradores 28 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Mega Skarmory ex | W1 | 47.06s
+  Liga: menor R$ 28,00 | 2º R$ 28,49 | 3º R$ 29,90 | média R$ 30,16 | mediana R$ 29,90 | buylist R$ 17,75
+  Mercado: vendedores 50 geral / 7 específicos | compradores 23 geral / 0 específicos
+  Observação: buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Marnie's Grimmsnarl ex | W1 | 86.97s
+  Liga: menor R$ 6,90 | 2º R$ 7,00 | 3º R$ 7,89 | média R$ 14,90 | mediana R$ 12,99 | buylist R$ 5,60
+  Mercado: vendedores 57 geral / 37 específicos | compradores 27 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Mega Lucario ex | W1 | 121.08s
+  Liga: menor R$ 8,00 | 2º R$ 9,00 | 3º R$ 10,90 | média R$ 17,43 | mediana R$ 16,90 | buylist R$ 5,61
+  Mercado: vendedores 56 geral / 41 específicos | compradores 22 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Prism Tower | W1 | 99.34s
+  Liga: menor R$ 17,00 | 2º R$ 19,88 | 3º R$ 19,90 | média R$ 39,70 | mediana R$ 34,90 | buylist R$ 14,13
+  Mercado: vendedores 58 geral / 50 específicos | compradores 22 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Mela | W1 | 212.62s
+  Liga: menor R$ 7,19 | 2º R$ 7,80 | 3º R$ 7,90 | média R$ 14,34 | mediana R$ 12,99 | buylist R$ 5,10
+  Mercado: vendedores 67 geral / 61 específicos | compradores 36 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[OK] CARTA | Eevee ex | W1 | 36.16s
+  Liga: menor R$ 22,00 | 2º R$ 24,90 | 3º R$ 24,90 | média R$ 35,94 | mediana R$ 30,00 | buylist R$ 17,68
+  Mercado: vendedores 40 geral / 38 específicos | compradores 26 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Dragapult ex | W1 | 184.56s
+  Liga: menor R$ 4,39 | 2º R$ 4,49 | 3º R$ 4,99 | média R$ 9,42 | mediana R$ 9,90 | buylist R$ 3,86
+  Mercado: vendedores 73 geral / 58 específicos | compradores 23 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Stunfisk ex | W1 | 253.23s
+  Liga: menor R$ 2,97 | 2º R$ 2,97 | 3º R$ 2,99 | média R$ 8,47 | mediana R$ 8,99 | buylist R$ 2,06
+  Mercado: vendedores 84 geral / 64 específicos | compradores 23 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Mega Emboar ex | W1 | 226.23s
+  Liga: menor R$ 5,80 | 2º R$ 5,82 | 3º R$ 5,99 | média R$ 11,35 | mediana R$ 9,94 | buylist R$ 5,60
+  Mercado: vendedores 80 geral / 61 específicos | compradores 23 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[Suspeita] CARTA | Team Rocket's Mimikyu | W1 | 64.02s
+  Liga: menor R$ 65,00 | 2º R$ 65,00 | 3º R$ 69,85 | média R$ 89,84 | mediana R$ 82,99 | buylist R$ 45,69
+  Mercado: vendedores 50 geral / 37 específicos | compradores 19 geral / 0 específicos
+  - Suspeita de carta igual em outra língua por preço menor
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Togedemaru ex | W1 | 189.83s
+  Liga: menor R$ 3,79 | 2º R$ 4,99 | 3º R$ 4,99 | média R$ 9,32 | mediana R$ 9,90 | buylist R$ 2,80
+  Mercado: vendedores 67 geral / 51 específicos | compradores 23 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Mega Gengar ex | W1 | 25.73s
+  Liga: menor R$ 5,90 | 2º R$ 8,00 | 3º R$ 9,90 | média R$ 14,25 | mediana R$ 14,44 | buylist R$ 4,19
+  Mercado: vendedores 32 geral / 23 específicos | compradores 23 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | N's Zoroark ex | W1 | 16.07s
+  Liga: menor R$ 550,00 | 2º R$ 599,00 | 3º R$ 599,80 | média R$ 762,11 | mediana R$ 749,00 | buylist R$ 390,50
+  Mercado: vendedores 24 geral / 19 específicos | compradores 18 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Lillie's Clefairy ex | W1 | 14.55s
+  Liga: menor R$ 38,99 | 2º R$ 39,90 | 3º R$ 39,90 | média R$ 51,28 | mediana R$ 49,90 | buylist R$ 27,68
+  Mercado: vendedores 21 geral / 19 específicos | compradores 15 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Morpeko ex | W1 | 115.97s
+  Liga: menor R$ 254,90 | 2º R$ 259,88 | 3º R$ 259,90 | média R$ 350,68 | mediana R$ 300,00 | buylist R$ 184,60
+  Mercado: vendedores 65 geral / 58 específicos | compradores 16 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Mega Darkrai ex | W1 | 422.12s
+  Liga: menor R$ 7,00 | 2º R$ 7,00 | 3º R$ 7,90 | média R$ 20,80 | mediana R$ 18,95 | buylist R$ 4,72
+  Mercado: vendedores 120 geral / 98 específicos | compradores 14 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[Suspeita] CARTA | Goldeen | W1 | 113.70s
+  Liga: menor R$ 49,90 | 2º R$ 50,00 | 3º R$ 54,90 | média R$ 71,39 | mediana R$ 69,90 | buylist R$ 39,05
+  Mercado: vendedores 58 geral / 47 específicos | compradores 16 geral / 0 específicos
+  - Suspeita de carta igual em outra língua por preço menor
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[Suspeita] CARTA | Energy Switch | W1 | 370.90s
+  Liga: menor R$ 18,61 | 2º R$ 19,00 | 3º R$ 19,50 | média R$ 45,78 | mediana R$ 39,99 | buylist R$ 13,14
+  Mercado: vendedores 111 geral / 100 específicos | compradores 19 geral / 0 específicos
+  - Suspeita de carta igual em outra língua por preço menor
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[OK] CARTA | Mega Dragonite ex | W1 | 18.68s
+  Liga: menor R$ 1.645,00 | 2º R$ 1.659,90 | 3º R$ 1.675,00 | média R$ 1.960,53 | mediana R$ 1.998,00 | buylist R$ 1.167,95
+  Mercado: vendedores 28 geral / 21 específicos | compradores 25 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+
+EXTRAS
+========================================================================================
+{
+  "updateId": "Leon19-2-20260812T185300Z"
+}

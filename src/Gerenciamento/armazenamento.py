@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
 
-from configuracao import ARQUIVOS_INVENTARIO, ARQUIVOS_LEGADOS, chave_texto
+from configuracao import ARQUIVO_MOVIMENTACOES, ARQUIVOS_INVENTARIO, ARQUIVOS_LEGADOS, PASTA_HISTORICO_NOME, chave_texto
 
 
 def ler_json_obj(caminho: Path) -> dict[str, Any]:
@@ -127,6 +127,7 @@ def recuperar_transacoes_pendentes(pasta: Path) -> list[str]:
             destino = pasta / nome
             original = backup / nome
             if bool(existiam.get(nome)) and original.is_file():
+                destino.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(original, destino)
             elif not bool(existiam.get(nome)) and destino.exists():
                 destino.unlink()
@@ -158,7 +159,9 @@ def transacao_arquivos(pasta: Path, nomes: list[str]) -> Iterator[Path]:
             origem = pasta / nome
             existiam[nome] = origem.exists()
             if origem.exists():
-                shutil.copy2(origem, backup / nome)
+                alvo_backup = backup / nome
+                alvo_backup.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(origem, alvo_backup)
         (backup / "manifesto.json").write_text(
             json.dumps({"nomes": nomes, "existiam": existiam}, ensure_ascii=False, indent=2),
             encoding="utf-8",
@@ -168,7 +171,9 @@ def transacao_arquivos(pasta: Path, nomes: list[str]) -> Iterator[Path]:
             for nome in nomes:
                 novo = staging / nome
                 if novo.exists():
-                    novo.replace(pasta / nome)
+                    destino = pasta / nome
+                    destino.parent.mkdir(parents=True, exist_ok=True)
+                    novo.replace(destino)
                     promovidos.append(nome)
             (backup / "commit.ok").write_text("ok", encoding="utf-8")
         except Exception:
@@ -284,3 +289,71 @@ def migrar_historicos_embutidos(pasta: Path) -> dict[str, int]:
             escrever_inventario(pasta, tipo, itens)
         migrados[tipo] = anexar_historico(pasta, tipo, registros)
     return migrados
+
+
+def _caminho_movimentacoes(pasta: Path) -> Path:
+    return pasta / PASTA_HISTORICO_NOME / ARQUIVO_MOVIMENTACOES
+
+
+def ler_movimentacoes(pasta: Path) -> list[dict[str, Any]]:
+    caminho = _caminho_movimentacoes(pasta)
+    if not caminho.is_file():
+        return []
+    registros: list[dict[str, Any]] = []
+    with caminho.open("r", encoding="utf-8-sig") as arquivo:
+        for linha in arquivo:
+            linha = linha.strip()
+            if not linha:
+                continue
+            try:
+                registro = json.loads(linha)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(registro, dict):
+                registros.append(registro)
+    return registros
+
+
+def _chave_movimentacao(registro: dict[str, Any]) -> tuple[str, str, str, str, str]:
+    event_id = str(registro.get("eventId") or "").strip()
+    if event_id:
+        return ("event", event_id, "", "", "")
+    return (
+        "legacy",
+        str(registro.get("updateId") or registro.get("sourceId") or ""),
+        str(registro.get("itemId") or ""),
+        str(registro.get("date") or registro.get("data") or ""),
+        str(registro.get("eventType") or registro.get("tipo") or ""),
+    )
+
+
+def escrever_movimentacoes(pasta: Path, registros: list[dict[str, Any]]) -> Path:
+    caminho = _caminho_movimentacoes(pasta)
+    caminho.parent.mkdir(parents=True, exist_ok=True)
+    temporario = caminho.with_name(f".{caminho.name}.{uuid.uuid4().hex}.tmp")
+    with temporario.open("w", encoding="utf-8", newline="\n") as arquivo:
+        for registro in registros:
+            if isinstance(registro, dict):
+                arquivo.write(json.dumps(registro, ensure_ascii=False, separators=(",", ":")) + "\n")
+    temporario.replace(caminho)
+    return caminho
+
+
+def anexar_movimentacoes(pasta: Path, registros: dict[str, Any] | list[dict[str, Any]]) -> int:
+    lista = [registros] if isinstance(registros, dict) else list(registros)
+    lista = [dict(r) for r in lista if isinstance(r, dict)]
+    if not lista:
+        return 0
+    existentes_lista = ler_movimentacoes(pasta)
+    existentes = {_chave_movimentacao(r) for r in existentes_lista}
+    novos: list[dict[str, Any]] = []
+    for registro in lista:
+        chave = _chave_movimentacao(registro)
+        if chave in existentes:
+            continue
+        existentes.add(chave)
+        novos.append(registro)
+    if not novos:
+        return 0
+    escrever_movimentacoes(pasta, [*existentes_lista, *novos])
+    return len(novos)

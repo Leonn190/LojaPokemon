@@ -1,0 +1,1456 @@
+{
+  "resumo": {
+    "iniciadoEm": "2026-08-12T16:22:21-03:00",
+    "finalizadoEm": "2026-08-12T17:17:42-03:00",
+    "modoVelocidade": "Conservador",
+    "workers": 1,
+    "total": 25,
+    "concluidos": 25,
+    "sucessos": 25,
+    "erros": 0,
+    "duracaoSegundos": 3320.603,
+    "duracaoFormatada": "55m 21s",
+    "mediaSegundosPorItem": 132.824,
+    "itensPorMinuto": 0.45,
+    "repeticoes": 0,
+    "tentativasConsultaItens": 25,
+    "operacao": "atualizacao",
+    "itensRegistrados": 25
+  },
+  "itens": [
+    {
+      "nome": "Team Rocket's Mewtwo ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 70.243,
+      "precos": {
+        "menor": 7.0,
+        "segundoMenor": 8.0,
+        "terceiroMenor": 9.0,
+        "media": 14.07,
+        "mediana": 12.9,
+        "buylist": 5.6,
+        "vendaRapida": 6.65
+      },
+      "mercado": {
+        "vendedoresGeral": 53,
+        "vendedoresEspecificos": 41,
+        "compradoresGeral": 23,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 41,
+        "buylistLida": 23
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 58,
+            "lidas": 58,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 23,
+            "lidas": 23,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 53,
+          "vendedoresEspecificos": 41,
+          "compradoresGeral": 23,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 8.0,
+          "terceiroMenorLiga": 9.0,
+          "medianaLiga": 12.9
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Mega Audino ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 139.903,
+      "precos": {
+        "menor": 5.9,
+        "segundoMenor": 6.95,
+        "terceiroMenor": 6.99,
+        "media": 12.32,
+        "mediana": 11.45,
+        "buylist": 4.19,
+        "vendaRapida": 5.6
+      },
+      "mercado": {
+        "vendedoresGeral": 62,
+        "vendedoresEspecificos": 47,
+        "compradoresGeral": 23,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 48,
+        "buylistLida": 23
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 70,
+            "lidas": 70,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 23,
+            "lidas": 23,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 62,
+          "vendedoresEspecificos": 47,
+          "compradoresGeral": 23,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 6.95,
+          "terceiroMenorLiga": 6.99,
+          "medianaLiga": 11.45
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Iono's Bellibolt ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 31.14,
+      "precos": {
+        "menor": 9.99,
+        "segundoMenor": 9.99,
+        "terceiroMenor": 9.99,
+        "media": 20.36,
+        "mediana": 19.9,
+        "buylist": 7.09,
+        "vendaRapida": 9.49
+      },
+      "mercado": {
+        "vendedoresGeral": 34,
+        "vendedoresEspecificos": 30,
+        "compradoresGeral": 15,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 31,
+        "buylistLida": 15
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 44,
+            "lidas": 44,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 15,
+            "lidas": 15,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 34,
+          "vendedoresEspecificos": 30,
+          "compradoresGeral": 15,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 9.99,
+          "terceiroMenorLiga": 9.99,
+          "medianaLiga": 19.9
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Fezandipiti ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 73.103,
+      "precos": {
+        "menor": 274.0,
+        "segundoMenor": 279.88,
+        "terceiroMenor": 290.0,
+        "media": 448.31,
+        "mediana": 396.5,
+        "buylist": 200.0,
+        "vendaRapida": 260.3
+      },
+      "mercado": {
+        "vendedoresGeral": 52,
+        "vendedoresEspecificos": 40,
+        "compradoresGeral": 24,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 42,
+        "buylistLida": 24
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 58,
+            "lidas": 58,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 24,
+            "lidas": 24,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 52,
+          "vendedoresEspecificos": 40,
+          "compradoresGeral": 24,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 279.88,
+          "terceiroMenorLiga": 290.0,
+          "medianaLiga": 396.5
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Registeel ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 322.243,
+      "precos": {
+        "menor": 3.9,
+        "segundoMenor": 3.9,
+        "terceiroMenor": 3.92,
+        "media": 8.61,
+        "mediana": 9.49,
+        "buylist": 2.77,
+        "vendaRapida": 3.7
+      },
+      "mercado": {
+        "vendedoresGeral": 94,
+        "vendedoresEspecificos": 73,
+        "compradoresGeral": 23,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 75,
+        "buylistLida": 17
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 116,
+            "lidas": 116,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 23,
+            "lidas": 23,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 94,
+          "vendedoresEspecificos": 73,
+          "compradoresGeral": 23,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 3.9,
+          "terceiroMenorLiga": 3.92,
+          "medianaLiga": 9.49
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Mega Lucario ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 62.495,
+      "precos": {
+        "menor": 43.0,
+        "segundoMenor": 44.3,
+        "terceiroMenor": 44.7,
+        "media": 69.03,
+        "mediana": 66.0,
+        "buylist": 38.98,
+        "vendaRapida": 40.85
+      },
+      "mercado": {
+        "vendedoresGeral": 52,
+        "vendedoresEspecificos": 43,
+        "compradoresGeral": 28,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 44,
+        "buylistLida": 28
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 56,
+            "lidas": 56,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 28,
+            "lidas": 28,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 52,
+          "vendedoresEspecificos": 43,
+          "compradoresGeral": 28,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 44.3,
+          "terceiroMenorLiga": 44.7,
+          "medianaLiga": 66.0
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Mega Skarmory ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 47.056,
+      "precos": {
+        "menor": 28.0,
+        "segundoMenor": 28.49,
+        "terceiroMenor": 29.9,
+        "media": 30.16,
+        "mediana": 29.9,
+        "buylist": 17.75,
+        "vendaRapida": 26.6
+      },
+      "mercado": {
+        "vendedoresGeral": 50,
+        "vendedoresEspecificos": 7,
+        "compradoresGeral": 23,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 7,
+        "buylistLida": 23
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 51,
+            "lidas": 51,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 23,
+            "lidas": 23,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 50,
+          "vendedoresEspecificos": 7,
+          "compradoresGeral": 23,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 28.49,
+          "terceiroMenorLiga": 29.9,
+          "medianaLiga": 29.9
+        }
+      },
+      "observacao": "buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Marnie's Grimmsnarl ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 86.974,
+      "precos": {
+        "menor": 6.9,
+        "segundoMenor": 7.0,
+        "terceiroMenor": 7.89,
+        "media": 14.9,
+        "mediana": 12.99,
+        "buylist": 5.6,
+        "vendaRapida": 6.56
+      },
+      "mercado": {
+        "vendedoresGeral": 57,
+        "vendedoresEspecificos": 37,
+        "compradoresGeral": 27,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 37,
+        "buylistLida": 27
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 66,
+            "lidas": 66,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 27,
+            "lidas": 27,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 57,
+          "vendedoresEspecificos": 37,
+          "compradoresGeral": 27,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 7.0,
+          "terceiroMenorLiga": 7.89,
+          "medianaLiga": 12.99
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Mega Lucario ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 121.078,
+      "precos": {
+        "menor": 8.0,
+        "segundoMenor": 9.0,
+        "terceiroMenor": 10.9,
+        "media": 17.43,
+        "mediana": 16.9,
+        "buylist": 5.61,
+        "vendaRapida": 7.6
+      },
+      "mercado": {
+        "vendedoresGeral": 56,
+        "vendedoresEspecificos": 41,
+        "compradoresGeral": 22,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 41,
+        "buylistLida": 22
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 70,
+            "lidas": 70,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 22,
+            "lidas": 22,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 56,
+          "vendedoresEspecificos": 41,
+          "compradoresGeral": 22,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 9.0,
+          "terceiroMenorLiga": 10.9,
+          "medianaLiga": 16.9
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Prism Tower",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 99.339,
+      "precos": {
+        "menor": 17.0,
+        "segundoMenor": 19.88,
+        "terceiroMenor": 19.9,
+        "media": 39.7,
+        "mediana": 34.9,
+        "buylist": 14.13,
+        "vendaRapida": 16.15
+      },
+      "mercado": {
+        "vendedoresGeral": 58,
+        "vendedoresEspecificos": 50,
+        "compradoresGeral": 22,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 50,
+        "buylistLida": 22
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 62,
+            "lidas": 62,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 22,
+            "lidas": 22,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 58,
+          "vendedoresEspecificos": 50,
+          "compradoresGeral": 22,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 19.88,
+          "terceiroMenorLiga": 19.9,
+          "medianaLiga": 34.9
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Mela",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 212.622,
+      "precos": {
+        "menor": 7.19,
+        "segundoMenor": 7.8,
+        "terceiroMenor": 7.9,
+        "media": 14.34,
+        "mediana": 12.99,
+        "buylist": 5.1,
+        "vendaRapida": 6.83
+      },
+      "mercado": {
+        "vendedoresGeral": 67,
+        "vendedoresEspecificos": 61,
+        "compradoresGeral": 36,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 61,
+        "buylistLida": 18
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 79,
+            "lidas": 79,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 36,
+            "lidas": 36,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 67,
+          "vendedoresEspecificos": 61,
+          "compradoresGeral": 36,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 7.8,
+          "terceiroMenorLiga": 7.9,
+          "medianaLiga": 12.99
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Eevee ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 36.157,
+      "precos": {
+        "menor": 22.0,
+        "segundoMenor": 24.9,
+        "terceiroMenor": 24.9,
+        "media": 35.94,
+        "mediana": 30.0,
+        "buylist": 17.68,
+        "vendaRapida": 20.9
+      },
+      "mercado": {
+        "vendedoresGeral": 40,
+        "vendedoresEspecificos": 38,
+        "compradoresGeral": 26,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 39,
+        "buylistLida": 26
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 46,
+            "lidas": 46,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 26,
+            "lidas": 26,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 40,
+          "vendedoresEspecificos": 38,
+          "compradoresGeral": 26,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 24.9,
+          "terceiroMenorLiga": 24.9,
+          "medianaLiga": 30.0
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Dragapult ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 184.559,
+      "precos": {
+        "menor": 4.39,
+        "segundoMenor": 4.49,
+        "terceiroMenor": 4.99,
+        "media": 9.42,
+        "mediana": 9.9,
+        "buylist": 3.86,
+        "vendaRapida": 4.17
+      },
+      "mercado": {
+        "vendedoresGeral": 73,
+        "vendedoresEspecificos": 58,
+        "compradoresGeral": 23,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 60,
+        "buylistLida": 23
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 87,
+            "lidas": 87,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 23,
+            "lidas": 23,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 73,
+          "vendedoresEspecificos": 58,
+          "compradoresGeral": 23,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 4.49,
+          "terceiroMenorLiga": 4.99,
+          "medianaLiga": 9.9
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Stunfisk ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 253.23,
+      "precos": {
+        "menor": 2.97,
+        "segundoMenor": 2.97,
+        "terceiroMenor": 2.99,
+        "media": 8.47,
+        "mediana": 8.99,
+        "buylist": 2.06,
+        "vendaRapida": 2.82
+      },
+      "mercado": {
+        "vendedoresGeral": 84,
+        "vendedoresEspecificos": 64,
+        "compradoresGeral": 23,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 65,
+        "buylistLida": 23
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 102,
+            "lidas": 102,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 23,
+            "lidas": 23,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 84,
+          "vendedoresEspecificos": 64,
+          "compradoresGeral": 23,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 2.97,
+          "terceiroMenorLiga": 2.99,
+          "medianaLiga": 8.99
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Mega Emboar ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 226.232,
+      "precos": {
+        "menor": 5.8,
+        "segundoMenor": 5.82,
+        "terceiroMenor": 5.99,
+        "media": 11.35,
+        "mediana": 9.94,
+        "buylist": 5.6,
+        "vendaRapida": 5.51
+      },
+      "mercado": {
+        "vendedoresGeral": 80,
+        "vendedoresEspecificos": 61,
+        "compradoresGeral": 23,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 62,
+        "buylistLida": 23
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 98,
+            "lidas": 98,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 23,
+            "lidas": 23,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 80,
+          "vendedoresEspecificos": 61,
+          "compradoresGeral": 23,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 5.82,
+          "terceiroMenorLiga": 5.99,
+          "medianaLiga": 9.94
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Team Rocket's Mimikyu",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 64.021,
+      "precos": {
+        "menor": 65.0,
+        "segundoMenor": 65.0,
+        "terceiroMenor": 69.85,
+        "media": 89.84,
+        "mediana": 82.99,
+        "buylist": 45.69,
+        "vendaRapida": 61.75
+      },
+      "mercado": {
+        "vendedoresGeral": 50,
+        "vendedoresEspecificos": 37,
+        "compradoresGeral": 19,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 37,
+        "buylistLida": 19
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "outro_idioma_mais_barato",
+            "mensagem": "Suspeita de carta igual em outra língua por preço menor",
+            "evidencia": {
+              "referencia": {
+                "loja": "SE7EN CARDS",
+                "preco": 65.0,
+                "idioma": "Português",
+                "estado": "NM",
+                "extra": "Foil",
+                "ofertaId": "30084571",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=692069&tcg=30084571"
+              },
+              "comparacao": {
+                "loja": "TokyoCards",
+                "preco": 54.0,
+                "idioma": "Japonês",
+                "estado": "NM",
+                "extra": "Foil",
+                "ofertaId": "31717579",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=634008&tcg=31717579"
+              },
+              "diferenca": 11.0
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 55,
+            "lidas": 55,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 19,
+            "lidas": 19,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 50,
+          "vendedoresEspecificos": 37,
+          "compradoresGeral": 19,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 65.0,
+          "terceiroMenorLiga": 69.85,
+          "medianaLiga": 82.99
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Togedemaru ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 189.827,
+      "precos": {
+        "menor": 3.79,
+        "segundoMenor": 4.99,
+        "terceiroMenor": 4.99,
+        "media": 9.32,
+        "mediana": 9.9,
+        "buylist": 2.8,
+        "vendaRapida": 3.6
+      },
+      "mercado": {
+        "vendedoresGeral": 67,
+        "vendedoresEspecificos": 51,
+        "compradoresGeral": 23,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 51,
+        "buylistLida": 23
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 82,
+            "lidas": 82,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 23,
+            "lidas": 23,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 67,
+          "vendedoresEspecificos": 51,
+          "compradoresGeral": 23,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 4.99,
+          "terceiroMenorLiga": 4.99,
+          "medianaLiga": 9.9
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Mega Gengar ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 25.727,
+      "precos": {
+        "menor": 5.9,
+        "segundoMenor": 8.0,
+        "terceiroMenor": 9.9,
+        "media": 14.25,
+        "mediana": 14.44,
+        "buylist": 4.19,
+        "vendaRapida": 5.6
+      },
+      "mercado": {
+        "vendedoresGeral": 32,
+        "vendedoresEspecificos": 23,
+        "compradoresGeral": 23,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 24,
+        "buylistLida": 23
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 40,
+            "lidas": 40,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 23,
+            "lidas": 23,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 32,
+          "vendedoresEspecificos": 23,
+          "compradoresGeral": 23,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 8.0,
+          "terceiroMenorLiga": 9.9,
+          "medianaLiga": 14.44
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "N's Zoroark ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 16.075,
+      "precos": {
+        "menor": 550.0,
+        "segundoMenor": 599.0,
+        "terceiroMenor": 599.8,
+        "media": 762.11,
+        "mediana": 749.0,
+        "buylist": 390.5,
+        "vendaRapida": 522.5
+      },
+      "mercado": {
+        "vendedoresGeral": 24,
+        "vendedoresEspecificos": 19,
+        "compradoresGeral": 18,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 19,
+        "buylistLida": 18
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 25,
+            "lidas": 25,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 18,
+            "lidas": 18,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 24,
+          "vendedoresEspecificos": 19,
+          "compradoresGeral": 18,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 599.0,
+          "terceiroMenorLiga": 599.8,
+          "medianaLiga": 749.0
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Lillie's Clefairy ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 14.553,
+      "precos": {
+        "menor": 38.99,
+        "segundoMenor": 39.9,
+        "terceiroMenor": 39.9,
+        "media": 51.28,
+        "mediana": 49.9,
+        "buylist": 27.68,
+        "vendaRapida": 37.04
+      },
+      "mercado": {
+        "vendedoresGeral": 21,
+        "vendedoresEspecificos": 19,
+        "compradoresGeral": 15,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 19,
+        "buylistLida": 15
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 24,
+            "lidas": 24,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 15,
+            "lidas": 15,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 21,
+          "vendedoresEspecificos": 19,
+          "compradoresGeral": 15,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 39.9,
+          "terceiroMenorLiga": 39.9,
+          "medianaLiga": 49.9
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Morpeko ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 115.969,
+      "precos": {
+        "menor": 254.9,
+        "segundoMenor": 259.88,
+        "terceiroMenor": 259.9,
+        "media": 350.68,
+        "mediana": 300.0,
+        "buylist": 184.6,
+        "vendaRapida": 242.16
+      },
+      "mercado": {
+        "vendedoresGeral": 65,
+        "vendedoresEspecificos": 58,
+        "compradoresGeral": 16,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 58,
+        "buylistLida": 16
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 69,
+            "lidas": 69,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 16,
+            "lidas": 16,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 65,
+          "vendedoresEspecificos": 58,
+          "compradoresGeral": 16,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 259.88,
+          "terceiroMenorLiga": 259.9,
+          "medianaLiga": 300.0
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Mega Darkrai ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 422.123,
+      "precos": {
+        "menor": 7.0,
+        "segundoMenor": 7.0,
+        "terceiroMenor": 7.9,
+        "media": 20.8,
+        "mediana": 18.95,
+        "buylist": 4.72,
+        "vendaRapida": 6.65
+      },
+      "mercado": {
+        "vendedoresGeral": 120,
+        "vendedoresEspecificos": 98,
+        "compradoresGeral": 14,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 99,
+        "buylistLida": 14
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 134,
+            "lidas": 134,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 120,
+          "vendedoresEspecificos": 98,
+          "compradoresGeral": 14,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 7.0,
+          "terceiroMenorLiga": 7.9,
+          "medianaLiga": 18.95
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Goldeen",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 113.703,
+      "precos": {
+        "menor": 49.9,
+        "segundoMenor": 50.0,
+        "terceiroMenor": 54.9,
+        "media": 71.39,
+        "mediana": 69.9,
+        "buylist": 39.05,
+        "vendaRapida": 47.4
+      },
+      "mercado": {
+        "vendedoresGeral": 58,
+        "vendedoresEspecificos": 47,
+        "compradoresGeral": 16,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 47,
+        "buylistLida": 16
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "outro_idioma_mais_barato",
+            "mensagem": "Suspeita de carta igual em outra língua por preço menor",
+            "evidencia": {
+              "referencia": {
+                "loja": "Sunrise Kingdom",
+                "preco": 49.9,
+                "idioma": "Português",
+                "estado": "NM",
+                "extra": "Foil",
+                "ofertaId": "32282797",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=211528&tcg=32282797"
+              },
+              "comparacao": {
+                "loja": "TokyoCards",
+                "preco": 48.0,
+                "idioma": "Japonês",
+                "estado": "NM",
+                "extra": "Foil",
+                "ofertaId": "32155107",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=634008&tcg=32155107"
+              },
+              "diferenca": 1.9
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 64,
+            "lidas": 64,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 16,
+            "lidas": 16,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 58,
+          "vendedoresEspecificos": 47,
+          "compradoresGeral": 16,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 50.0,
+          "terceiroMenorLiga": 54.9,
+          "medianaLiga": 69.9
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Energy Switch",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 370.898,
+      "precos": {
+        "menor": 18.61,
+        "segundoMenor": 19.0,
+        "terceiroMenor": 19.5,
+        "media": 45.78,
+        "mediana": 39.99,
+        "buylist": 13.14,
+        "vendaRapida": 17.68
+      },
+      "mercado": {
+        "vendedoresGeral": 111,
+        "vendedoresEspecificos": 100,
+        "compradoresGeral": 19,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 102,
+        "buylistLida": 11
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "outro_idioma_mais_barato",
+            "mensagem": "Suspeita de carta igual em outra língua por preço menor",
+            "evidencia": {
+              "referencia": {
+                "loja": "Monsters TCG",
+                "preco": 18.61,
+                "idioma": "Português",
+                "estado": "NM",
+                "extra": "Foil",
+                "ofertaId": "31810230",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=517115&tcg=31810230"
+              },
+              "comparacao": {
+                "loja": "tcgBR",
+                "preco": 18.5,
+                "idioma": "Inglês",
+                "estado": "NM",
+                "extra": "Foil",
+                "ofertaId": "31639386",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=673241&tcg=31639386"
+              },
+              "diferenca": 0.11
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 120,
+            "lidas": 120,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 19,
+            "lidas": 19,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 111,
+          "vendedoresEspecificos": 100,
+          "compradoresGeral": 19,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 19.0,
+          "terceiroMenorLiga": 19.5,
+          "medianaLiga": 39.99
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Mega Dragonite ex",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 18.684,
+      "precos": {
+        "menor": 1645.0,
+        "segundoMenor": 1659.9,
+        "terceiroMenor": 1675.0,
+        "media": 1960.53,
+        "mediana": 1998.0,
+        "buylist": 1167.95,
+        "vendaRapida": 1562.75
+      },
+      "mercado": {
+        "vendedoresGeral": 28,
+        "vendedoresEspecificos": 21,
+        "compradoresGeral": 25,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 21,
+        "buylistLida": 25
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 30,
+            "lidas": 30,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 25,
+            "lidas": 25,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 28,
+          "vendedoresEspecificos": 21,
+          "compradoresGeral": 25,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 1659.9,
+          "terceiroMenorLiga": 1675.0,
+          "medianaLiga": 1998.0
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    }
+  ],
+  "extras": {
+    "updateId": "Leon19-2-20260812T185300Z"
+  }
+}

@@ -15,6 +15,7 @@ PASTA_RELATORIOS_NOME = "relatorios"
 PASTA_HISTORICO_NOME = "historico"
 ARQUIVO_PERFIL = "perfil.json"
 ARQUIVO_ATUALIZACAO = "atualizacao.json"
+ARQUIVO_MOVIMENTACOES = "movimentacoes.jsonl"
 ARQUIVO_CONFIG = PASTA_GERENCIAMENTO / "config.json"
 
 ARQUIVOS_INVENTARIO = {
