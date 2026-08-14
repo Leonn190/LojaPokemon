@@ -2,12 +2,16 @@ from __future__ import annotations
 
 import os
 import re
+import json
+import random
+import hashlib
 import shutil
 import socket
 import subprocess
 import time
 import unicodedata
 import tempfile
+import threading
 from collections import Counter
 from decimal import Decimal
 from io import BytesIO
@@ -60,6 +64,9 @@ IDIOMA = "BR"
 
 # Salva imagens somente quando o OCR não consegue ler algum preço.
 PASTA_DEBUG = Path(__file__).with_name("debug_precos")
+VERSAO_LEITOR_PRECO = 2
+_LOCK_DEBUG = threading.Lock()
+_MAX_IMAGENS_DEBUG = 250
 
 
 IDIOMAS = {
@@ -392,34 +399,47 @@ def obter_dados_carta(navegador: webdriver.Chrome) -> dict[str, str]:
 
 
 def limpar_resultado_ocr(texto: str) -> str:
-    """Converte confusões comuns do OCR e mantém somente algarismos."""
+    """Mantém SOMENTE dígitos realmente reconhecidos pelo OCR.
 
-    substituicoes = str.maketrans(
-        {
-            "O": "0",
-            "o": "0",
-            "Q": "0",
-            "I": "1",
-            "i": "1",
-            "l": "1",
-            "L": "1",
-            "Z": "2",
-            "S": "5",
-            "s": "5",
-            "B": "8",
-            "G": "6",
-            "g": "9",
-        }
-    )
+    A versão anterior convertia letras visualmente parecidas (I/l/L -> 1,
+    O/Q -> 0 etc.). Em imagens pequenas ou cortadas isso transformava um
+    palpite do OCR em um preço aparentemente válido, criando padrões como
+    1,11 / 11,11 / 111,11. Aqui, letra é falha de OCR, não número.
+    """
 
-    convertido = (texto or "").translate(substituicoes)
-    return "".join(caractere for caractere in convertido if caractere.isdigit())
+    return "".join(caractere for caractere in (texto or "") if caractere.isdigit())
 
 
 def carregar_rgba(png: bytes) -> Image.Image:
     imagem = Image.open(BytesIO(png)).convert("RGBA")
     imagem.load()
     return imagem
+
+
+def _imagem_tem_grafia_util(imagem_rgba: Image.Image) -> bool:
+    """Rejeita screenshots em branco ou com o algarismo severamente cortado."""
+
+    cinza = ImageOps.grayscale(imagem_rgba.convert("RGB"))
+    minimo, maximo = cinza.getextrema()
+    if maximo - minimo < 18:
+        return False
+
+    # Usa o canto inferior direito como aproximação do fundo e procura pixels
+    # que realmente se afastam desse fundo. Isso funciona tanto em tema claro
+    # quanto escuro e, principalmente, detecta o problema visto nos PNGs de
+    # debug em que só 2-3 linhas do sprite apareciam.
+    fundo = cinza.getpixel((max(0, cinza.width - 1), max(0, cinza.height - 1)))
+    mascara = cinza.point(lambda px: 255 if abs(int(px) - int(fundo)) >= 18 else 0)
+    bbox = mascara.getbbox()
+    if bbox is None:
+        return False
+    largura_util = bbox[2] - bbox[0]
+    altura_util = bbox[3] - bbox[1]
+    if largura_util < max(2, int(imagem_rgba.width * 0.15)):
+        return False
+    if altura_util < max(4, int(imagem_rgba.height * 0.35)):
+        return False
+    return True
 
 
 def montar_variante_ocr(
@@ -442,7 +462,6 @@ def montar_variante_ocr(
         (max(1, cinza.width * escala), max(1, cinza.height * escala)),
         Image.Resampling.LANCZOS,
     )
-
     ampliada = ImageOps.expand(ampliada, border=24, fill=255)
 
     destino = BytesIO()
@@ -455,34 +474,40 @@ def reconhecer_imagem(
     imagem_rgba: Image.Image,
     quantidade_esperada: int,
 ) -> str | None:
-    """Executa diferentes tratamentos e escolhe o resultado mais frequente."""
+    """Reconhece apenas quando tratamentos independentes concordam.
+
+    Um único palpite nunca mais é aceito. A imagem também precisa ter grafia
+    suficiente; screenshots brancos ou cortados são falha explícita.
+    """
+
+    if not _imagem_tem_grafia_util(imagem_rgba):
+        return None
 
     resultados: list[str] = []
-
     for fundo in ("white", "black"):
         for inverter in (False, True):
-            variante = montar_variante_ocr(
-                imagem_rgba,
-                fundo=fundo,
-                inverter=inverter,
-            )
+            variante = montar_variante_ocr(imagem_rgba, fundo=fundo, inverter=inverter)
             texto = ocr.classification(variante)
             digitos = limpar_resultado_ocr(str(texto))
-
             if len(digitos) == quantidade_esperada:
                 resultados.append(digitos)
 
     if not resultados:
         return None
 
-    return Counter(resultados).most_common(1)[0][0]
+    vencedor, votos = Counter(resultados).most_common(1)[0]
+    # Exige pelo menos 2 confirmações e 75% das leituras válidas concordando.
+    # Evita que um único "I"/"l" interpretado como 1 contamine o cache/preço.
+    if votos < 2 or (votos / len(resultados)) < 0.75:
+        return None
+    return vencedor
 
 
 def chave_visual_digito(
     navegador: webdriver.Chrome,
     elemento: WebElement,
 ) -> str:
-    """Cria uma chave para não executar OCR repetido no mesmo algarismo."""
+    """Cria uma chave estável para diagnóstico do sprite visual."""
 
     return str(
         navegador.execute_script(
@@ -506,50 +531,125 @@ def reconhecer_digito(
     ocr: ddddocr.DdddOcr,
     cache: dict[str, str],
 ) -> str | None:
-    """Reconhece um único algarismo visual da Liga Pokémon."""
+    """Reconhece um algarismo sem confiar cegamente em cache antigo."""
 
-    chave = chave_visual_digito(navegador, elemento)
-    if chave in cache:
-        return cache[chave]
-
-    navegador.execute_script(
-        "arguments[0].scrollIntoView({block: 'center'});",
-        elemento,
-    )
-    time.sleep(0.05)
-
+    navegador.execute_script("arguments[0].scrollIntoView({block: 'center'});", elemento)
+    time.sleep(0.03)
     imagem = carregar_rgba(elemento.screenshot_as_png)
-    resultado = reconhecer_imagem(
-        ocr,
-        imagem,
-        quantidade_esperada=1,
-    )
+    resultado = reconhecer_imagem(ocr, imagem, quantidade_esperada=1)
 
+    # O cache só recebe leituras já validadas por consenso e grafia. Ele não é
+    # consultado antes do OCR: isso elimina o efeito cascata em que um erro de
+    # uma oferta envenenava centenas de preços posteriores no mesmo worker.
     if resultado:
-        cache[chave] = resultado
+        try:
+            cache[chave_visual_digito(navegador, elemento)] = resultado
+        except Exception:
+            pass
+    return resultado
 
+
+def _capturar_digitos_pelo_container(
+    navegador: webdriver.Chrome,
+    container: WebElement,
+    elementos: list[WebElement],
+) -> list[Image.Image]:
+    """Recorta os dígitos a partir do screenshot do preço inteiro.
+
+    O Selenium pode rasterizar mal um elemento-filho com background-position.
+    Capturar o contêiner já composto pelo Chrome e recortar pelas coordenadas
+    dos filhos é muito mais resistente a esse tipo de corte.
+    """
+
+    navegador.execute_script("arguments[0].scrollIntoView({block: 'center'});", container)
+    time.sleep(0.05)
+    imagem = carregar_rgba(container.screenshot_as_png)
+    geometria = navegador.execute_script(
+        """
+        const c = arguments[0].getBoundingClientRect();
+        return Array.from(arguments).slice(1).map(el => {
+            const r = el.getBoundingClientRect();
+            return {x:r.left-c.left, y:r.top-c.top, w:r.width, h:r.height,
+                    cw:c.width, ch:c.height};
+        });
+        """,
+        container,
+        *elementos,
+    )
+    if not geometria:
+        return []
+    cw = float(geometria[0].get("cw") or 0)
+    ch = float(geometria[0].get("ch") or 0)
+    if cw <= 0 or ch <= 0:
+        return []
+    sx = imagem.width / cw
+    sy = imagem.height / ch
+    recortes: list[Image.Image] = []
+    for g in geometria:
+        x1 = max(0, int(round(float(g.get("x") or 0) * sx)))
+        y1 = max(0, int(round(float(g.get("y") or 0) * sy)))
+        x2 = min(imagem.width, int(round((float(g.get("x") or 0) + float(g.get("w") or 0)) * sx)))
+        y2 = min(imagem.height, int(round((float(g.get("y") or 0) + float(g.get("h") or 0)) * sy)))
+        if x2 <= x1 or y2 <= y1:
+            return []
+        recortes.append(imagem.crop((x1, y1, x2, y2)))
+    return recortes
+
+
+def montar_imagem_preco_imagens(imagens: list[Image.Image]) -> Image.Image:
+    altura = max(imagem.height for imagem in imagens)
+    espacamento = 3
+    largura = sum(imagem.width for imagem in imagens) + espacamento * max(0, len(imagens) - 1)
+    resultado = Image.new("RGBA", (largura, altura), "white")
+    x = 0
+    for imagem in imagens:
+        y = (altura - imagem.height) // 2
+        resultado.alpha_composite(imagem.convert("RGBA"), (x, y))
+        x += imagem.width + espacamento
     return resultado
 
 
 def montar_imagem_preco(elementos: list[WebElement]) -> Image.Image:
-    """Junta as capturas dos algarismos para um segundo método de OCR."""
+    return montar_imagem_preco_imagens([carregar_rgba(elemento.screenshot_as_png) for elemento in elementos])
 
-    imagens = [carregar_rgba(elemento.screenshot_as_png) for elemento in elementos]
 
-    altura = max(imagem.height for imagem in imagens)
-    espacamento = 3
-    largura = sum(imagem.width for imagem in imagens)
-    largura += espacamento * max(0, len(imagens) - 1)
+def _salvar_debug_preco(imagem: Image.Image, oferta_id: str, motivo: str) -> Path | None:
+    """Deduplica PNGs de falha e mantém um índice leve em JSONL."""
 
-    resultado = Image.new("RGBA", (largura, altura), "white")
+    destino = BytesIO()
+    imagem.convert("RGB").save(destino, format="PNG")
+    conteudo = destino.getvalue()
+    hash_curto = hashlib.sha256(conteudo).hexdigest()[:12]
+    PASTA_DEBUG.mkdir(parents=True, exist_ok=True)
+    arquivo = PASTA_DEBUG / f"falha_{hash_curto}.png"
+    indice = PASTA_DEBUG / "falhas.jsonl"
+    with _LOCK_DEBUG:
+        existentes = len(list(PASTA_DEBUG.glob("falha_*.png")))
+        salvo = arquivo.exists()
+        if not salvo and existentes < _MAX_IMAGENS_DEBUG:
+            arquivo.write_bytes(conteudo)
+            salvo = True
+        registro = {
+            "ofertaId": str(oferta_id),
+            "imagemHash": hash_curto,
+            "imagem": arquivo.name if salvo else None,
+            "motivo": motivo,
+            "largura": imagem.width,
+            "altura": imagem.height,
+        }
+        with indice.open("a", encoding="utf-8") as fp:
+            fp.write(json.dumps(registro, ensure_ascii=False) + "\n")
+    return arquivo if salvo else None
 
-    x = 0
-    for imagem in imagens:
-        y = (altura - imagem.height) // 2
-        resultado.alpha_composite(imagem, (x, y))
-        x += imagem.width + espacamento
 
-    return resultado
+def _padrao_preco_suspeito(valor: Decimal) -> bool:
+    """Detecta os padrões artificiais observados na cotização corrompida."""
+
+    texto = f"{valor.quantize(Decimal('0.01')):.2f}"
+    inteiro, centavos = texto.split(".")
+    if centavos != "11":
+        return False
+    return bool(inteiro) and all(c in "17" for c in inteiro)
 
 
 def decodificar_preco(
@@ -559,7 +659,7 @@ def decodificar_preco(
     cache: dict[str, str],
     oferta_id: str,
 ) -> Decimal:
-    """Lê o preço visual de um anúncio e o converte em Decimal."""
+    """Lê o preço visual com validação forte e sem aceitar palpites isolados."""
 
     texto_oferta = (oferta.get_attribute("innerText") or "").replace("\xa0", " ")
     encontrado_texto = re.search(r"R\$\s*([0-9.]+,[0-9]{2})", texto_oferta)
@@ -567,96 +667,73 @@ def decodificar_preco(
         return Decimal(encontrado_texto.group(1).replace(".", "").replace(",", "."))
 
     if not USAR_OCR:
-        raise ErroLeituraPreco(
-            f"Oferta {oferta_id} usa preço visual e usarOCR está desativado no config.json."
-        )
+        raise ErroLeituraPreco(f"Oferta {oferta_id} usa preço visual e usarOCR está desativado no config.json.")
 
-    container = buscar_elemento_opcional(
-        oferta,
-        ".price-with-image, .price_with_image, [data-price-image]",
-    )
+    container = buscar_elemento_opcional(oferta, ".price-with-image, .price_with_image, [data-price-image]")
     if container is None:
-        raise ErroLeituraPreco(
-            f"Oferta {oferta_id} não possui um preço legível; ela será ignorada."
-        )
+        raise ErroLeituraPreco(f"Oferta {oferta_id} não possui um preço legível; ela será ignorada.")
     filhos = container.find_elements(By.XPATH, "./div")
 
     elementos_digitos: list[WebElement] = []
     indice_separador: int | None = None
-
     for filho in filhos:
         classes = filho.get_attribute("class") or ""
         estilo_inline = filho.get_attribute("style") or ""
-
         if "imgnum-monet" in classes:
             continue
-
         if "v2.png" in estilo_inline:
             indice_separador = len(elementos_digitos)
             continue
-
-        imagem_fundo = str(
-            navegador.execute_script(
-                "return getComputedStyle(arguments[0]).backgroundImage;",
-                filho,
-            )
-        )
-
+        imagem_fundo = str(navegador.execute_script("return getComputedStyle(arguments[0]).backgroundImage;", filho))
         if imagem_fundo and imagem_fundo != "none":
             elementos_digitos.append(filho)
 
     if not elementos_digitos:
-        raise ErroLeituraPreco(
-            f"Nenhum algarismo encontrado na oferta {oferta_id}."
-        )
-
+        raise ErroLeituraPreco(f"Nenhum algarismo encontrado na oferta {oferta_id}.")
     if indice_separador is None:
-        # Os preços da página usam sempre dois dígitos para os centavos.
         indice_separador = max(1, len(elementos_digitos) - 2)
 
-    reconhecidos: list[str | None] = [
-        reconhecer_digito(
-            navegador,
-            elemento,
-            ocr,
-            cache,
-        )
-        for elemento in elementos_digitos
-    ]
+    # Método principal: screenshot do contêiner já composto pelo Chrome.
+    imagens = _capturar_digitos_pelo_container(navegador, container, elementos_digitos)
+    if not imagens or len(imagens) != len(elementos_digitos):
+        imagens = [carregar_rgba(elemento.screenshot_as_png) for elemento in elementos_digitos]
 
-    if any(digito is None for digito in reconhecidos):
-        # Segunda tentativa: reconhece o preço completo de uma vez.
-        imagem_preco = montar_imagem_preco(elementos_digitos)
-        completo = reconhecer_imagem(
-            ocr,
-            imagem_preco,
-            quantidade_esperada=len(elementos_digitos),
-        )
+    reconhecidos = [reconhecer_imagem(ocr, imagem, 1) for imagem in imagens]
+    imagem_preco = montar_imagem_preco_imagens(imagens)
+    completo = reconhecer_imagem(ocr, imagem_preco, quantidade_esperada=len(elementos_digitos))
 
-        if completo:
-            reconhecidos = list(completo)
-        else:
-            PASTA_DEBUG.mkdir(parents=True, exist_ok=True)
-            arquivo_debug = PASTA_DEBUG / f"preco_{oferta_id}.png"
-            imagem_preco.convert("RGB").save(arquivo_debug)
+    if any(d is None for d in reconhecidos):
+        reconhecidos = list(completo) if completo else reconhecidos
+    elif completo and completo != "".join(str(d) for d in reconhecidos):
+        arquivo = _salvar_debug_preco(imagem_preco, oferta_id, "OCR do preço inteiro divergiu do OCR dos dígitos")
+        complemento = f" Debug: {arquivo}" if arquivo else ""
+        raise ErroLeituraPreco(f"Leituras OCR divergentes na oferta {oferta_id}.{complemento}")
 
-            raise ErroLeituraPreco(
-                "Não foi possível reconhecer o preço da oferta "
-                f"{oferta_id}. A imagem foi salva em: {arquivo_debug}"
-            )
+    if any(d is None for d in reconhecidos):
+        arquivo = _salvar_debug_preco(imagem_preco, oferta_id, "imagem branca/cortada ou OCR sem consenso")
+        complemento = f" Imagem de diagnóstico: {arquivo}" if arquivo else ""
+        raise ErroLeituraPreco(f"Não foi possível reconhecer com segurança o preço da oferta {oferta_id}.{complemento}")
 
-    digitos = "".join(str(digito) for digito in reconhecidos)
+    digitos = "".join(str(d) for d in reconhecidos)
     parte_inteira = digitos[:indice_separador]
     parte_decimal = digitos[indice_separador:]
-
     if not parte_inteira or len(parte_decimal) != 2:
         raise ErroLeituraPreco(
-            f"Preço reconhecido em formato inesperado na oferta {oferta_id}: "
-            f"{parte_inteira},{parte_decimal}"
+            f"Preço reconhecido em formato inesperado na oferta {oferta_id}: {parte_inteira},{parte_decimal}"
         )
 
-    return Decimal(f"{parte_inteira}.{parte_decimal}")
-
+    valor = Decimal(f"{parte_inteira}.{parte_decimal}")
+    # Para os padrões que apareceram em massa na execução corrompida, exigimos
+    # também confirmação do OCR do preço inteiro. Assim um 711,11 isolado não
+    # passa somente porque quatro dígitos individuais foram classificados como
+    # 7/1 por engano.
+    if _padrao_preco_suspeito(valor) and completo != digitos:
+        arquivo = _salvar_debug_preco(imagem_preco, oferta_id, "padrão 1/7 com centavos 11 sem confirmação integral")
+        complemento = f" Debug: {arquivo}" if arquivo else ""
+        raise ErroLeituraPreco(
+            f"Preço OCR suspeito {valor} na oferta {oferta_id} sem confirmação independente.{complemento}"
+        )
+    return valor
 
 def buscar_elemento_opcional(
     raiz: WebElement,
@@ -909,6 +986,54 @@ def obter_todas_as_ofertas(
         )
         estatisticas["lidas"] += 1
     return ofertas, estatisticas
+
+
+def validar_confiabilidade_coleta(
+    ofertas: list[dict[str, Any]],
+    estatisticas: dict[str, Any],
+    origem: str,
+) -> None:
+    """Interrompe a cotização quando a leitura aparenta estar corrompida.
+
+    O objetivo é preferir um item pendente a gravar um preço falso. Isso é
+    especialmente importante para marketplace, onde o menor valor afeta todas
+    as métricas derivadas.
+    """
+
+    detectadas = int(estatisticas.get("detectadas") or 0)
+    lidas = int(estatisticas.get("lidas") or 0)
+    falhas = int(estatisticas.get("falhas") or 0)
+
+    if detectadas > 0 and lidas == 0:
+        raise ErroLeituraPreco(
+            f"{origem}: havia {detectadas} oferta(s), mas nenhum preço pôde ser lido com segurança."
+        )
+
+    # Se quase tudo falhou e sobrou somente um palpite, não usamos esse único
+    # valor como referência de mercado.
+    if detectadas >= 3 and lidas <= 1 and falhas >= 2:
+        raise ErroLeituraPreco(
+            f"{origem}: leitura insuficiente ({lidas}/{detectadas}); cotização mantida pendente."
+        )
+
+    valores = [o.get("preco") for o in ofertas if isinstance(o.get("preco"), Decimal)]
+    if origem == "marketplace" and valores:
+        padroes = [v for v in valores if _padrao_preco_suspeito(v)]
+        contagem = Counter(padroes)
+        repeticao = contagem.most_common(1)[0][1] if contagem else 0
+
+        # Defesa específica contra o padrão observado na execução corrompida:
+        # 1,11 / 7,11 / 11,11 / 71,11 / 111,11 / 711,11 etc.
+        if len(padroes) >= 3 and len(padroes) >= max(3, int(len(valores) * 0.50)):
+            raise ErroLeituraPreco(
+                f"{origem}: padrão OCR artificial detectado em {len(padroes)}/{len(valores)} preços; "
+                "os valores foram recusados para não contaminar a coleção."
+            )
+        if repeticao >= 3:
+            valor, qtd = contagem.most_common(1)[0]
+            raise ErroLeituraPreco(
+                f"{origem}: preço suspeito {valor} repetido {qtd} vezes; cotização mantida pendente."
+            )
 
 
 def normalizar_url_liga(url: str, show: int) -> str:
@@ -1212,6 +1337,11 @@ class SessaoLiga:
                 print(f"  [W{self.worker_id}] Abrindo {origem} (tentativa {tentativa}/{TENTATIVAS})...")
                 if self.aba_base in navegador.window_handles:
                     navegador.switch_to.window(self.aba_base)
+                # Evita que vários workers façam requisições sincronizadas à Liga.
+                # Não corrige OCR (isso é tratado acima), mas reduz a chance de
+                # verificações de segurança quando 3-5 Chromes estão ativos.
+                if JITTER_WORKERS:
+                    time.sleep(random.uniform(0.0, JITTER_WORKERS))
                 navegador.get(url)
                 esperar_pagina(navegador)
                 esperar_ofertas_estaveis(navegador)
@@ -1239,7 +1369,11 @@ class SessaoLiga:
             return dict(self._cache[chave])
 
         dados, marketplace, stats_marketplace = self._coletar_pagina(normalizar_url_liga(url, 1), "marketplace", True)
+        validar_confiabilidade_coleta(marketplace, stats_marketplace, "marketplace")
         _, buylist, stats_buylist = self._coletar_pagina(normalizar_url_liga(url, 10), "buylist", False)
+        # A buylist não define o Menor Liga, mas também não aceitamos uma página
+        # que tinha ofertas e terminou sem nenhuma leitura válida.
+        validar_confiabilidade_coleta(buylist, stats_buylist, "buylist")
         precos = resumir_precos(marketplace, buylist, idioma_normalizado, estado_normalizado)
         resultado = {
             **dados,
@@ -1258,7 +1392,9 @@ class SessaoLiga:
         if chave in self._cache:
             return dict(self._cache[chave])
         dados, marketplace, stats_marketplace = self._coletar_pagina(normalizar_url_liga(url, 1), "marketplace", True)
+        validar_confiabilidade_coleta(marketplace, stats_marketplace, "marketplace")
         _, buylist, stats_buylist = self._coletar_pagina(normalizar_url_liga(url, 10), "buylist", False)
+        validar_confiabilidade_coleta(buylist, stats_buylist, "buylist")
         valores_venda = sorted(o["preco"] for o in marketplace if o.get("preco") is not None)
         valores_compra = [o["preco"] for o in buylist if o.get("preco") is not None]
         menor = valores_venda[0] if valores_venda else None

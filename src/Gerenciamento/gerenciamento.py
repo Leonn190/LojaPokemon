@@ -45,7 +45,7 @@ from configuracao import (
     pasta_colecoes,
     pasta_nao_formatadas,
 )
-from liga import SessaoLiga, baixar_imagem, normalizar_estado, normalizar_idioma
+from liga import SessaoLiga, VERSAO_LEITOR_PRECO, baixar_imagem, normalizar_estado, normalizar_idioma
 from precificacao import (
     agora_iso,
     gerar_status_booster,
@@ -2002,11 +2002,22 @@ def cotizar_colecao(colecao: Path, modo_padrao: str = MODO_MENOR, opcao: str = "
     estado_path = colecao / ARQUIVO_COTIZACAO_PARCIAL
     sessao = ler_json_obj(estado_path) if retomar else {}
 
+    if sessao:
+        versao_salva = int(sessao.get("leitorPrecoVersao") or 1)
+        if versao_salva < VERSAO_LEITOR_PRECO:
+            raise RuntimeError(
+                "Esta cotização parcial foi criada com o leitor de preços antigo (OCR v1), "
+                "que pode gerar valores 1,11 / 11,11 / 111,11. Não é seguro retomá-la. "
+                "Execute a cotização novamente e responda N quando o programa perguntar se deseja continuar; "
+                "isso inicia uma cotização nova com o leitor corrigido."
+            )
+
     if not sessao:
         selecionados, descricao = _selecionar_escopo(cartas, boosters, opcao, dias)
         sessao = {
             "cotacaoId": f"cot-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}",
             "dataCotacao": agora_iso(),
+            "leitorPrecoVersao": VERSAO_LEITOR_PRECO,
             "escopo": descricao,
             "selecionados": selecionados,
             "processados": [],

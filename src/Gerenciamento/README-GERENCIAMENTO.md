@@ -163,7 +163,7 @@ Cada worker possui Chrome, WebDriver, perfil temporário, OCR e cache próprios.
 
 ### Otimizações adicionais
 
-- OCR inicializado uma única vez por worker e cache de dígitos reaproveitado entre páginas.
+- OCR inicializado uma única vez por worker; o cache visual é mantido apenas para diagnóstico e não é usado para aceitar um preço sem nova validação.
 - A mesma aba do Chrome é reutilizada pelo worker em vez de abrir/fechar uma aba para cada marketplace/buylist.
 - A espera fixa após o carregamento foi substituída por espera adaptativa de estabilidade das ofertas.
 - Workers começam com pequeno `jitter` para não disparar todos os acessos no mesmo instante.
@@ -174,3 +174,20 @@ Cada worker possui Chrome, WebDriver, perfil temporário, OCR e cache próprios.
 Durante as consultas o terminal mostra, por item: worker, duração, menor/2º/3º preço, média, mediana, buylist, vendedores/compradores e, na cotização, variação desde a cotização anterior. Também mostra barra de progresso, percentual, tempo decorrido e ETA.
 
 Ao final são gravados relatórios JSON e TXT em `relatorios/`, com modo, quantidade de workers, duração, quantidade de itens, sucessos/erros e detalhes por item. Cotizações retomadas acumulam as métricas das execuções até a conclusão.
+
+## Leitor de preços OCR v2 — proteção contra cotizações corrompidas
+
+A partir desta versão, o leitor de preço foi endurecido para impedir a repetição do problema observado com valores artificiais como `1,11`, `11,11`, `111,11`, `71,11` e `711,11`.
+
+Principais proteções:
+
+- letras parecidas com números **não** são mais convertidas automaticamente (`I`, `l` e `L` não viram `1`);
+- um único palpite do OCR nunca é aceito: diferentes tratamentos da imagem precisam concordar;
+- imagens em branco ou com o algarismo severamente cortado são recusadas;
+- o preço é capturado preferencialmente a partir do contêiner inteiro já renderizado pelo Chrome e só depois recortado em dígitos;
+- o cache de dígitos não é usado como verdade para leituras futuras, evitando efeito cascata de um erro antigo;
+- padrões artificiais repetidos dentro da mesma página fazem o item **falhar e permanecer pendente**, em vez de atualizar a coleção;
+- imagens de diagnóstico são deduplicadas e limitadas a 250 arquivos; `debug_precos/falhas.jsonl` registra todas as ocorrências sem gerar milhares de PNGs;
+- cotizações parciais produzidas pelo leitor antigo (OCR v1) são recusadas na retomada. Inicie uma nova cotização para não misturar dados antigos possivelmente corrompidos.
+
+O modo Conservador (1 worker) reduz a chance de bloqueio/verificação da Liga, mas não é necessário para corrigir o defeito dos valores `1,11`: esse defeito era do leitor OCR e foi tratado diretamente. Nos modos paralelos, o jitter entre acessos foi aumentado para reduzir requisições sincronizadas.

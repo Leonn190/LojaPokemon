@@ -15,6 +15,6 @@
     "D": 0.3
   },
   "minimoCerteiro": 0.6,
-  "jitterWorkers": 0.3,
+  "jitterWorkers": 0.75,
   "esperaEstabilidadeMax": 5.0
 }

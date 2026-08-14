@@ -46,7 +46,7 @@ PADRAO_CONFIG: dict[str, Any] = {
     "minimoCerteiro": 0.60,
     "usarOCR": True,
     "salvarParcialACadaItem": True,
-    "jitterWorkers": 0.30,
+    "jitterWorkers": 0.75,
     "esperaEstabilidadeMax": 5.0,
     "fatoresEstado": {
         "M": 1.0,
@@ -83,7 +83,7 @@ VENDA_RAPIDA = float(CONFIG.get("vendaRapida", 0.95))
 MINIMO_CERTEIRO = float(CONFIG.get("minimoCerteiro", 0.60))
 USAR_OCR = bool(CONFIG.get("usarOCR", True))
 SALVAR_PARCIAL = bool(CONFIG.get("salvarParcialACadaItem", True))
-JITTER_WORKERS = max(0.0, float(CONFIG.get("jitterWorkers", 0.30)))
+JITTER_WORKERS = max(0.0, float(CONFIG.get("jitterWorkers", 0.75)))
 ESPERA_ESTABILIDADE_MAX = max(0.5, float(CONFIG.get("esperaEstabilidadeMax", ESPERA_PAGINA)))
 ESTADOS_ORDEM = ("M", "NM", "SP", "MP", "HP", "D")
 FATORES_ESTADO = {estado: float(CONFIG["fatoresEstado"].get(estado, 1.0)) for estado in ESTADOS_ORDEM}
