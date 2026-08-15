@@ -18,13 +18,7 @@ npm install
 npm run dev
 ```
 
-Para desenvolvimento fora do Firebase Hosting, copie `.env.example` para `.env` e preencha pelo menos:
-
-```env
-PUBLIC_FIREBASE_API_KEY=SUA_API_KEY_WEB
-```
-
-Os demais identificadores do projeto `nexustcg-ad9d3` já estão configurados como padrão. Se quiser, você também pode preencher todos os campos mostrados em `.env.example`.
+A configuração pública do app Web `nexustcg-ad9d3` já está incluída no cliente, portanto não é necessário criar `.env` para o projeto principal. O arquivo `.env.example` fica apenas como opção para substituir a configuração durante desenvolvimento.
 
 ## Deploy recomendado: Firebase Hosting
 
@@ -36,15 +30,13 @@ npx firebase login
 npm run deploy:firebase
 ```
 
-O comando faz o build do Astro e publica o Hosting, as regras e os índices. No Firebase Hosting, o app consegue obter automaticamente a configuração pública do Firebase pelo endpoint reservado `/__/firebase/init.json`, então não é necessário colocar a API key no código-fonte.
+O comando faz o build do Astro e publica o Hosting, as regras e os índices. A configuração pública do app Web já acompanha o cliente. Authentication e Firestore continuam protegidos pelas regras e pela sessão do usuário; a API key Web não funciona como senha administrativa.
 
 > Importante: mantenha o diretório `public/` do projeto original ao lado destes arquivos antes do build. É nele que continuam as imagens e outros assets estáticos.
 
 ## Se continuar no GitHub Pages
 
-O workflow `.github/workflows/deploy.yml` continua disponível. Como o GitHub Pages não possui o endpoint reservado do Firebase Hosting, crie no repositório uma variável de Actions chamada `PUBLIC_FIREBASE_API_KEY` com a `apiKey` exibida em **Firebase Console → Configurações do projeto → Seus aplicativos → Vault TCG → Configuração do SDK → Config**.
-
-Depois disso, o push na branch `main` continua fazendo o deploy pelo GitHub Pages.
+O workflow `.github/workflows/deploy.yml` continua disponível e o push na branch `main` faz o deploy pelo GitHub Pages. Não é mais necessário criar `PUBLIC_FIREBASE_API_KEY` nas Repository Variables; a variável continua aceita como override caso você queira trocar de projeto no futuro.
 
 ## Firebase Console
 

@@ -25,44 +25,36 @@ import {
   type Firestore,
 } from 'firebase/firestore';
 
-const PROJECT_DEFAULTS: Partial<FirebaseOptions> = {
+const PROJECT_DEFAULTS: FirebaseOptions = {
+  apiKey: 'AIzaSyAH2-yNZl048tTL57BCq7gdh82YBZH7GmU',
   authDomain: 'nexustcg-ad9d3.firebaseapp.com',
   projectId: 'nexustcg-ad9d3',
   storageBucket: 'nexustcg-ad9d3.firebasestorage.app',
   messagingSenderId: '887970597243',
   appId: '1:887970597243:web:42ac88e0ac7c55eaab95de',
+  measurementId: 'G-L4TS4FY89Y',
 };
 
-const envConfig: FirebaseOptions = {
-  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY || '',
-  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN || PROJECT_DEFAULTS.authDomain || '',
-  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID || PROJECT_DEFAULTS.projectId || '',
-  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET || PROJECT_DEFAULTS.storageBucket || '',
-  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID || PROJECT_DEFAULTS.messagingSenderId || '',
-  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID || PROJECT_DEFAULTS.appId || '',
+// A configuracao Web do Firebase e publica por design. Variaveis PUBLIC_*
+// continuam aceitas como override, mas o Vault funciona no GitHub Pages
+// mesmo sem depender de Repository Variables.
+const resolvedConfig: FirebaseOptions = {
+  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY || PROJECT_DEFAULTS.apiKey,
+  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN || PROJECT_DEFAULTS.authDomain,
+  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID || PROJECT_DEFAULTS.projectId,
+  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET || PROJECT_DEFAULTS.storageBucket,
+  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID || PROJECT_DEFAULTS.messagingSenderId,
+  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID || PROJECT_DEFAULTS.appId,
+  measurementId: import.meta.env.PUBLIC_FIREBASE_MEASUREMENT_ID || PROJECT_DEFAULTS.measurementId,
 };
 
 let servicesPromise: Promise<{ app: FirebaseApp; auth: ReturnType<typeof getAuth>; db: Firestore }> | null = null;
 
-const loadHostingConfig = async (): Promise<FirebaseOptions | null> => {
-  if (typeof window === 'undefined') return null;
-  try {
-    const response = await fetch('/__/firebase/init.json', { cache: 'no-store' });
-    if (!response.ok) return null;
-    const data = await response.json();
-    return data && data.apiKey ? data : null;
-  } catch (_) {
-    return null;
-  }
-};
-
 const resolveConfig = async (): Promise<FirebaseOptions> => {
-  if (envConfig.apiKey) return envConfig;
-  const hosting = await loadHostingConfig();
-  if (hosting?.apiKey) return { ...PROJECT_DEFAULTS, ...hosting } as FirebaseOptions;
-  throw new Error(
-    'Firebase ainda não recebeu a API key do app Web. Defina PUBLIC_FIREBASE_API_KEY ou publique pelo Firebase Hosting, que fornece /__/firebase/init.json automaticamente.',
-  );
+  if (!resolvedConfig.apiKey || !resolvedConfig.projectId || !resolvedConfig.appId) {
+    throw new Error('A configuracao publica do Firebase esta incompleta.');
+  }
+  return resolvedConfig;
 };
 
 export const getCloud = async () => {
