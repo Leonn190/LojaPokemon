@@ -11,7 +11,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
           <nav class="breadcrumbs" aria-label="Navegação estrutural"><a href={base}>Início</a><span>/</span><a href={`${base}colecoes/`}>Coleções</a><span>/</span><strong data-profile-owner>Carregando…</strong></nav>
           <div class="profile-identity"><span class="profile-avatar" data-profile-avatar>VT</span><div><small>Colecionador no Vault</small><strong data-profile-owner-name>Carregando…</strong></div><span class="profile-sale-status" data-profile-sale-status>Conectando</span></div>
           <h1 data-profile-title>Coleção</h1>
-          <p data-profile-description>Carregando dados do Firestore…</p>
+          <p data-profile-description>Carregando coleção…</p>
           <div class="profile-actions"><a class="primary-cta" href="#itens" data-explore-button hidden><span>Explorar a coleção</span><b>↓</b></a><button class="secondary-cta share-collection-button" type="button" data-share-collection><span>Compartilhar coleção</span><b>↗</b></button></div>
           <div class="profile-stats profile-stats-with-albums">
             <div><strong data-stat-cards>0</strong><span>cartas</span></div><div><strong data-stat-boosters>0</strong><span>boosters</span></div><div><strong data-stat-kits>0</strong><span>kits</span></div><div><strong data-stat-albums>0</strong><span>álbuns</span></div><div><strong data-stat-products>0</strong><span>produtos</span></div>
@@ -20,8 +20,8 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         </div>
         <div class="profile-cover profile-cover-flow" data-reveal>
           <div class="profile-cover-glow" aria-hidden="true"></div>
-          <div class="collection-flow collection-flow-placeholder online-profile-cover" aria-hidden="true"><span>VAULT TCG</span><strong data-cover-title>Coleção online</strong><small>Dados salvos na nuvem</small></div>
-          <div class="profile-value-card"><small>Status</small><strong data-profile-cloud-status>Carregando…</strong><span>Alterações do dono são refletidas online.</span></div>
+          <div class="collection-flow collection-flow-placeholder online-profile-cover" aria-hidden="true"><span>VAULT TCG</span><strong data-cover-title>Coleção</strong><small>Acervo do colecionador</small></div>
+          <div class="profile-value-card"><small>Status</small><strong data-profile-cloud-status>Carregando…</strong><span>Informações da coleção.</span></div>
         </div>
       </div>
     </section>
@@ -60,21 +60,21 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       try {
         if (!slug) throw new Error('Endereço da coleção ausente.');
         const cloud = (window as any).VaultCloud;
-        if (!cloud) throw new Error('Firebase ainda não foi inicializado.');
+        if (!cloud) throw new Error('Coleção ainda não foi inicializada.');
         const data = await cloud.loadCollectionBySlug(decodeURIComponent(slug));
         if (!data) throw new Error('Esta coleção não existe.');
         const profile = data.profile || {};
         const palette = Array.isArray(profile.palette) ? profile.palette : ['#54e8df','#bc91ff','#f4c25c'];
         root?.style.setProperty('--collector-primary', palette[0] || '#54e8df'); root?.style.setProperty('--collector-secondary', palette[1] || '#bc91ff'); root?.style.setProperty('--collector-accent', palette[2] || '#f4c25c');
         document.title = `${profile.title || 'Coleção'} · Vault TCG`;
-        setText('[data-profile-owner]', profile.owner || 'Colecionador'); setText('[data-profile-owner-name]', profile.owner || 'Colecionador'); setText('[data-profile-title]', profile.title || 'Minha coleção'); setText('[data-cover-title]', profile.title || 'Minha coleção'); setText('[data-profile-description]', profile.description || 'Coleção pública no Vault TCG.');
+        setText('[data-profile-owner]', profile.owner || 'Colecionador'); setText('[data-profile-owner-name]', profile.owner || 'Colecionador'); setText('[data-profile-title]', profile.title || 'Minha coleção'); setText('[data-cover-title]', profile.title || 'Minha coleção'); setText('[data-profile-description]', profile.description || 'Coleção publicada no Vault TCG.');
         setText('[data-profile-sale-status]', profile.selling === false ? 'Coleção para exposição' : 'Itens selecionados à venda');
         const sale = root?.querySelector<HTMLElement>('[data-profile-sale-status]'); sale?.classList.toggle('selling', profile.selling !== false); sale?.classList.toggle('showcase-only', profile.selling === false);
         const avatar = root?.querySelector<HTMLElement>('[data-profile-avatar]'); if (avatar) { const photo = toImageUrl(profile.profilePhoto || ''); if (photo) { avatar.classList.add('has-photo'); avatar.innerHTML = `<img src="${photo.replace(/"/g,'&quot;')}" alt="" />`; } else avatar.textContent = String(profile.owner || 'VT').slice(0,2).toUpperCase(); }
         setText('[data-stat-cards]', data.cards.length); setText('[data-stat-boosters]', data.boosters.length); setText('[data-stat-kits]', data.kits.length); setText('[data-stat-albums]', data.albums.length); setText('[data-stat-products]', data.products.length);
         const terms = profile.proposalTerms || {}; setText('[data-proposal-policy]', policyLabels[terms.policy] || 'Aceita propostas');
         setText('[data-proposal-detail]', terms.flexibleDiscounts === false && Array.isArray(terms.discountTiers) && terms.discountTiers.length ? terms.discountTiers.map((tier: any) => `A partir de R$ ${Number(tier.minValue || 0).toFixed(2).replace('.', ',')}: até ${Number(tier.maxDiscount || 0)}%`).join(' · ') : 'Entre na sua conta para montar e enviar uma proposta.');
-        setText('[data-profile-cloud-status]', 'Online');
+        setText('[data-profile-cloud-status]', 'Disponível');
         const groups: Record<string, any[]> = { albums: data.albums, cards: data.cards, boosters: data.boosters, kits: data.kits, products: data.products };
         let total = 0;
         Object.entries(groups).forEach(([key, items]) => {
@@ -87,7 +87,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         const empty = root?.querySelector<HTMLElement>('[data-collection-is-empty]'); if (empty) empty.hidden = total !== 0;
         const explore = root?.querySelector<HTMLElement>('[data-explore-button]'); if (explore) explore.hidden = total === 0;
       } catch (error: any) {
-        showError(error?.message === 'Esta coleção é privada.' ? 'Coleção privada' : 'Não foi possível abrir a coleção', error?.message || 'Confira a configuração do Firebase e tente novamente.');
+        showError(error?.message === 'Esta coleção é privada.' ? 'Coleção privada' : 'Não foi possível abrir a coleção', error?.message || 'Tente novamente em alguns instantes.');
       }
     };
     root?.querySelector('[data-share-collection]')?.addEventListener('click', async () => { try { await navigator.clipboard.writeText(location.href); const button = root.querySelector<HTMLElement>('[data-share-collection] span'); if (button) { const old = button.textContent; button.textContent = 'Link copiado'; setTimeout(() => button.textContent = old, 1800); } } catch (_) {} });

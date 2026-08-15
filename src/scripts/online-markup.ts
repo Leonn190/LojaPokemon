@@ -34,6 +34,17 @@ const imageCandidates = (item: any) => {
   return [...new Set([...candidates, ...image].filter(Boolean).map(toImageUrl))];
 };
 
+const rarityTier = (value: unknown) => {
+  const rarity = normalizeText(value);
+  const compact = rarity.replace(/[^a-z0-9]+/g, '');
+  const premium = ['full art', 'ultra rara', 'ultra rare', 'secret', 'secreta', 'gold', 'dourad', 'rainbow', 'illustration rare', 'ilustracao rara', 'arte rara', 'special illustration', 'sir', 'alt art', 'galeria de treinador', 'trainer gallery', 'shiny rare', 'shiny ultra', 'hyper rare']
+    .some((token) => rarity.includes(token)) || ['ru', 'sr', 're'].includes(rarity);
+  if (premium) return 'premium';
+  const holo = ['holo', 'foil', 'reverse', 'radiante', 'radiant', 'vmax', 'v-astro', 'vstar', 'mega ex', ' ex', 'gx', ' v', 'rh', 'rl', 'rd']
+    .some((token) => rarity.includes(token)) || /^(?:mega\s+)?(?:ex|gx|v(?:max|star|-astro|-union)?)(?:\b|\s|—|-)/.test(rarity) || /^(?:ex|gx|v|vmax|vstar|v-astro|megaex|rh|rl|rd|s)$/.test(compact);
+  return holo ? 'holo' : 'basic';
+};
+
 const productVisual = (item: any) => {
   const urls = imageCandidates(item);
   const [primary = '', ...fallbacks] = urls;
@@ -41,10 +52,34 @@ const productVisual = (item: any) => {
   const isKit = item.kind === 'kit';
   const label = isCard ? 'Carta Pokémon' : item.kind === 'booster' ? 'Booster Pokémon' : isKit ? 'Kit personalizado' : 'Produto Pokémon';
   const initials = isKit ? 'KIT' : String(item.name || 'TCG').split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join('').toUpperCase();
+
+  if (isKit) {
+    const contents = Array.isArray(item.contentItems) ? item.contentItems : [];
+    const withImages = contents.filter((entry: any) => Array.isArray(entry?.imageCandidates) && entry.imageCandidates.length > 0);
+    const firstCard = withImages.find((entry: any) => entry.kind === 'cards');
+    const secondCard = withImages.find((entry: any) => entry.kind === 'cards' && entry !== firstCard);
+    const firstBooster = withImages.find((entry: any) => entry.kind === 'boosters');
+    const preview = [firstCard, secondCard, firstBooster, ...withImages].filter((entry, index, list) => entry && list.indexOf(entry) === index).slice(0, 3);
+    if (preview.length) {
+      const stack = preview.map((entry: any, index: number) => {
+        const entryUrls = (entry.imageCandidates || []).map(toImageUrl).filter(Boolean);
+        const [entryPrimary = '', ...entryFallbacks] = entryUrls;
+        const entryInitials = String(entry.name || 'TCG').split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join('').toUpperCase();
+        return `<span class="kit-stack-card kit-stack-card-${index + 1}${entry.kind === 'boosters' ? ' booster-item' : ''}"><span class="kit-stack-card-surface" data-image-stage><span class="kit-stack-fallback">${escapeHtml(entryInitials || 'TCG')}</span>${entryPrimary ? `<img src="${escapeHtml(entryPrimary)}" alt="" loading="lazy" decoding="async" fetchpriority="low" data-image-candidates="${escapeHtml(JSON.stringify(entryFallbacks))}" />` : ''}</span></span>`;
+      }).join('');
+      const units = contents.reduce((total: number, entry: any) => total + Math.max(1, Number(entry?.quantity) || 1), 0);
+      const sourceTotal = Number(item.sourceTotal || 0);
+      const price = itemPrice(item);
+      const discount = sourceTotal > 0 && price !== null ? Math.max(0, ((sourceTotal - price) / sourceTotal) * 100) : 0;
+      return `<div class="collectible-visual kit-visual kit-composite-visual" data-tilt data-tilt-strength="4"><div class="image-stage kit-image-stage"><span class="image-fallback" aria-hidden="true"><b>KIT</b><small>${escapeHtml(label)}</small></span><div class="kit-stack" aria-hidden="true">${stack}</div><span class="kit-composite-badge">${units || contents.length} ${units === 1 ? 'item' : 'itens'}</span>${discount > 0 ? `<span class="kit-discount-badge">−${Math.round(discount)}%</span>` : ''}<span class="kit-composite-shine" aria-hidden="true"></span></div></div>`;
+    }
+  }
+
   const image = primary
-    ? `<img src="${escapeHtml(primary)}" alt="${escapeHtml(item.name || '')}" loading="lazy" decoding="async" data-image-candidates="${escapeHtml(JSON.stringify(fallbacks))}" />`
+    ? `<img src="${escapeHtml(primary)}" alt="${escapeHtml(item.name || '')}" loading="lazy" decoding="async" fetchpriority="low" data-image-candidates="${escapeHtml(JSON.stringify(fallbacks))}" />`
     : '';
-  return `<div class="collectible-visual ${isCard ? 'foil-tier-basic' : item.kind === 'booster' ? 'booster-visual' : isKit ? 'kit-visual' : 'sealed-product-visual'}" data-tilt data-tilt-strength="4"><div class="image-stage"><span class="image-fallback" aria-hidden="true"><b>${escapeHtml(initials || 'TCG')}</b><small>${escapeHtml(label)}</small></span>${image}${isCard ? '<span class="holo-band" aria-hidden="true"></span><span class="foil-spectrum" aria-hidden="true"></span><span class="glare" aria-hidden="true"></span>' : ''}</div></div>`;
+  const visualClass = isCard ? `foil-tier-${rarityTier(item.type)}` : item.kind === 'booster' ? 'booster-visual' : isKit ? 'kit-visual' : 'sealed-product-visual';
+  return `<div class="collectible-visual ${visualClass}"${isCard ? ` data-foil-tier="${rarityTier(item.type)}"` : ''} data-tilt data-tilt-strength="4"><div class="image-stage"><span class="image-fallback" aria-hidden="true"><b>${escapeHtml(initials || 'TCG')}</b><small>${escapeHtml(label)}</small></span>${image}${isCard ? '<span class="holo-band" aria-hidden="true"></span><span class="foil-spectrum" aria-hidden="true"></span><span class="glare" aria-hidden="true"></span>' : ''}</div></div>`;
 };
 
 const itemPrice = (item: any) => item?.price === null || item?.price === undefined || item?.price === '' ? null : Number(item.price);
@@ -117,6 +152,14 @@ export const albumMarkup = (album: any, compact = false) => {
 };
 
 export const initializeOnlineImages = (container: ParentNode = document) => {
+  const globalHydrate = (window as any).VaultHydrate;
+  if (typeof globalHydrate === 'function') {
+    globalHydrate(container);
+    return;
+  }
+  // Se o layout ainda estiver terminando de inicializar, reidrata assim que
+  // o controlador global de imagens/tilt estiver disponível.
+  window.addEventListener('vault:hydrator-ready', () => (window as any).VaultHydrate?.(container), { once: true });
   container.querySelectorAll<HTMLImageElement>('img[data-image-candidates]').forEach((image) => {
     if (image.dataset.onlineImageReady) return;
     image.dataset.onlineImageReady = 'true';

@@ -6,7 +6,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 <BaseLayout title="Coleções da comunidade" description="Conheça os colecionadores do Vault TCG e explore as coleções públicas." active="collections">
   <section class="catalog-hero collections-catalog-hero">
     <div class="shell catalog-hero-grid">
-      <div data-reveal><span class="hero-badge"><i></i> Perfis online</span><h1>Coleções da comunidade</h1><p>Somente contas que escolheram deixar a coleção pública aparecem aqui. Uma conta também pode manter a coleção completamente vazia e privada apenas para comprar e fazer propostas.</p></div>
+      <div data-reveal><span class="hero-badge"><i></i> Perfis da comunidade</span><h1>Coleções da comunidade</h1><p>Somente contas que escolheram deixar a coleção pública aparecem aqui. Uma conta também pode manter a coleção completamente vazia e privada apenas para comprar e fazer propostas.</p></div>
       <div class="catalog-hero-stats" data-reveal>
         <div><strong data-online-collection-total>0</strong><span>coleções públicas</span></div>
         <div><strong data-online-card-total>0</strong><span>cartas publicadas</span></div>
@@ -20,7 +20,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       <div class="search-control"><label for="collection-search">Pesquisar coleções</label><div class="search-input-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg><input id="collection-search" type="search" placeholder="Nome do colecionador ou da coleção..." data-collection-search /></div></div>
       <a class="primary-cta" href={`${base}cadastro/`}><span>Entrar / criar conta</span><b>→</b></a>
     </div>
-    <div class="collections-summary"><strong data-collection-count>0</strong> <span data-collection-label>coleções encontradas</span> <small data-collection-status>· conectando ao Firebase…</small></div>
+    <div class="collections-summary"><strong data-collection-count>0</strong> <span data-collection-label>coleções encontradas</span> <small data-collection-status>· carregando catálogo…</small></div>
     <div class="collections-grid" data-collections-grid></div>
     <div class="empty-state collection-empty-state" data-collection-empty hidden><span>◇</span><h2>Nenhuma coleção pública</h2><p>Não há resultado para esta busca ou ainda não há coleções públicas cadastradas.</p></div>
   </section>
@@ -49,7 +49,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       const load = async () => {
         try {
           const cloud = (window as any).VaultCloud;
-          if (!cloud) throw new Error('Firebase ainda não foi inicializado.');
+          if (!cloud) throw new Error('Catálogo ainda não foi inicializado.');
           collections = await cloud.listPublicCollections();
           const cardTotal = collections.reduce((sum, profile) => sum + Number(profile.stats?.cards || 0), 0);
           const boosterTotal = collections.reduce((sum, profile) => sum + Number(profile.stats?.boosters || 0), 0);
@@ -59,16 +59,16 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
           if (totalElement) totalElement.textContent = String(collections.length);
           if (cardElement) cardElement.textContent = String(cardTotal);
           if (boosterElement) boosterElement.textContent = String(boosterTotal);
-          if (status) status.textContent = '· atualizado da nuvem';
+          if (status) status.textContent = '· catálogo atualizado';
           render();
         } catch (error: any) {
-          if (status) status.textContent = '· Firebase indisponível';
+          if (status) status.textContent = '· catálogo indisponível';
           if (empty) {
             empty.hidden = false;
             const title = empty.querySelector('h2');
             const text = empty.querySelector('p');
             if (title) title.textContent = 'Não foi possível carregar';
-            if (text) text.textContent = error?.message || 'Confira a configuração do Firebase.';
+            if (text) text.textContent = error?.message || 'Não foi possível carregar as coleções agora.';
           }
         }
       };

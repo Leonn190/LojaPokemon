@@ -76,7 +76,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         <div>
           <a class="brand footer-brand" href={base}>
             <span class="brand-emblem" aria-hidden="true"><i></i></span>
-            <span class="brand-copy"><strong>{siteConfig.siteName}</strong><small>Coleções Pokémon online</small></span>
+            <span class="brand-copy"><strong>{siteConfig.siteName}</strong><small>Comunidade de colecionadores</small></span>
           </a>
           <p>{siteConfig.inventoryNote}</p>
         </div>
@@ -163,6 +163,13 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
 
       <div class="proposal-drawer-content">
         <nav class="proposal-collection-list" data-proposal-collection-list aria-label="Colecionadores selecionados"></nav>
+
+        <div class="proposal-empty proposal-auth-required" data-proposal-auth-required hidden>
+          <span aria-hidden="true">◇</span>
+          <h3>Entre para usar propostas</h3>
+          <p>Você está desconectado. Entre na sua conta ou crie uma conta para montar, salvar e enviar propostas.</p>
+          <a class="primary-cta proposal-auth-cta" href={`${base}cadastro/`} data-proposal-auth-link><span>Entrar ou criar conta</span><b>→</b></a>
+        </div>
 
         <div class="proposal-empty" data-proposal-empty>
           <span aria-hidden="true">◇</span>
@@ -411,6 +418,13 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           });
         };
         document.querySelectorAll('[data-tilt]').forEach(initTilt);
+
+        const hydrateDynamic = (container = document) => {
+          container.querySelectorAll?.('img[data-image-candidates]').forEach(initImage);
+          container.querySelectorAll?.('[data-tilt]').forEach(initTilt);
+        };
+        window.VaultHydrate = hydrateDynamic;
+        window.dispatchEvent(new CustomEvent('vault:hydrator-ready'));
 
         document.querySelectorAll('[data-catalog-root]').forEach((root) => {
           const grid = root.querySelector('[data-catalog-grid]');
@@ -749,6 +763,8 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         const proposalCount = document.querySelector('[data-proposal-count]');
         const proposalList = document.querySelector('[data-proposal-collection-list]');
         const proposalEmpty = document.querySelector('[data-proposal-empty]');
+        const proposalAuthRequired = document.querySelector('[data-proposal-auth-required]');
+        const proposalAuthLink = document.querySelector('[data-proposal-auth-link]');
         const proposalEditor = document.querySelector('[data-proposal-editor]');
         const proposalItems = document.querySelector('[data-proposal-items]');
         const proposalDiscount = document.querySelector('[data-proposal-discount]');
@@ -852,6 +868,28 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           if (proposalAddress) proposalAddress.value = group.address || '';
         };
 
+        let proposalUser = null;
+        const setProposalAuthState = (user) => {
+          proposalUser = user || null;
+          const signedIn = Boolean(proposalUser);
+          if (proposalAuthRequired) proposalAuthRequired.hidden = signedIn;
+          if (proposalList) proposalList.hidden = !signedIn;
+          if (proposalEmpty) proposalEmpty.hidden = !signedIn || Boolean(activeGroup());
+          if (proposalEditor) proposalEditor.hidden = !signedIn || !activeGroup();
+          if (proposalAuthLink) proposalAuthLink.href = `${base}cadastro/?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+        };
+        const refreshProposalAuth = async () => {
+          try {
+            await window.VaultCloud?.ready;
+            const user = await window.VaultCloud?.currentUser?.();
+            setProposalAuthState(user);
+            return user;
+          } catch (_) {
+            setProposalAuthState(null);
+            return null;
+          }
+        };
+
         const renderProposals = () => {
           proposals = proposals.filter((group) => group.items.length > 0);
           if (!activeOwnerSlug || !proposals.some((group) => group.ownerSlug === activeOwnerSlug)) activeOwnerSlug = proposals[0]?.ownerSlug || '';
@@ -870,8 +908,8 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             return button;
           }));
           const group = activeGroup();
-          if (proposalEmpty) proposalEmpty.hidden = Boolean(group);
-          if (proposalEditor) proposalEditor.hidden = !group;
+          if (proposalEmpty) proposalEmpty.hidden = !proposalUser || Boolean(group);
+          if (proposalEditor) proposalEditor.hidden = !proposalUser || !group;
           if (!group) { saveProposals(); return; }
           document.querySelector('[data-proposal-owner-avatar]').textContent = String(group.owner || 'CO').slice(0, 2).toUpperCase();
           document.querySelector('[data-proposal-owner]').textContent = group.owner;
@@ -899,11 +937,12 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         };
 
         const addToProposal = async (card, button) => {
-          try {
-            await window.VaultCloud?.ready;
-            const user = await window.VaultCloud?.currentUser?.();
-            if (!user) { window.location.href = `${document.body.dataset.siteBase || '/'}cadastro/?next=${encodeURIComponent(window.location.pathname + window.location.search)}`; return; }
-          } catch (_) { window.location.href = `${document.body.dataset.siteBase || '/'}cadastro/`; return; }
+          const user = proposalUser || await refreshProposalAuth();
+          if (!user) {
+            feedbackButton(button, 'Entre para adicionar');
+            openProposalDrawer();
+            return;
+          }
           if (card.dataset.proposalAllowed === 'false') { feedbackButton(button, 'Não permitido'); return; }
           const product = productFromCard(card);
           let group = proposals.find((entry) => entry.ownerSlug === product.ownerSlug);
@@ -927,17 +966,15 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         };
 
         const openProposalDrawer = async () => {
-          try {
-            await window.VaultCloud?.ready;
-            const user = await window.VaultCloud?.currentUser?.();
-            if (!user) { window.location.href = `${document.body.dataset.siteBase || '/'}cadastro/?next=${encodeURIComponent(window.location.pathname + window.location.search)}`; return; }
-          } catch (_) { window.location.href = `${document.body.dataset.siteBase || '/'}cadastro/`; return; }
           closeModal();
           if (!proposalDrawer || !proposalBackdrop) return;
           proposalBackdrop.hidden = false;
           proposalDrawer.setAttribute('aria-hidden', 'false');
           document.body.classList.add('proposal-open');
           requestAnimationFrame(() => { proposalBackdrop.classList.add('open'); proposalDrawer.classList.add('open'); });
+          const user = proposalUser || await refreshProposalAuth();
+          setProposalAuthState(user);
+          if (user) renderProposals();
         };
         const closeProposalDrawer = () => {
           if (!proposalDrawer || !proposalBackdrop) return;
@@ -1001,12 +1038,12 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           try {
             await window.VaultCloud?.ready;
             const user = await window.VaultCloud?.currentUser?.();
-            if (!user) { window.location.href = `${document.body.dataset.siteBase || '/'}cadastro/?next=${encodeURIComponent(window.location.pathname + window.location.search)}`; return; }
+            if (!user) { closeCheckout(); openProposalDrawer(); return; }
             group.publishedTotal = groupTotal(group);
             group.proposedTotal = finalTotalFor(group);
             await window.VaultCloud?.submitProposal?.(group);
           } catch (cloudError) {
-            showProposalError(window.VaultCloud?.friendlyFirebaseError?.(cloudError) || cloudError?.message || 'Não foi possível registrar a proposta online.');
+            showProposalError(window.VaultCloud?.friendlyFirebaseError?.(cloudError) || cloudError?.message || 'Não foi possível registrar a proposta.');
             return;
           }
           const message = buildCheckoutMessage(group);
@@ -1087,6 +1124,11 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           }
         });
         renderProposals();
+        refreshProposalAuth().then(() => renderProposals());
+        window.addEventListener('vault:auth-changed', (event) => {
+          setProposalAuthState(event.detail?.user || null);
+          renderProposals();
+        });
 
         document.querySelectorAll('[data-reveal]').forEach((element) => element.classList.add('reveal-ready'));
         if ('IntersectionObserver' in window && !reducedMotion) {

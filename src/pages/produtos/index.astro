@@ -3,6 +3,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import OnlineCatalogBrowser from '../../components/OnlineCatalogBrowser.astro';
 ---
 <BaseLayout title="Produtos da comunidade" description="Explore produtos Pokémon lacrados publicados no Vault TCG." active="products">
-  <section class="catalog-hero"><div class="shell catalog-hero-grid"><div data-reveal><span class="hero-badge"><i></i> Catálogo online</span><h1>Produtos da comunidade</h1><p>Boxes e outros produtos publicados em coleções públicas são lidos diretamente do banco online.</p></div><div class="catalog-hero-stats" data-reveal><div><strong>Online</strong><span>Firestore</span></div><div><strong>Atual</strong><span>sem rebuild de dados</span></div></div></div></section>
+  <section class="catalog-hero"><div class="shell catalog-hero-grid"><div data-reveal><span class="hero-badge"><i></i> Catálogo da comunidade</span><h1>Produtos da comunidade</h1><p>Explore boxes e outros produtos Pokémon lacrados publicados pelos colecionadores.</p></div><div class="catalog-hero-stats" data-reveal><div><strong>Lacrados</strong><span>produtos fechados</span></div><div><strong>Atual</strong><span>itens publicados</span></div></div></div></section>
   <OnlineCatalogBrowser kind="product" />
 </BaseLayout>

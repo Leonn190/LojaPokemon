@@ -55,8 +55,8 @@ const placeholder = kind === 'card'
   </div>
 
   <div class="catalog-results-heading">
-    <div><span class="section-kicker">Banco online</span><h2><strong data-online-count>0</strong> {noun} publicadas</h2></div>
-    <span class="cloud-save-state" data-online-status>Conectando ao Firebase…</span>
+    <div><span class="section-kicker">Catálogo</span><h2><strong data-online-count>0</strong> {noun} publicadas</h2></div>
+    <span class="cloud-save-state" data-online-status>Carregando catálogo…</span>
   </div>
 
   <div class="catalog-grid" data-online-grid></div>
@@ -137,11 +137,11 @@ const placeholder = kind === 'card'
       try {
         if (status) status.textContent = 'Carregando…';
         const cloud = (window as any).VaultCloud;
-        if (!cloud) throw new Error('Firebase ainda não foi inicializado.');
+        if (!cloud) throw new Error('Catálogo ainda não foi inicializado.');
         items = await cloud.listPublicItems(kind);
         hydrateFilters();
         apply();
-        if (status) status.textContent = 'Atualizado da nuvem';
+        if (status) status.textContent = 'Catálogo atualizado';
       } catch (error: any) {
         if (grid) grid.innerHTML = '';
         if (empty) {
@@ -149,9 +149,9 @@ const placeholder = kind === 'card'
           const title = empty.querySelector('h2');
           const text = empty.querySelector('p');
           if (title) title.textContent = 'Não foi possível carregar';
-          if (text) text.textContent = error?.message || 'Confira a configuração do Firebase e tente novamente.';
+          if (text) text.textContent = error?.message || 'Tente novamente em alguns instantes.';
         }
-        if (status) status.textContent = 'Firebase indisponível';
+        if (status) status.textContent = 'Catálogo indisponível';
       }
     };
 

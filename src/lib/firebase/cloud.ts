@@ -50,6 +50,91 @@ const resolvedConfig: FirebaseOptions = {
 
 let servicesPromise: Promise<{ app: FirebaseApp; auth: ReturnType<typeof getAuth>; db: Firestore }> | null = null;
 
+const PUBLIC_MIRROR_VERSION = 2;
+const PUBLIC_CACHE_TTL = 5 * 60 * 1000;
+const PUBLIC_CACHE_PREFIX = 'vault:public-cache:v2:';
+const memoryPublicCache = new Map<string, { savedAt: number; data: any }>();
+const publicRequests = new Map<string, Promise<any>>();
+
+const readPublicCache = (key: string) => {
+  const memory = memoryPublicCache.get(key);
+  if (memory) return memory;
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(`${PUBLIC_CACHE_PREFIX}${key}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.data) || !Number.isFinite(Number(parsed.savedAt))) return null;
+    const entry = { savedAt: Number(parsed.savedAt), data: parsed.data };
+    memoryPublicCache.set(key, entry);
+    return entry;
+  } catch (_) {
+    return null;
+  }
+};
+
+const writePublicCache = (key: string, data: any) => {
+  const entry = { savedAt: Date.now(), data };
+  memoryPublicCache.set(key, entry);
+  if (typeof window === 'undefined') return;
+  try { window.localStorage.setItem(`${PUBLIC_CACHE_PREFIX}${key}`, JSON.stringify(entry)); } catch (_) {}
+};
+
+const clearPublicCache = () => {
+  memoryPublicCache.clear();
+  publicRequests.clear();
+  if (typeof window === 'undefined') return;
+  try {
+    const keys: string[] = [];
+    for (let index = 0; index < window.localStorage.length; index += 1) {
+      const key = window.localStorage.key(index);
+      if (key?.startsWith(PUBLIC_CACHE_PREFIX)) keys.push(key);
+    }
+    keys.forEach((key) => window.localStorage.removeItem(key));
+  } catch (_) {}
+};
+
+const cachedPublicQuery = async <T>(key: string, loader: () => Promise<T>): Promise<T> => {
+  const cached = readPublicCache(key);
+  if (cached && Date.now() - cached.savedAt < PUBLIC_CACHE_TTL) return cached.data as T;
+  const running = publicRequests.get(key);
+  if (running) return running as Promise<T>;
+  const request = loader()
+    .then((data) => { writePublicCache(key, data); return data; })
+    .catch((error) => {
+      if (cached) return cached.data as T;
+      throw error;
+    })
+    .finally(() => publicRequests.delete(key));
+  publicRequests.set(key, request);
+  return request;
+};
+
+const numberOrNull = (value: any): number | null => {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const resolvePublicPrice = (item: any, fallback = 'league_average_then_lowest') => {
+  const direct = numberOrNull(item?.price);
+  if (direct !== null) return direct;
+  if (item?.kind !== 'card' && item?.kind !== 'booster') return null;
+  if (fallback === 'consult') return null;
+  const average = numberOrNull(item?.averageLeaguePrice ?? item?.leagueAverage);
+  const lowest = numberOrNull(item?.leaguePrice ?? item?.leagueLowest);
+  return fallback === 'league_lowest_then_average' ? (lowest ?? average) : (average ?? lowest);
+};
+
+const normalizePublicItem = (item: any, fallback?: string) => {
+  const priceDisplayFallback = fallback || item?.priceDisplayFallback || 'league_average_then_lowest';
+  return {
+    ...item,
+    price: resolvePublicPrice(item, priceDisplayFallback),
+    imageCandidates: Array.isArray(item?.imageCandidates) ? item.imageCandidates.filter(Boolean) : (item?.image ? [item.image] : []),
+  };
+};
+
 const resolveConfig = async (): Promise<FirebaseOptions> => {
   if (!resolvedConfig.apiKey || !resolvedConfig.projectId || !resolvedConfig.appId) {
     throw new Error('A configuracao publica do Firebase esta incompleta.');
@@ -121,26 +206,37 @@ const profileForFirestore = (profile: any, uid: string) => stripUndefined({
   priceDisplayFallback: profile.priceDisplayFallback || 'league_average_then_lowest',
   proposalTerms: profile.proposalTerms || { policy: 'flexible', flexibleDiscounts: true, discountTiers: [] },
   version: Number(profile.version || 1),
+  mirrorVersion: PUBLIC_MIRROR_VERSION,
   stats: profile.stats || {},
   updatedAt: serverTimestamp(),
 });
 
-const publicMirror = (item: any, kind: string, profile: any, uid: string) => stripUndefined({
-  ...toStoredItem(item),
-  kind,
-  ownerUid: uid,
-  collectionUid: uid,
-  collectionSlug: profile.collectionId || profile.slug || '',
-  ownerName: profile.owner || '',
-  ownerCollectionName: profile.title || '',
-  ownerCollectionSlug: profile.collectionId || profile.slug || '',
-  ownerPhone: profile.phone || '',
-  proposalTerms: profile.proposalTerms || { policy: 'flexible', flexibleDiscounts: true, discountTiers: [] },
-  showQuantity: profile.showQuantity !== false,
-  forSale: profile.selling !== false && item.forSale !== false,
-  public: true,
-  updatedAt: serverTimestamp(),
-});
+const publicMirror = (item: any, kind: string, profile: any, uid: string) => {
+  const stored = toStoredItem(item);
+  // Dados de depuração e históricos pesados não são necessários no catálogo público.
+  delete stored.advancedData;
+  delete stored.priceHistory;
+  const priceDisplayFallback = profile.priceDisplayFallback || 'league_average_then_lowest';
+  return stripUndefined({
+    ...stored,
+    kind,
+    price: resolvePublicPrice({ ...stored, kind }, priceDisplayFallback),
+    priceDisplayFallback,
+    mirrorVersion: PUBLIC_MIRROR_VERSION,
+    ownerUid: uid,
+    collectionUid: uid,
+    collectionSlug: profile.collectionId || profile.slug || '',
+    ownerName: profile.owner || '',
+    ownerCollectionName: profile.title || '',
+    ownerCollectionSlug: profile.collectionId || profile.slug || '',
+    ownerPhone: profile.phone || '',
+    proposalTerms: profile.proposalTerms || { policy: 'flexible', flexibleDiscounts: true, discountTiers: [] },
+    showQuantity: profile.showQuantity !== false,
+    forSale: profile.selling !== false && item.forSale !== false,
+    public: true,
+    updatedAt: serverTimestamp(),
+  });
+};
 
 const itemKey = (uid: string, kind: string, id: string) => `${uid}__${kind}__${encodeURIComponent(id).replace(/%/g, '_')}`.slice(0, 1450);
 
@@ -215,6 +311,7 @@ export async function createAccountWithCollection(input: {
     batch.set(doc(db, 'collections', uid), { ...profileForFirestore(profile, uid), createdAt: serverTimestamp() });
     batch.set(doc(db, 'slugs', slug), { ownerUid: uid, collectionUid: uid, slug, createdAt: serverTimestamp() });
     await batch.commit();
+    clearPublicCache();
     return { user: credential.user, profile };
   } catch (error) {
     try { await deleteUser(credential.user); } catch (_) {}
@@ -316,6 +413,8 @@ export async function saveEditorState(state: any, options: { profileDirty?: bool
   const user = auth.currentUser;
   if (!user) throw new Error('Sua sessão expirou. Entre novamente.');
   const uid = user.uid;
+  const mirrorUpgrade = Number(state.profile?.mirrorVersion || 0) < PUBLIC_MIRROR_VERSION;
+  state.profile.mirrorVersion = PUBLIC_MIRROR_VERSION;
   state.profile.stats = buildStats(state);
   state.profile.email = user.email || state.profile.email || '';
   state.profile.ownerUid = uid;
@@ -336,7 +435,7 @@ export async function saveEditorState(state: any, options: { profileDirty?: bool
     const items = state[kind] || [];
     items.forEach((item: any) => {
       const itemChanged = item._isNew || item._isDirty;
-      const mirrorNeedsRefresh = itemChanged || options.mirrorDirty === true || options.privacyDirty === true;
+      const mirrorNeedsRefresh = itemChanged || mirrorUpgrade || options.mirrorDirty === true || options.privacyDirty === true;
       if (!itemChanged && !mirrorNeedsRefresh) return;
       const id = String(item._id || item.id || item.albumId || crypto.randomUUID());
       item._id = id;
@@ -369,6 +468,7 @@ export async function saveEditorState(state: any, options: { profileDirty?: bool
   }
 
   await commitOperations(db, operations);
+  clearPublicCache();
   for (const kind of kinds) (state[kind] || []).forEach((item: any) => { item._isNew = false; item._isDirty = false; });
   state.movements = [...(state.movements || []), ...(state.pendingMovements || [])];
   state.pendingMovements = [];
@@ -377,27 +477,34 @@ export async function saveEditorState(state: any, options: { profileDirty?: bool
 }
 
 export async function listPublicCollections() {
-  const { db } = await getCloud();
-  const snapshot = await getDocs(query(collection(db, 'collections'), where('public', '==', true)));
-  return snapshot.docs.map((entry) => ({ uid: entry.id, ...entry.data() }));
+  return cachedPublicQuery('collections', async () => {
+    const { db } = await getCloud();
+    const snapshot = await getDocs(query(collection(db, 'collections'), where('public', '==', true)));
+    return snapshot.docs.map((entry) => ({ uid: entry.id, ...entry.data() }));
+  });
 }
 
 export async function listPublicItems(kind?: string, maxResults?: number) {
-  const { db } = await getCloud();
-  const baseQuery = kind
-    ? query(collection(db, 'publicItems'), where('kind', '==', kind))
-    : query(collection(db, 'publicItems'));
-  const source = maxResults && maxResults > 0
-    ? query(baseQuery, firestoreLimit(Math.max(1, Math.floor(maxResults))))
-    : baseQuery;
-  const snapshot = await getDocs(source);
-  return snapshot.docs.map((entry) => ({ _docId: entry.id, ...entry.data() }));
+  const normalizedKind = kind || 'all';
+  const normalizedLimit = maxResults && maxResults > 0 ? Math.max(1, Math.floor(maxResults)) : 0;
+  const cacheKey = `items:${normalizedKind}:${normalizedLimit || 'all'}`;
+  return cachedPublicQuery(cacheKey, async () => {
+    const { db } = await getCloud();
+    const baseQuery = kind
+      ? query(collection(db, 'publicItems'), where('kind', '==', kind))
+      : query(collection(db, 'publicItems'));
+    const source = normalizedLimit ? query(baseQuery, firestoreLimit(normalizedLimit)) : baseQuery;
+    const snapshot = await getDocs(source);
+    return snapshot.docs.map((entry) => normalizePublicItem({ _docId: entry.id, ...entry.data() }));
+  });
 }
 
 export async function listPublicAlbums() {
-  const { db } = await getCloud();
-  const snapshot = await getDocs(collection(db, 'publicAlbums'));
-  return snapshot.docs.map((entry) => ({ _docId: entry.id, ...entry.data() }));
+  return cachedPublicQuery('albums', async () => {
+    const { db } = await getCloud();
+    const snapshot = await getDocs(collection(db, 'publicAlbums'));
+    return snapshot.docs.map((entry) => ({ _docId: entry.id, ...entry.data() }));
+  });
 }
 
 export async function loadCollectionBySlug(slug: string) {
@@ -422,7 +529,7 @@ export async function loadCollectionBySlug(slug: string) {
       getDocs(query(collection(db, 'publicItems'), where('collectionUid', '==', uid))),
       getDocs(query(collection(db, 'publicAlbums'), where('collectionUid', '==', uid))),
     ]);
-    const publicItems = itemSnapshot.docs.map((entry) => ({ _docId: entry.id, ...entry.data() } as any));
+    const publicItems = itemSnapshot.docs.map((entry) => normalizePublicItem({ _docId: entry.id, ...entry.data() } as any, profile.priceDisplayFallback));
     const publicAlbums = albumSnapshot.docs.map((entry) => ({ _docId: entry.id, ...entry.data() } as any));
     return {
       profile,
@@ -444,6 +551,7 @@ export async function loadCollectionBySlug(slug: string) {
   const addOwner = (item: any, kind: string) => ({
     ...item,
     kind,
+    price: resolvePublicPrice({ ...item, kind }, profile.priceDisplayFallback || 'league_average_then_lowest'),
     ownerUid: uid,
     ownerName: profile.owner || '',
     ownerCollectionName: profile.title || '',

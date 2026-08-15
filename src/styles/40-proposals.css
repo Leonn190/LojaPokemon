@@ -698,3 +698,18 @@ body.checkout-open { overflow: hidden; }
 .workspace-tier-row label > div input { border: 0; background: transparent; }
 .workspace-tier-row label > div b { padding-right: 10px; color: var(--gold); font-size: .68rem; }
 
+
+
+.proposal-auth-required {
+  align-self: center;
+  justify-self: center;
+  width: min(100% - 32px, 420px);
+}
+.proposal-auth-required .proposal-auth-cta {
+  width: fit-content;
+  margin: 20px auto 0;
+  text-decoration: none;
+}
+@media (max-width: 720px) {
+  .proposal-auth-required { grid-column: 1 / -1; }
+}

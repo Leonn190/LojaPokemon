@@ -12,7 +12,7 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
 
 <BaseLayout
   title="Entrar"
-  description="Entre na sua conta do Vault TCG ou crie uma conta com coleção online."
+  description="Entre na sua conta do Vault TCG ou crie uma conta para organizar sua coleção."
   active="signup"
   bodyClass="signup-page"
 >
@@ -20,13 +20,13 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
     <div class="shell signup-hero-grid">
       <div data-reveal>
         <span class="hero-badge"><i></i> Central de coleções</span>
-        <h1>Sua coleção, salva na nuvem.</h1>
-        <p>Entre na sua conta para editar tudo online. Cada conta possui uma coleção, que pode ficar vazia, privada ou pública. Nenhum ZIP é necessário para salvar alterações.</p>
+        <h1>Sua coleção, do seu jeito.</h1>
+        <p>Entre na sua conta para organizar seu acervo. Sua coleção pode ficar vazia, privada ou pública, conforme você preferir.</p>
       </div>
       <div class="signup-steps" data-reveal>
-        <article><span>01</span><div><strong>Entre ou crie sua conta</strong><p>O Firebase cuida do login e mantém sua sessão protegida.</p></div></article>
+        <article><span>01</span><div><strong>Entre ou crie sua conta</strong><p>Acesse seu espaço pessoal para organizar a coleção e suas propostas.</p></div></article>
         <article><span>02</span><div><strong>Edite normalmente</strong><p>Cartas, boosters, kits, produtos e álbuns continuam no mesmo editor.</p></div></article>
-        <article><span>03</span><div><strong>Salve online</strong><p>As alterações são sincronizadas diretamente com o Firestore.</p></div></article>
+        <article><span>03</span><div><strong>Mantenha tudo organizado</strong><p>Suas alterações ficam disponíveis na sua conta.</p></div></article>
       </div>
     </div>
   </section>
@@ -41,11 +41,11 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
     </div>
 
     <div class="editor-notice" data-editor-notice>
-      <span>☁</span><p>Contas e dados são salvos no Firebase. Sua coleção pode permanecer completamente vazia e privada se você quiser usar o Vault apenas para comprar e enviar propostas.</p>
+      <span>◇</span><p>Sua coleção pode permanecer completamente vazia e privada se você quiser usar o Vault apenas para comprar e enviar propostas.</p>
     </div>
 
     <section class="editor-start-panel" data-start-panel="published">
-      <div class="form-section-heading"><span class="section-eyebrow">Conta Vault</span><h2>Entrar</h2><p>Use o e-mail e a senha cadastrados no Firebase.</p></div>
+      <div class="form-section-heading"><span class="section-eyebrow">Conta Vault</span><h2>Entrar</h2><p>Use o e-mail e a senha da sua conta.</p></div>
       <form class="editor-profile-form published-login" data-published-login>
         <label class="form-field"><span>E-mail</span><input name="login" type="email" autocomplete="email" required /></label>
         <label class="form-field"><span>Senha</span><input name="password" type="password" autocomplete="current-password" required /></label>
@@ -96,10 +96,10 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
 
       {legacyCollections.length > 0 && (
         <details class="editor-legacy-migration" data-legacy-migration>
-          <summary><span>↥</span><div><strong>Migrar uma coleção antiga</strong><small>Uso único: transfere os dados que existiam no projeto local para esta conta Firebase, sem ZIP.</small></div><b>+</b></summary>
+          <summary><span>↥</span><div><strong>Migrar uma coleção antiga</strong><small>Uso único: transfere os dados da versão anterior para esta conta.</small></div><b>+</b></summary>
           <div class="legacy-migration-body">
             <label class="form-field"><span>Coleção antiga</span><select data-legacy-select><option value="">Selecione…</option>{legacyCollections.map((collection) => <option value={collection.profile.collectionId || collection.slug}>{collection.profile.title} · {collection.profile.owner}</option>)}</select></label>
-            <label class="form-field"><span>Senha antiga dessa coleção</span><input type="password" autocomplete="off" data-legacy-password placeholder="A senha usada no sistema antigo" /><small>A senha é conferida localmente no navegador e não é enviada ao Firestore.</small></label>
+            <label class="form-field"><span>Senha antiga dessa coleção</span><input type="password" autocomplete="off" data-legacy-password placeholder="A senha usada no sistema antigo" /><small>A senha é conferida localmente no navegador.</small></label>
             <button type="button" class="secondary-cta" data-legacy-import><span>Migrar dados para esta conta</span><b>↥</b></button>
             <p class="import-feedback" data-legacy-feedback></p>
           </div>
@@ -200,7 +200,7 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
       </section>
 
       <div class="editor-export-panel cloud-save-panel">
-        <div><span class="section-eyebrow">Firebase</span><h3>Alterações salvas online</h3><p>Não existe mais download de ZIP para atualizar a coleção. O editor sincroniza somente os documentos que mudaram.</p></div>
+        <div><span class="section-eyebrow">Editor</span><h3>Alterações salvas automaticamente</h3><p>Edite sua coleção e continue de onde parou em qualquer acesso à sua conta.</p></div>
         <div class="editor-export-actions"><button type="button" class="primary-cta" data-save-now><span>Salvar agora</span><b>☁</b></button></div>
       </div>
     </section>
@@ -220,7 +220,7 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
             <label><span>Idioma</span><input name="language" required value="Português (PT-BR)" /></label>
             <label><span>Quantidade</span><input name="quantity" type="number" min="1" value="1" required /></label>
             <label><span>Preço final (opcional)</span><input name="price" type="number" min="0" step="0.01" placeholder="Ex.: 45.90" /></label>
-            <label class="wide"><span>Imagem local (opcional)</span><input name="image" placeholder="imagens/cartas/minha-carta.webp" /><small>O arquivo continua dentro de public; o Firestore guarda apenas o caminho.</small></label>
+            <label class="wide"><span>Imagem local (opcional)</span><input name="image" placeholder="imagens/cartas/minha-carta.webp" /><small>Use o caminho da imagem disponível no projeto.</small></label>
             <label class="wide"><span>Link da Liga (opcional)</span><input name="linkLiga" type="url" placeholder="https://www.ligapokemon.com.br/..." /></label>
           </div>
           <label class="modal-sale-check"><input name="forSale" type="checkbox" checked /><span><strong>Disponível para venda</strong><small>Pode ser alterado individualmente no inventário.</small></span></label>
@@ -283,7 +283,7 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
             <label class="wide"><span>Link da Liga (opcional)</span><input name="linkLiga" type="url" placeholder="https://www.ligapokemon.com.br/..." /></label>
             <label><span>Quantidade</span><input name="quantity" type="number" min="1" value="1" required /></label>
             <label><span>Preço (opcional)</span><input name="price" type="number" min="0" step="0.01" /></label>
-            <label class="wide"><span>Imagem local (opcional)</span><input name="image" placeholder="imagens/produtos/meu-produto.webp" /><small>O arquivo continua no public; o Firestore guarda só o caminho.</small></label>
+            <label class="wide"><span>Imagem local (opcional)</span><input name="image" placeholder="imagens/produtos/meu-produto.webp" /><small>Use o caminho da imagem disponível no projeto.</small></label>
           </div>
           <label class="modal-sale-check"><input name="forSale" type="checkbox" checked /><span><strong>Disponível para venda</strong><small>Pode ser alterado depois no inventário.</small></span></label>
           <footer class="modal-form-actions"><button type="button" class="secondary-cta" data-close-modal><span>Cancelar</span><b>×</b></button><button type="submit" class="primary-cta"><span>Adicionar produto</span><b>＋</b></button></footer>
@@ -1467,7 +1467,7 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
         const claim = legacyClaims.find((entry) => clean(entry?.collectionId) === collectionId);
         if (!legacy || !claim) { feedback.textContent = 'Selecione uma coleção antiga válida.'; return; }
         const currentItems = ['cards','boosters','kits','products','albums'].reduce((sum, kind) => sum + (state[kind]?.length || 0), 0);
-        if (currentItems > 0) { feedback.textContent = 'A migração só é permitida em uma coleção vazia para evitar sobrescrever dados online.'; return; }
+        if (currentItems > 0) { feedback.textContent = 'A migração só é permitida em uma coleção vazia para evitar sobrescrever dados da conta.'; return; }
         feedback.textContent = 'Verificando a senha antiga…';
         try {
           const valid = await verifyLegacyPassword(passwordInput.value, claim);
@@ -1489,7 +1489,7 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
           setCloudSaveState('Migrando coleção antiga…', 'saving');
           await flushCloudSave();
           passwordInput.value = '';
-          feedback.textContent = 'Migração concluída. A coleção antiga agora está salva no Firebase.';
+          feedback.textContent = 'Migração concluída. Sua coleção antiga já está disponível nesta conta.';
           const details = root.querySelector('[data-legacy-migration]'); if (details) details.open = false;
         } catch (error) {
           feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível migrar a coleção.';
@@ -1561,7 +1561,7 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
       });
       window.addEventListener('vault:cloud-error', (event) => {
         const feedback = root.querySelector('[data-login-feedback]');
-        if (feedback) feedback.textContent = event.detail?.message || 'Falta configurar a conexão com o Firebase.';
+        if (feedback) feedback.textContent = event.detail?.message || 'Não foi possível conectar ao serviço. Tente novamente.';
       });
 
 
