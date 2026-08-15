@@ -141,7 +141,7 @@ def main() -> None:
     acoes = {"1": executar_formatacao, "2": executar_atualizacao, "3": executar_cotizacao}
     while True:
         print("\n" + "=" * 62)
-        print("NEXUS TCG — GERENCIAMENTO DE COLEÇÕES")
+        print("VAULT TCG — GERENCIAMENTO DE COLEÇÕES")
         print("=" * 62)
         print("  1. Formatar nova coleção")
         print("  2. Atualizar coleção com novidades")

@@ -666,7 +666,7 @@ export const getCollections = (): CollectorCollection[] => {
     const owner = profile.owner?.trim() || folderName;
     const collectionSlug = slugify(folderName);
     const title = profile.title?.trim() || `Coleção de ${owner}`;
-    const description = profile.description?.trim() || 'Coleção Pokémon organizada no Nexus TCG.';
+    const description = profile.description?.trim() || 'Coleção Pokémon organizada no Vault TCG.';
     const showQuantity = profile.showQuantity !== false;
     const proposalTerms = normalizeProposalTerms(profile);
     const ownerPhone = profile.phone?.trim() || '';

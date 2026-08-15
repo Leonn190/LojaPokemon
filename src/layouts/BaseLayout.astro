@@ -636,7 +636,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             modalStock.textContent = showQuantity ? `${card.dataset.stock || '0'} ${card.dataset.stock === '1' ? 'unidade' : 'unidades'}` : '';
           }
           if (modalDescription) modalDescription.textContent = card.dataset.description || (isCard
-            ? 'Carta publicada por um colecionador da comunidade Nexus TCG.'
+            ? 'Carta publicada por um colecionador da comunidade Vault TCG.'
             : isBooster ? 'Booster lacrado publicado por um colecionador da comunidade.' : isKit ? 'Conjunto personalizado pelo dono da coleção.' : 'Produto Pokémon lacrado publicado pelo colecionador.');
           if (modalPrice) modalPrice.textContent = card.dataset.priceLabel || 'Consultar';
           modalPricePanel?.classList.toggle('booster-price-panel', isBooster);
@@ -970,7 +970,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           lines.push('', `Motivo: ${group.reason || 'Não informado.'}`);
           lines.push('', 'DADOS PARA ENTREGA', `Nome: ${group.buyerName}`, `Endereço: ${group.address}`);
           lines.push('', 'FORMA DE PAGAMENTO', 'Pagamento por Pix, após a aceitação da proposta e a confirmação da disponibilidade dos itens.');
-          lines.push('', 'Esta mensagem foi gerada pelo Nexus TCG de acordo com os termos públicos da coleção.');
+          lines.push('', 'Esta mensagem foi gerada pelo Vault TCG de acordo com os termos públicos da coleção.');
           return lines.join('\n');
         };
         const openCheckout = () => {

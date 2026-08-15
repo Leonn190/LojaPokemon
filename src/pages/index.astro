@@ -35,7 +35,7 @@ const wallLanes = Array.from({ length: 8 }, (_, laneIndex) => {
 ---
 
 <BaseLayout active="home">
-  <section class="home-hero nexus-home-hero" aria-labelledby="home-title">
+  <section class="home-hero nexus-home-hero vault-intro-pending" aria-labelledby="home-title" data-vault-intro>
     <div class="nexus-hero-card-flow" aria-hidden="true">
       <div class="nexus-hero-flow-plane">
         {wallLanes.map((lane, laneIndex) => (
@@ -47,7 +47,7 @@ const wallLanes = Array.from({ length: 8 }, (_, laneIndex) => {
                     <div class="nexus-hero-flow-card">
                       <ProductImage
                         item={card}
-                        eager={laneIndex < 2 && sequence === 0 && cardIndex < 4}
+                        eager={true}
                         interactive={false}
                       />
                     </div>
@@ -62,11 +62,19 @@ const wallLanes = Array.from({ length: 8 }, (_, laneIndex) => {
       <span class="nexus-hero-flow-vignette"></span>
     </div>
 
+    <div class="vault-intro-fx" aria-hidden="true">
+      <span class="vault-tech-drop"><i></i></span>
+      <span class="vault-impact-core"></span>
+      <span class="vault-impact-ring vault-impact-ring-a"></span>
+      <span class="vault-impact-ring vault-impact-ring-b"></span>
+      <span class="vault-impact-grid"></span>
+    </div>
+
     <div class="shell hero-copy nexus-home-copy">
       <span class="hero-badge"><i></i> Coleções Pokémon em um só lugar</span>
-      <h1 id="home-title"><span>Nexus</span> <em>TCG</em></h1>
+      <h1 id="home-title"><span>Vault</span> <em>TCG</em></h1>
       <h2 class="nexus-home-tagline">Seu acervo. Sua vitrine.</h2>
-      <p class="nexus-home-description">Organize sua coleção Pokémon, publique seus itens e encontre outros colecionadores. Use o Nexus para guardar sua coleção online ou transformar itens selecionados em uma vitrine de venda.</p>
+      <p class="nexus-home-description">Organize sua coleção Pokémon, publique seus itens e encontre outros colecionadores. Use o Vault para guardar sua coleção online ou transformar itens selecionados em uma vitrine de venda.</p>
       <div class="hero-actions">
         <a class="primary-cta" href={`${base}cadastro/`}><span>Criar minha coleção</span><b>＋</b></a>
         <a class="secondary-cta" href={`${base}explorar/`}><span>Explorar</span><b>↗</b></a>
@@ -79,7 +87,7 @@ const wallLanes = Array.from({ length: 8 }, (_, laneIndex) => {
     </div>
   </section>
 
-  <section class="shell navigation-cards marketplace-navigation" aria-label="Áreas do Nexus TCG" data-reveal>
+  <section class="shell navigation-cards marketplace-navigation" aria-label="Áreas do Vault TCG" data-reveal>
     <a class="navigation-card cards-navigation" href={`${base}cartas/`}>
       <div class="navigation-icon" aria-hidden="true"><span>◆</span></div>
       <div><small>Todos os colecionadores</small><h2>Cartas</h2><p>Explore cartas publicadas em todas as coleções e descubra quem possui cada item.</p></div>
@@ -115,7 +123,7 @@ const wallLanes = Array.from({ length: 8 }, (_, laneIndex) => {
   <Carousel
     eyebrow="Cartas da comunidade"
     title="Descobertas de várias coleções."
-    description="Uma seleção aleatória de cartas publicadas por todos os colecionadores do Nexus."
+    description="Uma seleção aleatória de cartas publicadas por todos os colecionadores do Vault."
     items={featuredCards}
     viewAllHref={`${base}cartas/`}
     viewAllLabel="Ver todas as cartas"
@@ -138,7 +146,7 @@ const wallLanes = Array.from({ length: 8 }, (_, laneIndex) => {
     viewAllHref={`${base}kits/`}
     viewAllLabel="Explorar kits"
     emptyTitle="O primeiro kit ainda não foi publicado"
-    emptyDescription="Combine cartas e boosters da coleção para criar a primeira oferta do Nexus."
+    emptyDescription="Combine cartas e boosters da coleção para criar a primeira oferta do Vault."
   />
 
   {products.length > 0 && (
@@ -154,4 +162,50 @@ const wallLanes = Array.from({ length: 8 }, (_, laneIndex) => {
 
   <AlbumCarousel albums={featuredAlbums} viewAllHref={`${base}albuns/`} />
   <CollectionCarousel collections={featuredCollections} viewAllHref={`${base}colecoes/`} />
+
+
+<script is:inline>
+  (() => {
+    const hero = document.querySelector('[data-vault-intro]');
+    if (!hero) return;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) {
+      hero.classList.remove('vault-intro-pending');
+      hero.classList.add('vault-intro-complete');
+      return;
+    }
+
+    const images = [...hero.querySelectorAll('.nexus-hero-card-flow img')];
+    const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+    const imageIsSettled = (image) => {
+      if (image.hidden || image.closest('.image-stage')?.classList.contains('no-image')) return true;
+      return image.complete && image.naturalWidth > 0;
+    };
+
+    const waitForWall = async () => {
+      const startedAt = performance.now();
+      const hardLimit = 5000;
+      while (performance.now() - startedAt < hardLimit) {
+        const settled = images.filter(imageIsSettled).length;
+        const ratio = images.length ? settled / images.length : 1;
+        // Once virtually the whole visible wall is ready, there is no reason to hold the intro longer.
+        if (ratio >= .96) return;
+        await sleep(80);
+      }
+    };
+
+    // Start the drop instantly. Its first ~900 ms intentionally doubles as image-loading time.
+    hero.classList.add('vault-intro-running');
+    Promise.all([sleep(900), waitForWall()]).then(async () => {
+      hero.classList.add('vault-intro-revealing');
+      await sleep(1080);
+      hero.classList.add('vault-intro-copy');
+      await sleep(900);
+      hero.classList.remove('vault-intro-pending', 'vault-intro-running', 'vault-intro-revealing', 'vault-intro-copy');
+      hero.classList.add('vault-intro-complete');
+    });
+  })();
+</script>
 </BaseLayout>

@@ -1,4 +1,4 @@
-# Nexus TCG — Gerenciamento
+# Vault TCG — Gerenciamento
 
 ## Formato oficial
 

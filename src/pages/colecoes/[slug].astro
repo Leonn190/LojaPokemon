@@ -53,7 +53,7 @@ const firstSection = collection.albums.length ? 'albuns' : collection.cards.leng
         </nav>
         <div class="profile-identity">
           <span class:list={['profile-avatar', collection.profilePhoto && 'has-photo']}>{collection.profilePhoto ? <img src={imageUrl(collection.profilePhoto)} alt={`Foto de perfil de ${collection.owner}`} /> : initials}</span>
-          <div><small>Colecionador no Nexus</small><strong>{collection.owner}</strong></div>
+          <div><small>Colecionador no Vault</small><strong>{collection.owner}</strong></div>
           <span class:list={['profile-sale-status', collection.selling ? 'selling' : 'showcase-only']}>{collection.selling ? 'Itens selecionados à venda' : 'Coleção para exposição'}</span>
         </div>
         <h1>{collection.title}</h1>

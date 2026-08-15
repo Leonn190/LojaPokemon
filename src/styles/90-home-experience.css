@@ -579,3 +579,247 @@ body.modal-open .collection-album-belt { animation-play-state: paused !important
   .explore-search-grid { grid-template-columns: 1fr; }
   .explore-search-results { padding-bottom: 80px; }
 }
+
+/* ========================================================================== 
+   Vault TCG — entrada tecnológica da home, 14/08/2026
+   O paredão fica mascarado enquanto as imagens da abertura carregam. Um
+   impacto de energia cria um pulso circular que revela as cartas e, só então,
+   libera o conteúdo principal da hero.
+   ========================================================================== */
+.nexus-home-hero.home-hero {
+  --vault-impact-x: 72%;
+  --vault-impact-y: 42%;
+}
+
+.vault-intro-fx {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .48s ease;
+}
+
+/* Enquanto a sequência está ativa, nada do conteúdo principal aparece antes
+   da hora e o fundo de cartas fica completamente escondido pela máscara. */
+.vault-intro-pending .nexus-hero-card-flow {
+  opacity: 0;
+  clip-path: circle(0 at var(--vault-impact-x) var(--vault-impact-y));
+  -webkit-clip-path: circle(0 at var(--vault-impact-x) var(--vault-impact-y));
+}
+.vault-intro-pending .nexus-home-copy {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  animation: none !important;
+}
+.vault-intro-pending .vault-intro-fx { opacity: 1; }
+
+.vault-tech-drop,
+.vault-impact-core,
+.vault-impact-ring,
+.vault-impact-grid {
+  position: absolute;
+  left: var(--vault-impact-x);
+  top: var(--vault-impact-y);
+}
+
+/* "Pingo" digital: núcleo compacto + cauda luminosa descendo até o ponto de
+   impacto. A queda começa imediatamente para que o tempo visual também seja
+   usado para o carregamento das imagens. */
+.vault-tech-drop {
+  z-index: 4;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0;
+  background: #d9ffff;
+  box-shadow:
+    0 0 8px rgba(216,255,255,.95),
+    0 0 22px rgba(84,232,223,.82),
+    0 0 54px rgba(84,232,223,.38);
+  transform: translate(-50%, -50%) translateY(-62vh) scale(.6);
+}
+.vault-tech-drop::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  width: 2px;
+  height: clamp(90px, 19vh, 210px);
+  transform: translateX(-50%);
+  transform-origin: bottom;
+  background: linear-gradient(180deg, transparent, rgba(84,232,223,.08) 24%, rgba(177,255,249,.78) 100%);
+  filter: blur(.3px);
+  box-shadow: 0 0 12px rgba(84,232,223,.3);
+}
+.vault-tech-drop i {
+  position: absolute;
+  inset: -4px;
+  border: 1px solid rgba(223,255,253,.62);
+  border-radius: 50%;
+  transform: rotate(45deg);
+}
+.vault-intro-running .vault-tech-drop {
+  animation: vault-tech-drop .82s cubic-bezier(.38,.04,.62,1) both;
+}
+
+.vault-impact-core {
+  z-index: 5;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.2);
+  background: #efffff;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.9),
+    0 0 18px 5px rgba(84,232,223,.84),
+    0 0 58px 18px rgba(84,232,223,.24);
+}
+.vault-intro-running .vault-impact-core {
+  animation: vault-impact-core .46s .68s cubic-bezier(.15,.75,.2,1) both;
+}
+
+.vault-impact-ring {
+  z-index: 3;
+  width: 26px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(154,255,247,.78);
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.1);
+  box-shadow:
+    0 0 14px rgba(84,232,223,.28),
+    inset 0 0 14px rgba(84,232,223,.12);
+}
+.vault-impact-ring::before,
+.vault-impact-ring::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border: 1px dashed rgba(206,255,252,.2);
+  border-radius: inherit;
+}
+.vault-impact-ring::after {
+  inset: 5px;
+  border-style: solid;
+  border-color: rgba(215,199,255,.25);
+}
+.vault-intro-revealing .vault-impact-ring-a {
+  animation: vault-ring-expand 1.02s cubic-bezier(.12,.7,.12,1) both;
+}
+.vault-intro-revealing .vault-impact-ring-b {
+  animation: vault-ring-expand-secondary 1.12s .10s cubic-bezier(.12,.7,.12,1) both;
+}
+
+.vault-impact-grid {
+  z-index: 2;
+  width: min(46vw, 620px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.14) rotate(8deg);
+  background:
+    repeating-radial-gradient(circle, rgba(84,232,223,.18) 0 1px, transparent 1px 34px),
+    repeating-conic-gradient(from 0deg, rgba(205,255,251,.13) 0 1deg, transparent 1deg 18deg);
+  -webkit-mask-image: radial-gradient(circle, #000 0 34%, rgba(0,0,0,.72) 48%, transparent 72%);
+  mask-image: radial-gradient(circle, #000 0 34%, rgba(0,0,0,.72) 48%, transparent 72%);
+  filter: drop-shadow(0 0 18px rgba(84,232,223,.12));
+}
+.vault-intro-revealing .vault-impact-grid {
+  animation: vault-grid-pulse 1.14s cubic-bezier(.12,.72,.16,1) both;
+}
+
+/* O pulso não é apenas decorativo: ele é a própria máscara que abre o fundo. */
+.vault-intro-revealing .nexus-hero-card-flow {
+  animation: vault-wall-reveal 1.08s cubic-bezier(.12,.74,.12,1) both;
+}
+
+/* Conteúdo entra somente depois do pulso revelar o paredão. */
+.vault-intro-copy .nexus-home-copy {
+  animation: vault-home-copy-reveal .82s cubic-bezier(.18,.78,.2,1) both !important;
+}
+.vault-intro-copy .vault-intro-fx { opacity: 0; }
+.vault-intro-complete .nexus-hero-card-flow {
+  opacity: 1;
+  clip-path: none;
+  -webkit-clip-path: none;
+}
+.vault-intro-complete .nexus-home-copy {
+  opacity: 1;
+  transform: none;
+  animation: none !important;
+}
+.vault-intro-complete .vault-intro-fx { display: none; }
+
+@keyframes vault-tech-drop {
+  0% { opacity: 0; transform: translate(-50%, -50%) translateY(-62vh) scale(.55); }
+  14% { opacity: .9; }
+  76% { opacity: 1; transform: translate(-50%, -50%) translateY(-5vh) scale(.85); }
+  91% { opacity: 1; transform: translate(-50%, -50%) translateY(0) scale(1.15); }
+  100% { opacity: 0; transform: translate(-50%, -50%) translateY(0) scale(.15); }
+}
+@keyframes vault-impact-core {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.15); }
+  28% { opacity: 1; transform: translate(-50%, -50%) scale(2.4); }
+  100% { opacity: .36; transform: translate(-50%, -50%) scale(.75); }
+}
+@keyframes vault-ring-expand {
+  0% { opacity: .9; transform: translate(-50%, -50%) scale(.14); }
+  55% { opacity: .62; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(34); }
+}
+@keyframes vault-ring-expand-secondary {
+  0% { opacity: .68; transform: translate(-50%, -50%) scale(.12) rotate(0); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(43) rotate(22deg); }
+}
+@keyframes vault-grid-pulse {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.14) rotate(8deg); }
+  22% { opacity: .46; }
+  68% { opacity: .18; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.35) rotate(17deg); }
+}
+@keyframes vault-wall-reveal {
+  0% {
+    opacity: 0;
+    clip-path: circle(0 at var(--vault-impact-x) var(--vault-impact-y));
+    -webkit-clip-path: circle(0 at var(--vault-impact-x) var(--vault-impact-y));
+  }
+  18% { opacity: .28; }
+  100% {
+    opacity: 1;
+    clip-path: circle(145vmax at var(--vault-impact-x) var(--vault-impact-y));
+    -webkit-clip-path: circle(145vmax at var(--vault-impact-x) var(--vault-impact-y));
+  }
+}
+@keyframes vault-home-copy-reveal {
+  0% { opacity: 0; transform: translate3d(0, 24px, 0); filter: blur(8px); }
+  58% { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: none; filter: none; }
+}
+
+@media (max-width: 760px) {
+  .nexus-home-hero.home-hero {
+    --vault-impact-x: 72%;
+    --vault-impact-y: 31%;
+  }
+  .vault-impact-grid { width: min(78vw, 480px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vault-intro-fx { display: none !important; }
+  .vault-intro-pending .nexus-hero-card-flow,
+  .vault-intro-complete .nexus-hero-card-flow {
+    opacity: 1 !important;
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+  }
+  .vault-intro-pending .nexus-home-copy,
+  .vault-intro-complete .nexus-home-copy {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    animation: none !important;
+  }
+}

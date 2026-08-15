@@ -29,7 +29,7 @@ const proposalBlocksDefinedPrice = (card: CardItem) => card.proposalTerms.policy
 const canPropose = (card: CardItem) => card.forSale && card.proposalTerms.policy !== 'none' && !(card.price !== null && proposalBlocksDefinedPrice(card));
 ---
 
-<BaseLayout title={album.name} description={`${album.name}, álbum virtual de ${collection.owner} no Nexus TCG.`} active="albums" bodyClass="immersive-album-page">
+<BaseLayout title={album.name} description={`${album.name}, álbum virtual de ${collection.owner} no Vault TCG.`} active="albums" bodyClass="immersive-album-page">
   <section class="album-world" data-immersive-album data-pages={album.pages.length}>
     <div class="album-world-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
     <div class="album-world-stars" aria-hidden="true"></div>
@@ -147,7 +147,7 @@ const canPropose = (card: CardItem) => card.forSale && card.proposalTerms.policy
               ))}
               {pages.length % 2 === 1 && (
                 <section class="immersive-album-sheet right immersive-album-endpaper" data-album-endpaper hidden aria-hidden="true">
-                  <div class="album-endpaper-mark"><span>NX</span><strong>Fim do álbum</strong><small>{album.name}</small></div>
+                  <div class="album-endpaper-mark"><span>VT</span><strong>Fim do álbum</strong><small>{album.name}</small></div>
                   <span class="immersive-page-texture" aria-hidden="true"></span>
                   <span class="immersive-page-edge" aria-hidden="true"></span>
                 </section>
