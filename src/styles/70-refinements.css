@@ -475,3 +475,109 @@ body.album-focus-mode .album-focus-exit > span { color:var(--muted); }
 .album-endpaper-mark small { max-width:20ch; color:var(--muted-2); font-size:.55rem; line-height:1.45; }
 @media (max-width:760px) { .immersive-album-endpaper { display:none !important; } }
 
+
+/* =========================================================
+   Loading states + carregamento progressivo dos catálogos
+   ========================================================= */
+.skeleton-pulse {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,.055);
+}
+.skeleton-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-105%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.085), transparent);
+  animation: vault-skeleton-shimmer 1.55s ease-in-out infinite;
+}
+@keyframes vault-skeleton-shimmer { to { transform: translateX(105%); } }
+
+.catalog-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+.catalog-skeleton-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255,255,255,.018);
+}
+.catalog-skeleton-media { min-height: 305px; margin: 12px; border-radius: 16px; }
+.catalog-skeleton-copy { display: grid; gap: 10px; padding: 4px 15px 17px; }
+.catalog-skeleton-copy > * { display: block; height: 10px; border-radius: 999px; }
+.catalog-skeleton-copy > i { width: 34%; height: 8px; }
+.catalog-skeleton-copy > b { width: 68%; height: 18px; }
+.catalog-skeleton-copy > span { width: 92%; }
+.catalog-skeleton-copy > .short { width: 56%; }
+
+.album-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.album-skeleton-card {
+  display: grid;
+  grid-template-columns: minmax(120px, .8fr) minmax(0, 1fr);
+  gap: 17px;
+  min-height: 250px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255,255,255,.018);
+}
+.album-skeleton-cover { min-height: 218px; border-radius: 14px; }
+.album-skeleton-card > div:last-child { display: grid; align-content: center; gap: 11px; }
+.album-skeleton-card i, .album-skeleton-card b, .album-skeleton-card span { display: block; height: 10px; border-radius: 999px; }
+.album-skeleton-card i { width: 42%; height: 8px; }
+.album-skeleton-card b { width: 78%; height: 19px; }
+.album-skeleton-card span { width: 95%; }
+.album-skeleton-card .short { width: 62%; }
+
+.collection-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.collection-skeleton-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255,255,255,.018);
+}
+.collection-skeleton-cover { min-height: 330px; }
+.collection-skeleton-copy { display: grid; gap: 11px; padding: 18px 20px 21px; }
+.collection-skeleton-copy > div { display: flex; align-items: center; gap: 10px; }
+.collection-skeleton-copy i { width: 42px; height: 42px; flex: 0 0 auto; border-radius: 13px; }
+.collection-skeleton-copy b { width: 34%; height: 11px; border-radius: 999px; }
+.collection-skeleton-copy > span { width: 62%; height: 20px; border-radius: 999px; }
+.collection-skeleton-copy > .short { width: 86%; height: 10px; }
+.collection-skeleton-copy em { width: 45%; height: 9px; border-radius: 999px; }
+
+.catalog-load-sentinel { width: 100%; height: 1px; margin-top: 18px; pointer-events: none; }
+.online-catalog-section > .empty-state:not([hidden]),
+.albums-catalog > .empty-state:not([hidden]),
+.collections-browser > .empty-state:not([hidden]) { display: grid; }
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-pulse::after { animation: none; }
+}
+@media (max-width: 1120px) {
+  .catalog-skeleton-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .album-skeleton-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 860px) {
+  .catalog-skeleton-grid, .collection-skeleton-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .album-skeleton-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .catalog-skeleton-grid, .collection-skeleton-grid { grid-template-columns: 1fr; }
+  .catalog-skeleton-media { min-height: 285px; }
+  .collection-skeleton-cover { min-height: 285px; }
+}
+.explore-search-empty:not([hidden]) { display: grid; }

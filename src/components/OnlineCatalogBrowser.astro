@@ -12,6 +12,7 @@ const placeholder = kind === 'card'
     : kind === 'kit'
       ? 'Nome, descrição ou conteúdo do kit...'
       : 'Nome do produto lacrado...';
+const skeletonCount = kind === 'card' ? 8 : 6;
 ---
 <section class="shell catalog-section online-catalog-section" data-online-catalog data-kind={kind} data-owner-filter={showOwnerFilter ? 'true' : 'false'}>
   <div class:list={['filter-panel', kind !== 'card' && 'compact-filter-panel']} data-reveal>
@@ -55,12 +56,18 @@ const placeholder = kind === 'card'
   </div>
 
   <div class="catalog-results-heading">
-    <div><span class="section-kicker">Catálogo</span><h2><strong data-online-count>0</strong> {noun} publicadas</h2></div>
-    <span class="cloud-save-state" data-online-status>Carregando catálogo…</span>
+    <div><span class="section-kicker">Catálogo</span><h2 data-online-heading><strong data-online-count>—</strong> <span data-online-count-label>{noun}</span></h2></div>
+    <span class="cloud-save-state" data-online-status aria-live="polite"></span>
   </div>
 
-  <div class="catalog-grid" data-online-grid></div>
-  <div class="empty-state" data-online-empty hidden><span>⌕</span><h2>Nada encontrado</h2><p>Esta área está vazia ou os filtros não encontraram resultados.</p></div>
+  <div class="catalog-skeleton-grid" data-online-skeleton aria-hidden="true">
+    {Array.from({ length: skeletonCount }, () => (
+      <article class="catalog-skeleton-card"><div class="catalog-skeleton-media skeleton-pulse"></div><div class="catalog-skeleton-copy"><i class="skeleton-pulse"></i><b class="skeleton-pulse"></b><span class="skeleton-pulse"></span><span class="skeleton-pulse short"></span></div></article>
+    ))}
+  </div>
+  <div class="catalog-grid" data-online-grid hidden></div>
+  <div class="catalog-load-sentinel" data-online-sentinel aria-hidden="true"></div>
+  <div class="empty-state" data-online-empty hidden><span>⌕</span><h2>Nenhum item encontrado</h2><p>Não há itens para esta busca ou combinação de filtros.</p></div>
 </section>
 
 <script>
@@ -70,9 +77,15 @@ const placeholder = kind === 'card'
   roots.forEach((root) => {
     if (root.dataset.initialized === 'true') return;
     root.dataset.initialized = 'true';
+
     const kind = root.dataset.kind || 'card';
+    const noun = kind === 'card' ? 'cartas' : kind === 'booster' ? 'boosters' : kind === 'kit' ? 'kits' : 'produtos';
+    const pageSize = kind === 'card' ? 24 : 20;
     const grid = root.querySelector<HTMLElement>('[data-online-grid]');
+    const skeleton = root.querySelector<HTMLElement>('[data-online-skeleton]');
+    const sentinel = root.querySelector<HTMLElement>('[data-online-sentinel]');
     const count = root.querySelector<HTMLElement>('[data-online-count]');
+    const countLabel = root.querySelector<HTMLElement>('[data-online-count-label]');
     const status = root.querySelector<HTMLElement>('[data-online-status]');
     const empty = root.querySelector<HTMLElement>('[data-online-empty]');
     const search = root.querySelector<HTMLInputElement>('[data-online-search]');
@@ -82,11 +95,29 @@ const placeholder = kind === 'card'
     const ownerFilter = root.querySelector<HTMLSelectElement>('[data-online-owner]');
     const ownerWrap = root.querySelector<HTMLElement>('[data-online-owner-wrap]');
     const sort = root.querySelector<HTMLSelectElement>('[data-online-sort]');
+
     let items: any[] = [];
+    let cursor: string | null = null;
+    let hasMore = true;
+    let pagePromise: Promise<void> | null = null;
+    let fullyLoaded = false;
+    let completePromise: Promise<void> | null = null;
+    let searchTimer = 0;
+
+    const escapeOption = (value: string) => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    const uniqueItems = (incoming: any[]) => {
+      const known = new Set(items.map((item) => String(item._docId || item.id || item.slug || '')));
+      incoming.forEach((item) => {
+        const key = String(item._docId || item.id || item.slug || '');
+        if (!key || !known.has(key)) { items.push(item); if (key) known.add(key); }
+      });
+    };
 
     const fillSelect = (select: HTMLSelectElement | null, values: string[], firstLabel: string) => {
       if (!select) return;
-      select.innerHTML = `<option value="">${firstLabel}</option>${values.map((value) => `<option value="${String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}">${String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;')}</option>`).join('')}`;
+      const current = select.value;
+      select.innerHTML = `<option value="">${firstLabel}</option>${values.map((value) => `<option value="${escapeOption(value)}">${escapeOption(value)}</option>`).join('')}`;
+      if ([...select.options].some((option) => option.value === current)) select.value = current;
     };
 
     const hydrateFilters = () => {
@@ -101,10 +132,21 @@ const placeholder = kind === 'card'
       });
       const owners = [...ownerMap.entries()].sort((a, b) => a[1].localeCompare(b[1], 'pt-BR'));
       if (ownerFilter) {
-        ownerFilter.innerHTML = `<option value="">Todas</option>${owners.map(([slug, label]) => `<option value="${slug.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}">${label.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</option>`).join('')}`;
+        const current = ownerFilter.value;
+        ownerFilter.innerHTML = `<option value="">Todas</option>${owners.map(([slug, label]) => `<option value="${escapeOption(slug)}">${escapeOption(label)}</option>`).join('')}`;
+        if ([...ownerFilter.options].some((option) => option.value === current)) ownerFilter.value = current;
         if (ownerWrap) ownerWrap.hidden = owners.length <= 1;
       }
     };
+
+    const hasActiveRefinement = () => Boolean(
+      normalizeText(search?.value || '')
+      || collectionFilter?.value
+      || typeFilter?.value
+      || conditionFilter?.value
+      || ownerFilter?.value
+      || (sort?.value && sort.value !== 'name')
+    );
 
     const apply = () => {
       const query = normalizeText(search?.value || '');
@@ -125,25 +167,61 @@ const placeholder = kind === 'card'
         if (sortValue === 'price-desc') return (rightPrice ?? -Infinity) - (leftPrice ?? -Infinity);
         return String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
       });
+
       if (grid) {
         grid.innerHTML = visible.map((item) => productMarkup(item)).join('');
+        grid.hidden = false;
         initializeOnlineImages(grid);
       }
-      if (count) count.textContent = String(visible.length);
-      if (empty) empty.hidden = visible.length !== 0;
+      if (skeleton) skeleton.hidden = true;
+      if (count) count.textContent = fullyLoaded ? String(visible.length) : `${visible.length}${hasMore ? '+' : ''}`;
+      if (countLabel) countLabel.textContent = fullyLoaded ? `${noun} publicadas` : `${noun} carregadas`;
+      const canBeEmpty = fullyLoaded || !hasMore;
+      if (empty) empty.hidden = !(canBeEmpty && visible.length === 0);
+      if (status) status.textContent = hasMore && !hasActiveRefinement() ? 'Role para carregar mais' : '';
+    };
+
+    const loadNextPage = (renderAfter = true): Promise<void> => {
+      if (!hasMore) return Promise.resolve();
+      if (pagePromise) return pagePromise;
+      pagePromise = (async () => {
+        const cloud = (window as any).VaultCloud;
+        if (!cloud) throw new Error('O catálogo ainda não está disponível.');
+        const page = await cloud.listPublicItemsPage(kind, pageSize, cursor);
+        uniqueItems(Array.isArray(page?.items) ? page.items : []);
+        cursor = page?.nextCursor || null;
+        hasMore = Boolean(page?.hasMore && cursor);
+        fullyLoaded = !hasMore;
+        hydrateFilters();
+        if (renderAfter) apply();
+      })().finally(() => { pagePromise = null; });
+      return pagePromise;
+    };
+
+    const ensureComplete = () => {
+      if (fullyLoaded) return Promise.resolve();
+      if (completePromise) return completePromise;
+      completePromise = (async () => {
+        if (status) status.textContent = 'Completando resultados…';
+        while (hasMore) await loadNextPage(false);
+        fullyLoaded = true;
+        hydrateFilters();
+        apply();
+      })().finally(() => { completePromise = null; });
+      return completePromise;
+    };
+
+    const handleRefinement = async () => {
+      if (hasActiveRefinement() && !fullyLoaded) await ensureComplete();
+      else apply();
     };
 
     const load = async () => {
       try {
-        if (status) status.textContent = 'Carregando…';
-        const cloud = (window as any).VaultCloud;
-        if (!cloud) throw new Error('Catálogo ainda não foi inicializado.');
-        items = await cloud.listPublicItems(kind);
-        hydrateFilters();
-        apply();
-        if (status) status.textContent = 'Catálogo atualizado';
+        await loadNextPage();
       } catch (error: any) {
-        if (grid) grid.innerHTML = '';
+        if (grid) grid.hidden = true;
+        if (skeleton) skeleton.hidden = true;
         if (empty) {
           empty.hidden = false;
           const title = empty.querySelector('h2');
@@ -151,18 +229,34 @@ const placeholder = kind === 'card'
           if (title) title.textContent = 'Não foi possível carregar';
           if (text) text.textContent = error?.message || 'Tente novamente em alguns instantes.';
         }
-        if (status) status.textContent = 'Catálogo indisponível';
+        if (count) count.textContent = '—';
+        if (countLabel) countLabel.textContent = noun;
+        if (status) status.textContent = '';
       }
     };
 
-    [search, collectionFilter, typeFilter, conditionFilter, ownerFilter, sort].forEach((element) => {
-      element?.addEventListener(element === search ? 'input' : 'change', apply);
+    search?.addEventListener('input', () => {
+      window.clearTimeout(searchTimer);
+      searchTimer = window.setTimeout(handleRefinement, 180);
     });
+    [collectionFilter, typeFilter, conditionFilter, ownerFilter, sort].forEach((element) => element?.addEventListener('change', handleRefinement));
+    [collectionFilter, typeFilter, conditionFilter, ownerFilter, sort].forEach((element) => {
+      element?.addEventListener('focus', () => { if (!fullyLoaded) ensureComplete(); }, { once: true });
+    });
+
     document.addEventListener('keydown', (event) => {
       if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement as HTMLElement | null)?.tagName || '')) {
-        event.preventDefault(); search?.focus();
+        event.preventDefault();
+        search?.focus();
       }
     });
+
+    if (sentinel && 'IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting) && !hasActiveRefinement()) loadNextPage().catch(() => {});
+      }, { rootMargin: '700px 0px' });
+      observer.observe(sentinel);
+    }
 
     if ((window as any).VaultCloud) load();
     else window.addEventListener('vault:cloud-ready', load, { once: true });

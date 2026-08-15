@@ -24,9 +24,17 @@ const wallLanes = Array.from({ length: 8 }, (_, laneIndex) => {
   const lane = wallSource.filter((_, cardIndex) => cardIndex % 8 === laneIndex);
   return rotate(lane, laneIndex + 1);
 });
+const encodeAssetPath = (path: string) => path.split('/').map(encodeURIComponent).join('/');
+const toAssetUrl = (path: string) => /^(?:https?:|data:|blob:)/i.test(path) ? path : `${base}${encodeAssetPath(path.replace(/^\/+/, ''))}`;
+const firstFrameCards = wallLanes
+  .flatMap((lane, laneIndex) => lane.map((card, cardIndex) => ({ card, slot: cardIndex * 8 + laneIndex })))
+  .filter(({ slot }) => slot < 4)
+  .sort((left, right) => left.slot - right.slot)
+  .map(({ card }) => card);
+const homePreloads = firstFrameCards.map((card) => card.imageCandidates[0]).filter(Boolean).map(toAssetUrl);
 ---
 
-<BaseLayout active="home">
+<BaseLayout active="home" preloadImages={homePreloads}>
   <section class="home-hero nexus-home-hero vault-intro-pending" aria-labelledby="home-title" data-vault-intro>
     <div class="nexus-hero-card-flow" aria-hidden="true">
       <div class="nexus-hero-flow-plane">
@@ -39,7 +47,8 @@ const wallLanes = Array.from({ length: 8 }, (_, laneIndex) => {
                     <div class="nexus-hero-flow-card">
                       <ProductImage
                         item={card}
-                        eager={sequence === 0 && laneIndex < 4 && cardIndex < 2}
+                        eager={sequence === 0 && (cardIndex * 8 + laneIndex) < 4}
+                        deferred={sequence !== 0 || (cardIndex * 8 + laneIndex) >= 12}
                         interactive={false}
                       />
                     </div>
@@ -72,9 +81,9 @@ const wallLanes = Array.from({ length: 8 }, (_, laneIndex) => {
         <a class="secondary-cta" href={`${base}explorar/`}><span>Explorar</span><b>↗</b></a>
       </div>
       <div class="hero-metrics" aria-label="Números da comunidade">
-        <div><strong data-home-collections>0</strong><span>coleções públicas</span></div>
-        <div><strong data-home-cards>0</strong><span>cartas publicadas</span></div>
-        <div><strong data-home-items>0</strong><span>itens publicados</span></div>
+        <div><strong data-home-collections>—</strong><span>coleções públicas</span></div>
+        <div><strong data-home-cards>—</strong><span>cartas publicadas</span></div>
+        <div><strong data-home-items>—</strong><span>itens publicados</span></div>
       </div>
     </div>
   </section>
@@ -107,6 +116,36 @@ const wallLanes = Array.from({ length: 8 }, (_, laneIndex) => {
 
   <script>
     import { albumMarkup, collectionMarkup, initializeOnlineImages, productMarkup } from '../scripts/online-markup';
+
+    const heroFlow = document.querySelector<HTMLElement>('.nexus-hero-card-flow');
+    let heroInView = true;
+    const syncHeroAnimation = () => heroFlow?.classList.toggle('is-paused', document.hidden || !heroInView);
+    if (heroFlow && 'IntersectionObserver' in window) {
+      const heroObserver = new IntersectionObserver(([entry]) => { heroInView = Boolean(entry?.isIntersecting); syncHeroAnimation(); }, { rootMargin: '120px 0px' });
+      heroObserver.observe(heroFlow);
+    }
+    document.addEventListener('visibilitychange', syncHeroAnimation);
+
+    const deferredHeroImages = Array.from(document.querySelectorAll<HTMLImageElement>('.nexus-hero-card-flow img[data-defer-load="true"]'));
+    let deferredHeroCursor = 0;
+    const activateDeferredHeroImage = (image: HTMLImageElement) => {
+      const source = image.dataset.deferredSrc;
+      if (!source || image.getAttribute('src')) return;
+      image.removeAttribute('data-defer-load');
+      delete image.dataset.deferredSrc;
+      image.src = source;
+      (window as any).VaultHydrate?.(image.parentElement || document);
+    };
+    const loadDeferredHeroBatch = () => {
+      if (document.hidden) { window.setTimeout(loadDeferredHeroBatch, 320); return; }
+      const end = Math.min(deferredHeroImages.length, deferredHeroCursor + 7);
+      while (deferredHeroCursor < end) activateDeferredHeroImage(deferredHeroImages[deferredHeroCursor++]);
+      if (deferredHeroCursor >= deferredHeroImages.length) return;
+      const idle = (window as any).requestIdleCallback;
+      if (typeof idle === 'function') idle(loadDeferredHeroBatch, { timeout: 260 });
+      else window.setTimeout(loadDeferredHeroBatch, 170);
+    };
+    window.setTimeout(loadDeferredHeroBatch, 260);
 
     const intro = document.querySelector<HTMLElement>('[data-vault-intro]');
     const finishIntro = () => {
@@ -165,14 +204,19 @@ const wallLanes = Array.from({ length: 8 }, (_, laneIndex) => {
       try {
         const cloud = (window as any).VaultCloud;
         if (!cloud) throw new Error('Catálogo ainda não foi inicializado.');
-        const [collections, cards, boosters, kits, products, albums] = await Promise.all([
+        const [collections, cardPage, boosterPage, kitPage, productPage, albumPage] = await Promise.all([
           cloud.listPublicCollections(),
-          cloud.listPublicItems('card', 80),
-          cloud.listPublicItems('booster', 28),
-          cloud.listPublicItems('kit', 28),
-          cloud.listPublicItems('product', 28),
-          cloud.listPublicAlbums(),
+          cloud.listPublicItemsPage('card', 24),
+          cloud.listPublicItemsPage('booster', 20),
+          cloud.listPublicItemsPage('kit', 20),
+          cloud.listPublicItemsPage('product', 20),
+          cloud.listPublicAlbumsPage(18),
         ]);
+        const cards = cardPage.items || [];
+        const boosters = boosterPage.items || [];
+        const kits = kitPage.items || [];
+        const products = productPage.items || [];
+        const albums = albumPage.items || [];
 
         const cardCount = collections.reduce((sum: number, profile: any) => sum + Number(profile.stats?.cards || 0), 0);
         const itemCount = collections.reduce((sum: number, profile: any) => sum
@@ -197,7 +241,8 @@ const wallLanes = Array.from({ length: 8 }, (_, laneIndex) => {
         });
         const collectionsWithCovers = collections.map((profile: any) => {
           const keys = [profile.uid, profile.ownerUid, profile.slug, profile.collectionId].filter(Boolean).map(String);
-          const previewCards = keys.flatMap((key) => previewMap.get(key) || []).filter((card, index, list) => list.indexOf(card) === index).slice(0, 12);
+          const mappedPreview = keys.flatMap((key) => previewMap.get(key) || []).filter((card, index, list) => list.indexOf(card) === index).slice(0, 12);
+          const previewCards = Array.isArray(profile.previewCards) && profile.previewCards.length ? profile.previewCards : mappedPreview;
           return { ...profile, previewCards };
         });
 

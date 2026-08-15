@@ -8,9 +8,9 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
     <div class="shell catalog-hero-grid">
       <div data-reveal><span class="hero-badge"><i></i> Perfis da comunidade</span><h1>Coleções da comunidade</h1><p>Somente contas que escolheram deixar a coleção pública aparecem aqui. Uma conta também pode manter a coleção completamente vazia e privada apenas para comprar e fazer propostas.</p></div>
       <div class="catalog-hero-stats" data-reveal>
-        <div><strong data-online-collection-total>0</strong><span>coleções públicas</span></div>
-        <div><strong data-online-card-total>0</strong><span>cartas publicadas</span></div>
-        <div><strong data-online-booster-total>0</strong><span>boosters publicados</span></div>
+        <div><strong data-online-collection-total>—</strong><span>coleções públicas</span></div>
+        <div><strong data-online-card-total>—</strong><span>cartas publicadas</span></div>
+        <div><strong data-online-booster-total>—</strong><span>boosters publicados</span></div>
       </div>
     </div>
   </section>
@@ -20,65 +20,165 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       <div class="search-control"><label for="collection-search">Pesquisar coleções</label><div class="search-input-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg><input id="collection-search" type="search" placeholder="Nome do colecionador ou da coleção..." data-collection-search /></div></div>
       <a class="primary-cta" href={`${base}cadastro/`}><span>Entrar / criar conta</span><b>→</b></a>
     </div>
-    <div class="collections-summary"><strong data-collection-count>0</strong> <span data-collection-label>coleções encontradas</span> <small data-collection-status>· carregando catálogo…</small></div>
-    <div class="collections-grid" data-collections-grid></div>
-    <div class="empty-state collection-empty-state" data-collection-empty hidden><span>◇</span><h2>Nenhuma coleção pública</h2><p>Não há resultado para esta busca ou ainda não há coleções públicas cadastradas.</p></div>
+    <div class="collections-summary"><strong data-collection-count>—</strong> <span data-collection-label>coleções</span> <small data-collection-status aria-live="polite"></small></div>
+    <div class="collection-skeleton-grid" data-collection-skeleton aria-hidden="true">
+      {Array.from({ length: 6 }, () => <article class="collection-skeleton-card"><div class="collection-skeleton-cover skeleton-pulse"></div><div class="collection-skeleton-copy"><div><i class="skeleton-pulse"></i><b class="skeleton-pulse"></b></div><span class="skeleton-pulse"></span><span class="skeleton-pulse short"></span><em class="skeleton-pulse"></em></div></article>)}
+    </div>
+    <div class="collections-grid" data-collections-grid hidden></div>
+    <div class="catalog-load-sentinel" data-collection-sentinel aria-hidden="true"></div>
+    <div class="empty-state collection-empty-state" data-collection-empty hidden><span>◇</span><h2>Nenhuma coleção encontrada</h2><p>Não há coleções para esta busca.</p></div>
   </section>
 
   <script>
     import { collectionMarkup, initializeOnlineImages, normalizeText } from '../../scripts/online-markup';
+
     const root = document.querySelector<HTMLElement>('[data-online-collections]');
     if (root) {
       const search = root.querySelector<HTMLInputElement>('[data-collection-search]');
       const grid = root.querySelector<HTMLElement>('[data-collections-grid]');
+      const skeleton = root.querySelector<HTMLElement>('[data-collection-skeleton]');
+      const sentinel = root.querySelector<HTMLElement>('[data-collection-sentinel]');
       const count = root.querySelector<HTMLElement>('[data-collection-count]');
       const label = root.querySelector<HTMLElement>('[data-collection-label]');
       const empty = root.querySelector<HTMLElement>('[data-collection-empty]');
       const status = root.querySelector<HTMLElement>('[data-collection-status]');
+      const totalElement = document.querySelector<HTMLElement>('[data-online-collection-total]');
+      const cardElement = document.querySelector<HTMLElement>('[data-online-card-total]');
+      const boosterElement = document.querySelector<HTMLElement>('[data-online-booster-total]');
+      const pageSize = 12;
       let collections: any[] = [];
-      const render = () => {
+      let cursor: string | null = null;
+      let hasMore = true;
+      let fullyLoaded = false;
+      let pagePromise: Promise<void> | null = null;
+      let completePromise: Promise<void> | null = null;
+      let searchTimer = 0;
+      const previewResolved = new Set<string>();
+      const previewLoading = new Set<string>();
+
+      const profileKey = (profile: any) => String(profile.uid || profile.ownerUid || profile.collectionId || profile.slug || '');
+
+      const mergeCollections = (incoming: any[]) => {
+        const known = new Set(collections.map(profileKey));
+        const added: any[] = [];
+        incoming.forEach((profile) => {
+          const key = profileKey(profile);
+          if (!key || !known.has(key)) {
+            collections.push(profile);
+            added.push(profile);
+            if (key) known.add(key);
+          }
+        });
+        return added;
+      };
+
+      const visibleCollections = () => {
         const query = normalizeText(search?.value || '');
-        const visible = collections
+        return collections
           .filter((profile) => !query || normalizeText(`${profile.owner || ''} ${profile.title || ''} ${profile.description || ''} ${profile.slug || ''}`).includes(query))
           .sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'pt-BR'));
-        if (grid) { grid.innerHTML = visible.map((profile) => collectionMarkup(profile)).join(''); initializeOnlineImages(grid); }
-        if (count) count.textContent = String(visible.length);
-        if (label) label.textContent = visible.length === 1 ? 'coleção encontrada' : 'coleções encontradas';
-        if (empty) empty.hidden = visible.length !== 0;
       };
+
+      const updateMetrics = () => {
+        const suffix = hasMore ? '+' : '';
+        if (totalElement) totalElement.textContent = `${collections.length}${suffix}`;
+        if (cardElement) cardElement.textContent = `${collections.reduce((sum, profile) => sum + Number(profile.stats?.cards || 0), 0)}${suffix}`;
+        if (boosterElement) boosterElement.textContent = `${collections.reduce((sum, profile) => sum + Number(profile.stats?.boosters || 0), 0)}${suffix}`;
+      };
+
+      const render = () => {
+        const visible = visibleCollections();
+        if (grid) {
+          grid.innerHTML = visible.map((profile) => collectionMarkup(profile)).join('');
+          grid.hidden = false;
+          initializeOnlineImages(grid);
+        }
+        if (skeleton) skeleton.hidden = true;
+        if (count) count.textContent = fullyLoaded ? String(visible.length) : `${visible.length}${hasMore ? '+' : ''}`;
+        if (label) label.textContent = fullyLoaded
+          ? (visible.length === 1 ? 'coleção encontrada' : 'coleções encontradas')
+          : 'coleções carregadas';
+        if (empty) empty.hidden = !(fullyLoaded && visible.length === 0);
+        if (status) status.textContent = hasMore && !normalizeText(search?.value || '') ? '· role para carregar mais' : '';
+        updateMetrics();
+      };
+
+      const hydratePreviews = async (profiles: any[]) => {
+        const cloud = (window as any).VaultCloud;
+        if (!cloud?.listPublicCollectionPreview) return;
+        const queue = profiles.filter((profile) => {
+          const key = profileKey(profile);
+          if (!key || previewResolved.has(key) || previewLoading.has(key)) return false;
+          if (Array.isArray(profile.previewCards) && profile.previewCards.length) {
+            previewResolved.add(key);
+            return false;
+          }
+          previewLoading.add(key);
+          return true;
+        });
+        if (!queue.length) return;
+
+        let changed = false;
+        const worker = async () => {
+          while (queue.length) {
+            const profile = queue.shift();
+            if (!profile) return;
+            const key = profileKey(profile);
+            try {
+              profile.previewCards = await cloud.listPublicCollectionPreview(key, 8);
+              changed = true;
+            } catch (_) {
+              profile.previewCards = [];
+            } finally {
+              previewLoading.delete(key);
+              previewResolved.add(key);
+            }
+          }
+        };
+        await Promise.all([worker(), worker(), worker()]);
+        if (changed) render();
+      };
+
+      const loadNextPage = (renderAfter = true): Promise<void> => {
+        if (!hasMore) return Promise.resolve();
+        if (pagePromise) return pagePromise;
+        pagePromise = (async () => {
+          const cloud = (window as any).VaultCloud;
+          if (!cloud) throw new Error('As coleções ainda não estão disponíveis.');
+          const page = await cloud.listPublicCollectionsPage(pageSize, cursor);
+          const added = mergeCollections(Array.isArray(page?.items) ? page.items : []);
+          cursor = page?.nextCursor || null;
+          hasMore = Boolean(page?.hasMore && cursor);
+          fullyLoaded = !hasMore;
+          if (renderAfter) {
+            render();
+            hydratePreviews(added).catch(() => {});
+          }
+        })().finally(() => { pagePromise = null; });
+        return pagePromise;
+      };
+
+      const ensureComplete = () => {
+        if (fullyLoaded) return Promise.resolve();
+        if (completePromise) return completePromise;
+        completePromise = (async () => {
+          while (hasMore) await loadNextPage(false);
+          fullyLoaded = true;
+          render();
+          hydratePreviews(visibleCollections()).catch(() => {});
+        })().finally(() => { completePromise = null; });
+        return completePromise;
+      };
+
       const load = async () => {
         try {
-          const cloud = (window as any).VaultCloud;
-          if (!cloud) throw new Error('Catálogo ainda não foi inicializado.');
-          const [profiles, publicCards] = await Promise.all([
-            cloud.listPublicCollections(),
-            cloud.listPublicItems('card'),
-          ]);
-          const previewMap = new Map<string, any[]>();
-          publicCards.forEach((card: any) => {
-            [card.collectionUid, card.ownerUid, card.ownerCollectionSlug].filter(Boolean).forEach((key: string) => {
-              const list = previewMap.get(String(key)) || [];
-              if (list.length < 12) list.push(card);
-              previewMap.set(String(key), list);
-            });
-          });
-          collections = profiles.map((profile: any) => {
-            const keys = [profile.uid, profile.ownerUid, profile.slug, profile.collectionId].filter(Boolean).map(String);
-            const previewCards = keys.flatMap((key) => previewMap.get(key) || []).filter((card, index, list) => list.indexOf(card) === index).slice(0, 12);
-            return { ...profile, previewCards };
-          });
-          const cardTotal = collections.reduce((sum, profile) => sum + Number(profile.stats?.cards || 0), 0);
-          const boosterTotal = collections.reduce((sum, profile) => sum + Number(profile.stats?.boosters || 0), 0);
-          const totalElement = document.querySelector<HTMLElement>('[data-online-collection-total]');
-          const cardElement = document.querySelector<HTMLElement>('[data-online-card-total]');
-          const boosterElement = document.querySelector<HTMLElement>('[data-online-booster-total]');
-          if (totalElement) totalElement.textContent = String(collections.length);
-          if (cardElement) cardElement.textContent = String(cardTotal);
-          if (boosterElement) boosterElement.textContent = String(boosterTotal);
-          if (status) status.textContent = '· catálogo atualizado';
-          render();
+          await loadNextPage();
         } catch (error: any) {
-          if (status) status.textContent = '· catálogo indisponível';
+          if (skeleton) skeleton.hidden = true;
+          if (grid) grid.hidden = true;
+          if (count) count.textContent = '';
+          if (label) label.textContent = '';
+          if (status) status.textContent = '';
           if (empty) {
             empty.hidden = false;
             const title = empty.querySelector('h2');
@@ -88,7 +188,25 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
           }
         }
       };
-      search?.addEventListener('input', render);
+
+      search?.addEventListener('input', () => {
+        window.clearTimeout(searchTimer);
+        searchTimer = window.setTimeout(async () => {
+          if (normalizeText(search.value) && !fullyLoaded) await ensureComplete();
+          else {
+            render();
+            hydratePreviews(visibleCollections()).catch(() => {});
+          }
+        }, 180);
+      });
+
+      if (sentinel && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          if (entries.some((entry) => entry.isIntersecting) && !normalizeText(search?.value || '')) loadNextPage().catch(() => {});
+        }, { rootMargin: '700px 0px' });
+        observer.observe(sentinel);
+      }
+
       if ((window as any).VaultCloud) load();
       else window.addEventListener('vault:cloud-ready', load, { once: true });
     }

@@ -7,6 +7,7 @@ interface Props {
   description?: string;
   active?: 'home' | 'explore' | 'cards' | 'boosters' | 'kits' | 'products' | 'albums' | 'collections' | 'signup';
   bodyClass?: string;
+  preloadImages?: string[];
 }
 
 const {
@@ -14,6 +15,7 @@ const {
   description = siteConfig.description,
   active = 'home',
   bodyClass = '',
+  preloadImages = [],
 } = Astro.props;
 
 const rawBase = import.meta.env.BASE_URL || '/';
@@ -31,6 +33,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
     <meta name="theme-color" content="#07111f" />
     <meta name="color-scheme" content="dark" />
     <title>{pageTitle}</title>
+    {preloadImages.slice(0, 6).map((href) => <link rel="preload" as="image" href={href} fetchpriority="high" />)}
   </head>
   <body class={bodyClass} data-site-base={base}>
     <div class="page-noise" aria-hidden="true"></div>
@@ -307,6 +310,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
 
         const initImage = (image) => {
           if (!image || image.dataset.fallbackReady === 'true') return;
+          if (image.dataset.deferLoad === 'true' && !image.getAttribute('src')) return;
           image.dataset.fallbackReady = 'true';
           const candidates = parseImageList(image.dataset.imageCandidates);
           const gallery = parseImageList(image.dataset.imageGallery);

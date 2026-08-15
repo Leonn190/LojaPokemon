@@ -13,11 +13,14 @@ import {
   collection,
   deleteDoc,
   doc,
+  documentId,
   getDoc,
   getDocs,
   getFirestore,
   query,
   limit as firestoreLimit,
+  orderBy,
+  startAfter,
   serverTimestamp,
   setDoc,
   where,
@@ -51,7 +54,7 @@ const resolvedConfig: FirebaseOptions = {
 let servicesPromise: Promise<{ app: FirebaseApp; auth: ReturnType<typeof getAuth>; db: Firestore }> | null = null;
 
 const PUBLIC_MIRROR_VERSION = 2;
-const PUBLIC_CACHE_TTL = 5 * 60 * 1000;
+const PUBLIC_CACHE_REVALIDATE_AFTER = 30 * 1000;
 const PUBLIC_CACHE_PREFIX = 'vault:public-cache:v2:';
 const memoryPublicCache = new Map<string, { savedAt: number; data: any }>();
 const publicRequests = new Map<string, Promise<any>>();
@@ -64,7 +67,7 @@ const readPublicCache = (key: string) => {
     const raw = window.localStorage.getItem(`${PUBLIC_CACHE_PREFIX}${key}`);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    if (!parsed || !Array.isArray(parsed.data) || !Number.isFinite(Number(parsed.savedAt))) return null;
+    if (!parsed || !Object.prototype.hasOwnProperty.call(parsed, 'data') || !Number.isFinite(Number(parsed.savedAt))) return null;
     const entry = { savedAt: Number(parsed.savedAt), data: parsed.data };
     memoryPublicCache.set(key, entry);
     return entry;
@@ -94,20 +97,35 @@ const clearPublicCache = () => {
   } catch (_) {}
 };
 
-const cachedPublicQuery = async <T>(key: string, loader: () => Promise<T>): Promise<T> => {
-  const cached = readPublicCache(key);
-  if (cached && Date.now() - cached.savedAt < PUBLIC_CACHE_TTL) return cached.data as T;
+const dispatchPublicCacheUpdate = (key: string, data: any) => {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent('vault:public-cache-updated', { detail: { key, data } }));
+};
+
+const refreshPublicQuery = async <T>(key: string, loader: () => Promise<T>): Promise<T> => {
   const running = publicRequests.get(key);
   if (running) return running as Promise<T>;
   const request = loader()
-    .then((data) => { writePublicCache(key, data); return data; })
-    .catch((error) => {
-      if (cached) return cached.data as T;
-      throw error;
+    .then((data) => {
+      writePublicCache(key, data);
+      dispatchPublicCacheUpdate(key, data);
+      return data;
     })
     .finally(() => publicRequests.delete(key));
   publicRequests.set(key, request);
   return request;
+};
+
+// Catálogos públicos usam cache-first: voltar para uma página é imediato, e
+// uma revalidação curta acontece em paralelo quando o cache envelhece.
+const cachedPublicQuery = async <T>(key: string, loader: () => Promise<T>): Promise<T> => {
+  const cached = readPublicCache(key);
+  if (cached) {
+    const age = Date.now() - cached.savedAt;
+    if (age >= PUBLIC_CACHE_REVALIDATE_AFTER) refreshPublicQuery(key, loader).catch(() => {});
+    return cached.data as T;
+  }
+  return refreshPublicQuery(key, loader);
 };
 
 const numberOrNull = (value: any): number | null => {
@@ -137,7 +155,7 @@ const normalizePublicItem = (item: any, fallback?: string) => {
 
 const resolveConfig = async (): Promise<FirebaseOptions> => {
   if (!resolvedConfig.apiKey || !resolvedConfig.projectId || !resolvedConfig.appId) {
-    throw new Error('A configuracao publica do Firebase esta incompleta.');
+    throw new Error('O serviço de dados não está disponível no momento.');
   }
   return resolvedConfig;
 };
@@ -208,6 +226,7 @@ const profileForFirestore = (profile: any, uid: string) => stripUndefined({
   version: Number(profile.version || 1),
   mirrorVersion: PUBLIC_MIRROR_VERSION,
   stats: profile.stats || {},
+  previewCards: Array.isArray(profile.previewCards) ? profile.previewCards.slice(0, 8) : [],
   updatedAt: serverTimestamp(),
 });
 
@@ -416,6 +435,15 @@ export async function saveEditorState(state: any, options: { profileDirty?: bool
   const mirrorUpgrade = Number(state.profile?.mirrorVersion || 0) < PUBLIC_MIRROR_VERSION;
   state.profile.mirrorVersion = PUBLIC_MIRROR_VERSION;
   state.profile.stats = buildStats(state);
+  state.profile.previewCards = (state.cards || []).slice(0, 8).map((card: any) => stripUndefined({
+    name: card.name || 'Carta',
+    number: card.number || '',
+    rarity: card.rarity || card.type || '',
+    type: card.type || '',
+    price: resolvePublicPrice({ ...card, kind: 'card' }, state.profile.priceDisplayFallback),
+    leaguePrice: numberOrNull(card.leaguePrice),
+    imageCandidates: Array.isArray(card.imageCandidates) ? card.imageCandidates.filter(Boolean).slice(0, 5) : (card.image ? [card.image] : []),
+  }));
   state.profile.email = user.email || state.profile.email || '';
   state.profile.ownerUid = uid;
   const operations: Array<(batch: ReturnType<typeof writeBatch>) => void> = [];
@@ -476,11 +504,33 @@ export async function saveEditorState(state: any, options: { profileDirty?: bool
   return state;
 }
 
+export type PublicPage<T = any> = {
+  items: T[];
+  nextCursor: string | null;
+  hasMore: boolean;
+};
+
+const pageSize = (value?: number, fallback = 24) => Math.min(80, Math.max(1, Math.floor(Number(value) || fallback)));
+const pageCacheKey = (scope: string, cursor?: string | null, size?: number) => `${scope}:page:${size || 24}:${cursor || 'first'}`;
+
 export async function listPublicCollections() {
   return cachedPublicQuery('collections', async () => {
     const { db } = await getCloud();
     const snapshot = await getDocs(query(collection(db, 'collections'), where('public', '==', true)));
     return snapshot.docs.map((entry) => ({ uid: entry.id, ...entry.data() }));
+  });
+}
+
+export async function listPublicCollectionsPage(maxResults = 18, cursor?: string | null): Promise<PublicPage<any>> {
+  const size = pageSize(maxResults, 18);
+  const key = pageCacheKey('collections', cursor, size);
+  return cachedPublicQuery(key, async () => {
+    const { db } = await getCloud();
+    const constraints: any[] = [where('public', '==', true), orderBy(documentId()), firestoreLimit(size)];
+    if (cursor) constraints.splice(2, 0, startAfter(cursor));
+    const snapshot = await getDocs(query(collection(db, 'collections'), ...constraints));
+    const items = snapshot.docs.map((entry) => ({ uid: entry.id, ...entry.data() }));
+    return { items, nextCursor: snapshot.docs[snapshot.docs.length - 1]?.id || null, hasMore: snapshot.size === size };
   });
 }
 
@@ -499,11 +549,53 @@ export async function listPublicItems(kind?: string, maxResults?: number) {
   });
 }
 
+export async function listPublicItemsPage(kind: string, maxResults = 24, cursor?: string | null): Promise<PublicPage<any>> {
+  const size = pageSize(maxResults, 24);
+  const key = pageCacheKey(`items:${kind}`, cursor, size);
+  return cachedPublicQuery(key, async () => {
+    const { db } = await getCloud();
+    const constraints: any[] = [where('kind', '==', kind), orderBy(documentId()), firestoreLimit(size)];
+    if (cursor) constraints.splice(2, 0, startAfter(cursor));
+    const snapshot = await getDocs(query(collection(db, 'publicItems'), ...constraints));
+    const items = snapshot.docs.map((entry) => normalizePublicItem({ _docId: entry.id, ...entry.data() }));
+    return { items, nextCursor: snapshot.docs[snapshot.docs.length - 1]?.id || null, hasMore: snapshot.size === size };
+  });
+}
+
+export async function listPublicCollectionPreview(collectionUid: string, maxResults = 8) {
+  const uid = String(collectionUid || '').trim();
+  if (!uid) return [];
+  const size = pageSize(maxResults, 8);
+  return cachedPublicQuery(`collection-preview:${uid}:${size}`, async () => {
+    const { db } = await getCloud();
+    const snapshot = await getDocs(query(
+      collection(db, 'publicItems'),
+      where('collectionUid', '==', uid),
+      where('kind', '==', 'card'),
+      firestoreLimit(size),
+    ));
+    return snapshot.docs.map((entry) => normalizePublicItem({ _docId: entry.id, ...entry.data() }));
+  });
+}
+
 export async function listPublicAlbums() {
   return cachedPublicQuery('albums', async () => {
     const { db } = await getCloud();
     const snapshot = await getDocs(collection(db, 'publicAlbums'));
     return snapshot.docs.map((entry) => ({ _docId: entry.id, ...entry.data() }));
+  });
+}
+
+export async function listPublicAlbumsPage(maxResults = 18, cursor?: string | null): Promise<PublicPage<any>> {
+  const size = pageSize(maxResults, 18);
+  const key = pageCacheKey('albums', cursor, size);
+  return cachedPublicQuery(key, async () => {
+    const { db } = await getCloud();
+    const constraints: any[] = [orderBy(documentId()), firestoreLimit(size)];
+    if (cursor) constraints.splice(1, 0, startAfter(cursor));
+    const snapshot = await getDocs(query(collection(db, 'publicAlbums'), ...constraints));
+    const items = snapshot.docs.map((entry) => ({ _docId: entry.id, ...entry.data() }));
+    return { items, nextCursor: snapshot.docs[snapshot.docs.length - 1]?.id || null, hasMore: snapshot.size === size };
   });
 }
 
@@ -576,7 +668,7 @@ export async function submitProposal(group: any) {
   const user = auth.currentUser;
   if (!user) throw new Error('Entre na sua conta para enviar propostas.');
   const sellerUid = String(group?.ownerUid || '');
-  if (!sellerUid) throw new Error('Esta coleção ainda não foi migrada para o sistema online.');
+  if (!sellerUid) throw new Error('Esta coleção não está disponível para propostas no momento.');
   if (sellerUid === user.uid) throw new Error('Você não pode enviar proposta para a própria coleção.');
   const buyerSnapshot = await getDoc(doc(db, 'users', user.uid));
   const buyer = buyerSnapshot.exists() ? buyerSnapshot.data() : {};
@@ -614,8 +706,8 @@ export function friendlyFirebaseError(error: any) {
     'auth/invalid-credential': 'E-mail ou senha incorretos.',
     'auth/user-disabled': 'Esta conta foi desativada.',
     'auth/too-many-requests': 'Muitas tentativas seguidas. Aguarde um pouco e tente novamente.',
-    'permission-denied': 'O Firebase bloqueou esta operação pelas regras de segurança.',
-    'firestore/permission-denied': 'O Firebase bloqueou esta operação pelas regras de segurança.',
+    'permission-denied': 'Você não tem permissão para concluir esta operação.',
+    'firestore/permission-denied': 'Você não tem permissão para concluir esta operação.',
   };
   return map[code] || error?.message || 'Não foi possível concluir a operação agora.';
 }

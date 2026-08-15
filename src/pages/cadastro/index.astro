@@ -88,8 +88,8 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
           <p data-workspace-meta>Versão 1</p>
         </div>
         <div class="workspace-header-actions">
-          <span class="workspace-save-state" data-cloud-save-state><i></i> Sincronizado</span>
-          <button type="button" class="secondary-cta" data-save-now><span>Salvar agora</span><b>☁</b></button>
+          <span class="workspace-save-state" data-cloud-save-state><i></i> Tudo salvo</span>
+          <button type="button" class="secondary-cta" data-save-now><span>Salvar agora</span><b>✓</b></button>
           <button type="button" class="secondary-cta" data-reset-editor><span>Sair da conta</span><b>×</b></button>
         </div>
       </header>
@@ -99,7 +99,7 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
           <summary><span>↥</span><div><strong>Migrar uma coleção antiga</strong><small>Uso único: transfere os dados da versão anterior para esta conta.</small></div><b>+</b></summary>
           <div class="legacy-migration-body">
             <label class="form-field"><span>Coleção antiga</span><select data-legacy-select><option value="">Selecione…</option>{legacyCollections.map((collection) => <option value={collection.profile.collectionId || collection.slug}>{collection.profile.title} · {collection.profile.owner}</option>)}</select></label>
-            <label class="form-field"><span>Senha antiga dessa coleção</span><input type="password" autocomplete="off" data-legacy-password placeholder="A senha usada no sistema antigo" /><small>A senha é conferida localmente no navegador.</small></label>
+            <label class="form-field"><span>Senha antiga dessa coleção</span><input type="password" autocomplete="off" data-legacy-password placeholder="A senha usada no sistema antigo" /><small>Sua senha antiga é usada apenas para confirmar a migração.</small></label>
             <button type="button" class="secondary-cta" data-legacy-import><span>Migrar dados para esta conta</span><b>↥</b></button>
             <p class="import-feedback" data-legacy-feedback></p>
           </div>
@@ -143,10 +143,10 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
         <div class="collector-personalization-grid">
           <div class="profile-photo-editor">
             <div class="profile-photo-preview" data-profile-photo-preview><span>TC</span></div>
-            <div><strong>Foto do colecionador</strong><small>Por enquanto as imagens continuam no seu public. Informe o caminho, por exemplo imagens/perfis/leon.webp.</small><div class="profile-photo-actions"><label><input type="text" data-profile-photo-path placeholder="imagens/perfis/minha-foto.webp" /><span>Caminho local</span></label><button type="button" data-remove-profile-photo>Remover</button></div></div>
+            <div><strong>Foto do colecionador</strong><small>Informe o caminho da sua foto, por exemplo imagens/perfis/leon.webp.</small><div class="profile-photo-actions"><label><input type="text" data-profile-photo-path placeholder="imagens/perfis/minha-foto.webp" /><span>Caminho da foto</span></label><button type="button" data-remove-profile-photo>Remover</button></div></div>
           </div>
           <div class="palette-editor">
-            <div class="palette-editor-copy"><strong>Paleta da coleção</strong><small>Principal define o glow e ações, Secundária domina o fundo e Destaque cria contraste. Tudo continua editável a qualquer momento.</small><div class="palette-live-preview" data-palette-preview aria-hidden="true"><i></i><span><b>NEXUS</b><small>prévia do tema</small></span><em></em></div></div>
+            <div class="palette-editor-copy"><strong>Paleta da coleção</strong><small>Principal define o glow e ações, Secundária domina o fundo e Destaque cria contraste. Tudo continua editável a qualquer momento.</small><div class="palette-live-preview" data-palette-preview aria-hidden="true"><i></i><span><b>VAULT</b><small>prévia do tema</small></span><em></em></div></div>
             <div class="palette-inputs">
               <label><span>Principal</span><input type="color" value="#54e8df" data-palette-color="0" /></label>
               <label><span>Secundária</span><input type="color" value="#bc91ff" data-palette-color="1" /></label>
@@ -249,7 +249,7 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
             <section class="card-variation-panel"><header><strong>Valorização / desvalorização</strong><small>Comparação entre o primeiro e o último ponto disponível.</small></header><div data-card-variations></div></section>
             <section class="card-movement-panel"><header><div><strong>Linha do tempo da coleção</strong><small>Entradas, vendas e ajustes de quantidade com data e versão.</small></div></header><div data-card-movements></div></section>
             <section class="card-market-depth-panel"><header><div><strong>Mercado detalhado</strong><small>Profundidade e liquidez da cotização mais recente.</small></div></header><div data-card-market-depth></div></section>
-            <details class="card-json-panel"><summary>Ver todas as informações do JSON</summary><div class="card-json-blocks" data-card-json></div></details>
+            <details class="card-json-panel"><summary>Ver informações avançadas</summary><div class="card-json-blocks" data-card-json></div></details>
           </main>
         </div>
       </section>
@@ -258,7 +258,7 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
     <div class="editor-modal" data-editor-modal="booster" hidden>
       <button class="editor-modal-backdrop" type="button" data-close-modal aria-label="Fechar"></button>
       <section class="editor-modal-dialog editor-form-dialog" role="dialog" aria-modal="true" aria-labelledby="booster-modal-title">
-        <header class="editor-modal-header"><div><span class="section-eyebrow">Novo booster</span><h2 id="booster-modal-title">Adicionar booster</h2><p>Cadastre o booster diretamente. A quantidade fica privada e o banco recebe apenas os dados, não a imagem.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
+        <header class="editor-modal-header"><div><span class="section-eyebrow">Novo booster</span><h2 id="booster-modal-title">Adicionar booster</h2><p>Cadastre o booster diretamente. A quantidade fica privada e a imagem continua vinculada ao item.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
         <form class="editor-item-form editor-modal-form" data-booster-form>
           <div class="modal-form-grid">
             <label class="wide"><span>Nome do booster</span><input name="name" required placeholder="Ex.: Evolving Skies" /></label>
@@ -429,7 +429,7 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
           profileDirty = false;
           privacyDirty = false;
           mirrorDirty = false;
-          setCloudSaveState('Sincronizado', 'saved');
+          setCloudSaveState('Tudo salvo', 'saved');
           renderCollectionTimeline();
         } catch (error) {
           setCloudSaveState('Erro ao salvar', 'error');
@@ -730,7 +730,7 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
 
       const activate = (profile, items, source = 'new') => {
         state = makeState(profile, items, source);
-        profileDirty = false; privacyDirty = false; clearTimeout(cloudSaveTimer); setCloudSaveState('Sincronizado', 'saved');
+        profileDirty = false; privacyDirty = false; clearTimeout(cloudSaveTimer); setCloudSaveState('Tudo salvo', 'saved');
         modeButtons.forEach((button) => { button.hidden = true; });
         panels.forEach((panel) => { panel.hidden = true; });
         root.querySelector('[data-editor-notice]').hidden = true;

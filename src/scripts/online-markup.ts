@@ -143,7 +143,7 @@ export const collectionMarkup = (profile: any, compact = false) => {
   ].filter(([key]) => Number(stats[key] || 0) > 0);
   const statHtml = statEntries.length
     ? statEntries.map(([key, label]) => `<span><strong>${Number(stats[key] || 0)}</strong> ${label}</span>`).join('')
-    : '<span><strong>0</strong> itens publicados</span>';
+    : '<span>Nenhum item publicado</span>';
   const previewCards = Array.isArray(profile.previewCards) ? profile.previewCards : Array.isArray(profile.coverCards) ? profile.coverCards : [];
   const cover = previewCards.length
     ? collectionFlowMarkup(previewCards, true)

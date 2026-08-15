@@ -823,3 +823,6 @@ body.modal-open .collection-album-belt { animation-play-state: paused !important
     animation: none !important;
   }
 }
+
+/* Evita gastar GPU com o mural quando ele já saiu da viewport ou a aba está oculta. */
+.nexus-hero-card-flow.is-paused .nexus-hero-flow-track { animation-play-state: paused !important; }

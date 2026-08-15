@@ -6,9 +6,10 @@ interface Props {
   detail?: boolean;
   eager?: boolean;
   interactive?: boolean;
+  deferred?: boolean;
 }
 
-const { item, detail = false, eager = false, interactive = true } = Astro.props;
+const { item, detail = false, eager = false, interactive = true, deferred = false } = Astro.props;
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 const encodePath = (path: string) => path.split('/').map(encodeURIComponent).join('/');
@@ -126,11 +127,13 @@ const hasKitComposition = isKit && kitPreviewItems.length > 0;
       </>
     ) : primaryImage ? (
       <img
-        src={primaryImage}
+        src={deferred ? undefined : primaryImage}
+        data-deferred-src={deferred ? primaryImage : undefined}
+        data-defer-load={deferred ? 'true' : undefined}
         alt={isCard ? `${item.name}, ${item.number}` : isBooster ? `Booster ${item.name}` : isKit ? `Kit ${item.name}` : `Produto ${item.name}`}
         loading={eager ? 'eager' : 'lazy'}
         decoding="async"
-        fetchpriority={eager ? 'high' : 'auto'}
+        fetchpriority={eager ? 'high' : deferred ? 'low' : 'auto'}
         data-image-candidates={JSON.stringify(fallbackImages)}
         data-image-gallery={item.kind === 'booster' ? JSON.stringify(imageUrls) : undefined}
       />
