@@ -14,4 +14,19 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       <a class="secondary-cta" href={`${base}cartas/`}><span>Explorar cartas</span><b>↗</b></a>
     </div>
   </section>
+  <script is:inline>
+    (() => {
+      const path = window.location.pathname;
+      const base = document.body.dataset.siteBase || '/';
+      const collectionMatch = path.match(/\/colecoes\/([^/]+)\/?$/);
+      if (collectionMatch) {
+        window.location.replace(`${base}colecao/?slug=${encodeURIComponent(decodeURIComponent(collectionMatch[1]))}`);
+        return;
+      }
+      const albumMatch = path.match(/\/albuns\/([^/]+)\/([^/]+)\/?$/);
+      if (albumMatch) {
+        window.location.replace(`${base}album/?collection=${encodeURIComponent(decodeURIComponent(albumMatch[1]))}&album=${encodeURIComponent(decodeURIComponent(albumMatch[2]))}`);
+      }
+    })();
+  </script>
 </BaseLayout>

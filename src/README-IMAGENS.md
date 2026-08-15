@@ -1,91 +1,44 @@
-# Estrutura das coleções, JSON e imagens
+# Imagens e dados locais de migração
 
-Cada colecionador possui uma pasta em `src/colecoes/`:
+A versão atual do Vault TCG usa o Firebase como fonte oficial dos dados de contas e coleções. As pastas `src/colecoes/` e `src/colecoes-nao-formatadas/` permanecem temporariamente no projeto apenas para permitir a migração das coleções que já existiam antes do Firebase.
 
-```text
-src/
-└── colecoes/
-    └── Leon19/
-        ├── perfil.json
-        ├── inventario-cartas.json
-        ├── inventario-boosters.json
-        ├── inventario-kits.json
-        ├── inventario-albuns.json
-        └── historico/
-            ├── cartas.jsonl
-            └── boosters.jsonl
-```
+## Imagens continuam locais
 
-O site lê JSON como formato oficial. CSV continua aceito apenas por leitores de compatibilidade para importar/migrar versões antigas.
-
-## Imagens
-
-As imagens podem continuar nas pastas globais:
+Mantenha o diretório `public/` do site original ao lado deste `src/`. Exemplos de caminhos aceitos no editor:
 
 ```text
-public/
-├── imagens/
-├── imagensboosters/
-└── imagenskits/
+public/imagens/...
+public/imagensboosters/...
+public/imagenskits/...
+public/colecoes/<slug>/...
 ```
 
-O campo `Imagem` dos JSONs tem prioridade. O Gerenciamento salva cartas e boosters baixados da Liga em `public/imagens/` e registra o nome do arquivo no próprio item. Se `Imagem` estiver vazio, o catálogo ainda usa as heurísticas antigas por nome/numeração como fallback.
-
-Também continuam suportadas imagens por coleção em `public/colecoes/<slug>/...`.
-
-## Kits
-
-`inventario-kits.json` é uma lista. `Conteúdo` é uma lista de referências reais:
-
-```json
-[
-  {
-    "Id": "KIT-...",
-    "Nome": "Kit Pikachu",
-    "Conteúdo": [
-      {
-        "kind": "cards",
-        "itemId": "XYP-XY124-BR-NM",
-        "name": "Pikachu EX",
-        "quantity": 1,
-        "unitPrice": 1900.0
-      }
-    ]
-  }
-]
-```
-
-O preço do kit é recalculado pelo `itemId`. Nome é apenas informação visual/fallback legado.
-
-## Álbuns
-
-`inventario-albuns.json` guarda `Páginas` como array real, sem JSON serializado dentro de uma célula. Cada slot ocupado também carrega `itemId` da carta.
-
-## Coleções não formatadas
-
-O botão de download de uma coleção nova no editor gera um ZIP JSON pronto para `src/colecoes-nao-formatadas/`:
+No Firestore é salvo somente o caminho relativo, por exemplo:
 
 ```text
-perfil.json
-inventario-cartas.json
-inventario-boosters.json
-inventario-kits.json
-inventario-albuns.json
+imagens/Giratina_V_186-196.webp
+imagensboosters/Evolving_Skies.webp
 ```
 
-## Updates
+Não salve a imagem em Base64 dentro do Firestore.
 
-O botão **Baixar só o update** gera:
+## Coleções antigas
+
+Os arquivos `perfil.json`, `inventario-cartas.json`, `inventario-boosters.json`, `inventario-kits.json`, `inventario-produtos.json`, `inventario-albuns.json` e históricos existentes são lidos apenas para a ferramenta **Migrar uma coleção antiga** da página Entrar/Minha coleção.
+
+Depois da migração, o inventário editável passa a viver em:
 
 ```text
-atualizacao.json
-perfil.json
-inventario-cartas.json
-inventario-boosters.json
-inventario-kits.json
-inventario-albuns.json
+collections/{uid}/cards
+collections/{uid}/boosters
+collections/{uid}/kits
+collections/{uid}/products
+collections/{uid}/albums
+collections/{uid}/movements
 ```
 
-Cartas e boosters novos podem vir em formato mínimo (link, quantidade, estado/idioma e `Id`); o Gerenciamento consulta a Liga antes de aplicar. Kits e álbuns usam `itemId`. Perfil, termos, kits e álbuns também são aplicados pelo atualizador.
+Não existe mais fluxo de baixar ZIP/update para salvar alterações do site. O editor grava diretamente no Firestore.
 
-O ZIP completo e o ZIP de update produzidos pela página não geram mais inventários CSV.
+## Limpeza futura
+
+Quando todos os donos das coleções antigas tiverem criado a conta Firebase e concluído a migração, as pastas locais de coleção e `src/data/legacy-claim-verifiers.json` podem ser removidas do projeto. As imagens de `public/` continuam normalmente.

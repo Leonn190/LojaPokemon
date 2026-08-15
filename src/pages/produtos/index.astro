@@ -1,11 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import CatalogBrowser from '../../components/CatalogBrowser.astro';
-import { getCollections, getProducts } from '../../lib/catalog';
-const products = getProducts();
-const collections = getCollections();
+import OnlineCatalogBrowser from '../../components/OnlineCatalogBrowser.astro';
 ---
-<BaseLayout title="Produtos lacrados" description="Produtos Pokémon fechados publicados pelos colecionadores do Vault TCG." active="products">
-  <section class="catalog-hero product-catalog-hero"><div class="shell catalog-hero-grid"><div data-reveal><span class="hero-badge"><i></i> Produtos fechados</span><h1>Produtos lacrados</h1><p>Boxes, coleções especiais e outros produtos Pokémon fechados, com nome, imagem, preço e referência da Liga padronizados.</p></div><div class="catalog-hero-stats" data-reveal><div><strong>{products.length}</strong><span>produtos publicados</span></div><div><strong>{collections.length}</strong><span>coleções cadastradas</span></div></div></div></section>
-  {products.length ? <CatalogBrowser kind="product" items={products} /> : <section class="shell standalone-empty-state product-empty-state" data-reveal><span>▣</span><div><small>Nenhum produto publicado ainda</small><h2>A categoria já está pronta.</h2><p>Produtos lacrados podem ser cadastrados no editor de coleção e aparecerão automaticamente aqui.</p></div></section>}
+<BaseLayout title="Produtos da comunidade" description="Explore produtos Pokémon lacrados publicados no Vault TCG." active="products">
+  <section class="catalog-hero"><div class="shell catalog-hero-grid"><div data-reveal><span class="hero-badge"><i></i> Catálogo online</span><h1>Produtos da comunidade</h1><p>Boxes e outros produtos publicados em coleções públicas são lidos diretamente do banco online.</p></div><div class="catalog-hero-stats" data-reveal><div><strong>Online</strong><span>Firestore</span></div><div><strong>Atual</strong><span>sem rebuild de dados</span></div></div></div></section>
+  <OnlineCatalogBrowser kind="product" />
 </BaseLayout>

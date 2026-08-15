@@ -1,30 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import CatalogBrowser from '../../components/CatalogBrowser.astro';
-import { getBoosters, getCollections } from '../../lib/catalog';
-
-const boosters = getBoosters();
-const collections = getCollections();
+import OnlineCatalogBrowser from '../../components/OnlineCatalogBrowser.astro';
 ---
-
-<BaseLayout
-  title="Boosters da comunidade"
-  description="Pesquise boosters Pokémon publicados por colecionadores no Vault TCG."
-  active="boosters"
->
-  <section class="catalog-hero booster-catalog-hero">
-    <div class="shell catalog-hero-grid">
-      <div data-reveal>
-        <span class="hero-badge"><i></i> {boosters.length} boosters publicados</span>
-        <h1>Boosters da comunidade</h1>
-        <p>Encontre pacotes lacrados em várias coleções. Abra qualquer item para ver o preço e a página do colecionador responsável.</p>
-      </div>
-      <div class="catalog-hero-stats" data-reveal>
-        <div><strong>{boosters.length}</strong><span>tipos de pacote</span></div>
-        <div><strong>{collections.length}</strong><span>coleções participantes</span></div>
-      </div>
-    </div>
-  </section>
-
-  <CatalogBrowser kind="booster" items={boosters} />
+<BaseLayout title="Boosters da comunidade" description="Pesquise boosters Pokémon publicados por colecionadores no Vault TCG." active="boosters">
+  <section class="catalog-hero booster-catalog-hero"><div class="shell catalog-hero-grid"><div data-reveal><span class="hero-badge"><i></i> Catálogo online</span><h1>Boosters da comunidade</h1><p>Os boosters das coleções públicas são carregados diretamente do Firestore. Alterações feitas pelo dono passam a valer online sem novo deploy.</p></div><div class="catalog-hero-stats" data-reveal><div><strong>Online</strong><span>dados na nuvem</span></div><div><strong>Seguro</strong><span>edição só pelo dono</span></div></div></div></section>
+  <OnlineCatalogBrowser kind="booster" />
 </BaseLayout>

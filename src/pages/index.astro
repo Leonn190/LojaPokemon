@@ -1,30 +1,15 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Carousel from '../components/Carousel.astro';
-import CollectionCarousel from '../components/CollectionCarousel.astro';
-import AlbumCarousel from '../components/AlbumCarousel.astro';
 import ProductImage from '../components/ProductImage.astro';
-import { getAlbums, getBoosters, getCards, getCollections, getKits, getProducts, shuffleItems } from '../lib/catalog';
+import { getCards, shuffleItems } from '../lib/catalog';
 
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
-const cards = getCards();
-const boosters = getBoosters();
-const kits = getKits();
-const products = getProducts();
-const albums = getAlbums();
-const collections = getCollections();
-const featuredCards = shuffleItems(cards).slice(0, 14);
-const featuredBoosters = shuffleItems(boosters).slice(0, 14);
-const featuredKits = shuffleItems(kits).slice(0, 14);
-const featuredProducts = shuffleItems(products).slice(0, 14);
-const featuredAlbums = shuffleItems(albums).slice(0, 14);
-const featuredCollections = [...collections].sort((a, b) => Number(b.featured) - Number(a.featured));
-const totalUnits = [...cards, ...boosters, ...kits, ...products].reduce((total, item) => total + item.quantity, 0);
+const decorativeCards = getCards();
 
 // O fundo da abertura usa o mesmo princípio visual das coleções: várias colunas
 // de cartas subindo continuamente, só que inclinado para a direita e sem hover.
-const wallSource = shuffleItems(cards.filter((card) => card.imageCandidates.length > 0)).slice(0, 56);
+const wallSource = shuffleItems(decorativeCards.filter((card) => card.imageCandidates.length > 0)).slice(0, 56);
 const rotate = (items: typeof wallSource, amount: number) => items.length
   ? [...items.slice(amount % items.length), ...items.slice(0, amount % items.length)]
   : [];
@@ -76,13 +61,13 @@ const wallLanes = Array.from({ length: 8 }, (_, laneIndex) => {
       <h2 class="nexus-home-tagline">Seu acervo. Sua vitrine.</h2>
       <p class="nexus-home-description">Organize sua coleção Pokémon, publique seus itens e encontre outros colecionadores. Use o Vault para guardar sua coleção online ou transformar itens selecionados em uma vitrine de venda.</p>
       <div class="hero-actions">
-        <a class="primary-cta" href={`${base}cadastro/`}><span>Criar minha coleção</span><b>＋</b></a>
+        <a class="primary-cta" href={`${base}cadastro/`} data-home-auth-cta><span>Entrar</span><b>→</b></a>
         <a class="secondary-cta" href={`${base}explorar/`}><span>Explorar</span><b>↗</b></a>
       </div>
       <div class="hero-metrics" aria-label="Números da comunidade">
-        <div><strong>{collections.length}</strong><span>{collections.length === 1 ? 'coleção publicada' : 'coleções publicadas'}</span></div>
-        <div><strong>{cards.length}</strong><span>cartas cadastradas</span></div>
-        <div><strong>{totalUnits}</strong><span>itens na comunidade</span></div>
+        <div><strong data-home-collections>0</strong><span>coleções públicas</span></div>
+        <div><strong data-home-cards>0</strong><span>cartas publicadas</span></div>
+        <div><strong data-home-items>0</strong><span>itens publicados</span></div>
       </div>
     </div>
   </section>
@@ -120,92 +105,27 @@ const wallLanes = Array.from({ length: 8 }, (_, laneIndex) => {
     </a>
   </section>
 
-  <Carousel
-    eyebrow="Cartas da comunidade"
-    title="Descobertas de várias coleções."
-    description="Uma seleção aleatória de cartas publicadas por todos os colecionadores do Vault."
-    items={featuredCards}
-    viewAllHref={`${base}cartas/`}
-    viewAllLabel="Ver todas as cartas"
-  />
 
-  <Carousel
-    eyebrow="Boosters publicados"
-    title="Pacotes lacrados em movimento."
-    description="Boosters de diferentes coleções aparecem juntos para facilitar novas descobertas."
-    items={featuredBoosters}
-    viewAllHref={`${base}boosters/`}
-    viewAllLabel="Ver todos os boosters"
-  />
+  <section class="shell home-online-preview" data-home-online-preview data-reveal>
+    <div class="section-heading"><div><span class="section-eyebrow">Agora tudo online</span><h2>Publicações recentes da comunidade</h2><p>Estes cards são carregados do Firestore. Quando um usuário edita a coleção, a mudança passa a aparecer aqui sem baixar ZIP ou fazer novo deploy.</p></div><a class="text-link" href={`${base}explorar/`}>Explorar tudo <span>↗</span></a></div>
+    <div class="catalog-grid" data-home-preview-grid></div>
+    <div class="empty-state" data-home-preview-empty hidden><span>◇</span><h2>A comunidade online está começando</h2><p>Entre ou crie uma conta para publicar os primeiros itens.</p></div>
+  </section>
 
-  <Carousel
-    eyebrow="Kits dos colecionadores"
-    title="Combinações feitas pela comunidade."
-    description="Kits podem reunir cartas, boosters ou os dois, com quantidade e preço definidos pelo dono da coleção."
-    items={featuredKits}
-    viewAllHref={`${base}kits/`}
-    viewAllLabel="Explorar kits"
-    emptyTitle="O primeiro kit ainda não foi publicado"
-    emptyDescription="Combine cartas e boosters da coleção para criar a primeira oferta do Vault."
-  />
-
-  {products.length > 0 && (
-    <Carousel
-      eyebrow="Produtos lacrados"
-      title="Produtos Pokémon fechados."
-      description="Boxes, coleções especiais e outros produtos lacrados entram em uma categoria própria."
-      items={featuredProducts}
-      viewAllHref={`${base}produtos/`}
-      viewAllLabel="Ver produtos"
-    />
-  )}
-
-  <AlbumCarousel albums={featuredAlbums} viewAllHref={`${base}albuns/`} />
-  <CollectionCarousel collections={featuredCollections} viewAllHref={`${base}colecoes/`} />
-
-
-<script is:inline>
-  (() => {
-    const hero = document.querySelector('[data-vault-intro]');
-    if (!hero) return;
-
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reducedMotion) {
-      hero.classList.remove('vault-intro-pending');
-      hero.classList.add('vault-intro-complete');
-      return;
-    }
-
-    const images = [...hero.querySelectorAll('.nexus-hero-card-flow img')];
-    const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
-
-    const imageIsSettled = (image) => {
-      if (image.hidden || image.closest('.image-stage')?.classList.contains('no-image')) return true;
-      return image.complete && image.naturalWidth > 0;
+  <script>
+    import { initializeOnlineImages, productMarkup } from '../scripts/online-markup';
+    const loadHome = async () => {
+      try {
+        const cloud = (window as any).VaultCloud; if (!cloud) throw new Error('Firebase ainda não foi inicializado.');
+        const [collections, items] = await Promise.all([cloud.listPublicCollections(), cloud.listPublicItems(undefined, 8)]);
+        const cardCount = collections.reduce((sum: number, profile: any) => sum + Number(profile.stats?.cards || 0), 0);
+        const itemCount = collections.reduce((sum: number, profile: any) => sum + Number(profile.stats?.cards || 0) + Number(profile.stats?.boosters || 0) + Number(profile.stats?.kits || 0) + Number(profile.stats?.products || 0), 0);
+        const collectionMetric = document.querySelector<HTMLElement>('[data-home-collections]'); const cardMetric = document.querySelector<HTMLElement>('[data-home-cards]'); const itemMetric = document.querySelector<HTMLElement>('[data-home-items]');
+        if (collectionMetric) collectionMetric.textContent = String(collections.length); if (cardMetric) cardMetric.textContent = String(cardCount); if (itemMetric) itemMetric.textContent = String(itemCount);
+        const grid = document.querySelector<HTMLElement>('[data-home-preview-grid]'); const empty = document.querySelector<HTMLElement>('[data-home-preview-empty]'); const sample = [...items].sort(() => Math.random() - .5).slice(0, 8);
+        if (grid) { grid.innerHTML = sample.map((item: any) => productMarkup(item, { compact: true })).join(''); initializeOnlineImages(grid); } if (empty) empty.hidden = sample.length !== 0;
+      } catch (_) { const empty = document.querySelector<HTMLElement>('[data-home-preview-empty]'); if (empty) empty.hidden = false; }
     };
-
-    const waitForWall = async () => {
-      const startedAt = performance.now();
-      const hardLimit = 5000;
-      while (performance.now() - startedAt < hardLimit) {
-        const settled = images.filter(imageIsSettled).length;
-        const ratio = images.length ? settled / images.length : 1;
-        // Once virtually the whole visible wall is ready, there is no reason to hold the intro longer.
-        if (ratio >= .96) return;
-        await sleep(80);
-      }
-    };
-
-    // Start the drop instantly. Its first ~900 ms intentionally doubles as image-loading time.
-    hero.classList.add('vault-intro-running');
-    Promise.all([sleep(900), waitForWall()]).then(async () => {
-      hero.classList.add('vault-intro-revealing');
-      await sleep(1080);
-      hero.classList.add('vault-intro-copy');
-      await sleep(900);
-      hero.classList.remove('vault-intro-pending', 'vault-intro-running', 'vault-intro-revealing', 'vault-intro-copy');
-      hero.classList.add('vault-intro-complete');
-    });
-  })();
-</script>
+    if ((window as any).VaultCloud) loadHome(); else window.addEventListener('vault:cloud-ready', loadHome, { once: true });
+  </script>
 </BaseLayout>

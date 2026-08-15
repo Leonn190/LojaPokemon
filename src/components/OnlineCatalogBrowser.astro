@@ -1,0 +1,170 @@
+---
+interface Props {
+  kind: 'card' | 'booster' | 'kit' | 'product';
+  showOwnerFilter?: boolean;
+}
+const { kind, showOwnerFilter = true } = Astro.props;
+const noun = kind === 'card' ? 'cartas' : kind === 'booster' ? 'boosters' : kind === 'kit' ? 'kits' : 'produtos';
+const placeholder = kind === 'card'
+  ? 'Nome, número, coleção, tipo...'
+  : kind === 'booster'
+    ? 'Nome da coleção ou do booster...'
+    : kind === 'kit'
+      ? 'Nome, descrição ou conteúdo do kit...'
+      : 'Nome do produto lacrado...';
+---
+<section class="shell catalog-section online-catalog-section" data-online-catalog data-kind={kind} data-owner-filter={showOwnerFilter ? 'true' : 'false'}>
+  <div class:list={['filter-panel', kind !== 'card' && 'compact-filter-panel']} data-reveal>
+    <div class="search-control">
+      <label for={`${kind}-search`}>Pesquisar {noun}</label>
+      <div class="search-input-wrap">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg>
+        <input id={`${kind}-search`} type="search" placeholder={placeholder} autocomplete="off" data-online-search />
+        <kbd>/</kbd>
+      </div>
+    </div>
+
+    {kind === 'card' && (
+      <>
+        <div class="select-control">
+          <label>Coleção Pokémon</label>
+          <div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">▦</span><select data-online-collection><option value="">Todas</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div>
+        </div>
+        <div class="select-control">
+          <label>Tipo</label>
+          <div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◆</span><select data-online-type><option value="">Todos</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div>
+        </div>
+        <div class="select-control">
+          <label>Estado</label>
+          <div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">✓</span><select data-online-condition><option value="">Todos</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div>
+        </div>
+      </>
+    )}
+
+    {showOwnerFilter && (
+      <div class="select-control" data-online-owner-wrap hidden>
+        <label>Coleção Vault</label>
+        <div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◎</span><select data-online-owner><option value="">Todas</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div>
+      </div>
+    )}
+
+    <div class="select-control">
+      <label>Ordenar</label>
+      <div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">↕</span><select data-online-sort><option value="name">Nome</option><option value="price-asc">Menor preço</option><option value="price-desc">Maior preço</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div>
+    </div>
+  </div>
+
+  <div class="catalog-results-heading">
+    <div><span class="section-kicker">Banco online</span><h2><strong data-online-count>0</strong> {noun} publicadas</h2></div>
+    <span class="cloud-save-state" data-online-status>Conectando ao Firebase…</span>
+  </div>
+
+  <div class="catalog-grid" data-online-grid></div>
+  <div class="empty-state" data-online-empty hidden><span>⌕</span><h2>Nada encontrado</h2><p>Esta área está vazia ou os filtros não encontraram resultados.</p></div>
+</section>
+
+<script>
+  import { initializeOnlineImages, normalizeText, productMarkup } from '../scripts/online-markup';
+
+  const roots = document.querySelectorAll<HTMLElement>('[data-online-catalog]');
+  roots.forEach((root) => {
+    if (root.dataset.initialized === 'true') return;
+    root.dataset.initialized = 'true';
+    const kind = root.dataset.kind || 'card';
+    const grid = root.querySelector<HTMLElement>('[data-online-grid]');
+    const count = root.querySelector<HTMLElement>('[data-online-count]');
+    const status = root.querySelector<HTMLElement>('[data-online-status]');
+    const empty = root.querySelector<HTMLElement>('[data-online-empty]');
+    const search = root.querySelector<HTMLInputElement>('[data-online-search]');
+    const collectionFilter = root.querySelector<HTMLSelectElement>('[data-online-collection]');
+    const typeFilter = root.querySelector<HTMLSelectElement>('[data-online-type]');
+    const conditionFilter = root.querySelector<HTMLSelectElement>('[data-online-condition]');
+    const ownerFilter = root.querySelector<HTMLSelectElement>('[data-online-owner]');
+    const ownerWrap = root.querySelector<HTMLElement>('[data-online-owner-wrap]');
+    const sort = root.querySelector<HTMLSelectElement>('[data-online-sort]');
+    let items: any[] = [];
+
+    const fillSelect = (select: HTMLSelectElement | null, values: string[], firstLabel: string) => {
+      if (!select) return;
+      select.innerHTML = `<option value="">${firstLabel}</option>${values.map((value) => `<option value="${String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}">${String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;')}</option>`).join('')}`;
+    };
+
+    const hydrateFilters = () => {
+      const unique = (values: unknown[]) => [...new Set(values.map((value) => String(value || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+      fillSelect(collectionFilter, unique(items.map((item) => item.collection)), 'Todas');
+      fillSelect(typeFilter, unique(items.map((item) => item.type)), 'Todos');
+      fillSelect(conditionFilter, unique(items.map((item) => item.condition)), 'Todos');
+      const ownerMap = new Map<string, string>();
+      items.forEach((item) => {
+        const slug = String(item.ownerCollectionSlug || item.collectionSlug || '');
+        if (slug) ownerMap.set(slug, String(item.ownerCollectionName || item.ownerName || slug));
+      });
+      const owners = [...ownerMap.entries()].sort((a, b) => a[1].localeCompare(b[1], 'pt-BR'));
+      if (ownerFilter) {
+        ownerFilter.innerHTML = `<option value="">Todas</option>${owners.map(([slug, label]) => `<option value="${slug.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}">${label.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</option>`).join('')}`;
+        if (ownerWrap) ownerWrap.hidden = owners.length <= 1;
+      }
+    };
+
+    const apply = () => {
+      const query = normalizeText(search?.value || '');
+      let visible = items.filter((item) => {
+        const text = normalizeText(`${item.searchText || ''} ${item.name || ''} ${item.number || ''} ${item.collection || ''} ${item.ownerName || ''} ${item.ownerCollectionName || ''}`);
+        if (query && !text.includes(query)) return false;
+        if (collectionFilter?.value && item.collection !== collectionFilter.value) return false;
+        if (typeFilter?.value && item.type !== typeFilter.value) return false;
+        if (conditionFilter?.value && item.condition !== conditionFilter.value) return false;
+        if (ownerFilter?.value && String(item.ownerCollectionSlug || item.collectionSlug || '') !== ownerFilter.value) return false;
+        return true;
+      });
+      const sortValue = sort?.value || 'name';
+      visible = [...visible].sort((a, b) => {
+        const leftPrice = a.price === null || a.price === undefined ? null : Number(a.price);
+        const rightPrice = b.price === null || b.price === undefined ? null : Number(b.price);
+        if (sortValue === 'price-asc') return (leftPrice ?? Infinity) - (rightPrice ?? Infinity);
+        if (sortValue === 'price-desc') return (rightPrice ?? -Infinity) - (leftPrice ?? -Infinity);
+        return String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
+      });
+      if (grid) {
+        grid.innerHTML = visible.map((item) => productMarkup(item)).join('');
+        initializeOnlineImages(grid);
+      }
+      if (count) count.textContent = String(visible.length);
+      if (empty) empty.hidden = visible.length !== 0;
+    };
+
+    const load = async () => {
+      try {
+        if (status) status.textContent = 'Carregando…';
+        const cloud = (window as any).VaultCloud;
+        if (!cloud) throw new Error('Firebase ainda não foi inicializado.');
+        items = await cloud.listPublicItems(kind);
+        hydrateFilters();
+        apply();
+        if (status) status.textContent = 'Atualizado da nuvem';
+      } catch (error: any) {
+        if (grid) grid.innerHTML = '';
+        if (empty) {
+          empty.hidden = false;
+          const title = empty.querySelector('h2');
+          const text = empty.querySelector('p');
+          if (title) title.textContent = 'Não foi possível carregar';
+          if (text) text.textContent = error?.message || 'Confira a configuração do Firebase e tente novamente.';
+        }
+        if (status) status.textContent = 'Firebase indisponível';
+      }
+    };
+
+    [search, collectionFilter, typeFilter, conditionFilter, ownerFilter, sort].forEach((element) => {
+      element?.addEventListener(element === search ? 'input' : 'change', apply);
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement as HTMLElement | null)?.tagName || '')) {
+        event.preventDefault(); search?.focus();
+      }
+    });
+
+    if ((window as any).VaultCloud) load();
+    else window.addEventListener('vault:cloud-ready', load, { once: true });
+  });
+</script>

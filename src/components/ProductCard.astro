@@ -46,6 +46,7 @@ const showPublicQuantity = item.kind === 'kit' && item.showQuantity;
   data-kit-discount={item.kind === 'kit' ? kitDiscount.toFixed(1) : ''}
   data-kit-source-total={item.kind === 'kit' && item.sourceTotal !== null ? String(item.sourceTotal) : ''}
   data-owner={item.ownerName}
+  data-owner-uid={(item as any).ownerUid || ''}
   data-owner-collection={item.ownerCollectionName}
   data-owner-slug={item.ownerCollectionSlug}
   data-owner-phone={item.ownerPhone}
@@ -106,7 +107,7 @@ const showPublicQuantity = item.kind === 'kit' && item.showQuantity;
   </button>
 
   {!hideOwner && (
-    <a class="collection-origin" href={`${base}colecoes/${item.ownerCollectionSlug}/`}>
+    <a class="collection-origin" href={`${base}colecao/?slug=${encodeURIComponent(item.ownerCollectionSlug)}`}>
       <span class="origin-avatar">{item.ownerName.slice(0, 2).toUpperCase()}</span>
       <span><small>Publicado por</small><strong>{item.ownerName}</strong></span>
       <b aria-hidden="true">↗</b>

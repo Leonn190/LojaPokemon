@@ -1,15 +1,18 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getEditableCollections } from '../../lib/catalog';
+import legacyClaims from '../../data/legacy-claim-verifiers.json';
 
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
-const publishedCollections = getEditableCollections();
+const legacyCollections = getEditableCollections().map((collection) => ({ ...collection, profile: { ...collection.profile, email: '', phone: '', password: '' } }));
+const legacyJson = JSON.stringify(legacyCollections).replace(/</g, '\\u003c');
+const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
 ---
 
 <BaseLayout
-  title="Criar ou editar coleção"
-  description="Monte, importe ou edite sua coleção Pokémon e gere o ZIP para aprovação."
+  title="Entrar"
+  description="Entre na sua conta do Vault TCG ou crie uma conta com coleção online."
   active="signup"
   bodyClass="signup-page"
 >
@@ -17,37 +20,50 @@ const publishedCollections = getEditableCollections();
     <div class="shell signup-hero-grid">
       <div data-reveal>
         <span class="hero-badge"><i></i> Central de coleções</span>
-        <h1>Controle sua coleção em um só lugar.</h1>
-        <p>Organize o inventário, prepare itens para venda, monte kits visualmente e gere o ZIP para publicação. Envie o arquivo final para <strong>alexeidostoievsky@gmail.com</strong>.</p>
+        <h1>Sua coleção, salva na nuvem.</h1>
+        <p>Entre na sua conta para editar tudo online. Cada conta possui uma coleção, que pode ficar vazia, privada ou pública. Nenhum ZIP é necessário para salvar alterações.</p>
       </div>
       <div class="signup-steps" data-reveal>
-        <article><span>01</span><div><strong>Entre na coleção</strong><p>Crie uma nova, importe um ZIP anterior ou abra uma coleção publicada.</p></div></article>
-        <article><span>02</span><div><strong>Edite o inventário</strong><p>Veja cartas, boosters, kits e álbuns em abas organizadas.</p></div></article>
-        <article><span>03</span><div><strong>Publique a atualização</strong><p>Baixe o ZIP completo ou somente as novas cartas, boosters e kits, além dos álbuns criados ou reorganizados.</p></div></article>
+        <article><span>01</span><div><strong>Entre ou crie sua conta</strong><p>O Firebase cuida do login e mantém sua sessão protegida.</p></div></article>
+        <article><span>02</span><div><strong>Edite normalmente</strong><p>Cartas, boosters, kits, produtos e álbuns continuam no mesmo editor.</p></div></article>
+        <article><span>03</span><div><strong>Salve online</strong><p>As alterações são sincronizadas diretamente com o Firestore.</p></div></article>
       </div>
     </div>
   </section>
 
-  <section class="shell collection-editor" data-editor-root data-base={base} data-published={JSON.stringify(publishedCollections)}>
-    <div class="editor-mode-tabs" role="tablist" aria-label="Forma de iniciar uma coleção">
-      <button type="button" class="active" data-editor-mode="new">Criar do zero</button>
-      <button type="button" data-editor-mode="import">Importar ZIP</button>
-      <button type="button" data-editor-mode="published">Editar coleção publicada</button>
+  <script type="application/json" data-legacy-collections set:html={legacyJson}></script>
+  <script type="application/json" data-legacy-claims set:html={legacyClaimsJson}></script>
+
+  <section class="shell collection-editor" data-editor-root data-base={base} >
+    <div class="editor-mode-tabs" role="tablist" aria-label="Acesso à conta">
+      <button type="button" class="active" data-editor-mode="published">Entrar</button>
+      <button type="button" data-editor-mode="new">Criar conta</button>
     </div>
 
     <div class="editor-notice" data-editor-notice>
-      <span>i</span><p>Os dados ficam no seu navegador até o download. A validação de acesso desta versão controla apenas a interface do site estático.</p>
+      <span>☁</span><p>Contas e dados são salvos no Firebase. Sua coleção pode permanecer completamente vazia e privada se você quiser usar o Vault apenas para comprar e enviar propostas.</p>
     </div>
 
-    <section class="editor-start-panel" data-start-panel="new">
-      <div class="form-section-heading"><span class="section-eyebrow">Nova coleção</span><h2>Dados do colecionador</h2><p>Cadastre o perfil e depois organize os itens pelo painel.</p></div>
+    <section class="editor-start-panel" data-start-panel="published">
+      <div class="form-section-heading"><span class="section-eyebrow">Conta Vault</span><h2>Entrar</h2><p>Use o e-mail e a senha cadastrados no Firebase.</p></div>
+      <form class="editor-profile-form published-login" data-published-login>
+        <label class="form-field"><span>E-mail</span><input name="login" type="email" autocomplete="email" required /></label>
+        <label class="form-field"><span>Senha</span><input name="password" type="password" autocomplete="current-password" required /></label>
+        <button class="primary-cta" type="submit"><span>Entrar</span><b>→</b></button>
+      </form>
+      <p class="import-feedback" data-login-feedback></p>
+    </section>
+
+    <section class="editor-start-panel" data-start-panel="new" hidden>
+      <div class="form-section-heading"><span class="section-eyebrow">Nova conta</span><h2>Crie sua conta e coleção</h2><p>Toda conta recebe uma coleção. Ela pode ficar privada e sem nenhum item.</p></div>
       <form class="editor-profile-form" data-new-profile-form>
-        <label class="form-field"><span>Nome</span><input name="owner" required placeholder="Ex.: Ana Silva" /></label>
+        <label class="form-field"><span>Seu nome</span><input name="owner" required placeholder="Ex.: Ana Silva" /></label>
         <label class="form-field"><span>Nome da coleção</span><input name="title" required placeholder="Ex.: Coleção da Ana" /></label>
-        <label class="form-field"><span>Gmail</span><input name="email" type="email" required placeholder="voce@gmail.com" /></label>
-        <label class="form-field"><span>Número de telefone</span><input name="phone" required placeholder="(00) 00000-0000" /></label>
-        <label class="form-field"><span>Senha</span><input name="password" type="password" minlength="4" required /></label>
+        <label class="form-field"><span>E-mail</span><input name="email" type="email" autocomplete="email" required placeholder="voce@email.com" /></label>
+        <label class="form-field"><span>Número de telefone (opcional)</span><input name="phone" placeholder="(00) 00000-0000" /></label>
+        <label class="form-field"><span>Senha</span><input name="password" type="password" autocomplete="new-password" minlength="6" required /></label>
         <label class="form-field"><span>Descrição (opcional)</span><input name="description" placeholder="Conte um pouco sobre a coleção" /></label>
+        <label class="modal-sale-check"><input name="public" type="checkbox" /><span><strong>Deixar minha coleção pública</strong><small>Desmarcado, sua conta existe normalmente, mas ninguém vê sua coleção.</small></span></label>
         <fieldset class="proposal-terms-form new-proposal-terms">
           <legend>Termos de propostas</legend>
           <label class="form-field"><span>Regra principal</span><select name="proposalPolicy" required><option value="flexible">Sou flexível quanto às regras</option><option value="none">Não aceito nenhuma proposta</option><option value="fixed_price_multi_only">Não aceito proposta para cartas com preço definido e só aceito mais de um produto</option><option value="no_defined_price">Não aceito proposta para cartas com preço definido</option><option value="multi_only">Aceito propostas apenas com mais de um produto</option></select></label>
@@ -59,24 +75,9 @@ const publishedCollections = getEditableCollections();
             <div><label><span>A partir de R$</span><input name="tierMin" type="number" min="0" step="0.01" placeholder="500" /></label><label><span>Máximo de desconto</span><div><input name="tierDiscount" type="number" min="0" max="100" step="0.1" placeholder="10" /><b>%</b></div></label></div>
           </div>
         </fieldset>
-        <button class="primary-cta" type="submit"><span>Abrir editor</span><b>→</b></button>
+        <button class="primary-cta" type="submit"><span>Criar conta e coleção</span><b>→</b></button>
       </form>
-    </section>
-
-    <section class="editor-start-panel" data-start-panel="import" hidden>
-      <div class="form-section-heading"><span class="section-eyebrow">ZIP JSON da coleção</span><h2>Continue uma versão anterior</h2><p>Selecione um ZIP JSON gerado pela central. ZIPs CSV antigos continuam aceitos apenas para migração.</p></div>
-      <label class="zip-drop-zone" data-zip-drop><input type="file" accept=".zip,application/zip" data-zip-input /><span>↑</span><strong>Solte o ZIP aqui ou clique para escolher</strong><small>O arquivo não é enviado para nenhum servidor.</small></label>
-      <p class="import-feedback" data-import-feedback></p>
-    </section>
-
-    <section class="editor-start-panel" data-start-panel="published" hidden>
-      <div class="form-section-heading"><span class="section-eyebrow">Coleções aprovadas</span><h2>Entre para editar</h2><p>Use o Gmail ou telefone e a senha vinculada à coleção.</p></div>
-      <form class="editor-profile-form published-login" data-published-login>
-        <label class="form-field"><span>Gmail ou número de telefone</span><input name="login" required /></label>
-        <label class="form-field"><span>Senha</span><input name="password" type="password" required /></label>
-        <button class="primary-cta" type="submit"><span>Autorizar edição</span><b>→</b></button>
-      </form>
-      <p class="import-feedback" data-login-feedback></p>
+      <p class="import-feedback" data-signup-feedback></p>
     </section>
 
     <section class="editor-workspace" data-editor-workspace hidden>
@@ -87,16 +88,44 @@ const publishedCollections = getEditableCollections();
           <p data-workspace-meta>Versão 1</p>
         </div>
         <div class="workspace-header-actions">
-          <span class="workspace-save-state"><i></i> Alterações locais</span>
-          <button type="button" class="secondary-cta" data-reset-editor><span>Sair do editor</span><b>×</b></button>
+          <span class="workspace-save-state" data-cloud-save-state><i></i> Sincronizado</span>
+          <button type="button" class="secondary-cta" data-save-now><span>Salvar agora</span><b>☁</b></button>
+          <button type="button" class="secondary-cta" data-reset-editor><span>Sair da conta</span><b>×</b></button>
         </div>
       </header>
+
+      {legacyCollections.length > 0 && (
+        <details class="editor-legacy-migration" data-legacy-migration>
+          <summary><span>↥</span><div><strong>Migrar uma coleção antiga</strong><small>Uso único: transfere os dados que existiam no projeto local para esta conta Firebase, sem ZIP.</small></div><b>+</b></summary>
+          <div class="legacy-migration-body">
+            <label class="form-field"><span>Coleção antiga</span><select data-legacy-select><option value="">Selecione…</option>{legacyCollections.map((collection) => <option value={collection.profile.collectionId || collection.slug}>{collection.profile.title} · {collection.profile.owner}</option>)}</select></label>
+            <label class="form-field"><span>Senha antiga dessa coleção</span><input type="password" autocomplete="off" data-legacy-password placeholder="A senha usada no sistema antigo" /><small>A senha é conferida localmente no navegador e não é enviada ao Firestore.</small></label>
+            <button type="button" class="secondary-cta" data-legacy-import><span>Migrar dados para esta conta</span><b>↥</b></button>
+            <p class="import-feedback" data-legacy-feedback></p>
+          </div>
+        </details>
+      )}
+
+      <details class="editor-legacy-migration editor-profile-settings" data-profile-settings>
+        <summary><span>✎</span><div><strong>Dados da coleção</strong><small>Altere nome, título, descrição e telefone. O endereço público da coleção permanece estável.</small></div><b>+</b></summary>
+        <div class="legacy-migration-body profile-settings-body">
+          <label class="form-field"><span>Seu nome</span><input data-profile-field="owner" /></label>
+          <label class="form-field"><span>Nome da coleção</span><input data-profile-field="title" /></label>
+          <label class="form-field"><span>Telefone para propostas</span><input data-profile-field="phone" placeholder="(00) 00000-0000" /></label>
+          <label class="form-field profile-description-field"><span>Descrição</span><textarea rows="3" data-profile-field="description"></textarea></label>
+        </div>
+      </details>
 
       <section class="editor-control-center" aria-label="Configurações gerais da coleção">
         <label class="editor-setting-card">
           <span class="setting-icon">#</span>
           <span><strong>Mostrar quantidade de kits</strong><small>Cartas e boosters nunca exibem estoque publicamente; este controle vale para kits.</small></span>
           <span class="switch"><input type="checkbox" data-show-quantity checked /><i></i></span>
+        </label>
+        <label class="editor-setting-card">
+          <span class="setting-icon">◎</span>
+          <span><strong>Coleção pública</strong><small>Quando desligado, sua conta continua ativa, mas a coleção não aparece para outras pessoas.</small></span>
+          <span class="switch"><input type="checkbox" data-collection-public /><i></i></span>
         </label>
         <label class="editor-setting-card">
           <span class="setting-icon">$</span>
@@ -114,7 +143,7 @@ const publishedCollections = getEditableCollections();
         <div class="collector-personalization-grid">
           <div class="profile-photo-editor">
             <div class="profile-photo-preview" data-profile-photo-preview><span>TC</span></div>
-            <div><strong>Foto do colecionador</strong><small>PNG, JPG ou WebP. A imagem fica salva no perfil da coleção.</small><div class="profile-photo-actions"><label><input type="file" accept="image/png,image/jpeg,image/webp" data-profile-photo-input /><span>Escolher foto</span></label><button type="button" data-remove-profile-photo>Remover</button></div></div>
+            <div><strong>Foto do colecionador</strong><small>Por enquanto as imagens continuam no seu public. Informe o caminho, por exemplo imagens/perfis/leon.webp.</small><div class="profile-photo-actions"><label><input type="text" data-profile-photo-path placeholder="imagens/perfis/minha-foto.webp" /><span>Caminho local</span></label><button type="button" data-remove-profile-photo>Remover</button></div></div>
           </div>
           <div class="palette-editor">
             <div class="palette-editor-copy"><strong>Paleta da coleção</strong><small>Principal define o glow e ações, Secundária domina o fundo e Destaque cria contraste. Tudo continua editável a qualquer momento.</small><div class="palette-live-preview" data-palette-preview aria-hidden="true"><i></i><span><b>NEXUS</b><small>prévia do tema</small></span><em></em></div></div>
@@ -170,23 +199,29 @@ const publishedCollections = getEditableCollections();
         <div data-collection-movements></div>
       </section>
 
-      <div class="editor-export-panel">
-        <div><span class="section-eyebrow">Pronto para aprovação</span><h3>Baixe o ZIP da versão <b data-version-number>1</b></h3><p>Os inventários são exportados em JSON. Para coleção nova, o ZIP sai pronto para a pasta de não formatadas; em coleções existentes, o update leva perfil, novas cartas/boosters/produtos e kits/álbuns alterados.</p></div>
-        <div class="editor-export-actions"><button type="button" class="secondary-cta" data-download-update hidden><span>Baixar só o update</span><b>＋</b></button><button type="button" class="primary-cta" data-download-zip><span>Baixar ZIP JSON</span><b>↓</b></button></div>
+      <div class="editor-export-panel cloud-save-panel">
+        <div><span class="section-eyebrow">Firebase</span><h3>Alterações salvas online</h3><p>Não existe mais download de ZIP para atualizar a coleção. O editor sincroniza somente os documentos que mudaram.</p></div>
+        <div class="editor-export-actions"><button type="button" class="primary-cta" data-save-now><span>Salvar agora</span><b>☁</b></button></div>
       </div>
     </section>
 
     <div class="editor-modal" data-editor-modal="card" hidden>
       <button class="editor-modal-backdrop" type="button" data-close-modal aria-label="Fechar"></button>
       <section class="editor-modal-dialog editor-form-dialog" role="dialog" aria-modal="true" aria-labelledby="card-modal-title">
-        <header class="editor-modal-header"><div><span class="section-eyebrow">Nova carta</span><h2 id="card-modal-title">Adicionar carta</h2><p>O formatador poderá completar os dados consultando o link da Liga.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
+        <header class="editor-modal-header"><div><span class="section-eyebrow">Nova carta</span><h2 id="card-modal-title">Adicionar carta</h2><p>Cadastre os dados diretamente no Vault. O link da Liga continua opcional como referência para cotização futura.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
         <form class="editor-item-form editor-modal-form" data-card-form>
           <div class="modal-form-grid">
-            <label class="wide"><span>Link da Liga</span><input name="linkLiga" type="url" required placeholder="https://www.ligapokemon.com.br/..." /><small>Campo usado pelo formatador para consultar nome, coleção, preços e imagem.</small></label>
+            <label class="wide"><span>Nome da carta</span><input name="name" required placeholder="Ex.: Giratina V" /></label>
+            <label><span>Número</span><input name="number" placeholder="Ex.: 186/196" /></label>
+            <label><span>Coleção Pokémon</span><input name="collection" required placeholder="Ex.: Origem Perdida" /></label>
+            <label><span>Tipo / raridade</span><input name="type" placeholder="Ex.: Arte Secreta" /></label>
+            <label><span>Ano</span><input name="year" placeholder="2022" /></label>
             <label><span>Estado</span><select name="condition" required><option value="NM">NM</option><option value="SP">SP</option><option value="MP">MP</option><option value="HP">HP</option><option value="D">D</option></select></label>
             <label><span>Idioma</span><input name="language" required value="Português (PT-BR)" /></label>
             <label><span>Quantidade</span><input name="quantity" type="number" min="1" value="1" required /></label>
             <label><span>Preço final (opcional)</span><input name="price" type="number" min="0" step="0.01" placeholder="Ex.: 45.90" /></label>
+            <label class="wide"><span>Imagem local (opcional)</span><input name="image" placeholder="imagens/cartas/minha-carta.webp" /><small>O arquivo continua dentro de public; o Firestore guarda apenas o caminho.</small></label>
+            <label class="wide"><span>Link da Liga (opcional)</span><input name="linkLiga" type="url" placeholder="https://www.ligapokemon.com.br/..." /></label>
           </div>
           <label class="modal-sale-check"><input name="forSale" type="checkbox" checked /><span><strong>Disponível para venda</strong><small>Pode ser alterado individualmente no inventário.</small></span></label>
           <footer class="modal-form-actions"><button type="button" class="secondary-cta" data-close-modal><span>Cancelar</span><b>×</b></button><button type="submit" class="primary-cta"><span>Adicionar carta</span><b>＋</b></button></footer>
@@ -223,12 +258,14 @@ const publishedCollections = getEditableCollections();
     <div class="editor-modal" data-editor-modal="booster" hidden>
       <button class="editor-modal-backdrop" type="button" data-close-modal aria-label="Fechar"></button>
       <section class="editor-modal-dialog editor-form-dialog" role="dialog" aria-modal="true" aria-labelledby="booster-modal-title">
-        <header class="editor-modal-header"><div><span class="section-eyebrow">Novo booster</span><h2 id="booster-modal-title">Adicionar booster</h2><p>Cadastre o link e o estoque interno. A quantidade não será exibida publicamente.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
+        <header class="editor-modal-header"><div><span class="section-eyebrow">Novo booster</span><h2 id="booster-modal-title">Adicionar booster</h2><p>Cadastre o booster diretamente. A quantidade fica privada e o banco recebe apenas os dados, não a imagem.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
         <form class="editor-item-form editor-modal-form" data-booster-form>
           <div class="modal-form-grid">
-            <label class="wide"><span>Link da Liga</span><input name="linkLiga" type="url" required placeholder="https://www.ligapokemon.com.br/..." /></label>
+            <label class="wide"><span>Nome do booster</span><input name="name" required placeholder="Ex.: Evolving Skies" /></label>
             <label><span>Quantidade</span><input name="quantity" type="number" min="1" value="1" required /></label>
             <label><span>Preço final (opcional)</span><input name="price" type="number" min="0" step="0.01" placeholder="Ex.: 30.00" /></label>
+            <label class="wide"><span>Imagem local (opcional)</span><input name="image" placeholder="imagens/boosters/evolving-skies.webp" /></label>
+            <label class="wide"><span>Link da Liga (opcional)</span><input name="linkLiga" type="url" placeholder="https://www.ligapokemon.com.br/..." /></label>
           </div>
           <label class="modal-sale-check"><input name="forSale" type="checkbox" checked /><span><strong>Disponível para venda</strong><small>Pode ser alterado individualmente no inventário.</small></span></label>
           <footer class="modal-form-actions"><button type="button" class="secondary-cta" data-close-modal><span>Cancelar</span><b>×</b></button><button type="submit" class="primary-cta"><span>Adicionar booster</span><b>＋</b></button></footer>
@@ -243,9 +280,10 @@ const publishedCollections = getEditableCollections();
         <form class="editor-item-form editor-modal-form" data-product-form>
           <div class="modal-form-grid">
             <label class="wide"><span>Nome do produto</span><input name="name" required placeholder="Ex.: Elite Trainer Box" /></label>
-            <label class="wide"><span>Link da Liga</span><input name="linkLiga" type="url" required placeholder="https://www.ligapokemon.com.br/..." /></label>
-            <label><span>Preço</span><input name="price" type="number" min="0" step="0.01" required /></label>
-            <label><span>Imagem</span><input name="image" required placeholder="URL ou caminho da imagem" /></label>
+            <label class="wide"><span>Link da Liga (opcional)</span><input name="linkLiga" type="url" placeholder="https://www.ligapokemon.com.br/..." /></label>
+            <label><span>Quantidade</span><input name="quantity" type="number" min="1" value="1" required /></label>
+            <label><span>Preço (opcional)</span><input name="price" type="number" min="0" step="0.01" /></label>
+            <label class="wide"><span>Imagem local (opcional)</span><input name="image" placeholder="imagens/produtos/meu-produto.webp" /><small>O arquivo continua no public; o Firestore guarda só o caminho.</small></label>
           </div>
           <label class="modal-sale-check"><input name="forSale" type="checkbox" checked /><span><strong>Disponível para venda</strong><small>Pode ser alterado depois no inventário.</small></span></label>
           <footer class="modal-form-actions"><button type="button" class="secondary-cta" data-close-modal><span>Cancelar</span><b>×</b></button><button type="submit" class="primary-cta"><span>Adicionar produto</span><b>＋</b></button></footer>
@@ -330,8 +368,12 @@ const publishedCollections = getEditableCollections();
       const root = document.querySelector('[data-editor-root]');
       if (!root) return;
 
+      let legacyCollections = [];
+      let legacyClaims = [];
+      try { legacyCollections = JSON.parse(document.querySelector('[data-legacy-collections]')?.textContent || '[]'); } catch (_) {}
+      try { legacyClaims = JSON.parse(document.querySelector('[data-legacy-claims]')?.textContent || '[]'); } catch (_) {}
+
       const base = root.dataset.base || '/';
-      const published = JSON.parse(root.dataset.published || '[]');
       const panels = [...root.querySelectorAll('[data-start-panel]')];
       const modeButtons = [...root.querySelectorAll('[data-editor-mode]')];
       const workspace = root.querySelector('[data-editor-workspace]');
@@ -339,7 +381,8 @@ const publishedCollections = getEditableCollections();
       const inventory = root.querySelector('[data-editor-inventory]');
       const inventorySection = root.querySelector('[data-inventory-section]');
       const inventorySearch = root.querySelector('[data-inventory-search]');
-      const updateButton = root.querySelector('[data-download-update]');
+      const updateButton = null;
+      const saveStateBadge = root.querySelector('[data-cloud-save-state]');
       const modalElements = [...root.querySelectorAll('[data-editor-modal]')];
       const priceFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -355,8 +398,63 @@ const publishedCollections = getEditableCollections();
       let albumCardQuery = '';
       let selectedAlbumCardId = '';
       let activeKitEditIndex = -1;
+      let profileDirty = false;
+      let privacyDirty = false;
+      let mirrorDirty = false;
+      let cloudSaveTimer = 0;
+      let cloudSaving = false;
+      let cloudSaveQueued = false;
+      let authActionInProgress = false;
+
+      const setCloudSaveState = (label, mode = 'saved') => {
+        if (!saveStateBadge) return;
+        saveStateBadge.dataset.state = mode;
+        saveStateBadge.innerHTML = `<i></i> ${label}`;
+      };
+      const hasCloudChanges = () => {
+        if (!state) return false;
+        if (profileDirty || privacyDirty || mirrorDirty || (state.pendingMovements || []).length) return true;
+        if (Object.values(state.removed || {}).some((rows) => Array.isArray(rows) && rows.length)) return true;
+        return ['cards', 'boosters', 'kits', 'products', 'albums'].some((kind) => (state[kind] || []).some((item) => item._isNew || item._isDirty));
+      };
+      const flushCloudSave = async () => {
+        if (!state || !hasCloudChanges()) return;
+        if (cloudSaving) { cloudSaveQueued = true; return; }
+        cloudSaving = true;
+        clearTimeout(cloudSaveTimer);
+        setCloudSaveState('Salvando…', 'saving');
+        try {
+          await window.VaultCloud?.ready;
+          await window.VaultCloud.saveEditorState(state, { profileDirty, privacyDirty, mirrorDirty });
+          profileDirty = false;
+          privacyDirty = false;
+          mirrorDirty = false;
+          setCloudSaveState('Sincronizado', 'saved');
+          renderCollectionTimeline();
+        } catch (error) {
+          setCloudSaveState('Erro ao salvar', 'error');
+          console.error('[Vault TCG] Falha ao salvar no Firebase:', error);
+        } finally {
+          cloudSaving = false;
+          if (cloudSaveQueued) { cloudSaveQueued = false; await flushCloudSave(); }
+        }
+      };
+      const scheduleCloudSave = (delay = 850) => {
+        if (!state || !hasCloudChanges()) return;
+        clearTimeout(cloudSaveTimer);
+        setCloudSaveState('Alterações pendentes', 'pending');
+        cloudSaveTimer = window.setTimeout(() => { flushCloudSave(); }, delay);
+      };
 
       const clean = (value) => String(value ?? '').trim();
+      const bytesFromBase64 = (value) => Uint8Array.from(atob(String(value || '')), (char) => char.charCodeAt(0));
+      const equalBytes = (left, right) => left.length === right.length && left.every((value, index) => value === right[index]);
+      const verifyLegacyPassword = async (password, claim) => {
+        if (!claim || !password || !window.crypto?.subtle) return false;
+        const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(String(password)), 'PBKDF2', false, ['deriveBits']);
+        const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: bytesFromBase64(claim.salt), iterations: Number(claim.iterations || 210000) }, key, 256);
+        return equalBytes(new Uint8Array(bits), bytesFromBase64(claim.verifier));
+      };
       const toPrice = (value) => {
         const raw = clean(value).replace(/R\$/gi, '').replace(/\s/g, '');
         if (!raw || raw === '-') return null;
@@ -580,7 +678,7 @@ const publishedCollections = getEditableCollections();
       const makeState = (profile, items = {}, source = 'new') => {
         const cards = (items.cards || []).map((item) => normalizeCard(item, false));
         const boosters = (items.boosters || []).map((item) => normalizeBooster(item, false));
-        const normalizedProfile = { owner: '', title: '', description: '', email: '', phone: '', password: '', selling: true, showQuantity: true, featured: false, version: 1, profilePhoto: '', palette: ['#54e8df', '#bc91ff', '#f4c25c'], priceDisplayFallback: 'league_average_then_lowest', ...profile };
+        const normalizedProfile = { owner: '', title: '', description: '', email: '', phone: '', password: '', public: false, selling: true, showQuantity: true, featured: false, version: 1, profilePhoto: '', palette: ['#54e8df', '#bc91ff', '#f4c25c'], priceDisplayFallback: 'league_average_then_lowest', ...profile };
         if (!['league_average_then_lowest', 'league_lowest_then_average', 'consult'].includes(normalizedProfile.priceDisplayFallback)) normalizedProfile.priceDisplayFallback = 'league_average_then_lowest';
         normalizedProfile.palette = Array.isArray(normalizedProfile.palette) && normalizedProfile.palette.length >= 3 ? normalizedProfile.palette.slice(0, 3) : ['#54e8df', '#bc91ff', '#f4c25c'];
         normalizedProfile.profilePhoto = clean(normalizedProfile.profilePhoto);
@@ -616,7 +714,7 @@ const publishedCollections = getEditableCollections();
         const preview = root.querySelector('[data-profile-photo-preview]');
         if (preview) {
           const initials = clean(state.profile.owner).split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'TC';
-          preview.innerHTML = state.profile.profilePhoto ? `<img src="${escapeHtml(state.profile.profilePhoto)}" alt="Foto de perfil" />` : `<span>${escapeHtml(initials)}</span>`;
+          const rawPhoto = clean(state.profile.profilePhoto); const photoUrl = rawPhoto && !/^(?:https?:|data:|blob:|\/)/i.test(rawPhoto) ? `${base}${rawPhoto.replace(/^\/+/, '')}` : rawPhoto; preview.innerHTML = photoUrl ? `<img src="${escapeHtml(photoUrl)}" alt="Foto de perfil" />` : `<span>${escapeHtml(initials)}</span>`; const photoPath = root.querySelector('[data-profile-photo-path]'); if (photoPath) photoPath.value = rawPhoto;
         }
         root.querySelectorAll('[data-palette-color]').forEach((input) => {
           const index = Number(input.dataset.paletteColor);
@@ -632,6 +730,7 @@ const publishedCollections = getEditableCollections();
 
       const activate = (profile, items, source = 'new') => {
         state = makeState(profile, items, source);
+        profileDirty = false; privacyDirty = false; clearTimeout(cloudSaveTimer); setCloudSaveState('Sincronizado', 'saved');
         modeButtons.forEach((button) => { button.hidden = true; });
         panels.forEach((panel) => { panel.hidden = true; });
         root.querySelector('[data-editor-notice]').hidden = true;
@@ -640,16 +739,17 @@ const publishedCollections = getEditableCollections();
         if (editorHero) editorHero.hidden = true;
         root.querySelector('[data-workspace-title]').textContent = state.profile.title;
         root.querySelector('[data-workspace-meta]').textContent = `${state.profile.owner} · versão ${state.profile.version}`;
+        root.querySelectorAll('[data-profile-field]').forEach((input) => { input.value = state.profile[input.dataset.profileField] || ''; });
         root.querySelector('[data-show-quantity]').checked = state.profile.showQuantity !== false;
+        root.querySelector('[data-collection-public]').checked = state.profile.public === true;
         root.querySelector('[data-collection-selling]').checked = state.profile.selling !== false;
         root.querySelector('[data-proposal-policy]').value = state.profile.proposalTerms.policy;
         const fallbackSelect = root.querySelector('[data-price-display-fallback]'); if (fallbackSelect) fallbackSelect.value = state.profile.priceDisplayFallback;
         root.querySelector('[data-flexible-discounts]').checked = state.profile.proposalTerms.flexibleDiscounts;
         renderDiscountTiers();
         renderPersonalization();
-        root.querySelector('[data-version-number]').textContent = String(state.profile.version);
+        const versionNode = root.querySelector('[data-version-number]'); if (versionNode) versionNode.textContent = String(state.profile.version);
         if (updateButton) updateButton.hidden = source === 'new';
-        const fullDownloadLabel = root.querySelector('[data-download-zip] span'); if (fullDownloadLabel) fullDownloadLabel.textContent = source === 'new' ? 'Baixar coleção não formatada' : 'Baixar ZIP completo JSON';
         activeTab = 'cards'; inventoryQuery = ''; if (inventorySearch) inventorySearch.value = '';
         render();
         workspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1073,53 +1173,81 @@ const publishedCollections = getEditableCollections();
       root.querySelectorAll('[data-inventory-tab]').forEach((button) => button.addEventListener('click', () => { activeTab = button.dataset.inventoryTab; inventoryQuery = ''; if (inventorySearch) inventorySearch.value = ''; render(); }));
       inventorySearch?.addEventListener('input', (event) => { inventoryQuery = normalizeText(event.target.value); renderInventory(); });
 
-      root.querySelector('[data-new-profile-form]')?.addEventListener('submit', (event) => {
+      root.querySelector('[data-new-profile-form]')?.addEventListener('submit', async (event) => {
         event.preventDefault();
         const form = event.currentTarget;
+        const feedback = root.querySelector('[data-signup-feedback]');
         if (!form.reportValidity()) return;
         const formData = new FormData(form);
-        const profile = Object.fromEntries(formData.entries());
         const mins = formData.getAll('tierMin');
         const discounts = formData.getAll('tierDiscount');
-        profile.proposalTerms = normalizeProposalTerms({
+        const proposalTerms = normalizeProposalTerms({
           policy: clean(formData.get('proposalPolicy')),
           flexibleDiscounts: formData.get('flexibleDiscounts') === 'on',
           discountTiers: mins.map((minValue, index) => ({ minValue, maxDiscount: discounts[index] })).filter((tier) => clean(tier.minValue) && clean(tier.maxDiscount)),
         });
-        delete profile.proposalPolicy; delete profile.flexibleDiscounts; delete profile.tierMin; delete profile.tierDiscount;
-        profile.collectionId = safeSlug(profile.title);
-        activate(profile, undefined, 'new');
+        feedback.textContent = 'Criando sua conta…';
+        authActionInProgress = true;
+        try {
+          await window.VaultCloud?.ready;
+          const created = await window.VaultCloud.createAccountWithCollection({
+            owner: clean(formData.get('owner')),
+            title: clean(formData.get('title')),
+            email: clean(formData.get('email')),
+            phone: clean(formData.get('phone')),
+            password: String(formData.get('password') || ''),
+            description: clean(formData.get('description')),
+            isPublic: formData.get('public') === 'on',
+            selling: true,
+            proposalTerms,
+          });
+          feedback.textContent = '';
+          const next = new URLSearchParams(window.location.search).get('next');
+          if (next) { window.location.href = next; return; }
+          activate(created.profile, { cards: [], boosters: [], kits: [], products: [], albums: [], movements: [] }, 'cloud');
+        } catch (error) {
+          feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível criar a conta.';
+        } finally { authActionInProgress = false; }
       });
-      root.querySelector('[data-published-login]')?.addEventListener('submit', (event) => {
+      root.querySelector('[data-published-login]')?.addEventListener('submit', async (event) => {
         event.preventDefault();
-        const values = new FormData(event.currentTarget);
-        const login = clean(values.get('login')).toLowerCase();
-        const collection = published.find((item) => login === clean(item.profile.email).toLowerCase() || login === clean(item.profile.phone).toLowerCase());
+        const form = event.currentTarget;
+        const values = new FormData(form);
         const feedback = root.querySelector('[data-login-feedback]');
-        if (!collection || values.get('password') !== collection.profile.password) { feedback.textContent = 'Gmail/número ou senha incorretos para uma coleção autorizada.'; return; }
-        feedback.textContent = '';
-        activate({ ...collection.profile, version: Number(collection.profile.version || 1) + 1 }, collection, 'published');
+        feedback.textContent = 'Entrando…';
+        authActionInProgress = true;
+        try {
+          await window.VaultCloud?.ready;
+          const credential = await window.VaultCloud.signIn(clean(values.get('login')), String(values.get('password') || ''));
+          const next = new URLSearchParams(window.location.search).get('next');
+          if (next) { window.location.href = next; return; }
+          const cloud = await window.VaultCloud.loadMyCollection(credential.user);
+          feedback.textContent = '';
+          if (cloud) activate(cloud.profile, cloud, 'cloud');
+        } catch (error) {
+          feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível entrar.';
+        } finally { authActionInProgress = false; }
       });
 
       root.querySelector('[data-card-form]')?.addEventListener('submit', (event) => {
         event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
-        const data = new FormData(form); const linkLiga = clean(data.get('linkLiga'));
-        state.cards.push(normalizeCard({ linkLiga, name: getNameFromLink(linkLiga, 'Carta da Liga'), condition: clean(data.get('condition')), language: clean(data.get('language')), quantity: data.get('quantity'), price: data.get('price'), forSale: data.get('forSale') === 'on' }, true));
+        const data = new FormData(form); const linkLiga = clean(data.get('linkLiga')); const image = clean(data.get('image'));
+        state.cards.push(normalizeCard({ linkLiga, name: clean(data.get('name')), number: clean(data.get('number')), collection: clean(data.get('collection')), type: clean(data.get('type')), year: clean(data.get('year')), condition: clean(data.get('condition')), language: clean(data.get('language')), quantity: data.get('quantity'), price: data.get('price'), image, imageCandidates: image ? [image] : [], forSale: data.get('forSale') === 'on' }, true));
         form.reset(); form.querySelector('[name="quantity"]').value = 1; form.querySelector('[name="language"]').value = 'Português (PT-BR)'; form.querySelector('[name="forSale"]').checked = true;
         activeTab = 'cards'; closeModals(); render(); inventorySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
       root.querySelector('[data-booster-form]')?.addEventListener('submit', (event) => {
         event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
-        const data = new FormData(form); const linkLiga = clean(data.get('linkLiga'));
-        state.boosters.push(normalizeBooster({ linkLiga, name: getNameFromLink(linkLiga, 'Booster da Liga'), quantity: data.get('quantity'), price: data.get('price'), forSale: data.get('forSale') === 'on' }, true));
+        const data = new FormData(form); const linkLiga = clean(data.get('linkLiga')); const image = clean(data.get('image'));
+        state.boosters.push(normalizeBooster({ linkLiga, name: clean(data.get('name')), quantity: data.get('quantity'), price: data.get('price'), image, imageCandidates: image ? [image] : [], forSale: data.get('forSale') === 'on' }, true));
         form.reset(); form.querySelector('[name="quantity"]').value = 1; form.querySelector('[name="forSale"]').checked = true;
         activeTab = 'boosters'; closeModals(); render(); inventorySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
       root.querySelector('[data-product-form]')?.addEventListener('submit', (event) => {
         event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
         const data = new FormData(form);
-        state.products.push(normalizeProduct({ name: clean(data.get('name')), linkLiga: clean(data.get('linkLiga')), price: data.get('price'), image: clean(data.get('image')), forSale: data.get('forSale') === 'on' }, true));
-        form.reset(); form.querySelector('[name="forSale"]').checked = true;
+        state.products.push(normalizeProduct({ name: clean(data.get('name')), linkLiga: clean(data.get('linkLiga')), quantity: data.get('quantity'), price: data.get('price'), image: clean(data.get('image')), forSale: data.get('forSale') === 'on' }, true));
+        form.reset(); form.querySelector('[name="quantity"]').value = 1; form.querySelector('[name="forSale"]').checked = true;
         activeTab = 'products'; closeModals(); render(); inventorySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
       root.querySelector('[data-album-form]')?.addEventListener('submit', (event) => {
@@ -1316,206 +1444,127 @@ const publishedCollections = getEditableCollections();
         else { image.remove(); }
       }, true);
 
-      root.querySelector('[data-profile-photo-input]')?.addEventListener('change', (event) => {
-        const file = event.target.files?.[0]; if (!file || !state) return;
-        const reader = new FileReader(); reader.addEventListener('load', () => { state.profile.profilePhoto = String(reader.result || ''); renderPersonalization(); }); reader.readAsDataURL(file);
-      });
-      root.querySelector('[data-remove-profile-photo]')?.addEventListener('click', () => { if (!state) return; state.profile.profilePhoto = ''; const input = root.querySelector('[data-profile-photo-input]'); if (input) input.value = ''; renderPersonalization(); });
-      root.querySelectorAll('[data-palette-color]').forEach((input) => input.addEventListener('input', () => { if (!state) return; state.profile.palette[Number(input.dataset.paletteColor)] = input.value; renderPersonalization(); }));
+      root.querySelectorAll('[data-profile-field]').forEach((input) => input.addEventListener('input', () => {
+        if (!state) return;
+        const field = input.dataset.profileField;
+        if (!field) return;
+        state.profile[field] = input.value;
+        profileDirty = true;
+        if (['owner', 'title', 'phone'].includes(field)) mirrorDirty = true;
+        if (field === 'title') root.querySelector('[data-workspace-title]').textContent = input.value || 'Minha coleção';
+        if (field === 'owner') root.querySelector('[data-workspace-meta]').textContent = `${input.value || 'Colecionador'} · versão ${state.profile.version}`;
+        if (field === 'owner') renderPersonalization();
+        scheduleCloudSave();
+      }));
 
-      root.querySelector('[data-show-quantity]')?.addEventListener('change', (event) => { if (state) state.profile.showQuantity = event.target.checked; });
-      root.querySelector('[data-collection-selling]')?.addEventListener('change', (event) => { if (state) state.profile.selling = event.target.checked; });
-      root.querySelector('[data-proposal-policy]')?.addEventListener('change', (event) => { if (state) state.profile.proposalTerms.policy = event.target.value; });
-      root.querySelector('[data-price-display-fallback]')?.addEventListener('change', (event) => { if (state) state.profile.priceDisplayFallback = event.target.value; });
-      root.querySelector('[data-flexible-discounts]')?.addEventListener('change', (event) => { if (state) state.profile.proposalTerms.flexibleDiscounts = event.target.checked; });
-      root.querySelector('[data-add-discount-tier]')?.addEventListener('click', () => { if (!state) return; state.profile.proposalTerms.discountTiers.push({ minValue: 0, maxDiscount: 0 }); renderDiscountTiers(); });
+      root.querySelector('[data-legacy-import]')?.addEventListener('click', async () => {
+        const feedback = root.querySelector('[data-legacy-feedback]');
+        const select = root.querySelector('[data-legacy-select]');
+        const passwordInput = root.querySelector('[data-legacy-password]');
+        if (!state || !feedback || !select || !passwordInput) return;
+        const collectionId = clean(select.value);
+        const legacy = legacyCollections.find((collection) => clean(collection?.profile?.collectionId || collection?.slug) === collectionId);
+        const claim = legacyClaims.find((entry) => clean(entry?.collectionId) === collectionId);
+        if (!legacy || !claim) { feedback.textContent = 'Selecione uma coleção antiga válida.'; return; }
+        const currentItems = ['cards','boosters','kits','products','albums'].reduce((sum, kind) => sum + (state[kind]?.length || 0), 0);
+        if (currentItems > 0) { feedback.textContent = 'A migração só é permitida em uma coleção vazia para evitar sobrescrever dados online.'; return; }
+        feedback.textContent = 'Verificando a senha antiga…';
+        try {
+          const valid = await verifyLegacyPassword(passwordInput.value, claim);
+          if (!valid) { feedback.textContent = 'A senha antiga não confere para essa coleção.'; return; }
+          const currentProfile = { ...state.profile };
+          const migrationProfile = {
+            ...legacy.profile,
+            ...currentProfile,
+            profilePhoto: legacy.profile?.profilePhoto || currentProfile.profilePhoto || '',
+            palette: legacy.profile?.palette || currentProfile.palette,
+            showQuantity: legacy.profile?.showQuantity !== false,
+            priceDisplayFallback: legacy.profile?.priceDisplayFallback || currentProfile.priceDisplayFallback,
+          };
+          activate(migrationProfile, legacy, 'cloud');
+          ['cards', 'boosters', 'kits', 'products', 'albums'].forEach((kind) => (state?.[kind] || []).forEach((item) => { item._isNew = true; item._isDirty = true; }));
+          state.pendingMovements = [...(state.movements || [])];
+          state.movements = [];
+          profileDirty = true; privacyDirty = true; mirrorDirty = true;
+          setCloudSaveState('Migrando coleção antiga…', 'saving');
+          await flushCloudSave();
+          passwordInput.value = '';
+          feedback.textContent = 'Migração concluída. A coleção antiga agora está salva no Firebase.';
+          const details = root.querySelector('[data-legacy-migration]'); if (details) details.open = false;
+        } catch (error) {
+          feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível migrar a coleção.';
+        }
+      });
+
+      root.querySelector('[data-profile-photo-path]')?.addEventListener('input', (event) => { if (!state) return; state.profile.profilePhoto = clean(event.target.value); profileDirty = true; renderPersonalization(); scheduleCloudSave(); });
+      root.querySelector('[data-remove-profile-photo]')?.addEventListener('click', () => { if (!state) return; state.profile.profilePhoto = ''; profileDirty = true; const input = root.querySelector('[data-profile-photo-path]'); if (input) input.value = ''; renderPersonalization(); scheduleCloudSave(); });
+      root.querySelectorAll('[data-palette-color]').forEach((input) => input.addEventListener('input', () => { if (!state) return; state.profile.palette[Number(input.dataset.paletteColor)] = input.value; profileDirty = true; renderPersonalization(); scheduleCloudSave(); }));
+
+      root.querySelector('[data-show-quantity]')?.addEventListener('change', (event) => { if (state) { state.profile.showQuantity = event.target.checked; profileDirty = true; mirrorDirty = true; scheduleCloudSave(); } });
+      root.querySelector('[data-collection-public]')?.addEventListener('change', (event) => { if (state) { state.profile.public = event.target.checked; profileDirty = true; privacyDirty = true; scheduleCloudSave(); } });
+      root.querySelector('[data-collection-selling]')?.addEventListener('change', (event) => { if (state) { state.profile.selling = event.target.checked; profileDirty = true; mirrorDirty = true; scheduleCloudSave(); } });
+      root.querySelector('[data-proposal-policy]')?.addEventListener('change', (event) => { if (state) { state.profile.proposalTerms.policy = event.target.value; profileDirty = true; mirrorDirty = true; scheduleCloudSave(); } });
+      root.querySelector('[data-price-display-fallback]')?.addEventListener('change', (event) => { if (state) { state.profile.priceDisplayFallback = event.target.value; profileDirty = true; scheduleCloudSave(); } });
+      root.querySelector('[data-flexible-discounts]')?.addEventListener('change', (event) => { if (state) { state.profile.proposalTerms.flexibleDiscounts = event.target.checked; profileDirty = true; mirrorDirty = true; scheduleCloudSave(); } });
+      root.querySelector('[data-add-discount-tier]')?.addEventListener('click', () => { if (!state) return; state.profile.proposalTerms.discountTiers.push({ minValue: 0, maxDiscount: 0 }); profileDirty = true; mirrorDirty = true; renderDiscountTiers(); scheduleCloudSave(); });
       root.querySelector('[data-discount-tier-list]')?.addEventListener('input', (event) => {
         const [rawIndex, field] = (event.target.dataset.tierEdit || '').split(':');
         const tier = state?.profile?.proposalTerms?.discountTiers?.[Number(rawIndex)];
         if (!tier || !field) return;
-        tier[field] = field === 'maxDiscount' ? Math.min(100, Math.max(0, Number(event.target.value || 0))) : Math.max(0, Number(event.target.value || 0));
+        tier[field] = field === 'maxDiscount' ? Math.min(100, Math.max(0, Number(event.target.value || 0))) : Math.max(0, Number(event.target.value || 0)); profileDirty = true; mirrorDirty = true; scheduleCloudSave();
       });
       root.querySelector('[data-discount-tier-list]')?.addEventListener('click', (event) => {
         const button = event.target.closest('[data-remove-discount-tier]');
         if (!button || !state) return;
         state.profile.proposalTerms.discountTiers.splice(Number(button.dataset.removeDiscountTier), 1);
-        renderDiscountTiers();
+        profileDirty = true; mirrorDirty = true; renderDiscountTiers(); scheduleCloudSave();
       });
-      root.querySelector('[data-reset-editor]')?.addEventListener('click', () => {
-        closeModals(); state = null; workspace.hidden = true; if (editorHero) editorHero.hidden = false; root.classList.remove('is-editing'); modeButtons.forEach((button) => { button.hidden = false; }); root.querySelector('[data-editor-notice]').hidden = false; root.querySelector('[data-new-profile-form]').reset(); setMode('new');
+      root.querySelector('[data-reset-editor]')?.addEventListener('click', async () => {
+        try { await flushCloudSave(); await window.VaultCloud?.signOut?.(); } catch (_) {}
+        closeModals(); state = null; workspace.hidden = true; if (editorHero) editorHero.hidden = false; root.classList.remove('is-editing'); modeButtons.forEach((button) => { button.hidden = false; }); root.querySelector('[data-editor-notice]').hidden = false; root.querySelector('[data-new-profile-form]')?.reset(); setMode('published');
       });
 
-      const cardJson = (item, minimal = false, operation = '') => {
-        const baseItem = {
-          'Id': item._id || stableCardId(item), 'Nome': item.name || '', 'Número': item.number || '', 'Coleção': item.collection || '', 'Ano': item.year || '', 'Tipo': item.type || '',
-          'Link Liga': item.linkLiga || '', 'Link MYP': item.linkMyp || '', 'Link Cardmarket': item.linkCardmarket || '', 'Link Tcgplayer': item.linkTcgplayer || '', 'Link PriceCharting': item.linkPriceCharting || '',
-          'Quantidade': toQuantity(item.quantity), 'Estado': item.condition || 'NM', 'Idioma': item.language || 'Português (PT-BR)', 'Preço': item.price ?? null, 'Favorita': item.favorite === true, 'Imagem': item.image || '', 'À venda': item.forSale !== false,
-        };
-        const result = minimal ? baseItem : {
-          ...(item.advancedData || {}), ...baseItem,
-          'Minimo Certeiro': item.certainMinimumPrice ?? null, 'Minimo': item.minimumPrice ?? null, 'Menor Liga': item.leaguePrice ?? null, 'Segundo Menor Liga': item.secondLeaguePrice ?? null, 'Terceiro Menor Liga': item.thirdLeaguePrice ?? null, 'Media Liga': item.averageLeaguePrice ?? null, 'Mediana Liga': item.medianLeaguePrice ?? null, 'Venda Rapida': item.quickSalePrice ?? null,
-          'Vendedores Geral': Number(item.sellersGeneral || 0), 'Vendedores Específicos': Number(item.sellersSpecific || 0), 'Compradores Geral': Number(item.buyersGeneral || 0), 'Compradores Específicos': Number(item.buyersSpecific || 0),
-        };
-        if (operation) result.operation = operation;
-        return result;
-      };
-      const boosterJson = (item, minimal = false, operation = '') => {
-        const baseItem = { 'Id': item._id || stableBoosterId(item), 'Tipo de pacote': item.name || '', 'Link Liga': item.linkLiga || '', 'Quantidade': toQuantity(item.quantity), 'Preço': item.price ?? null, 'Imagem': item.image || '', 'À venda': item.forSale !== false };
-        const result = minimal ? baseItem : {
-          ...(item.advancedData || {}), ...baseItem, 'Minimo Certeiro': item.certainMinimumPrice ?? null, 'Minimo': item.minimumPrice ?? null, 'Menor Liga': item.leaguePrice ?? null, 'Segundo Menor Liga': item.secondLeaguePrice ?? null, 'Terceiro Menor Liga': item.thirdLeaguePrice ?? null, 'Media Liga': item.averageLeaguePrice ?? null, 'Mediana Liga': item.medianLeaguePrice ?? null, 'Venda Rapida': item.quickSalePrice ?? null,
-          'Vendedores Geral': Number(item.sellersGeneral || 0), 'Vendedores Específicos': Number(item.sellersSpecific || 0), 'Compradores Geral': Number(item.buyersGeneral || 0), 'Compradores Específicos': Number(item.buyersSpecific || 0),
-        };
-        if (operation) result.operation = operation;
-        return result;
-      };
-      const productJson = (item, operation = '') => {
-        const result = { 'Id': item._id || stableProductId(item), 'Nome': item.name || '', 'Link Liga': item.linkLiga || '', 'Quantidade': toQuantity(item.quantity, 1), 'Preço': item.price ?? null, 'Imagem': item.image || '', 'À venda': item.forSale !== false };
-        if (operation) result.operation = operation;
-        return result;
-      };
-      const kitJson = (item, operation = '') => {
-        const gross = toPrice(item.sourceTotal) || 0;
-        const discount = gross > 0 && item.price !== null ? Math.max(0, gross - item.price) : 0;
-        const result = {
-          'Id': item._id || item.id || uid('kit-export'), 'Nome': item.name, 'Descrição': item.description || '', 'Preço': item.price ?? null, 'Quantidade': toQuantity(item.quantity),
-          'Conteúdo': (item.contentItems || []).map((entry) => ({ kind: entry.kind === 'boosters' ? 'boosters' : 'cards', itemId: entry.itemId || '', name: entry.name || 'Item', quantity: toQuantity(entry.quantity), unitPrice: toPrice(entry.unitPrice) })),
-          'Valor avulso': gross || null, 'Desconto': discount || 0, 'Imagem': item.image || '', 'À venda': item.forSale !== false,
-        };
-        if (operation) result.operation = operation;
-        return result;
-      };
-      const albumPagesForExport = (item) => (item.pages || []).map((page) => ({ slots: (page.slots || []).map((slot) => slot ? { itemId: slot.itemId || '', linkLiga: slot.linkLiga || '', language: slot.language || '', condition: slot.condition || '', name: slot.name || '', number: slot.number || '', collection: slot.collection || '' } : null) }));
-      const albumJson = (item) => {
-        const occupied = albumOccupied(item);
-        const capacity = albumCapacity(item);
-        return { 'Id': item.albumId || item._id, 'Nome': item.name, 'Descrição': item.description || '', 'Formato': item.format || '3x3', 'Páginas': albumPagesForExport(item), 'Progresso': `${occupied} / ${capacity}`, 'Quantidade': 1, 'Imagem': item.image || '', 'À venda': false };
-      };
+      root.querySelectorAll('[data-save-now]').forEach((button) => button.addEventListener('click', () => flushCloudSave()));
 
-      const crc32 = (bytes) => { let crc = -1; for (const byte of bytes) { crc ^= byte; for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1)); } return (crc ^ -1) >>> 0; };
-      const u16 = (value) => Uint8Array.of(value & 255, (value >>> 8) & 255);
-      const u32 = (value) => Uint8Array.of(value & 255, (value >>> 8) & 255, (value >>> 16) & 255, (value >>> 24) & 255);
-      const merge = (parts) => { const length = parts.reduce((sum, part) => sum + part.length, 0); const result = new Uint8Array(length); let offset = 0; parts.forEach((part) => { result.set(part, offset); offset += part.length; }); return result; };
-      const zipStore = (files) => { const encoder = new TextEncoder(); let offset = 0; const local = []; const central = []; files.forEach(([name, text]) => { const filename = encoder.encode(name); const data = encoder.encode(text); const crc = crc32(data); local.push(merge([u32(0x04034b50), u16(20), u16(0), u16(0), u16(0), u16(0), u32(crc), u32(data.length), u32(data.length), u16(filename.length), u16(0), filename, data])); central.push(merge([u32(0x02014b50), u16(20), u16(20), u16(0), u16(0), u16(0), u16(0), u32(crc), u32(data.length), u32(data.length), u16(filename.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(offset), filename])); offset += local[local.length - 1].length; }); const directory = merge(central); return merge([...local, directory, u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length), u32(directory.length), u32(offset), u16(0)]); };
-      const read16 = (data, offset) => data[offset] | (data[offset + 1] << 8);
-      const read32 = (data, offset) => (data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16) | (data[offset + 3] << 24)) >>> 0;
-      const unzipStore = (buffer) => { const data = new Uint8Array(buffer); let end = -1; for (let index = data.length - 22; index >= Math.max(0, data.length - 65557); index -= 1) { if (read32(data, index) === 0x06054b50) { end = index; break; } } if (end < 0) throw new Error('ZIP inválido.'); const count = read16(data, end + 10); let offset = read32(data, end + 16); const decoder = new TextDecoder(); const files = {}; for (let index = 0; index < count; index += 1) { if (read32(data, offset) !== 0x02014b50) throw new Error('Diretório do ZIP inválido.'); const method = read16(data, offset + 10); const size = read32(data, offset + 24); const nameLength = read16(data, offset + 28); const extraLength = read16(data, offset + 30); const commentLength = read16(data, offset + 32); const localOffset = read32(data, offset + 42); const name = decoder.decode(data.slice(offset + 46, offset + 46 + nameLength)); if (method !== 0) throw new Error('Este ZIP usa compressão não suportada. Importe um ZIP gerado por esta página.'); const localNameLength = read16(data, localOffset + 26); const localExtraLength = read16(data, localOffset + 28); const start = localOffset + 30 + localNameLength + localExtraLength; const content = decoder.decode(data.slice(start, start + size)); files[name] = content; const baseName = name.split('/').pop(); if (baseName && !Object.prototype.hasOwnProperty.call(files, baseName)) files[baseName] = content; offset += 46 + nameLength + extraLength + commentLength; } return files; };
-      const parseCsv = (source) => { const rows = []; let row = []; let field = ''; let quoted = false; for (let index = 0; index < source.length; index += 1) { const char = source[index]; if (char === '"') { if (quoted && source[index + 1] === '"') { field += '"'; index += 1; } else quoted = !quoted; } else if (char === ',' && !quoted) { row.push(field); field = ''; } else if ((char === '\n' || char === '\r') && !quoted) { if (char === '\r' && source[index + 1] === '\n') index += 1; row.push(field); if (row.some((value) => clean(value))) rows.push(row); row = []; field = ''; } else field += char; } if (field || row.length) { row.push(field); rows.push(row); } const [headers = [], ...values] = rows; return values.map((record) => Object.fromEntries(headers.map((header, index) => [clean(header), clean(record[index])]))); };
-      const parseJsonArray = (value) => { try { const parsed = JSON.parse(value || '[]'); return Array.isArray(parsed) ? parsed : []; } catch (_) { return []; } };
-      const inventoryRowsFromZip = (files, jsonName, csvName) => {
-        if (files[jsonName]) return parseJsonArray(files[jsonName]);
-        return parseCsv(files[csvName] || '');
+      ['input', 'change', 'click', 'submit'].forEach((eventName) => root.addEventListener(eventName, (event) => {
+        if (!state || workspace.hidden) return;
+        if (event.target.closest?.('[data-save-now], [data-reset-editor]')) return;
+        window.setTimeout(() => { if (hasCloudChanges()) scheduleCloudSave(); }, 0);
+      }));
+
+      const showLoggedOut = () => {
+        if (state) return;
+        workspace.hidden = true;
+        if (editorHero) editorHero.hidden = false;
+        root.classList.remove('is-editing');
+        modeButtons.forEach((button) => { button.hidden = false; });
+        root.querySelector('[data-editor-notice]').hidden = false;
+        setMode('published');
       };
-      const parseJsonLines = (source = '') => source.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).flatMap((line) => { try { const row = JSON.parse(line); return row && typeof row === 'object' && row.sucesso !== false && !row.erro ? [row] : []; } catch (_) { return []; } });
-      const normalizedImportedHistory = (entry) => ({
-        date: entry.data || entry.date || '', minimumCertain: entry['Minimo Certeiro'] ?? entry.minimumCertain ?? null, minimumBuylist: entry.Minimo ?? entry.minimumBuylist ?? null, leagueLowest: entry['Menor Liga'] ?? entry.leagueLowest ?? null, leagueSecond: entry['Segundo Menor Liga'] ?? entry.leagueSecond ?? null, leagueThird: entry['Terceiro Menor Liga'] ?? entry.leagueThird ?? null, leagueAverage: entry['Media Liga'] ?? entry['Preço Médio Liga'] ?? entry.leagueAverage ?? null, leagueMedian: entry['Mediana Liga'] ?? entry.leagueMedian ?? null, quickSale: entry['Venda Rapida'] ?? entry.quickSale ?? null,
-        sellersGeneral: entry['Vendedores Geral'] ?? entry.sellersGeneral ?? 0, sellersSpecific: entry['Vendedores Específicos'] ?? entry.sellersSpecific ?? 0, buyersGeneral: entry['Compradores Geral'] ?? entry.buyersGeneral ?? 0, buyersSpecific: entry['Compradores Específicos'] ?? entry.buyersSpecific ?? 0,
-      });
-      const attachImportedHistory = (items, rows) => {
-        const byId = new Map(); rows.forEach((row) => { const id = clean(row.itemId || row.Id || row.id); if (!id) return; const list = byId.get(id) || []; list.push(normalizedImportedHistory(row)); byId.set(id, list); });
-        items.forEach((item) => { const history = byId.get(clean(item.id || item._id)); if (history?.length) item.priceHistory = history.sort((a, b) => String(a.date).localeCompare(String(b.date))); });
-      };
-      const historyRowsForExport = (items) => items.flatMap((item) => (Array.isArray(item.priceHistory) ? item.priceHistory : []).map((entry) => ({
-        itemId: item._id || item.id || '', cotacaoId: 'editor-history', data: entry.date || '', sucesso: true, 'Minimo Certeiro': entry.minimumCertain ?? entry['Minimo Certeiro'] ?? null, Minimo: entry.minimumBuylist ?? entry.Minimo ?? null, 'Menor Liga': entry.leagueLowest ?? entry['Menor Liga'] ?? null, 'Segundo Menor Liga': entry.leagueSecond ?? entry['Segundo Menor Liga'] ?? null, 'Terceiro Menor Liga': entry.leagueThird ?? entry['Terceiro Menor Liga'] ?? null, 'Media Liga': entry.leagueAverage ?? entry['Media Liga'] ?? null, 'Mediana Liga': entry.leagueMedian ?? entry['Mediana Liga'] ?? null, 'Venda Rapida': entry.quickSale ?? entry['Venda Rapida'] ?? null, 'Vendedores Geral': entry.sellersGeneral ?? entry['Vendedores Geral'] ?? 0, 'Vendedores Específicos': entry.sellersSpecific ?? entry['Vendedores Específicos'] ?? 0, 'Compradores Geral': entry.buyersGeneral ?? entry['Compradores Geral'] ?? 0, 'Compradores Específicos': entry.buyersSpecific ?? entry['Compradores Específicos'] ?? 0, erro: '',
-      })));
-      const jsonLines = (rows) => rows.map((row) => JSON.stringify(row)).join('\n') + (rows.length ? '\n' : '');
-      const importedImage = (value) => { const image = clean(value); return image ? (image.includes('/') ? image : `imagens/${image}`) : ''; };
-      const importCardRow = (row) => ({
-        id: row['Id'] || row['ID'] || '', name: row['Nome'], number: row['Número'] || row['Numeração'], collection: row['Coleção'], language: row['Idioma'], condition: row['Estado'], year: row['Ano'], type: row['Tipo'], quantity: row['Quantidade'],
-        certainMinimumPrice: row['Minimo Certeiro'] ?? row['Mínimo Certeiro'], minimumPrice: row['Minimo'] ?? row['Preço mínimo'], quickSalePrice: row['Venda Rapida'] ?? row['Venda rápida'], leaguePrice: row['Menor Liga'] ?? row['Preço Liga mais barato'], secondLeaguePrice: row['Segundo Menor Liga'], thirdLeaguePrice: row['Terceiro Menor Liga'], averageLeaguePrice: row['Media Liga'] ?? row['Preço Médio Liga'] ?? row['Preço médio Liga'], medianLeaguePrice: row['Mediana Liga'], sellersGeneral: row['Vendedores Geral'], sellersSpecific: row['Vendedores Específicos'], buyersGeneral: row['Compradores Geral'], buyersSpecific: row['Compradores Específicos'], price: row['Preço'], favorite: row['Favorita'] === true || row['Favorita'] === 'Sim', priceHistory: Array.isArray(row['Histórico de preços']) ? row['Histórico de preços'] : [], advancedData: row,
-        forSale: typeof row['À venda'] === 'boolean' ? row['À venda'] : row['À venda'] !== 'Não', linkLiga: row['Link Liga'], linkMyp: row['Link MYP'], linkCardmarket: row['Link Cardmarket'], linkTcgplayer: row['Link Tcgplayer'] || row['Link TCGPlayer'], linkPriceCharting: row['Link PriceCharting'],
-        image: importedImage(row['Imagem']), imageCandidates: importedImage(row['Imagem']) ? [importedImage(row['Imagem'])] : [],
-      });
-      const importBoosterRow = (row) => ({
-        id: row['Id'] || row['ID'] || '', name: row['Tipo de pacote'] || row['Coleção'] || row['Nome'], quantity: row['Quantidade'], certainMinimumPrice: row['Minimo Certeiro'] ?? row['Mínimo Certeiro'], minimumPrice: row['Minimo'] ?? row['Preço mínimo'], quickSalePrice: row['Venda Rapida'] ?? row['Venda rápida'], leaguePrice: row['Menor Liga'] ?? row['Preço Liga mais barato'], secondLeaguePrice: row['Segundo Menor Liga'], thirdLeaguePrice: row['Terceiro Menor Liga'], averageLeaguePrice: row['Media Liga'] ?? row['Preço médio Liga'] ?? row['Preço Médio Liga'], medianLeaguePrice: row['Mediana Liga'], sellersGeneral: row['Vendedores Geral'], sellersSpecific: row['Vendedores Específicos'], buyersGeneral: row['Compradores Geral'], buyersSpecific: row['Compradores Específicos'], price: row['Preço'], priceHistory: Array.isArray(row['Histórico de preços']) ? row['Histórico de preços'] : [], advancedData: row,
-        forSale: typeof row['À venda'] === 'boolean' ? row['À venda'] : row['À venda'] !== 'Não', linkLiga: row['Link Liga'], image: importedImage(row['Imagem']), imageCandidates: importedImage(row['Imagem']) ? [importedImage(row['Imagem'])] : [],
-      });
-      const importProductRow = (row) => ({
-        id: row['Id'] || row['ID'] || '', name: row['Nome'], description: row['Descrição'] || '', linkLiga: row['Link Liga'] || '', quantity: row['Quantidade'], price: row['Preço'],
-        forSale: typeof row['À venda'] === 'boolean' ? row['À venda'] : row['À venda'] !== 'Não', image: importedImage(row['Imagem']), imageCandidates: importedImage(row['Imagem']) ? [importedImage(row['Imagem'])] : [],
-      });
-      const importKitRow = (row) => {
-        let contentItems = Array.isArray(row['Conteúdo']) ? row['Conteúdo'] : [];
-        if (!contentItems.length && row['Conteúdo JSON']) contentItems = parseJsonArray(row['Conteúdo JSON']);
-        const contents = typeof row['Conteúdo'] === 'string' ? row['Conteúdo'] : contentItems.map((entry) => `${toQuantity(entry.quantity)}x ${entry.name || entry.nome || 'Item'}`).join(' | ');
-        return { id: row['Id'] || row['ID'] || '', name: row['Nome'], description: row['Descrição'], contents, contentItems, quantity: row['Quantidade'], price: row['Preço'], sourceTotal: row['Valor avulso'] ?? row['Preço bruto'], forSale: typeof row['À venda'] === 'boolean' ? row['À venda'] : row['À venda'] !== 'Não', image: importedImage(row['Imagem']), imageCandidates: importedImage(row['Imagem']) ? [importedImage(row['Imagem'])] : [] };
-      };
-      const importAlbumRow = (row) => ({
-        albumId: row['Id'] || row['ID'] || '', id: row['Id'] || row['ID'] || '', name: row['Nome'], description: row['Descrição'], format: row['Formato'] || '3x3',
-        pages: Array.isArray(row['Páginas']) ? row['Páginas'] : parseJsonArray(row['Páginas JSON'] || row['Paginas JSON']), imageCandidates: importedImage(row['Imagem']) ? [importedImage(row['Imagem'])] : [],
-      });
-      const importZip = async (file) => {
-        const feedback = root.querySelector('[data-import-feedback]');
+      const loadSignedUser = async (user) => {
+        if (!user || authActionInProgress) return;
+        const next = new URLSearchParams(window.location.search).get('next');
+        if (next) { window.location.replace(next); return; }
         try {
-          const files = unzipStore(await file.arrayBuffer());
-          const profile = JSON.parse(files['perfil.json'] || '{}');
-          if (!profile.owner || !profile.title || !profile.email || !profile.password) throw new Error('O ZIP não contém um perfil válido.');
-          const cards = inventoryRowsFromZip(files, 'inventario-cartas.json', 'inventario-cartas.csv').map(importCardRow);
-          const boosters = inventoryRowsFromZip(files, 'inventario-boosters.json', 'inventario-boosters.csv').map(importBoosterRow);
-          const kits = inventoryRowsFromZip(files, 'inventario-kits.json', 'inventario-kits.csv').map(importKitRow);
-          const products = inventoryRowsFromZip(files, 'inventario-produtos.json', 'inventario-produtos.csv').map(importProductRow);
-          const albums = inventoryRowsFromZip(files, 'inventario-albuns.json', 'inventario-albuns.csv').map(importAlbumRow);
-          attachImportedHistory(cards, parseJsonLines(files['historico/cartas.jsonl'] || files['cartas.jsonl'] || ''));
-          attachImportedHistory(boosters, parseJsonLines(files['historico/boosters.jsonl'] || files['boosters.jsonl'] || ''));
-          const movements = parseJsonLines(files['historico/movimentacoes.jsonl'] || files['movimentacoes.jsonl'] || '');
-          feedback.textContent = '';
-          activate({ ...profile, version: Number(profile.version || 0) + 1 }, { cards, boosters, kits, products, albums, movements }, 'import');
-        } catch (error) { feedback.textContent = error.message || 'Não foi possível abrir este ZIP.'; }
+          setCloudSaveState('Carregando…', 'saving');
+          const cloud = await window.VaultCloud.loadMyCollection(user);
+          if (cloud) activate(cloud.profile, cloud, 'cloud');
+        } catch (error) {
+          const feedback = root.querySelector('[data-login-feedback]');
+          if (feedback) feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível carregar sua coleção.';
+        }
       };
-
-      root.querySelector('[data-zip-input]')?.addEventListener('change', (event) => { const file = event.target.files?.[0]; if (file) importZip(file); });
-      const drop = root.querySelector('[data-zip-drop]');
-      ['dragenter', 'dragover'].forEach((type) => drop?.addEventListener(type, (event) => { event.preventDefault(); drop.classList.add('dragging'); }));
-      ['dragleave', 'drop'].forEach((type) => drop?.addEventListener(type, (event) => { event.preventDefault(); drop.classList.remove('dragging'); }));
-      drop?.addEventListener('drop', (event) => { const file = event.dataTransfer?.files?.[0]; if (file) importZip(file); });
-
-      const downloadZip = (zip, filename) => { const link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([zip], { type: 'application/zip' })); link.download = filename; link.click(); setTimeout(() => URL.revokeObjectURL(link.href), 0); };
-      root.querySelector('[data-download-zip]')?.addEventListener('click', () => {
-        if (!state) return;
-        state.profile.version = Number(state.profile.version || 1);
-        const cards = state.cards.map((item) => cardJson(item));
-        const boosters = state.boosters.map((item) => boosterJson(item));
-        const kits = state.kits.map((item) => kitJson(item));
-        const products = state.products.map((item) => productJson(item));
-        const albums = state.albums.map((item) => albumJson(item));
-        const profile = { ...state.profile, generatedAt: new Date().toISOString(), collectionId: state.profile.collectionId || safeSlug(state.profile.title) };
-        const zip = zipStore([
-          ['perfil.json', JSON.stringify(profile, null, 2)],
-          ['inventario-cartas.json', JSON.stringify(cards, null, 2)],
-          ['inventario-boosters.json', JSON.stringify(boosters, null, 2)],
-          ['inventario-kits.json', JSON.stringify(kits, null, 2)],
-          ['inventario-produtos.json', JSON.stringify(products, null, 2)],
-          ['inventario-albuns.json', JSON.stringify(albums, null, 2)],
-          ['historico/cartas.jsonl', jsonLines(historyRowsForExport(state.cards))],
-          ['historico/boosters.jsonl', jsonLines(historyRowsForExport(state.boosters))],
-          ['historico/movimentacoes.jsonl', jsonLines([...(state.movements || []), ...(state.pendingMovements || []).map((entry) => ({ ...entry, updateId: entry.updateId || `editor-${profile.collectionId}-v${profile.version}`, version: Number(profile.version || 1) }))])],
-        ]);
-        const suffix = state.source === 'new' ? `nao-formatada-v${state.profile.version}` : `v${state.profile.version}`;
-        downloadZip(zip, `${safeSlug(profile.collectionId)}-${suffix}.zip`);
+      window.addEventListener('vault:auth-changed', (event) => {
+        const user = event.detail?.user || null;
+        if (user) loadSignedUser(user);
+        else showLoggedOut();
       });
-      updateButton?.addEventListener('click', () => {
-        if (!state) return;
-        const cards = [...state.cards.filter((item) => item._isNew || item._isDirty).map((item) => item._isNew ? cardJson(item, true) : cardJson(item, false, 'patch')), ...state.removed.cards];
-        const boosters = [...state.boosters.filter((item) => item._isNew || item._isDirty).map((item) => item._isNew ? boosterJson(item, true) : boosterJson(item, false, 'patch')), ...state.removed.boosters];
-        const kits = [...state.kits.filter((item) => item._isNew || item._isDirty).map((item) => kitJson(item, 'upsert')), ...state.removed.kits];
-        const products = [...state.products.filter((item) => item._isNew || item._isDirty).map((item) => productJson(item, 'upsert')), ...state.removed.products];
-        const albums = [...state.albums.filter((item) => item._isNew || item._isDirty).map(albumJson), ...state.removed.albums];
-        const generatedAt = new Date().toISOString();
-        const collectionId = state.profile.collectionId || safeSlug(state.profile.title);
-        const metadata = { type: 'collection-update', format: 'json-v2', collectionId, baseVersion: Math.max(1, Number(state.profile.version || 1) - 1), version: Number(state.profile.version || 1), generatedAt, updateId: `${collectionId}-${Number(state.profile.version || 1)}-${Date.now()}`, includesProfile: true };
-        const profile = { ...state.profile, collectionId, generatedAt };
-        const movementRows = (state.pendingMovements || []).map((entry, index) => ({ ...entry, eventId: entry.eventId || `mov-${Date.now()}-${index + 1}`, updateId: metadata.updateId, collectionId, version: metadata.version, date: entry.date || generatedAt }));
-        const zip = zipStore([
-          ['atualizacao.json', JSON.stringify(metadata, null, 2)],
-          ['perfil.json', JSON.stringify(profile, null, 2)],
-          ['inventario-cartas.json', JSON.stringify(cards, null, 2)],
-          ['inventario-boosters.json', JSON.stringify(boosters, null, 2)],
-          ['inventario-kits.json', JSON.stringify(kits, null, 2)],
-          ['inventario-produtos.json', JSON.stringify(products, null, 2)],
-          ['inventario-albuns.json', JSON.stringify(albums, null, 2)],
-          ['historico/movimentacoes.jsonl', jsonLines(movementRows)],
-        ]);
-        downloadZip(zip, `${safeSlug(collectionId)}-update-v${metadata.version}.zip`);
+      window.addEventListener('vault:cloud-error', (event) => {
+        const feedback = root.querySelector('[data-login-feedback]');
+        if (feedback) feedback.textContent = event.detail?.message || 'Falta configurar a conexão com o Firebase.';
       });
+
+
 
     })();
   </script>

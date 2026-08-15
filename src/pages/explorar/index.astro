@@ -1,157 +1,40 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ProductCard from '../../components/ProductCard.astro';
-import AlbumCard from '../../components/AlbumCard.astro';
-import CollectionCard from '../../components/CollectionCard.astro';
-import { getAlbums, getBoosters, getCards, getCollections, getKits, getProducts } from '../../lib/catalog';
-
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
-const cards = getCards();
-const boosters = getBoosters();
-const kits = getKits();
-const products = getProducts();
-const albums = getAlbums();
-const collections = getCollections();
-const totalSearchable = cards.length + boosters.length + kits.length + products.length + albums.length + collections.length;
 ---
-
-<BaseLayout
-  title="Explorar"
-  description="Escolha como explorar cartas, boosters, kits, produtos, álbuns e coleções da comunidade Vault TCG."
-  active="explore"
->
-  <section class="catalog-hero explore-hub-hero">
-    <div class="shell explore-hub-heading" data-reveal>
-      <span class="hero-badge"><i></i> Vault TCG</span>
-      <h1>Explorar</h1>
-      <p>Escolha uma área da comunidade ou use a busca global para encontrar qualquer item, álbum ou coleção em um só lugar.</p>
-    </div>
-  </section>
+<BaseLayout title="Explorar" description="Explore cartas, boosters, kits, produtos, álbuns e coleções públicas do Vault TCG." active="explore">
+  <section class="catalog-hero explore-hub-hero"><div class="shell explore-hub-heading" data-reveal><span class="hero-badge"><i></i> Vault TCG online</span><h1>Explorar</h1><p>Escolha uma área da comunidade ou pesquise os dados que estão publicados no Firestore.</p></div></section>
 
   <section class="shell explore-global-search" data-explore-search data-reveal>
-    <label class="explore-search-field" for="explore-global-search">
-      <span aria-hidden="true">⌕</span>
-      <input id="explore-global-search" type="search" autocomplete="off" placeholder="Buscar cartas, boosters, kits, produtos, álbuns ou coleções..." data-explore-search-input />
-      <kbd>/</kbd>
-    </label>
-    <div class="explore-search-meta" data-explore-search-meta hidden>
-      <strong data-explore-result-count>0</strong>
-      <span data-explore-result-label>resultados encontrados</span>
-    </div>
-
-    <div class="explore-search-results" data-explore-search-results hidden>
-      <div class="explore-search-grid">
-        {cards.map((item) => (
-          <div class="explore-search-entry" data-explore-search-entry data-search={`${item.searchText} carta cartas`} data-kind="Carta" hidden>
-            <ProductCard item={item} compact />
-          </div>
-        ))}
-        {boosters.map((item) => (
-          <div class="explore-search-entry" data-explore-search-entry data-search={`${item.searchText} booster boosters pacote pacotes`} data-kind="Booster" hidden>
-            <ProductCard item={item} compact />
-          </div>
-        ))}
-        {kits.map((item) => (
-          <div class="explore-search-entry" data-explore-search-entry data-search={`${item.searchText} kit kits`} data-kind="Kit" hidden>
-            <ProductCard item={item} compact />
-          </div>
-        ))}
-        {products.map((item) => (
-          <div class="explore-search-entry" data-explore-search-entry data-search={`${item.searchText} produto produtos`} data-kind="Produto" hidden>
-            <ProductCard item={item} compact />
-          </div>
-        ))}
-        {albums.map((album) => (
-          <div class="explore-search-entry" data-explore-search-entry data-search={`${album.searchText} album albuns álbum álbuns`} data-kind="Álbum" hidden>
-            <AlbumCard album={album} compact />
-          </div>
-        ))}
-        {collections.map((collection) => (
-          <div class="explore-search-entry" data-explore-search-entry data-search={`${collection.searchText} colecao colecoes coleção coleções`} data-kind="Coleção" hidden>
-            <CollectionCard collection={collection} compact />
-          </div>
-        ))}
-      </div>
-      <div class="empty-state explore-search-empty" data-explore-search-empty>
-        <span>⌕</span><h2>Nada encontrado</h2><p>Tente outro nome, coleção, número de carta ou colecionador.</p>
-      </div>
-    </div>
-    <span class="explore-search-index" aria-hidden="true">{totalSearchable} registros pesquisáveis</span>
+    <label class="explore-search-field" for="explore-global-search"><span aria-hidden="true">⌕</span><input id="explore-global-search" type="search" autocomplete="off" placeholder="Buscar cartas, boosters, kits, produtos, álbuns ou coleções..." data-explore-search-input /><kbd>/</kbd></label>
+    <div class="explore-search-meta" data-explore-search-meta hidden><strong data-explore-result-count>0</strong><span data-explore-result-label>resultados encontrados</span></div>
+    <div class="explore-search-results" data-explore-search-results hidden><div class="explore-search-grid" data-explore-search-grid></div><div class="empty-state explore-search-empty" data-explore-search-empty hidden><span>⌕</span><h2>Nada encontrado</h2><p>Tente outro nome, coleção, número de carta ou colecionador.</p></div></div>
+    <span class="explore-search-index" data-explore-search-index aria-hidden="true">Conectando ao Firebase…</span>
   </section>
 
   <section class="shell navigation-cards marketplace-navigation explore-hub-navigation" aria-label="Áreas para explorar" data-explore-navigation data-reveal>
-    <a class="navigation-card cards-navigation" href={`${base}cartas/`}>
-      <div class="navigation-icon" aria-hidden="true"><span>◆</span></div>
-      <div><small>Todos os colecionadores</small><h2>Cartas</h2><p>Explore cartas publicadas em todas as coleções e descubra quem possui cada item.</p></div>
-      <span class="navigation-arrow">↗</span>
-    </a>
-    <a class="navigation-card boosters-navigation" href={`${base}boosters/`}>
-      <div class="navigation-icon" aria-hidden="true"><span>▰</span></div>
-      <div><small>Pacotes da comunidade</small><h2>Boosters</h2><p>Veja boosters lacrados de diferentes colecionadores em um catálogo unificado.</p></div>
-      <span class="navigation-arrow">↗</span>
-    </a>
-    <a class="navigation-card kits-navigation" href={`${base}kits/`}>
-      <div class="navigation-icon" aria-hidden="true"><span>▦</span></div>
-      <div><small>Ofertas combinadas</small><h2>Kits</h2><p>Encontre conjuntos personalizados de cartas e boosters por um preço único.</p></div>
-      <span class="navigation-arrow">↗</span>
-    </a>
-    <a class="navigation-card products-navigation" href={`${base}produtos/`}>
-      <div class="navigation-icon" aria-hidden="true"><span>▣</span></div>
-      <div><small>Produtos fechados</small><h2>Produtos</h2><p>Boxes e produtos Pokémon lacrados com informações padronizadas.</p></div>
-      <span class="navigation-arrow">↗</span>
-    </a>
-    <a class="navigation-card albums-navigation" href={`${base}albuns/`}>
-      <div class="navigation-icon" aria-hidden="true"><span>▤</span></div>
-      <div><small>Organização visual</small><h2>Álbuns</h2><p>Explore álbuns virtuais montados pelos colecionadores da comunidade.</p></div>
-      <span class="navigation-arrow">↗</span>
-    </a>
-    <a class="navigation-card collections-navigation" href={`${base}colecoes/`}>
-      <div class="navigation-icon" aria-hidden="true"><span>◎</span></div>
-      <div><small>Perfis de colecionador</small><h2>Coleções</h2><p>Entre na página de cada usuário e navegue apenas pelos itens daquele acervo.</p></div>
-      <span class="navigation-arrow">↗</span>
-    </a>
+    <a class="navigation-card cards-navigation" href={`${base}cartas/`}><div class="navigation-icon" aria-hidden="true"><span>◆</span></div><div><small>Todos os colecionadores</small><h2>Cartas</h2><p>Explore cartas publicadas nas coleções públicas.</p></div><span class="navigation-arrow">↗</span></a>
+    <a class="navigation-card boosters-navigation" href={`${base}boosters/`}><div class="navigation-icon" aria-hidden="true"><span>▰</span></div><div><small>Pacotes da comunidade</small><h2>Boosters</h2><p>Veja boosters lacrados salvos no catálogo online.</p></div><span class="navigation-arrow">↗</span></a>
+    <a class="navigation-card kits-navigation" href={`${base}kits/`}><div class="navigation-icon" aria-hidden="true"><span>▦</span></div><div><small>Ofertas combinadas</small><h2>Kits</h2><p>Encontre conjuntos personalizados publicados pelos usuários.</p></div><span class="navigation-arrow">↗</span></a>
+    <a class="navigation-card products-navigation" href={`${base}produtos/`}><div class="navigation-icon" aria-hidden="true"><span>▣</span></div><div><small>Produtos fechados</small><h2>Produtos</h2><p>Boxes e outros produtos lacrados publicados online.</p></div><span class="navigation-arrow">↗</span></a>
+    <a class="navigation-card albums-navigation" href={`${base}albuns/`}><div class="navigation-icon" aria-hidden="true"><span>▤</span></div><div><small>Organização visual</small><h2>Álbuns</h2><p>Explore álbuns virtuais de coleções públicas.</p></div><span class="navigation-arrow">↗</span></a>
+    <a class="navigation-card collections-navigation" href={`${base}colecoes/`}><div class="navigation-icon" aria-hidden="true"><span>◎</span></div><div><small>Perfis de colecionador</small><h2>Coleções</h2><p>Entre no perfil público de cada conta.</p></div><span class="navigation-arrow">↗</span></a>
   </section>
 
-  <script is:inline>
-    (() => {
-      const root = document.querySelector('[data-explore-search]');
-      const input = root?.querySelector('[data-explore-search-input]');
-      const navigation = document.querySelector('[data-explore-navigation]');
-      const results = root?.querySelector('[data-explore-search-results]');
-      const entries = [...(root?.querySelectorAll('[data-explore-search-entry]') || [])];
-      const count = root?.querySelector('[data-explore-result-count]');
-      const label = root?.querySelector('[data-explore-result-label]');
-      const meta = root?.querySelector('[data-explore-search-meta]');
-      const empty = root?.querySelector('[data-explore-search-empty]');
-      const normalize = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-
-      const apply = () => {
-        const query = normalize(input?.value);
-        const searching = query.length > 0;
-        if (navigation) navigation.hidden = searching;
-        if (results) results.hidden = !searching;
-        if (meta) meta.hidden = !searching;
-        root?.classList.toggle('is-searching', searching);
-
-        let visible = 0;
-        entries.forEach((entry) => {
-          const matches = searching && normalize(entry.dataset.search).includes(query);
-          entry.hidden = !matches;
-          if (matches) visible += 1;
-        });
-        if (count) count.textContent = String(visible);
-        if (label) label.textContent = visible === 1 ? 'resultado encontrado' : 'resultados encontrados';
-        empty?.classList.toggle('show', searching && visible === 0);
-      };
-
-      input?.addEventListener('input', apply);
-      document.addEventListener('keydown', (event) => {
-        if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName || '')) {
-          event.preventDefault(); input?.focus();
-        }
-      });
-      apply();
-    })();
+  <script>
+    import { albumMarkup, collectionMarkup, initializeOnlineImages, normalizeText, productMarkup } from '../../scripts/online-markup';
+    const root = document.querySelector<HTMLElement>('[data-explore-search]');
+    if (root) {
+      const input = root.querySelector<HTMLInputElement>('[data-explore-search-input]'); const navigation = document.querySelector<HTMLElement>('[data-explore-navigation]'); const results = root.querySelector<HTMLElement>('[data-explore-search-results]'); const grid = root.querySelector<HTMLElement>('[data-explore-search-grid]'); const count = root.querySelector<HTMLElement>('[data-explore-result-count]'); const label = root.querySelector<HTMLElement>('[data-explore-result-label]'); const meta = root.querySelector<HTMLElement>('[data-explore-search-meta]'); const empty = root.querySelector<HTMLElement>('[data-explore-search-empty]'); const indexLabel = root.querySelector<HTMLElement>('[data-explore-search-index]');
+      let records: Array<{ type: string; search: string; html: () => string }> = [];
+      const apply = () => { const q = normalizeText(input?.value || ''); const searching = q.length > 0; if (navigation) navigation.hidden = searching; if (results) results.hidden = !searching; if (meta) meta.hidden = !searching; root.classList.toggle('is-searching', searching); const visible = searching ? records.filter((record) => normalizeText(record.search).includes(q)).slice(0, 120) : []; if (grid) { grid.innerHTML = visible.map((record) => `<div class="explore-search-entry"><span class="explore-result-kind">${record.type}</span>${record.html()}</div>`).join(''); initializeOnlineImages(grid); } if (count) count.textContent = String(visible.length); if (label) label.textContent = visible.length === 1 ? 'resultado encontrado' : 'resultados encontrados'; if (empty) empty.hidden = !searching || visible.length !== 0; };
+      const load = async () => { try { const cloud = (window as any).VaultCloud; if (!cloud) throw new Error('Firebase ainda não foi inicializado.'); const [items, albums, collections] = await Promise.all([cloud.listPublicItems(), cloud.listPublicAlbums(), cloud.listPublicCollections()]); records = [
+        ...items.map((item: any) => ({ type: item.kind === 'card' ? 'Carta' : item.kind === 'booster' ? 'Booster' : item.kind === 'kit' ? 'Kit' : 'Produto', search: `${item.searchText || ''} ${item.name || ''} ${item.number || ''} ${item.collection || ''} ${item.ownerName || ''}`, html: () => productMarkup(item, { compact: true }) })),
+        ...albums.map((album: any) => ({ type: 'Álbum', search: `${album.searchText || ''} ${album.name || ''} ${album.ownerName || ''}`, html: () => albumMarkup(album, true) })),
+        ...collections.map((profile: any) => ({ type: 'Coleção', search: `${profile.owner || ''} ${profile.title || ''} ${profile.description || ''}`, html: () => collectionMarkup(profile, true) })),
+      ]; if (indexLabel) indexLabel.textContent = `${records.length} registros públicos pesquisáveis`; apply(); } catch (error: any) { if (indexLabel) indexLabel.textContent = error?.message || 'Firebase indisponível'; } };
+      input?.addEventListener('input', apply); document.addEventListener('keydown', (event) => { if (event.key === '/' && !['INPUT','TEXTAREA','SELECT'].includes((document.activeElement as HTMLElement | null)?.tagName || '')) { event.preventDefault(); input?.focus(); } }); if ((window as any).VaultCloud) load(); else window.addEventListener('vault:cloud-ready', load, { once: true });
+    }
   </script>
 </BaseLayout>

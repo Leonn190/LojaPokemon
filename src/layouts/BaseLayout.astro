@@ -53,7 +53,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
             >Explorar</a>
           </div>
 
-          <a class:list={['collector-nav-cta', { active: active === 'signup' }]} href={`${base}cadastro/`}>Criar coleção</a>
+          <a class:list={['collector-nav-cta', { active: active === 'signup' }]} href={`${base}cadastro/`} data-auth-nav>Entrar</a>
 
           <button class="proposal-trigger" type="button" data-proposal-open aria-label="Abrir propostas">
             <span class="proposal-trigger-icon" aria-hidden="true">◇</span>
@@ -87,7 +87,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           <a href={`${base}kits/`}>Kits</a>
           <a href={`${base}produtos/`}>Produtos</a>
           <a href={`${base}albuns/`}>Álbuns</a>
-          <a href={`${base}cadastro/`}>Criar coleção</a>
+          <a href={`${base}cadastro/`} data-auth-footer>Entrar</a>
         </div>
       </div>
       <div class="shell footer-bottom">
@@ -239,6 +239,10 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
         </div>
       </section>
     </div>
+
+    <script>
+      import '../scripts/cloud-runtime';
+    </script>
 
     <script is:inline>
       (() => {
@@ -657,7 +661,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           if (modalOwner) modalOwner.textContent = ownerName;
           if (modalOwnerCollection) modalOwnerCollection.textContent = card.dataset.ownerCollection || '';
           if (modalOwnerAvatar) modalOwnerAvatar.textContent = ownerName.slice(0, 2).toUpperCase();
-          if (modalOwnerLink) modalOwnerLink.href = `${base}colecoes/${card.dataset.ownerSlug || ''}/`;
+          if (modalOwnerLink) modalOwnerLink.href = `${base}colecao/?slug=${encodeURIComponent(card.dataset.ownerSlug || '')}`;
 
           setSpec('[data-spec-pokemon-collection]', card.dataset.collection || '', isCard || isBooster);
           setSpec('[data-spec-number]', card.dataset.number || '', false);
@@ -795,7 +799,7 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           return {
             id: card.dataset.productId || '', kind: card.dataset.kind || 'card', name: card.dataset.name || 'Produto',
             number: card.dataset.number || '', owner: card.dataset.owner || 'Colecionador',
-            ownerCollection: card.dataset.ownerCollection || '', ownerSlug: card.dataset.ownerSlug || '', ownerPhone: card.dataset.ownerPhone || '',
+            ownerCollection: card.dataset.ownerCollection || '', ownerSlug: card.dataset.ownerSlug || '', ownerPhone: card.dataset.ownerPhone || '', ownerUid: card.dataset.ownerUid || '',
             price: card.dataset.priceValue === '' ? null : Number(card.dataset.priceValue), priceLabel: card.dataset.priceLabel || 'Consultar',
             image: image && !image.hidden ? (image.currentSrc || image.src || '') : '', quantity: 1,
             stock: Math.max(1, Number(card.dataset.stock || 1)),
@@ -894,13 +898,25 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           saveProposals();
         };
 
-        const addToProposal = (card, button) => {
+        const addToProposal = async (card, button) => {
+          try {
+            await window.VaultCloud?.ready;
+            const user = await window.VaultCloud?.currentUser?.();
+            if (!user) { window.location.href = `${document.body.dataset.siteBase || '/'}cadastro/?next=${encodeURIComponent(window.location.pathname + window.location.search)}`; return; }
+          } catch (_) { window.location.href = `${document.body.dataset.siteBase || '/'}cadastro/`; return; }
           if (card.dataset.proposalAllowed === 'false') { feedbackButton(button, 'Não permitido'); return; }
           const product = productFromCard(card);
           let group = proposals.find((entry) => entry.ownerSlug === product.ownerSlug);
           if (!group) {
-            group = { ownerSlug: product.ownerSlug, owner: product.owner, ownerCollection: product.ownerCollection, phone: product.ownerPhone, terms: product.terms, items: [], discount: 0, reason: '', buyerName: '', address: '' };
+            group = { ownerSlug: product.ownerSlug, ownerUid: product.ownerUid, owner: product.owner, ownerCollection: product.ownerCollection, phone: product.ownerPhone, terms: product.terms, items: [], discount: 0, reason: '', buyerName: '', address: '' };
             proposals.push(group);
+          } else {
+            // Atualiza propostas salvas no navegador antes da migração online.
+            group.ownerUid = product.ownerUid || group.ownerUid || '';
+            group.owner = product.owner || group.owner || '';
+            group.ownerCollection = product.ownerCollection || group.ownerCollection || '';
+            group.phone = product.ownerPhone || group.phone || '';
+            group.terms = product.terms || group.terms;
           }
           const current = group.items.find((item) => item.id === product.id);
           if (current) current.quantity = Math.min(current.stock, current.quantity + 1);
@@ -910,7 +926,12 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           feedbackButton(button, 'Na proposta');
         };
 
-        const openProposalDrawer = () => {
+        const openProposalDrawer = async () => {
+          try {
+            await window.VaultCloud?.ready;
+            const user = await window.VaultCloud?.currentUser?.();
+            if (!user) { window.location.href = `${document.body.dataset.siteBase || '/'}cadastro/?next=${encodeURIComponent(window.location.pathname + window.location.search)}`; return; }
+          } catch (_) { window.location.href = `${document.body.dataset.siteBase || '/'}cadastro/`; return; }
           closeModal();
           if (!proposalDrawer || !proposalBackdrop) return;
           proposalBackdrop.hidden = false;
@@ -973,10 +994,21 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
           lines.push('', 'Esta mensagem foi gerada pelo Vault TCG de acordo com os termos públicos da coleção.');
           return lines.join('\n');
         };
-        const openCheckout = () => {
+        const openCheckout = async () => {
           const group = activeGroup();
           const error = validateGroup(group);
           if (error) { showProposalError(error); return; }
+          try {
+            await window.VaultCloud?.ready;
+            const user = await window.VaultCloud?.currentUser?.();
+            if (!user) { window.location.href = `${document.body.dataset.siteBase || '/'}cadastro/?next=${encodeURIComponent(window.location.pathname + window.location.search)}`; return; }
+            group.publishedTotal = groupTotal(group);
+            group.proposedTotal = finalTotalFor(group);
+            await window.VaultCloud?.submitProposal?.(group);
+          } catch (cloudError) {
+            showProposalError(window.VaultCloud?.friendlyFirebaseError?.(cloudError) || cloudError?.message || 'Não foi possível registrar a proposta online.');
+            return;
+          }
           const message = buildCheckoutMessage(group);
           const phone = normalizePhone(group.phone);
           if (checkoutMessage) checkoutMessage.value = message;

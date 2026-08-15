@@ -1,6 +1,15 @@
-# Diva Cards — site Astro para vender cartas Pokémon
+# Vault TCG — versão online com Firebase
 
-Site estático em Astro gerado a partir do arquivo `src/data/cartas.json` com 246 entradas do depósito.
+O Vault TCG continua sendo um site Astro estático, mas contas, coleções, inventário, álbuns, movimentações e propostas passam a usar Firebase Authentication + Cloud Firestore. As imagens continuam sendo arquivos do diretório `public/`; o Firestore guarda apenas o caminho/URL da imagem.
+
+## Estrutura online
+
+- `users/{uid}`: dados privados da conta (e-mail e metadados do usuário).
+- `collections/{uid}`: perfil da coleção. Toda conta possui exatamente uma coleção, mesmo que esteja vazia e privada.
+- `collections/{uid}/cards`, `boosters`, `kits`, `products`, `albums`, `movements`: dados editáveis da coleção.
+- `publicItems` e `publicAlbums`: espelhos usados pelos catálogos públicos. Quando uma coleção vira privada, seus espelhos públicos são removidos.
+- `slugs/{slug}`: resolve a URL pública da coleção para o UID do dono.
+- `proposals/{id}`: propostas enviadas por usuários autenticados.
 
 ## Rodar localmente
 
@@ -9,54 +18,72 @@ npm install
 npm run dev
 ```
 
-Depois abra o endereço que aparecer no terminal.
+Para desenvolvimento fora do Firebase Hosting, copie `.env.example` para `.env` e preencha pelo menos:
 
-## Personalizar contato
-
-Abra `src/config.ts` e coloque:
-
-- `whatsappNumber`: número com DDI + DDD, só dígitos. Exemplo: `5513999999999`.
-- `contactEmail`: email para pedido.
-- `instagramUrl` e `mercadoLivreUrl`, se quiser mostrar esses links.
-
-O site é estático: ele não cobra pagamento sozinho. O botão de pedido monta uma mensagem com as cartas do carrinho para WhatsApp/email.
-
-## Publicar no GitHub Pages
-
-1. Crie um repositório no GitHub.
-2. Suba todos os arquivos deste projeto.
-3. No GitHub: **Settings > Pages > Build and deployment > Source > GitHub Actions**.
-4. Faça push na branch `main`.
-5. A Action `.github/workflows/deploy.yml` vai instalar, buildar e publicar o site.
-
-O `astro.config.mjs` tenta detectar automaticamente o nome do repositório no GitHub Actions para configurar o `base` correto. Se quiser forçar manualmente, configure a variável `ASTRO_BASE`, por exemplo `/nome-do-repo`.
-
-## Aprovar e atualizar coleções
-
-Na página **Criar coleção**, o colecionador pode iniciar do zero, importar um ZIP anterior ou entrar em uma coleção publicada. Ao terminar, ele baixa um arquivo `nome-da-colecao-vN.zip` e deve enviá-lo para `alexeidostoievsky@gmail.com`, solicitando formalmente a aprovação/atualização.
-
-Coloque os ZIPs recebidos em `src/Coleções não formatadas/` e execute:
-
-```bash
-python src/regulador.py
+```env
+PUBLIC_FIREBASE_API_KEY=SUA_API_KEY_WEB
 ```
 
-O regulador consulta a Liga Pokémon, cria/atualiza a pasta correspondente em `src/coleções/` e salva imagens de cartas em `public/imagens/` com o padrão `Nome_Numeração`.
+Os demais identificadores do projeto `nexustcg-ad9d3` já estão configurados como padrão. Se quiser, você também pode preencher todos os campos mostrados em `.env.example`.
 
-Para atualizar em massa os preços de uma coleção já aprovada:
+## Deploy recomendado: Firebase Hosting
 
-```bash
-python src/atualizador.py --colecao Leon19
-```
-
-Na primeira aba do Chrome, resolva a verificação da Liga se ela aparecer. Em seguida, o script processa o restante em grupos de até 10 abas. Os scripts requerem Chrome, Selenium, Pillow e ddddocr instalados no Python usado para executá-los.
-
-## Atualizar cartas
-
-Substitua `src/data/cartas.json` por uma versão nova do seu depósito e rode:
+O projeto já contém `.firebaserc`, `firebase.json`, `firestore.rules` e `firestore.indexes.json` para o projeto `nexustcg-ad9d3`.
 
 ```bash
-npm run build
+npm install
+npx firebase login
+npm run deploy:firebase
 ```
 
-Se passar, faça commit e push.
+O comando faz o build do Astro e publica o Hosting, as regras e os índices. No Firebase Hosting, o app consegue obter automaticamente a configuração pública do Firebase pelo endpoint reservado `/__/firebase/init.json`, então não é necessário colocar a API key no código-fonte.
+
+> Importante: mantenha o diretório `public/` do projeto original ao lado destes arquivos antes do build. É nele que continuam as imagens e outros assets estáticos.
+
+## Se continuar no GitHub Pages
+
+O workflow `.github/workflows/deploy.yml` continua disponível. Como o GitHub Pages não possui o endpoint reservado do Firebase Hosting, crie no repositório uma variável de Actions chamada `PUBLIC_FIREBASE_API_KEY` com a `apiKey` exibida em **Firebase Console → Configurações do projeto → Seus aplicativos → Vault TCG → Configuração do SDK → Config**.
+
+Depois disso, o push na branch `main` continua fazendo o deploy pelo GitHub Pages.
+
+## Firebase Console
+
+Antes de publicar, confirme:
+
+1. Authentication → Provedores de login → **E-mail/senha** ativado.
+2. Authentication → Configurações → Domínios autorizados contém o domínio usado pelo site (`localhost`, `*.web.app`/`*.firebaseapp.com` e/ou `leonn190.github.io`).
+3. Publique as regras deste repositório com `npm run deploy:firebase` ou, se preferir, copie `firestore.rules` para a aba **Firestore → Regras** e clique em **Publicar**.
+
+Não crie manualmente `users`, `collections`, `cards` etc. O próprio site cria os documentos quando a conta é criada e quando a coleção é editada.
+
+## Fluxo da conta
+
+Na página **Entrar** o visitante pode entrar ou criar uma conta. Criar uma conta também cria uma coleção vazia. A coleção pode permanecer privada e sem itens para quem quiser usar o Vault apenas como comprador.
+
+Dentro do editor, as alterações são salvas automaticamente no Firestore. O botão **Salvar agora** força a sincronização. Não existe mais fluxo de baixar/enviar ZIP para atualizar a coleção.
+
+Para enviar proposta, o comprador precisa estar autenticado. A proposta é registrada no Firestore e o fluxo existente de mensagem para WhatsApp é mantido como etapa de contato com o vendedor.
+
+## Migrar coleções que já existiam no projeto
+
+As coleções locais antigas continuam incluídas temporariamente apenas como fonte de migração. O dono deve:
+
+1. Criar uma nova conta Firebase.
+2. Deixar a coleção online vazia.
+3. Abrir **Migrar uma coleção antiga** dentro do editor.
+4. Selecionar a coleção e confirmar a senha antiga.
+5. O navegador transfere cartas, boosters, kits, álbuns e movimentações para o Firestore.
+
+As senhas antigas em texto puro foram removidas dos arquivos de perfil desta versão. A verificação de migração usa apenas verificadores derivados e não envia a senha antiga ao Firestore. Depois que todas as coleções antigas forem migradas, `src/colecoes`, `src/colecoes-nao-formatadas` e `src/data/legacy-claim-verifiers.json` podem ser removidos em uma limpeza posterior.
+
+## Imagens
+
+As imagens permanecem locais. Exemplos de valores salvos no Firestore:
+
+```text
+imagens/cartas/Giratina_V_186-196.webp
+imagens/boosters/Evolving_Skies.webp
+imagens/perfis/leon.webp
+```
+
+O arquivo real precisa existir dentro de `public/` no mesmo caminho. Não salve Base64 ou arquivos binários no Firestore.

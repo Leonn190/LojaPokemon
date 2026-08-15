@@ -4,7 +4,7 @@
   "description": "Uma coleção Pokémon com cartas avulsas e boosters organizados em um catálogo digital.",
   "email": "euleonsoto@gmail.com",
   "phone": "13 99158-5788",
-  "password": "SenhaLeon",
+  "password": "",
   "selling": true,
   "showQuantity": true,
   "featured": true,

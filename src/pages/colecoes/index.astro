@@ -1,78 +1,80 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import CollectionCard from '../../components/CollectionCard.astro';
-import { getCollections } from '../../lib/catalog';
-
-const collections = getCollections();
-const totalCards = collections.reduce((total, item) => total + item.cards.length, 0);
-const totalBoosters = collections.reduce((total, item) => total + item.boosters.length, 0);
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 ---
-
-<BaseLayout
-  title="Coleções da comunidade"
-  description="Conheça os colecionadores do Vault TCG e explore os itens de cada coleção."
-  active="collections"
->
+<BaseLayout title="Coleções da comunidade" description="Conheça os colecionadores do Vault TCG e explore as coleções públicas." active="collections">
   <section class="catalog-hero collections-catalog-hero">
     <div class="shell catalog-hero-grid">
-      <div data-reveal>
-        <span class="hero-badge"><i></i> Perfis de colecionador</span>
-        <h1>Coleções da comunidade</h1>
-        <p>Cada página pertence a um colecionador. Entre em uma coleção para visualizar apenas as cartas, boosters e kits daquele perfil.</p>
-      </div>
+      <div data-reveal><span class="hero-badge"><i></i> Perfis online</span><h1>Coleções da comunidade</h1><p>Somente contas que escolheram deixar a coleção pública aparecem aqui. Uma conta também pode manter a coleção completamente vazia e privada apenas para comprar e fazer propostas.</p></div>
       <div class="catalog-hero-stats" data-reveal>
-        <div><strong>{collections.length}</strong><span>coleções publicadas</span></div>
-        <div><strong>{totalCards}</strong><span>cartas catalogadas</span></div>
-        <div><strong>{totalBoosters}</strong><span>boosters diferentes</span></div>
+        <div><strong data-online-collection-total>0</strong><span>coleções públicas</span></div>
+        <div><strong data-online-card-total>0</strong><span>cartas publicadas</span></div>
+        <div><strong data-online-booster-total>0</strong><span>boosters publicados</span></div>
       </div>
     </div>
   </section>
 
-  <section class="shell collections-browser" data-collections-browser>
+  <section class="shell collections-browser" data-online-collections>
     <div class="collections-toolbar" data-reveal>
-      <div class="search-control">
-        <label for="collection-search">Pesquisar coleções</label>
-        <div class="search-input-wrap">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg>
-          <input id="collection-search" type="search" placeholder="Nome do colecionador ou da coleção..." data-collection-search />
-        </div>
-      </div>
-      <a class="primary-cta" href={`${base}cadastro/`}><span>Criar minha coleção</span><b>＋</b></a>
+      <div class="search-control"><label for="collection-search">Pesquisar coleções</label><div class="search-input-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg><input id="collection-search" type="search" placeholder="Nome do colecionador ou da coleção..." data-collection-search /></div></div>
+      <a class="primary-cta" href={`${base}cadastro/`}><span>Entrar / criar conta</span><b>→</b></a>
     </div>
-
-    <div class="collections-summary"><strong data-collection-count>{collections.length}</strong> {collections.length === 1 ? 'coleção encontrada' : 'coleções encontradas'}</div>
-    <div class="collections-grid" data-collections-grid>
-      {collections.map((collection) => (
-        <div data-collection-entry data-search={collection.searchText}><CollectionCard collection={collection} /></div>
-      ))}
-    </div>
-    <div class="empty-state collection-empty-state" data-collection-empty>
-      <span>◇</span><h2>Nenhuma coleção encontrada</h2><p>Tente pesquisar pelo nome do colecionador.</p>
-    </div>
+    <div class="collections-summary"><strong data-collection-count>0</strong> <span data-collection-label>coleções encontradas</span> <small data-collection-status>· conectando ao Firebase…</small></div>
+    <div class="collections-grid" data-collections-grid></div>
+    <div class="empty-state collection-empty-state" data-collection-empty hidden><span>◇</span><h2>Nenhuma coleção pública</h2><p>Não há resultado para esta busca ou ainda não há coleções públicas cadastradas.</p></div>
   </section>
 
-  <script is:inline>
-    (() => {
-      const root = document.querySelector('[data-collections-browser]');
-      const search = root?.querySelector('[data-collection-search]');
-      const entries = [...(root?.querySelectorAll('[data-collection-entry]') || [])];
-      const count = root?.querySelector('[data-collection-count]');
-      const empty = root?.querySelector('[data-collection-empty]');
-      const normalize = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-      const apply = () => {
-        const query = normalize(search?.value);
-        let visible = 0;
-        entries.forEach((entry) => {
-          const matches = !query || normalize(entry.dataset.search).includes(query);
-          entry.hidden = !matches;
-          if (matches) visible += 1;
-        });
-        if (count) count.textContent = String(visible);
-        empty?.classList.toggle('show', visible === 0);
+  <script>
+    import { collectionMarkup, normalizeText } from '../../scripts/online-markup';
+    const root = document.querySelector<HTMLElement>('[data-online-collections]');
+    if (root) {
+      const search = root.querySelector<HTMLInputElement>('[data-collection-search]');
+      const grid = root.querySelector<HTMLElement>('[data-collections-grid]');
+      const count = root.querySelector<HTMLElement>('[data-collection-count]');
+      const label = root.querySelector<HTMLElement>('[data-collection-label]');
+      const empty = root.querySelector<HTMLElement>('[data-collection-empty]');
+      const status = root.querySelector<HTMLElement>('[data-collection-status]');
+      let collections: any[] = [];
+      const render = () => {
+        const query = normalizeText(search?.value || '');
+        const visible = collections
+          .filter((profile) => !query || normalizeText(`${profile.owner || ''} ${profile.title || ''} ${profile.description || ''} ${profile.slug || ''}`).includes(query))
+          .sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'pt-BR'));
+        if (grid) grid.innerHTML = visible.map((profile) => collectionMarkup(profile)).join('');
+        if (count) count.textContent = String(visible.length);
+        if (label) label.textContent = visible.length === 1 ? 'coleção encontrada' : 'coleções encontradas';
+        if (empty) empty.hidden = visible.length !== 0;
       };
-      search?.addEventListener('input', apply);
-    })();
+      const load = async () => {
+        try {
+          const cloud = (window as any).VaultCloud;
+          if (!cloud) throw new Error('Firebase ainda não foi inicializado.');
+          collections = await cloud.listPublicCollections();
+          const cardTotal = collections.reduce((sum, profile) => sum + Number(profile.stats?.cards || 0), 0);
+          const boosterTotal = collections.reduce((sum, profile) => sum + Number(profile.stats?.boosters || 0), 0);
+          const totalElement = document.querySelector<HTMLElement>('[data-online-collection-total]');
+          const cardElement = document.querySelector<HTMLElement>('[data-online-card-total]');
+          const boosterElement = document.querySelector<HTMLElement>('[data-online-booster-total]');
+          if (totalElement) totalElement.textContent = String(collections.length);
+          if (cardElement) cardElement.textContent = String(cardTotal);
+          if (boosterElement) boosterElement.textContent = String(boosterTotal);
+          if (status) status.textContent = '· atualizado da nuvem';
+          render();
+        } catch (error: any) {
+          if (status) status.textContent = '· Firebase indisponível';
+          if (empty) {
+            empty.hidden = false;
+            const title = empty.querySelector('h2');
+            const text = empty.querySelector('p');
+            if (title) title.textContent = 'Não foi possível carregar';
+            if (text) text.textContent = error?.message || 'Confira a configuração do Firebase.';
+          }
+        }
+      };
+      search?.addEventListener('input', render);
+      if ((window as any).VaultCloud) load();
+      else window.addEventListener('vault:cloud-ready', load, { once: true });
+    }
   </script>
 </BaseLayout>

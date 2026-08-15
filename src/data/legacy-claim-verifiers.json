@@ -1,0 +1,20 @@
+[
+  {
+    "collectionId": "Leon19",
+    "salt": "pv5x+VjYLYrktXraNLoC1A==",
+    "iterations": 210000,
+    "verifier": "wZuUJRTcFn63DIxpaleYsAWkgqRCJVJMLVsaXoQspW0="
+  },
+  {
+    "collectionId": "colecao-de-nath",
+    "salt": "JC61KLNVyZcezcs+NcYmng==",
+    "iterations": 210000,
+    "verifier": "HCdIuimJuYEbSnB5sITv5iu6G6dr14Gyq+CDWqJbYBg="
+  },
+  {
+    "collectionId": "colecao-de-vasques",
+    "salt": "EUbPi4hDEx2ivLEI6lRIcw==",
+    "iterations": 210000,
+    "verifier": "reRNKIqF58tiA3Ah5kijqsu6Z6XvSJC34mQaqQdclCY="
+  }
+]

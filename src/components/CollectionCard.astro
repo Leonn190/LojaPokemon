@@ -11,7 +11,7 @@ const encodePath = (path: string) => path.split('/').map(encodeURIComponent).joi
 const imageUrl = (path: string) => /^(?:https?:|data:|blob:)/i.test(path) ? path : `${base}${encodePath(path.replace(/^\/+/, ''))}`;
 ---
 
-<a class:list={['collection-card', compact && 'compact-collection-card']} href={`${base}colecoes/${collection.slug}/`}>
+<a class:list={['collection-card', compact && 'compact-collection-card']} href={`${base}colecao/?slug=${encodeURIComponent(collection.slug)}`}>
   <div class="collection-card-preview">
     <CollectionFlow collection={collection} compact />
     <span class="collection-status">{collection.selling ? 'Itens à venda' : 'Somente exposição'}</span>

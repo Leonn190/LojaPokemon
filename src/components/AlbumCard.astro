@@ -8,7 +8,7 @@ const encodePath = (path: string) => path.split('/').map(encodeURIComponent).joi
 const imageUrl = (path: string) => /^(?:https?:|data:|blob:)/i.test(path) ? path : `${base}${encodePath(path.replace(/^\/+/, ''))}`;
 const previewCards = album.pages.flatMap((page) => page.slots).filter(Boolean).slice(0, 6);
 const progress = album.totalSlots ? Math.round(album.occupiedSlots / album.totalSlots * 100) : 0;
-const albumHref = `${base}albuns/${encodeURIComponent(album.ownerCollectionSlug)}/${encodeURIComponent(album.slug)}/`;
+const albumHref = `${base}album/?collection=${encodeURIComponent(album.ownerCollectionSlug)}&album=${encodeURIComponent(album.slug)}`;
 ---
 <a class:list={['album-product-card', compact && 'compact']} href={albumHref} aria-label={`Abrir diretamente o álbum ${album.name}`}>
   <div class="album-product-visual" aria-hidden="true">

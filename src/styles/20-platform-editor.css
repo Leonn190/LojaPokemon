@@ -795,3 +795,21 @@ body.editor-modal-open { overflow: hidden; }
   background: rgba(255,255,255,.025);
 }
 .inventory-sold span { font-size: .72rem; }
+
+/* Migração única do antigo armazenamento local para o Firestore. */
+.editor-legacy-migration { margin: 20px clamp(18px,3vw,34px) 0; overflow: hidden; border: 1px solid rgba(84,232,223,.18); border-radius: 20px; background: linear-gradient(145deg,rgba(84,232,223,.045),rgba(188,145,255,.045)); }
+.editor-legacy-migration > summary { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 13px; align-items: center; padding: 16px 18px; cursor: pointer; list-style: none; }
+.editor-legacy-migration > summary::-webkit-details-marker { display:none; }
+.editor-legacy-migration > summary > span { width: 34px; height: 34px; display:grid; place-items:center; border-radius:11px; color:var(--cyan); background:rgba(84,232,223,.08); }
+.editor-legacy-migration > summary div { display:grid; gap:3px; }
+.editor-legacy-migration > summary strong { font-size:.82rem; }
+.editor-legacy-migration > summary small { color:var(--muted-2); line-height:1.45; }
+.editor-legacy-migration > summary > b { color:var(--muted); font-size:1.2rem; transition:transform .18s ease; }
+.editor-legacy-migration[open] > summary > b { transform:rotate(45deg); }
+.legacy-migration-body { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto; gap:14px; align-items:end; padding:16px 18px 20px; border-top:1px solid var(--line); }
+.legacy-migration-body .import-feedback { grid-column:1/-1; margin:0; }
+@media (max-width:900px){ .legacy-migration-body{grid-template-columns:1fr;} .legacy-migration-body .secondary-cta{width:100%;} }
+.editor-profile-settings { border-color:rgba(188,145,255,.16); background:linear-gradient(145deg,rgba(188,145,255,.04),rgba(84,232,223,.025)); }
+.profile-settings-body { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.profile-settings-body .profile-description-field { grid-column:1/-1; }
+@media (max-width:900px){ .profile-settings-body{grid-template-columns:1fr;} .profile-settings-body .profile-description-field{grid-column:auto;} }
