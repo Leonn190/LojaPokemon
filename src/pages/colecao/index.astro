@@ -5,6 +5,8 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 ---
 <BaseLayout title="Coleção" description="Coleção pública no Vault TCG." active="collections" bodyClass="collection-profile-page">
   <div class="collector-theme" data-online-collection-page style="--collector-primary:#54e8df;--collector-secondary:#bc91ff;--collector-accent:#f4c25c;">
+    <div class="collector-theme-atmosphere" aria-hidden="true">{Array.from({ length: 18 }).map((_, index) => <i style={`--particle-index:${index}`}></i>)}</div>
+    <div class="collector-favorite-backdrop" data-online-collection-backdrop aria-hidden="true"></div>
     <section class="collection-profile-hero">
       <div class="shell collection-profile-grid">
         <div class="collection-profile-copy" data-reveal>
@@ -20,8 +22,8 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         </div>
         <div class="profile-cover profile-cover-flow" data-reveal>
           <div class="profile-cover-glow" aria-hidden="true"></div>
-          <div class="collection-flow collection-flow-placeholder online-profile-cover" aria-hidden="true"><span>VAULT TCG</span><strong data-cover-title>Coleção</strong><small>Acervo do colecionador</small></div>
-          <div class="profile-value-card"><small>Status</small><strong data-profile-cloud-status>Carregando…</strong><span>Informações da coleção.</span></div>
+          <div class="collection-flow collection-flow-placeholder online-profile-cover" data-online-profile-cover aria-hidden="true"><span>VAULT TCG</span><strong data-cover-title>Coleção</strong><small>Acervo do colecionador</small></div>
+          <div class="profile-value-card"><small>Valor real dos itens da coleção</small><strong data-profile-value>Carregando…</strong><span>cartas, boosters e produtos, sem contar kits novamente</span></div>
         </div>
       </div>
     </section>
@@ -38,7 +40,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
   </div>
 
   <script>
-    import { albumMarkup, initializeOnlineImages, productMarkup, toImageUrl } from '../../scripts/online-markup';
+    import { albumMarkup, collectionFlowMarkup, escapeHtml, formatBRL, initializeOnlineImages, productMarkup, toImageUrl } from '../../scripts/online-markup';
     const root = document.querySelector<HTMLElement>('[data-online-collection-page]');
     const params = new URLSearchParams(location.search);
     const slug = params.get('slug') || location.pathname.match(/\/colecoes\/([^/]+)/)?.[1] || '';
@@ -54,7 +56,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       root?.querySelector<HTMLElement>('[data-online-collection-content]')?.setAttribute('hidden', '');
       const box = root?.querySelector<HTMLElement>('[data-collection-error]'); if (box) box.hidden = false;
       setText('[data-error-title]', title); setText('[data-error-message]', message);
-      setText('[data-profile-cloud-status]', 'Indisponível');
+      setText('[data-profile-value]', 'Indisponível');
     };
     const load = async () => {
       try {
@@ -71,10 +73,26 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         setText('[data-profile-sale-status]', profile.selling === false ? 'Coleção para exposição' : 'Itens selecionados à venda');
         const sale = root?.querySelector<HTMLElement>('[data-profile-sale-status]'); sale?.classList.toggle('selling', profile.selling !== false); sale?.classList.toggle('showcase-only', profile.selling === false);
         const avatar = root?.querySelector<HTMLElement>('[data-profile-avatar]'); if (avatar) { const photo = toImageUrl(profile.profilePhoto || ''); if (photo) { avatar.classList.add('has-photo'); avatar.innerHTML = `<img src="${photo.replace(/"/g,'&quot;')}" alt="" />`; } else avatar.textContent = String(profile.owner || 'VT').slice(0,2).toUpperCase(); }
+        const coverPlaceholder = root?.querySelector<HTMLElement>('[data-online-profile-cover]');
+        if (coverPlaceholder) {
+          const holder = document.createElement('div');
+          holder.innerHTML = collectionFlowMarkup(data.cards || [], false);
+          const flow = holder.firstElementChild as HTMLElement | null;
+          if (flow) { coverPlaceholder.replaceWith(flow); initializeOnlineImages(flow); }
+        }
+        const ambientCards = [...(data.cards || [])]
+          .filter((card: any) => Array.isArray(card.imageCandidates) && card.imageCandidates.length)
+          .sort((a: any, b: any) => Number(Boolean(b.favorite)) - Number(Boolean(a.favorite)) || Number(b.price || 0) - Number(a.price || 0))
+          .slice(0, 10);
+        const backdrop = root?.querySelector<HTMLElement>('[data-online-collection-backdrop]');
+        if (backdrop) {
+          backdrop.innerHTML = ambientCards.map((card: any, index: number) => `<img src="${escapeHtml(toImageUrl(card.imageCandidates[0]))}" alt="" loading="lazy" style="--favorite-index:${index}" />`).join('');
+        }
         setText('[data-stat-cards]', data.cards.length); setText('[data-stat-boosters]', data.boosters.length); setText('[data-stat-kits]', data.kits.length); setText('[data-stat-albums]', data.albums.length); setText('[data-stat-products]', data.products.length);
         const terms = profile.proposalTerms || {}; setText('[data-proposal-policy]', policyLabels[terms.policy] || 'Aceita propostas');
         setText('[data-proposal-detail]', terms.flexibleDiscounts === false && Array.isArray(terms.discountTiers) && terms.discountTiers.length ? terms.discountTiers.map((tier: any) => `A partir de R$ ${Number(tier.minValue || 0).toFixed(2).replace('.', ',')}: até ${Number(tier.maxDiscount || 0)}%`).join(' · ') : 'Entre na sua conta para montar e enviar uma proposta.');
-        setText('[data-profile-cloud-status]', 'Disponível');
+        const estimatedValue = Number(profile.stats?.estimatedValue ?? [...(data.cards || []), ...(data.boosters || []), ...(data.products || [])].reduce((sum: number, item: any) => sum + Math.max(0, Number(item.quantity || 0)) * Math.max(0, Number(item.price || 0)), 0));
+        setText('[data-profile-value]', formatBRL(estimatedValue));
         const groups: Record<string, any[]> = { albums: data.albums, cards: data.cards, boosters: data.boosters, kits: data.kits, products: data.products };
         let total = 0;
         Object.entries(groups).forEach(([key, items]) => {

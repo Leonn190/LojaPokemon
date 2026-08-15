@@ -3,23 +3,295 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 ---
+
 <BaseLayout title="Álbum" description="Álbum virtual publicado no Vault TCG." active="albums" bodyClass="immersive-album-page">
-  <section class="catalog-hero album-catalog-hero"><div class="shell catalog-hero-grid"><div data-reveal><span class="hero-badge"><i></i> Álbum da comunidade</span><h1 data-album-title>Carregando álbum…</h1><p data-album-description>Veja as cartas organizadas neste álbum virtual.</p></div><div class="catalog-hero-stats" data-reveal><div><strong data-album-progress>0 / 0</strong><span>espaços ocupados</span></div><div><strong data-album-owner>—</strong><span>colecionador</span></div></div></div></section>
-  <section class="shell" data-online-album-viewer>
-    <div class="public-album-dialog" style="width:100%;max-height:none">
-      <header class="public-album-dialog-header"><div><span class="section-eyebrow" data-album-format>Álbum</span><h2 data-album-heading>Álbum</h2><p data-album-copy></p></div><a class="secondary-cta" href={`${base}albuns/`}><span>Voltar aos álbuns</span><b>←</b></a></header>
-      <div class="public-album-stage"><button class="album-page-arrow" type="button" data-album-prev aria-label="Página anterior">‹</button><div class="public-album-page-wrap"><div class="public-album-page" data-album-page><span class="public-album-rings" aria-hidden="true"><i></i><i></i><i></i><i></i></span></div></div><button class="album-page-arrow" type="button" data-album-next aria-label="Próxima página">›</button></div>
-      <footer class="public-album-footer"><strong data-album-page-label>Página 1</strong><span data-album-slots-label></span></footer>
-    </div>
-    <div class="empty-state" data-album-error hidden><span>!</span><h2>Não foi possível abrir este álbum</h2><p data-album-error-message>Confira o endereço e tente novamente.</p></div>
+  <section class="album-world" data-immersive-album>
+    <div class="album-world-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="album-world-stars" aria-hidden="true"></div>
+    <button class="album-focus-exit" type="button" data-album-focus-exit aria-label="Sair do modo imersivo">× <span>Sair do modo imersivo</span></button>
+
+    <header class="shell album-experience-header" data-reveal>
+      <div class="album-experience-copy">
+        <nav class="breadcrumbs" aria-label="Navegação estrutural">
+          <a href={base}>Início</a><span>/</span><a href={`${base}albuns/`}>Álbuns</a><span>/</span><strong data-album-name-breadcrumb>Carregando…</strong>
+        </nav>
+        <span class="album-experience-kicker" data-album-kicker>Álbum virtual</span>
+        <h1 data-album-name>Carregando álbum…</h1>
+        <p data-album-description>Buscando o fichário publicado pelo colecionador.</p>
+        <div class="album-experience-owner-row">
+          <a class="album-owner-pill" href={`${base}colecoes/`} data-album-owner-link>
+            <span data-album-owner-initials>VT</span>
+            <div><small>Organizado por</small><strong data-album-owner>Colecionador</strong></div>
+            <b>↗</b>
+          </a>
+          <button class="album-focus-button" type="button" data-album-focus aria-pressed="false"><span>◈</span> Modo imersivo</button>
+        </div>
+      </div>
+
+      <div class="album-experience-cover" aria-hidden="true">
+        <div class="album-cover-depth"></div>
+        <div class="album-cover-spine"><span>VAULT</span></div>
+        <div class="album-cover-mosaic" data-album-cover-mosaic>
+          {Array.from({ length: 8 }).map(() => <span class="empty"></span>)}
+        </div>
+      </div>
+    </header>
+
+    <section class="shell album-experience-stats" data-reveal>
+      <div><small>Páginas</small><strong data-album-pages>0</strong></div>
+      <div><small>Formato</small><strong data-album-format>—</strong></div>
+      <div><small>Cartas posicionadas</small><strong data-album-occupied>0</strong></div>
+      <div class="album-stat-progress"><small>Preenchimento</small><strong data-album-progress>0%</strong><i><span data-album-progress-bar style="--album-progress:0%"></span></i></div>
+    </section>
+
+    <section class="album-reading-zone" aria-label="Leitor do álbum">
+      <div class="shell album-reader-shell">
+        <div class="album-reader-toolbar">
+          <div><span class="section-eyebrow">Fichário aberto</span><strong data-album-page-label>Página 1</strong></div>
+          <p>Passe o mouse sobre uma carta para destacá-la. Clique para abrir todas as informações avançadas.</p>
+        </div>
+
+        <div class="immersive-album-stage" data-album-stage>
+          <button class="immersive-album-arrow previous" type="button" data-album-previous aria-label="Voltar páginas">‹</button>
+          <div class="immersive-album-book-wrap" data-album-book-wrap>
+            <div class="immersive-album-book" data-album-book>
+              <section class="immersive-album-sheet left immersive-album-endpaper" data-album-loading>
+                <div class="album-endpaper-mark"><span>VT</span><strong>Carregando álbum</strong><small>Vault TCG</small></div>
+                <span class="immersive-page-texture" aria-hidden="true"></span><span class="immersive-page-edge" aria-hidden="true"></span>
+              </section>
+            </div>
+            <div class="immersive-album-rings" aria-hidden="true">{Array.from({ length: 7 }).map(() => <i></i>)}</div>
+            <div class="immersive-album-center-shadow" aria-hidden="true"></div>
+            <div class="immersive-album-floor-shadow" aria-hidden="true"></div>
+          </div>
+          <button class="immersive-album-arrow next" type="button" data-album-next aria-label="Avançar páginas">›</button>
+        </div>
+
+        <footer class="album-reader-footer">
+          <div class="album-page-rail" data-album-page-rail aria-label="Ir para uma página"></div>
+          <div class="album-reader-hint"><span>← →</span><p>Você também pode usar as setas do teclado.</p></div>
+        </footer>
+      </div>
+    </section>
+
+    <section class="shell" data-album-error hidden>
+      <div class="empty-state show"><span>!</span><h2>Não foi possível abrir este álbum</h2><p data-album-error-message>Confira o endereço e tente novamente.</p><a class="primary-cta" href={`${base}albuns/`}><span>Voltar aos álbuns</span><b>←</b></a></div>
+    </section>
   </section>
+
   <script>
-    import { escapeHtml, initializeOnlineImages, toImageUrl } from '../../scripts/online-markup';
-    const root = document.querySelector<HTMLElement>('[data-online-album-viewer]');
-    const params = new URLSearchParams(location.search); const collectionSlug = params.get('collection') || ''; const albumSlug = params.get('album') || ''; let album: any = null; let pageIndex = 0;
-    const setText = (selector: string, value: unknown) => { const el = document.querySelector<HTMLElement>(selector); if (el) el.textContent = String(value ?? ''); };
-    const render = () => { if (!album) return; const pages = Array.isArray(album.pages) ? album.pages : []; const page = pages[pageIndex] || { slots: [] }; const columns = Number(album.columns || String(album.format || '3x3').split('x')[0] || 3); const rows = Number(album.rows || String(album.format || '3x3').split('x')[1] || 3); const pageEl = root?.querySelector<HTMLElement>('[data-album-page]'); if (!pageEl) return; pageEl.style.setProperty('--album-columns', String(columns)); pageEl.style.setProperty('--album-rows', String(rows)); const slots = Array.isArray(page.slots) ? page.slots : []; pageEl.innerHTML = '<span class="public-album-rings" aria-hidden="true"><i></i><i></i><i></i><i></i></span>' + slots.map((card: any) => { if (!card) return '<article class="public-album-slot empty"><span>◇</span></article>'; const candidates = Array.isArray(card.imageCandidates) ? card.imageCandidates.map(toImageUrl) : []; const [primary='', ...fallbacks] = candidates; return `<article class="public-album-slot occupied"><div>${primary ? `<img src="${escapeHtml(primary)}" alt="${escapeHtml(card.name || '')}" loading="lazy" data-image-candidates="${escapeHtml(JSON.stringify(fallbacks))}" />` : `<span>${escapeHtml(String(card.name || 'TC').slice(0,2).toUpperCase())}</span>`}</div><small>${escapeHtml(card.name || 'Carta')}</small><b>${escapeHtml(card.number || card.collection || '')}</b></article>`; }).join(''); initializeOnlineImages(pageEl); setText('[data-album-page-label]', `Página ${pageIndex + 1} de ${Math.max(1, pages.length)}`); setText('[data-album-slots-label]', `${slots.filter(Boolean).length} cartas nesta página`); const prev = root.querySelector<HTMLButtonElement>('[data-album-prev]'); const next = root.querySelector<HTMLButtonElement>('[data-album-next]'); if (prev) prev.disabled = pageIndex <= 0; if (next) next.disabled = pageIndex >= pages.length - 1; };
-    const load = async () => { try { if (!collectionSlug || !albumSlug) throw new Error('Endereço do álbum incompleto.'); const cloud = (window as any).VaultCloud; if (!cloud) throw new Error('Álbuns ainda não foram inicializados.'); const albums = await cloud.listPublicAlbums(); album = albums.find((entry: any) => { const ownerSlug = String(entry.ownerCollectionSlug || entry.collectionSlug || ''); const id = String(entry.slug || entry.albumId || entry.id || ''); const fallbackId = String(entry.albumId || entry.id || ''); return ownerSlug === collectionSlug && (id === albumSlug || fallbackId === albumSlug); }); if (!album) throw new Error('Álbum não encontrado.'); const pages = Array.isArray(album.pages) ? album.pages : []; const occupied = Number(album.occupiedSlots ?? pages.flatMap((page: any) => page.slots || []).filter(Boolean).length); const total = Number(album.totalSlots ?? pages.reduce((sum: number, page: any) => sum + (page.slots?.length || 0), 0)); const ownerName = album.ownerName || album.ownerCollectionName || 'Colecionador'; document.title = `${album.name || 'Álbum'} · Vault TCG`; setText('[data-album-title]', album.name || 'Álbum'); setText('[data-album-heading]', album.name || 'Álbum'); setText('[data-album-description]', album.description || `Álbum virtual de ${ownerName}.`); setText('[data-album-copy]', album.description || 'Álbum virtual organizado no Vault TCG.'); setText('[data-album-owner]', ownerName); setText('[data-album-progress]', `${occupied} / ${total}`); setText('[data-album-format]', `${album.format || 'Álbum'} · ${pages.length} ${pages.length === 1 ? 'página' : 'páginas'}`); render(); } catch (error: any) { const dialog = root?.querySelector<HTMLElement>('.public-album-dialog'); if (dialog) dialog.hidden = true; const box = root?.querySelector<HTMLElement>('[data-album-error]'); if (box) box.hidden = false; setText('[data-album-error-message]', error?.message || 'Confira o endereço e tente novamente.'); } };
-    root?.querySelector('[data-album-prev]')?.addEventListener('click', () => { if (pageIndex > 0) { pageIndex -= 1; render(); } }); root?.querySelector('[data-album-next]')?.addEventListener('click', () => { if (album && pageIndex < (album.pages?.length || 1) - 1) { pageIndex += 1; render(); } }); if ((window as any).VaultCloud) load(); else window.addEventListener('vault:cloud-ready', load, { once: true });
+    import { escapeHtml, formatBRL, initializeOnlineImages, productVisualMarkup, toImageUrl } from '../../scripts/online-markup';
+
+    const root = document.querySelector<HTMLElement>('[data-immersive-album]');
+    const params = new URLSearchParams(location.search);
+    const collectionSlug = params.get('collection') || '';
+    const albumSlug = params.get('album') || '';
+    const setText = (selector: string, value: unknown) => { const el = root?.querySelector<HTMLElement>(selector); if (el) el.textContent = String(value ?? ''); };
+    const escapeAttr = (value: unknown) => escapeHtml(String(value ?? ''));
+    const normalizeLink = (value: unknown) => String(value || '').replace(/([?&])(?:show|srsltid|utm_[^=]+)=[^&]*/gi, '$1').replace(/[?&]+$/, '');
+
+    const showError = (message: string) => {
+      const error = root?.querySelector<HTMLElement>('[data-album-error]');
+      if (error) error.hidden = false;
+      setText('[data-album-error-message]', message || 'Confira o endereço e tente novamente.');
+      const zone = root?.querySelector<HTMLElement>('.album-reading-zone');
+      if (zone) zone.hidden = true;
+    };
+
+    const cardAttributes = (card: any) => {
+      const policy = card.proposalTerms?.policy || 'flexible';
+      const blocksDefinedPrice = policy === 'no_defined_price' || policy === 'fixed_price_multi_only';
+      const price = card.price === null || card.price === undefined || card.price === '' ? null : Number(card.price);
+      const canPropose = card.forSale !== false && policy !== 'none' && !(price !== null && blocksDefinedPrice);
+      return [
+        ['data-product-id', `card:${card.slug || card.id || card._id || ''}`],
+        ['data-kind', 'card'], ['data-name', card.name], ['data-number', card.number], ['data-collection', card.collection],
+        ['data-language', card.language], ['data-condition', card.condition], ['data-year', card.year], ['data-type', card.type || 'Carta Pokémon'],
+        ['data-description', ''], ['data-contents', ''], ['data-link-liga', card.linkLiga], ['data-owner', card.ownerName],
+        ['data-owner-uid', card.ownerUid || card.collectionUid], ['data-owner-collection', card.ownerCollectionName], ['data-owner-slug', card.ownerCollectionSlug],
+        ['data-owner-phone', card.ownerPhone], ['data-proposal-policy', policy], ['data-proposal-flexible', card.proposalTerms?.flexibleDiscounts === false ? 'false' : 'true'],
+        ['data-proposal-tiers', JSON.stringify(card.proposalTerms?.discountTiers || [])], ['data-proposal-allowed', canPropose ? 'true' : 'false'],
+        ['data-price-value', price === null ? '' : price], ['data-price-label', formatBRL(price)], ['data-stock', Math.max(0, Number(card.quantity || 0))],
+        ['data-for-sale', card.forSale === false ? 'false' : 'true'], ['data-show-quantity', 'false'],
+      ].map(([name, value]) => `${name}="${escapeAttr(value)}"`).join(' ');
+    };
+
+    const renderAlbum = (album: any, data: any) => {
+      const profile = data.profile || {};
+      const cards = Array.isArray(data.cards) ? data.cards : [];
+      const cardById = new Map<string, any>();
+      const cardBySlug = new Map<string, any>();
+      cards.forEach((card: any) => {
+        [card.id, card._id, card.itemId].filter(Boolean).forEach((key: any) => cardById.set(String(key), card));
+        if (card.slug) cardBySlug.set(String(card.slug), card);
+      });
+      const resolveCard = (slot: any) => {
+        if (!slot) return null;
+        const direct = cardById.get(String(slot.itemId || slot.id || '')) || cardBySlug.get(String(slot.cardSlug || slot.slug || ''));
+        if (direct) return direct;
+        const link = normalizeLink(slot.linkLiga);
+        if (link) {
+          const match = cards.find((card: any) => normalizeLink(card.linkLiga) === link);
+          if (match) return match;
+        }
+        return cards.find((card: any) => String(card.name || '').toLowerCase() === String(slot.name || '').toLowerCase() && (!slot.number || String(card.number || '') === String(slot.number || ''))) || null;
+      };
+
+      const pages = (Array.isArray(album.pages) ? album.pages : []).map((page: any) => {
+        const slots = Array.isArray(page?.slots) ? page.slots : [];
+        return { slots, cards: slots.map(resolveCard) };
+      });
+      const columns = Number(album.columns || String(album.format || '3x3').split('x')[0] || 3);
+      const rows = Number(album.rows || String(album.format || '3x3').split('x')[1] || 3);
+      const format = album.format || `${columns}x${rows}`;
+      const occupied = Number(album.occupiedSlots ?? pages.flatMap((page: any) => page.slots).filter(Boolean).length);
+      const total = Number(album.totalSlots ?? pages.reduce((sum: number, page: any) => sum + page.slots.length, 0));
+      const progress = total > 0 ? Math.round((occupied / total) * 100) : 0;
+      const owner = album.ownerName || profile.owner || 'Colecionador';
+      const ownerSlug = album.ownerCollectionSlug || profile.slug || collectionSlug;
+
+      document.title = `${album.name || 'Álbum'} · Vault TCG`;
+      setText('[data-album-name]', album.name || 'Álbum');
+      setText('[data-album-name-breadcrumb]', album.name || 'Álbum');
+      setText('[data-album-description]', album.description || `Álbum organizado por ${owner}.`);
+      setText('[data-album-kicker]', `Álbum virtual · ${String(format).replace('x', ' por ')}`);
+      setText('[data-album-owner]', owner);
+      setText('[data-album-owner-initials]', String(owner).slice(0, 2).toUpperCase());
+      setText('[data-album-pages]', pages.length);
+      setText('[data-album-format]', String(format).replace('x', ' × '));
+      setText('[data-album-occupied]', occupied);
+      setText('[data-album-progress]', `${progress}%`);
+      const progressBar = root?.querySelector<HTMLElement>('[data-album-progress-bar]');
+      progressBar?.style.setProperty('--album-progress', `${progress}%`);
+      const ownerLink = root?.querySelector<HTMLAnchorElement>('[data-album-owner-link]');
+      if (ownerLink) ownerLink.href = `${document.body.dataset.siteBase || '/'}colecao/?slug=${encodeURIComponent(ownerSlug)}`;
+
+      const coverItems = pages.flatMap((page: any) => page.slots.map((slot: any, index: number) => page.cards[index] || slot)).filter(Boolean).slice(0, 8);
+      const cover = root?.querySelector<HTMLElement>('[data-album-cover-mosaic]');
+      if (cover) {
+        cover.innerHTML = coverItems.map((item: any) => {
+          const candidates = (Array.isArray(item.imageCandidates) ? item.imageCandidates : []).map(toImageUrl).filter(Boolean);
+          const [primary = '', ...fallbacks] = candidates;
+          return `<span>${primary ? `<img src="${escapeAttr(primary)}" alt="" loading="eager" decoding="async" data-image-candidates="${escapeAttr(JSON.stringify(fallbacks))}" />` : `<b>${escapeHtml(String(item.name || 'TC').slice(0, 2).toUpperCase())}</b>`}</span>`;
+        }).join('') + Array.from({ length: Math.max(0, 8 - coverItems.length) }, () => '<span class="empty"></span>').join('');
+      }
+
+      const book = root?.querySelector<HTMLElement>('[data-album-book]');
+      if (!book) return;
+      book.innerHTML = pages.map((page: any, pageIndex: number) => {
+        const slots = page.slots.map((slot: any, slotIndex: number) => {
+          const card = page.cards[slotIndex];
+          if (!slot) return `<div class="immersive-album-slot empty"><span>${slotIndex + 1}</span><small>espaço livre</small></div>`;
+          if (!card) {
+            const candidates = (Array.isArray(slot.imageCandidates) ? slot.imageCandidates : []).map(toImageUrl).filter(Boolean);
+            const [primary = '', ...fallbacks] = candidates;
+            return `<article class="immersive-album-slot unresolved"><div class="immersive-card-image">${primary ? `<img src="${escapeAttr(primary)}" alt="${escapeAttr(slot.name || 'Carta')}" loading="lazy" decoding="async" data-image-candidates="${escapeAttr(JSON.stringify(fallbacks))}" />` : `<span>${escapeHtml(String(slot.name || 'TC').slice(0, 2).toUpperCase())}</span>`}</div><div class="immersive-card-caption"><strong>${escapeHtml(slot.name || 'Carta')}</strong><small>${escapeHtml(slot.number || '')}</small></div></article>`;
+          }
+          return `<article class="immersive-album-slot occupied" data-product-card ${cardAttributes(card)}><button class="immersive-card-button" type="button" data-open-product aria-label="Abrir informações avançadas de ${escapeAttr(card.name || 'Carta')}"><div class="immersive-card-visual">${productVisualMarkup(card)}</div><div class="immersive-card-caption"><strong>${escapeHtml(card.name || 'Carta')}</strong><small>${escapeHtml(card.number || '')}</small></div><span class="immersive-card-open">Ver detalhes <b>⌗</b></span></button></article>`;
+        }).join('');
+        return `<section class="immersive-album-sheet ${pageIndex % 2 === 0 ? 'left' : 'right'}" data-album-page="${pageIndex}" ${pageIndex > 1 ? 'hidden' : ''}><header><span>Página ${pageIndex + 1}</span><b>${escapeHtml(String(format).replace('x', ' × '))}</b></header><div class="immersive-pocket-grid" style="--album-columns:${columns};--album-rows:${rows}">${slots}</div><span class="immersive-page-texture" aria-hidden="true"></span><span class="immersive-page-edge" aria-hidden="true"></span></section>`;
+      }).join('') + (pages.length % 2 === 1 ? `<section class="immersive-album-sheet right immersive-album-endpaper" data-album-endpaper hidden aria-hidden="true"><div class="album-endpaper-mark"><span>VT</span><strong>Fim do álbum</strong><small>${escapeHtml(album.name || 'Álbum')}</small></div><span class="immersive-page-texture" aria-hidden="true"></span><span class="immersive-page-edge" aria-hidden="true"></span></section>` : '');
+
+      const rail = root?.querySelector<HTMLElement>('[data-album-page-rail]');
+      if (rail) rail.innerHTML = pages.map((_: any, index: number) => `<button type="button" data-album-page-jump="${index}" class="${index === 0 ? 'active' : ''}"><span>${index + 1}</span></button>`).join('');
+      initializeOnlineImages(root || document);
+      initializeReader();
+    };
+
+    const initializeReader = () => {
+      if (!root || root.dataset.readerReady === 'true') return;
+      root.dataset.readerReady = 'true';
+      const pages = [...root.querySelectorAll<HTMLElement>('[data-album-page]')];
+      const bookWrap = root.querySelector<HTMLElement>('[data-album-book-wrap]');
+      const prev = root.querySelector<HTMLButtonElement>('[data-album-previous]');
+      const next = root.querySelector<HTMLButtonElement>('[data-album-next]');
+      const label = root.querySelector<HTMLElement>('[data-album-page-label]');
+      const rail = root.querySelector<HTMLElement>('[data-album-page-rail]');
+      const endpaper = root.querySelector<HTMLElement>('[data-album-endpaper]');
+      const focusButton = root.querySelector<HTMLButtonElement>('[data-album-focus]');
+      const focusExit = root.querySelector<HTMLButtonElement>('[data-album-focus-exit]');
+      const mobile = window.matchMedia('(max-width: 760px)');
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let start = 0;
+      let timer = 0;
+      const perView = () => mobile.matches ? 1 : 2;
+      const lastStart = () => Math.max(0, pages.length - perView());
+      const normalizedStart = (value: number) => {
+        const clamped = Math.max(0, Math.min(value, lastStart()));
+        return perView() === 2 ? Math.floor(clamped / 2) * 2 : clamped;
+      };
+      const render = (direction = 0) => {
+        start = normalizedStart(start);
+        const count = perView();
+        pages.forEach((page, index) => { page.hidden = index < start || index >= start + count; });
+        if (endpaper) endpaper.hidden = mobile.matches || pages.length % 2 === 0 || start + count < pages.length;
+        const end = Math.min(pages.length, start + count);
+        if (label) label.textContent = end - start > 1 ? `Páginas ${start + 1}–${end}` : `Página ${start + 1}`;
+        if (prev) prev.disabled = start === 0;
+        if (next) next.disabled = start + count >= pages.length;
+        rail?.querySelectorAll<HTMLElement>('[data-album-page-jump]').forEach((button) => {
+          const index = Number(button.dataset.albumPageJump || 0);
+          button.classList.toggle('active', index >= start && index < end);
+        });
+        if (direction && bookWrap && !reduced) {
+          window.clearTimeout(timer);
+          bookWrap.classList.remove('turn-forward', 'turn-backward');
+          void bookWrap.offsetWidth;
+          bookWrap.classList.add(direction > 0 ? 'turn-forward' : 'turn-backward');
+          timer = window.setTimeout(() => bookWrap.classList.remove('turn-forward', 'turn-backward'), 780);
+        }
+      };
+      const step = (direction: number) => { start += direction * perView(); render(direction); };
+      prev?.addEventListener('click', () => step(-1));
+      next?.addEventListener('click', () => step(1));
+      rail?.addEventListener('click', (event) => {
+        const target = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-album-page-jump]') : null;
+        if (!target) return;
+        const requested = Number(target.dataset.albumPageJump || 0);
+        const direction = requested >= start ? 1 : -1;
+        start = requested;
+        render(direction);
+      });
+      document.addEventListener('keydown', (event) => {
+        if (document.body.classList.contains('modal-open')) return;
+        if (event.key === 'ArrowLeft' && start > 0) step(-1);
+        if (event.key === 'ArrowRight' && start + perView() < pages.length) step(1);
+      });
+      mobile.addEventListener?.('change', () => render());
+      const setFocusMode = (active: boolean) => {
+        document.body.classList.toggle('album-focus-mode', active);
+        focusButton?.setAttribute('aria-pressed', String(active));
+        if (focusButton) focusButton.innerHTML = active ? '<span>◇</span> Sair do modo imersivo' : '<span>◈</span> Modo imersivo';
+        if (active) root.querySelector('[data-album-stage]')?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+      };
+      focusButton?.addEventListener('click', () => setFocusMode(!document.body.classList.contains('album-focus-mode')));
+      focusExit?.addEventListener('click', () => setFocusMode(false));
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && document.body.classList.contains('album-focus-mode') && !document.body.classList.contains('modal-open')) setFocusMode(false);
+      });
+      render();
+    };
+
+    const load = async () => {
+      try {
+        if (!collectionSlug || !albumSlug) throw new Error('Endereço do álbum incompleto.');
+        const cloud = (window as any).VaultCloud;
+        if (!cloud) throw new Error('Álbuns ainda não foram inicializados.');
+        const data = await cloud.loadCollectionBySlug(decodeURIComponent(collectionSlug));
+        if (!data) throw new Error('Coleção não encontrada.');
+        const album = (data.albums || []).find((entry: any) => {
+          const id = String(entry.slug || entry.albumId || entry.id || entry._id || entry._docId || '');
+          const aliases = [entry.slug, entry.albumId, entry.id, entry._id, entry._docId].filter(Boolean).map(String);
+          return id === albumSlug || aliases.includes(albumSlug);
+        });
+        if (!album) throw new Error('Álbum não encontrado nesta coleção.');
+        renderAlbum(album, data);
+      } catch (error: any) {
+        showError(error?.message || 'Confira o endereço e tente novamente.');
+      }
+    };
+
+    if ((window as any).VaultCloud) load();
+    else window.addEventListener('vault:cloud-ready', load, { once: true });
   </script>
 </BaseLayout>

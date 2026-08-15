@@ -26,7 +26,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
   </section>
 
   <script>
-    import { collectionMarkup, normalizeText } from '../../scripts/online-markup';
+    import { collectionMarkup, initializeOnlineImages, normalizeText } from '../../scripts/online-markup';
     const root = document.querySelector<HTMLElement>('[data-online-collections]');
     if (root) {
       const search = root.querySelector<HTMLInputElement>('[data-collection-search]');
@@ -41,7 +41,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         const visible = collections
           .filter((profile) => !query || normalizeText(`${profile.owner || ''} ${profile.title || ''} ${profile.description || ''} ${profile.slug || ''}`).includes(query))
           .sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'pt-BR'));
-        if (grid) grid.innerHTML = visible.map((profile) => collectionMarkup(profile)).join('');
+        if (grid) { grid.innerHTML = visible.map((profile) => collectionMarkup(profile)).join(''); initializeOnlineImages(grid); }
         if (count) count.textContent = String(visible.length);
         if (label) label.textContent = visible.length === 1 ? 'coleção encontrada' : 'coleções encontradas';
         if (empty) empty.hidden = visible.length !== 0;
@@ -50,7 +50,23 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         try {
           const cloud = (window as any).VaultCloud;
           if (!cloud) throw new Error('Catálogo ainda não foi inicializado.');
-          collections = await cloud.listPublicCollections();
+          const [profiles, publicCards] = await Promise.all([
+            cloud.listPublicCollections(),
+            cloud.listPublicItems('card'),
+          ]);
+          const previewMap = new Map<string, any[]>();
+          publicCards.forEach((card: any) => {
+            [card.collectionUid, card.ownerUid, card.ownerCollectionSlug].filter(Boolean).forEach((key: string) => {
+              const list = previewMap.get(String(key)) || [];
+              if (list.length < 12) list.push(card);
+              previewMap.set(String(key), list);
+            });
+          });
+          collections = profiles.map((profile: any) => {
+            const keys = [profile.uid, profile.ownerUid, profile.slug, profile.collectionId].filter(Boolean).map(String);
+            const previewCards = keys.flatMap((key) => previewMap.get(key) || []).filter((card, index, list) => list.indexOf(card) === index).slice(0, 12);
+            return { ...profile, previewCards };
+          });
           const cardTotal = collections.reduce((sum, profile) => sum + Number(profile.stats?.cards || 0), 0);
           const boosterTotal = collections.reduce((sum, profile) => sum + Number(profile.stats?.boosters || 0), 0);
           const totalElement = document.querySelector<HTMLElement>('[data-online-collection-total]');
