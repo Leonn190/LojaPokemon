@@ -1,6 +1,6 @@
-# Imagens e dados locais de migração
+# Imagens e dados locais
 
-A versão atual do Vault TCG usa o Firebase como fonte oficial dos dados de contas e coleções. As pastas `src/colecoes/` e `src/colecoes-nao-formatadas/` permanecem temporariamente no projeto apenas para permitir a migração das coleções que já existiam antes do Firebase.
+A versão atual do Vault TCG usa o Firebase como fonte oficial dos dados de contas e coleções. As pastas `src/colecoes/` e `src/colecoes-nao-formatadas/` permanecem no projeto como dados locais/compatibilidade do catálogo. A migração de coleções de contas antigas pela interface foi removida.
 
 ## Imagens continuam locais
 
@@ -22,11 +22,11 @@ imagensboosters/Evolving_Skies.webp
 
 Não salve a imagem em Base64 dentro do Firestore.
 
-## Coleções antigas
+## Coleções e dados locais
 
-Os arquivos `perfil.json`, `inventario-cartas.json`, `inventario-boosters.json`, `inventario-kits.json`, `inventario-produtos.json`, `inventario-albuns.json` e históricos existentes são lidos apenas para a ferramenta **Migrar uma coleção antiga** da página Entrar/Minha coleção.
+Os arquivos locais de coleção permanecem somente como dados de catálogo/compatibilidade. Não existe mais opção de migrar uma conta ou coleção antiga pela interface.
 
-Depois da migração, o inventário editável passa a viver em:
+O inventário editável das contas atuais vive em:
 
 ```text
 collections/{uid}/cards
@@ -41,4 +41,4 @@ Não existe mais fluxo de baixar ZIP/update para salvar alterações do site. O 
 
 ## Limpeza futura
 
-Quando todos os donos das coleções antigas tiverem criado a conta Firebase e concluído a migração, as pastas locais de coleção e `src/data/legacy-claim-verifiers.json` podem ser removidas do projeto. As imagens de `public/` continuam normalmente.
+A interface não oferece mais migração de contas antigas e o arquivo de verificadores legado foi removido. As imagens de `public/` continuam normalmente.

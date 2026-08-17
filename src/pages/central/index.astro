@@ -1,13 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getEditableCollections } from '../../lib/catalog';
-import legacyClaims from '../../data/legacy-claim-verifiers.json';
 
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
-const legacyCollections = getEditableCollections().map((collection) => ({ ...collection, profile: { ...collection.profile, email: '', phone: '', password: '' } }));
-const legacyJson = JSON.stringify(legacyCollections).replace(/</g, '\\u003c');
-const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
 ---
 
 <BaseLayout
@@ -16,8 +11,6 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
   active="central"
   bodyClass="central-page"
 >
-  <script type="application/json" data-legacy-collections set:html={legacyJson}></script>
-  <script type="application/json" data-legacy-claims set:html={legacyClaimsJson}></script>
 
   <section class="shell collection-editor central-collection-editor" data-editor-root data-base={base}>
     <div class="central-auth-gate" data-editor-notice>
@@ -83,18 +76,6 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
               </section>
             </div>
           </section>
-
-      {legacyCollections.length > 0 && (
-        <details class="editor-legacy-migration" data-legacy-migration data-admin-section="settings">
-          <summary><span>↥</span><div><strong>Migrar uma coleção antiga</strong><small>Uso único: transfere os dados da versão anterior para esta conta.</small></div><b>+</b></summary>
-          <div class="legacy-migration-body">
-            <label class="form-field"><span>Coleção antiga</span><select data-legacy-select><option value="">Selecione…</option>{legacyCollections.map((collection) => <option value={collection.profile.collectionId || collection.slug}>{collection.profile.title} · {collection.profile.owner}</option>)}</select></label>
-            <label class="form-field"><span>Senha antiga dessa coleção</span><input type="password" autocomplete="off" data-legacy-password placeholder="A senha usada no sistema antigo" /><small>Sua senha antiga é usada apenas para confirmar a migração.</small></label>
-            <button type="button" class="secondary-cta" data-legacy-import><span>Migrar dados para esta conta</span><b>↥</b></button>
-            <p class="import-feedback" data-legacy-feedback></p>
-          </div>
-        </details>
-      )}
 
       <section class="editor-profile-settings settings-profile-card" data-profile-settings id="editor-settings" data-admin-section="settings">
         <header class="settings-section-heading"><span>✎</span><div><strong>Dados da conta e coleção</strong><small>Nome, telefone, Gmail/e-mail e informações públicas da sua coleção.</small></div></header>
@@ -404,10 +385,6 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
       const root = document.querySelector('[data-editor-root]');
       if (!root) return;
 
-      let legacyCollections = [];
-      let legacyClaims = [];
-      try { legacyCollections = JSON.parse(document.querySelector('[data-legacy-collections]')?.textContent || '[]'); } catch (_) {}
-      try { legacyClaims = JSON.parse(document.querySelector('[data-legacy-claims]')?.textContent || '[]'); } catch (_) {}
 
       const base = root.dataset.base || '/';
       const panels = [...root.querySelectorAll('[data-start-panel]')];
@@ -485,14 +462,6 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
       };
 
       const clean = (value) => String(value ?? '').trim();
-      const bytesFromBase64 = (value) => Uint8Array.from(atob(String(value || '')), (char) => char.charCodeAt(0));
-      const equalBytes = (left, right) => left.length === right.length && left.every((value, index) => value === right[index]);
-      const verifyLegacyPassword = async (password, claim) => {
-        if (!claim || !password || !window.crypto?.subtle) return false;
-        const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(String(password)), 'PBKDF2', false, ['deriveBits']);
-        const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: bytesFromBase64(claim.salt), iterations: Number(claim.iterations || 210000) }, key, 256);
-        return equalBytes(new Uint8Array(bits), bytesFromBase64(claim.verifier));
-      };
       const toPrice = (value) => {
         const raw = clean(value).replace(/R\$/gi, '').replace(/\s/g, '');
         if (!raw || raw === '-') return null;
@@ -1814,8 +1783,6 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
           renderInventory();
           updateTabs();
         }
-        const tabs = root.querySelector('.editor-admin-tabs');
-        if (tabs) tabs.scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
       root.querySelectorAll('[data-admin-nav]').forEach((button) => button.addEventListener('click', () => navigateAdmin(button.dataset.adminNav, button.dataset.adminInventory || '')));
       root.addEventListener('click', (event) => {
@@ -1868,45 +1835,6 @@ const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
         renderPersonalization();
         scheduleCloudSave();
       }));
-
-      root.querySelector('[data-legacy-import]')?.addEventListener('click', async () => {
-        const feedback = root.querySelector('[data-legacy-feedback]');
-        const select = root.querySelector('[data-legacy-select]');
-        const passwordInput = root.querySelector('[data-legacy-password]');
-        if (!state || !feedback || !select || !passwordInput) return;
-        const collectionId = clean(select.value);
-        const legacy = legacyCollections.find((collection) => clean(collection?.profile?.collectionId || collection?.slug) === collectionId);
-        const claim = legacyClaims.find((entry) => clean(entry?.collectionId) === collectionId);
-        if (!legacy || !claim) { feedback.textContent = 'Selecione uma coleção antiga válida.'; return; }
-        const currentItems = ['cards','boosters','kits','products','albums'].reduce((sum, kind) => sum + (state[kind]?.length || 0), 0);
-        if (currentItems > 0) { feedback.textContent = 'A migração só é permitida em uma coleção vazia para evitar sobrescrever dados da conta.'; return; }
-        feedback.textContent = 'Verificando a senha antiga…';
-        try {
-          const valid = await verifyLegacyPassword(passwordInput.value, claim);
-          if (!valid) { feedback.textContent = 'A senha antiga não confere para essa coleção.'; return; }
-          const currentProfile = { ...state.profile };
-          const migrationProfile = {
-            ...legacy.profile,
-            ...currentProfile,
-            profilePhoto: legacy.profile?.profilePhoto || currentProfile.profilePhoto || '',
-            palette: legacy.profile?.palette || currentProfile.palette,
-            showQuantity: false,
-            priceDisplayFallback: legacy.profile?.priceDisplayFallback || currentProfile.priceDisplayFallback,
-          };
-          activate(migrationProfile, legacy, 'cloud');
-          ['cards', 'boosters', 'kits', 'products', 'albums'].forEach((kind) => (state?.[kind] || []).forEach((item) => { item._isNew = true; item._isDirty = true; }));
-          state.pendingMovements = [...(state.movements || [])];
-          state.movements = [];
-          profileDirty = true; privacyDirty = true; mirrorDirty = true;
-          setCloudSaveState('Migrando coleção antiga…', 'saving');
-          await flushCloudSave();
-          passwordInput.value = '';
-          feedback.textContent = 'Migração concluída. Sua coleção antiga já está disponível nesta conta.';
-          const details = root.querySelector('[data-legacy-migration]'); if (details) details.open = false;
-        } catch (error) {
-          feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível migrar a coleção.';
-        }
-      });
 
       root.querySelector('[data-profile-photo-path]')?.addEventListener('input', (event) => { if (!state) return; state.profile.profilePhoto = clean(event.target.value); profileDirty = true; renderPersonalization(); scheduleCloudSave(); });
       root.querySelector('[data-profile-banner-path]')?.addEventListener('input', (event) => { if (!state) return; state.profile.profileBanner = clean(event.target.value); profileDirty = true; renderPersonalization(); scheduleCloudSave(); });
