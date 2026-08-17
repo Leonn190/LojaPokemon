@@ -8,7 +8,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
   <section class="album-world" data-immersive-album>
     <div class="album-world-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
     <div class="album-world-stars" aria-hidden="true"></div>
-    <button class="album-focus-exit" type="button" data-album-focus-exit aria-label="Sair do modo imersivo">× <span>Sair do modo imersivo</span></button>
+    <button class="album-focus-exit" type="button" data-album-focus-exit aria-label="Sair da apresentação">× <span>Sair da apresentação</span></button>
 
     <header class="shell album-experience-header" data-reveal>
       <div class="album-experience-copy">
@@ -24,13 +24,16 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
             <div><small>Organizado por</small><strong data-album-owner>Colecionador</strong></div>
             <b>↗</b>
           </a>
-          <button class="album-focus-button" type="button" data-album-focus aria-pressed="false"><span>◈</span> Modo imersivo</button>
+          <button class="secondary-cta album-open-button" type="button" data-album-open><span>Abrir fichário</span><b>↓</b></button>
+          <button class="album-focus-button" type="button" data-album-focus aria-pressed="false"><span>◈</span> Apresentar álbum</button>
         </div>
       </div>
 
-      <div class="album-experience-cover" aria-hidden="true">
+      <div class="album-experience-cover binder-style-vault" data-album-cover aria-hidden="true">
         <div class="album-cover-depth"></div>
         <div class="album-cover-spine"><span>VAULT</span></div>
+        <div class="album-cover-custom-title"><small>VAULT TCG</small><strong data-album-cover-title>Álbum</strong></div>
+        <i class="album-cover-custom-image" aria-hidden="true"></i>
         <div class="album-cover-mosaic" data-album-cover-mosaic>
           {Array.from({ length: 8 }).map(() => <span class="empty"></span>)}
         </div>
@@ -44,7 +47,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       <div class="album-stat-progress"><small>Preenchimento</small><strong data-album-progress>0%</strong><i><span data-album-progress-bar style="--album-progress:0%"></span></i></div>
     </section>
 
-    <section class="album-reading-zone" aria-label="Leitor do álbum">
+    <section class="album-reading-zone" aria-label="Leitor do álbum" data-album-reading-zone hidden>
       <div class="shell album-reader-shell">
         <div class="album-reader-toolbar">
           <div><span class="section-eyebrow">Fichário aberto</span><strong data-album-page-label>Página 1</strong></div>
@@ -118,6 +121,10 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
     const renderAlbum = (album: any, data: any) => {
       const profile = data.profile || {};
+      const palette = Array.isArray(profile.palette) ? profile.palette : ['#54e8df','#bc91ff','#f4c25c'];
+      root?.style.setProperty('--album-primary', palette[0] || '#54e8df');
+      root?.style.setProperty('--album-secondary', palette[1] || '#bc91ff');
+      root?.style.setProperty('--album-accent', palette[2] || '#f4c25c');
       const cards = Array.isArray(data.cards) ? data.cards : [];
       const cardById = new Map<string, any>();
       const cardBySlug = new Map<string, any>();
@@ -165,6 +172,21 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       progressBar?.style.setProperty('--album-progress', `${progress}%`);
       const ownerLink = root?.querySelector<HTMLAnchorElement>('[data-album-owner-link]');
       if (ownerLink) ownerLink.href = `${document.body.dataset.siteBase || '/'}colecao/?slug=${encodeURIComponent(ownerSlug)}`;
+
+      const coverElement = root?.querySelector<HTMLElement>('[data-album-cover]');
+      if (coverElement) {
+        const allowedStyles = ['vault', 'leather', 'holo', 'minimal'];
+        const coverStyle = allowedStyles.includes(String(album.coverStyle || '')) ? String(album.coverStyle) : 'vault';
+        allowedStyles.forEach((style) => coverElement.classList.remove(`binder-style-${style}`));
+        coverElement.classList.add(`binder-style-${coverStyle}`);
+        const coverColor = /^#[0-9a-f]{6}$/i.test(String(album.coverColor || '')) ? String(album.coverColor) : '#14253d';
+        coverElement.style.setProperty('--binder-cover', coverColor);
+        const customImage = toImageUrl(album.coverImage || '');
+        coverElement.classList.toggle('has-custom-cover-image', Boolean(customImage));
+        if (customImage) coverElement.style.setProperty('--binder-image', `url("${customImage.replace(/"/g, '\\"')}")`);
+        else coverElement.style.removeProperty('--binder-image');
+      }
+      setText('[data-album-cover-title]', album.coverTitle || album.name || 'Álbum');
 
       const coverItems = pages.flatMap((page: any) => page.slots.map((slot: any, index: number) => page.cards[index] || slot)).filter(Boolean).slice(0, 8);
       const cover = root?.querySelector<HTMLElement>('[data-album-cover-mosaic]');
@@ -259,11 +281,18 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       });
       mobile.addEventListener?.('change', () => render());
       const setFocusMode = (active: boolean) => {
+        const readingZone = root.querySelector<HTMLElement>('[data-album-reading-zone]');
+        if (active && readingZone) readingZone.hidden = false;
         document.body.classList.toggle('album-focus-mode', active);
         focusButton?.setAttribute('aria-pressed', String(active));
-        if (focusButton) focusButton.innerHTML = active ? '<span>◇</span> Sair do modo imersivo' : '<span>◈</span> Modo imersivo';
+        if (focusButton) focusButton.innerHTML = active ? '<span>◇</span> Sair da apresentação' : '<span>◈</span> Apresentar álbum';
         if (active) root.querySelector('[data-album-stage]')?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
       };
+      root.querySelector<HTMLButtonElement>('[data-album-open]')?.addEventListener('click', () => {
+        const readingZone = root.querySelector<HTMLElement>('[data-album-reading-zone]');
+        if (readingZone) readingZone.hidden = false;
+        root.querySelector('[data-album-stage]')?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+      });
       focusButton?.addEventListener('click', () => setFocusMode(!document.body.classList.contains('album-focus-mode')));
       focusExit?.addEventListener('click', () => setFocusMode(false));
       document.addEventListener('keydown', (event) => {

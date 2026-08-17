@@ -3,60 +3,118 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 ---
-<BaseLayout title="Coleção" description="Coleção pública no Vault TCG." active="collections" bodyClass="collection-profile-page">
-  <div class="collector-theme" data-online-collection-page style="--collector-primary:#54e8df;--collector-secondary:#bc91ff;--collector-accent:#f4c25c;">
-    <div class="collector-theme-atmosphere" aria-hidden="true">{Array.from({ length: 18 }).map((_, index) => <i style={`--particle-index:${index}`}></i>)}</div>
+<BaseLayout title="Coleção" description="Coleção pública no Vault TCG." active="collections" bodyClass="collection-profile-page collection-profile-v2-page">
+  <div class="collector-theme collector-profile-v2" data-online-collection-page style="--collector-primary:#54e8df;--collector-secondary:#bc91ff;--collector-accent:#f4c25c;">
+    <div class="collector-theme-atmosphere" aria-hidden="true">{Array.from({ length: 14 }).map((_, index) => <i style={`--particle-index:${index}`}></i>)}</div>
     <div class="collector-favorite-backdrop" data-online-collection-backdrop aria-hidden="true"></div>
-    <section class="collection-profile-hero">
-      <div class="shell collection-profile-grid">
-        <div class="collection-profile-copy" data-reveal>
-          <nav class="breadcrumbs" aria-label="Navegação estrutural"><a href={base}>Início</a><span>/</span><a href={`${base}colecoes/`}>Coleções</a><span>/</span><strong data-profile-owner>Carregando…</strong></nav>
-          <div class="profile-identity"><span class="profile-avatar" data-profile-avatar>VT</span><div><small>Colecionador no Vault</small><strong data-profile-owner-name>Carregando…</strong></div><span class="profile-sale-status" data-profile-sale-status>Carregando…</span></div>
-          <h1 data-profile-title>Coleção</h1>
-          <p data-profile-description>Carregando coleção…</p>
-          <div class="profile-actions"><a class="primary-cta" href="#itens" data-explore-button hidden><span>Explorar a coleção</span><b>↓</b></a><button class="secondary-cta share-collection-button" type="button" data-share-collection><span>Compartilhar coleção</span><b>↗</b></button></div>
-          <div class="profile-stats profile-stats-with-albums">
-            <div><strong data-stat-cards>—</strong><span>cartas</span></div><div><strong data-stat-boosters>—</strong><span>boosters</span></div><div><strong data-stat-kits>—</strong><span>kits</span></div><div><strong data-stat-albums>—</strong><span>álbuns</span></div><div><strong data-stat-products>—</strong><span>produtos</span></div>
+
+    <section class="collector-profile-hero-v2">
+      <div class="shell">
+        <nav class="breadcrumbs collector-profile-breadcrumbs" aria-label="Navegação estrutural"><a href={base}>Início</a><span>/</span><a href={`${base}colecoes/`}>Coleções</a><span>/</span><strong data-profile-owner>Carregando…</strong></nav>
+        <div class="collector-profile-banner" data-profile-banner aria-hidden="true"><span></span></div>
+        <div class="collector-profile-identity-card" data-reveal>
+          <div class="collector-profile-avatar-wrap"><span class="profile-avatar collector-profile-avatar" data-profile-avatar>VT</span><i aria-hidden="true"></i></div>
+          <div class="collector-profile-main-copy">
+            <div class="collector-profile-name-row"><div><small>Colecionador no Vault</small><strong data-profile-owner-name>Carregando…</strong></div><span class="profile-sale-status" data-profile-sale-status>Carregando…</span></div>
+            <h1 data-profile-title>Coleção</h1>
+            <p data-profile-description>Carregando coleção…</p>
           </div>
-          <aside class="public-proposal-terms"><div><span class="section-eyebrow">Termos de proposta</span><strong data-proposal-policy>Carregando…</strong></div><p data-proposal-detail>Para enviar uma proposta, entre na sua conta.</p><span>O envio de propostas exige autenticação.</span></aside>
+          <div class="collector-profile-actions">
+            <button class="primary-cta" type="button" data-proposal-start hidden><span>Montar proposta</span><b>◇</b></button>
+            <button class="secondary-cta share-collection-button" type="button" data-share-collection><span>Compartilhar</span><b>↗</b></button>
+          </div>
         </div>
-        <div class="profile-cover profile-cover-flow" data-reveal>
-          <div class="profile-cover-glow" aria-hidden="true"></div>
-          <div class="collection-flow collection-flow-placeholder online-profile-cover" data-online-profile-cover aria-hidden="true"><span>VAULT TCG</span><strong data-cover-title>Coleção</strong><small>Acervo do colecionador</small></div>
-          <div class="profile-value-card"><small>Valor real dos itens da coleção</small><strong data-profile-value>Carregando…</strong><span>cartas, boosters e produtos, sem contar kits novamente</span></div>
+
+        <div class="collector-profile-quick-stats" data-reveal>
+          <article><small>Cartas</small><strong data-stat-cards>—</strong><span>unidades no acervo</span></article>
+          <article><small>Boosters</small><strong data-stat-boosters>—</strong><span>unidades lacradas</span></article>
+          <article><small>Kits</small><strong data-stat-kits>—</strong><span>itens montados</span></article>
+          <article><small>Álbuns</small><strong data-stat-albums>—</strong><span>fichários publicados</span></article>
+          <article data-public-value-stat><small>Valor estimado</small><strong data-profile-value>—</strong><span>itens com preço conhecido</span></article>
         </div>
       </div>
     </section>
 
-    <main id="itens" class="shell online-collection-content" data-online-collection-content hidden>
-      <section class="collection-online-section" data-section="albums" hidden><div class="section-heading"><div><span class="section-eyebrow">Álbuns</span><h2>Álbuns publicados</h2></div></div><div class="albums-catalog-grid" data-grid="albums"></div></section>
-      <section class="collection-online-section" data-section="cards" hidden><div class="section-heading"><div><span class="section-eyebrow">Cartas</span><h2>Cartas da coleção</h2></div></div><div class="catalog-grid" data-grid="cards"></div></section>
-      <section class="collection-online-section" data-section="boosters" hidden><div class="section-heading"><div><span class="section-eyebrow">Boosters</span><h2>Boosters da coleção</h2></div></div><div class="catalog-grid" data-grid="boosters"></div></section>
-      <section class="collection-online-section" data-section="kits" hidden><div class="section-heading"><div><span class="section-eyebrow">Kits</span><h2>Kits da coleção</h2></div></div><div class="catalog-grid" data-grid="kits"></div></section>
-      <section class="collection-online-section" data-section="products" hidden><div class="section-heading"><div><span class="section-eyebrow">Produtos</span><h2>Produtos da coleção</h2></div></div><div class="catalog-grid" data-grid="products"></div></section>
+    <main id="itens" class="shell collector-profile-content-v2" data-online-collection-content hidden>
+      <nav class="collector-profile-tabs" id="profile-tabs" aria-label="Conteúdo da coleção" data-profile-tabs>
+        <button type="button" class="active" data-profile-tab="overview">Visão geral</button>
+        <button type="button" data-profile-tab="cards">Cartas <span data-tab-count="cards">0</span></button>
+        <button type="button" data-profile-tab="boosters">Boosters <span data-tab-count="boosters">0</span></button>
+        <button type="button" data-profile-tab="kits">Kits <span data-tab-count="kits">0</span></button>
+        <button type="button" data-profile-tab="products">Produtos <span data-tab-count="products">0</span></button>
+        <button type="button" data-profile-tab="albums">Álbuns <span data-tab-count="albums">0</span></button>
+        <button type="button" data-profile-tab="sold">Vendidos <span data-tab-count="sold">0</span></button>
+      </nav>
+
+      <section class="collector-profile-panel active" data-profile-panel="overview">
+        <div class="collector-overview-grid">
+          <section class="collector-overview-card collector-overview-about">
+            <header><div><span class="section-eyebrow">Visão geral</span><h2>Sobre este acervo</h2></div></header>
+            <div class="collector-overview-facts">
+              <article><span>◷</span><div><small>Carta mais antiga</small><strong data-stat-oldest>—</strong></div></article>
+              <article><span>◫</span><div><small>Coleções diferentes</small><strong data-stat-sets>—</strong></div></article>
+              <article><span>▦</span><div><small>Produtos</small><strong data-stat-products>—</strong></div></article>
+              <article><span>◇</span><div><small>Itens à venda</small><strong data-stat-for-sale>—</strong></div></article>
+            </div>
+            <aside class="public-proposal-terms collector-proposal-summary"><div><span class="section-eyebrow">Termos de proposta</span><strong data-proposal-policy>Carregando…</strong></div><p data-proposal-detail>Para enviar uma proposta, entre na sua conta.</p><span>O envio de propostas exige autenticação.</span></aside>
+          </section>
+          <section class="collector-overview-card collector-stat-distributions">
+            <header><div><span class="section-eyebrow">Composição</span><h2>Como a coleção se distribui</h2></div></header>
+            <div class="collector-distribution-block"><div><strong>Raridades / tipos</strong><small>Principais grupos identificados</small></div><div data-rarity-bars></div></div>
+            <div class="collector-distribution-block"><div><strong>Coleções / eras</strong><small>Concentração das cartas</small></div><div data-set-bars></div></div>
+          </section>
+        </div>
+
+        <section class="collector-overview-highlight" data-overview-albums hidden>
+          <div class="section-heading"><div><span class="section-eyebrow">Estante</span><h2>Álbuns em destaque</h2><p>Abra um fichário para navegar pelas páginas como um binder.</p></div><button type="button" class="text-link-button" data-open-tab="albums">Ver todos →</button></div>
+          <div class="album-virtual-shelf"><div class="albums-catalog-grid album-shelf-grid" data-grid="overview-albums"></div></div>
+        </section>
+
+        <section class="collector-overview-highlight" data-overview-cards hidden>
+          <div class="section-heading"><div><span class="section-eyebrow">Destaques</span><h2>Cartas da coleção</h2></div><button type="button" class="text-link-button" data-open-tab="cards">Ver todas →</button></div>
+          <div class="catalog-grid collector-highlight-grid" data-grid="overview-cards"></div>
+        </section>
+      </section>
+
+      <section class="collector-profile-panel" data-profile-panel="cards" hidden><div class="section-heading"><div><span class="section-eyebrow">Cartas</span><h2>Cartas da coleção</h2></div></div><div class="catalog-grid" data-grid="cards"></div><div class="empty-state compact" data-panel-empty="cards" hidden><span>◇</span><h2>Nenhuma carta publicada</h2></div></section>
+      <section class="collector-profile-panel" data-profile-panel="boosters" hidden><div class="section-heading"><div><span class="section-eyebrow">Boosters</span><h2>Boosters da coleção</h2></div></div><div class="catalog-grid" data-grid="boosters"></div><div class="empty-state compact" data-panel-empty="boosters" hidden><span>◇</span><h2>Nenhum booster publicado</h2></div></section>
+      <section class="collector-profile-panel" data-profile-panel="kits" hidden><div class="section-heading"><div><span class="section-eyebrow">Kits</span><h2>Kits da coleção</h2></div></div><div class="catalog-grid" data-grid="kits"></div><div class="empty-state compact" data-panel-empty="kits" hidden><span>◇</span><h2>Nenhum kit publicado</h2></div></section>
+      <section class="collector-profile-panel" data-profile-panel="products" hidden><div class="section-heading"><div><span class="section-eyebrow">Produtos</span><h2>Produtos da coleção</h2></div></div><div class="catalog-grid" data-grid="products"></div><div class="empty-state compact" data-panel-empty="products" hidden><span>◇</span><h2>Nenhum produto publicado</h2></div></section>
+      <section class="collector-profile-panel" data-profile-panel="albums" hidden><div class="section-heading"><div><span class="section-eyebrow">Estante de álbuns</span><h2>Fichários publicados</h2><p>Cada capa pertence a um álbum. Clique para abrir o binder.</p></div></div><div class="album-virtual-shelf album-virtual-shelf-full"><div class="albums-catalog-grid album-shelf-grid" data-grid="albums"></div></div><div class="empty-state compact" data-panel-empty="albums" hidden><span>▤</span><h2>Nenhum álbum publicado</h2></div></section>
+      <section class="collector-profile-panel" data-profile-panel="sold" hidden><div class="section-heading"><div><span class="section-eyebrow">Histórico público</span><h2>Itens vendidos</h2><p>Aparecem aqui apenas itens que continuam publicados com estoque zerado.</p></div></div><div class="catalog-grid" data-grid="sold"></div><div class="empty-state compact" data-panel-empty="sold" hidden><span>✓</span><h2>Nenhum item vendido publicado</h2><p>O histórico administrativo completo permanece privado para o proprietário.</p></div></section>
+
       <div class="empty-state" data-collection-is-empty hidden><span>◇</span><h2>Coleção vazia</h2><p>Esta conta optou por publicar o perfil, mas ainda não adicionou itens.</p></div>
     </main>
     <section class="shell" data-collection-error hidden><div class="empty-state show"><span>!</span><h2 data-error-title>Não foi possível abrir a coleção</h2><p data-error-message>Confira o endereço e tente novamente.</p><a class="primary-cta" href={`${base}colecoes/`}><span>Voltar às coleções</span><b>←</b></a></div></section>
   </div>
 
   <script>
-    import { albumMarkup, collectionFlowMarkup, escapeHtml, formatBRL, initializeOnlineImages, productMarkup, toImageUrl } from '../../scripts/online-markup';
+    import { albumMarkup, escapeHtml, formatBRL, initializeOnlineImages, productMarkup, toImageUrl } from '../../scripts/online-markup';
     const root = document.querySelector<HTMLElement>('[data-online-collection-page]');
     const params = new URLSearchParams(location.search);
     const slug = params.get('slug') || location.pathname.match(/\/colecoes\/([^/]+)/)?.[1] || '';
     const policyLabels: Record<string, string> = {
-      flexible: 'Aceita propostas flexíveis',
-      none: 'Não aceita propostas',
-      fixed_price_multi_only: 'Propostas apenas em múltiplos itens sem preço fixo',
-      no_defined_price: 'Propostas somente em itens sem preço definido',
-      multi_only: 'Propostas apenas com mais de um item',
+      flexible: 'Aceita propostas flexíveis', none: 'Não aceita propostas', fixed_price_multi_only: 'Propostas em múltiplos itens sem preço fixo', no_defined_price: 'Propostas em itens sem preço definido', multi_only: 'Propostas com mais de um item',
     };
     const setText = (selector: string, value: unknown) => { const el = root?.querySelector<HTMLElement>(selector); if (el) el.textContent = String(value ?? ''); };
+    const quantity = (item: any) => Math.max(0, Number(item?.quantity ?? 1) || 0);
+    const isActive = (item: any) => item?.quantity === undefined || item?.quantity === null || quantity(item) > 0;
+    const units = (items: any[]) => items.reduce((sum, item) => sum + quantity(item), 0);
+    const mediaUrl = (raw: unknown) => toImageUrl(String(raw || ''));
     const showError = (title: string, message: string) => {
       root?.querySelector<HTMLElement>('[data-online-collection-content]')?.setAttribute('hidden', '');
       const box = root?.querySelector<HTMLElement>('[data-collection-error]'); if (box) box.hidden = false;
       setText('[data-error-title]', title); setText('[data-error-message]', message);
-      setText('[data-profile-value]', 'Indisponível');
+    };
+    const activateTab = (tab: string, scroll = false) => {
+      root?.querySelectorAll<HTMLElement>('[data-profile-tab]').forEach((button) => button.classList.toggle('active', button.dataset.profileTab === tab));
+      root?.querySelectorAll<HTMLElement>('[data-profile-panel]').forEach((panel) => { const active = panel.dataset.profilePanel === tab; panel.hidden = !active; panel.classList.toggle('active', active); });
+      if (scroll) root?.querySelector('[data-profile-tabs]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    const distributionMarkup = (entries: [string, number][], emptyLabel: string) => {
+      if (!entries.length) return `<div class="collector-bar-empty">${escapeHtml(emptyLabel)}</div>`;
+      const max = Math.max(...entries.map(([, value]) => value), 1);
+      return entries.slice(0, 6).map(([label, value]) => `<div class="collector-stat-bar"><div><span>${escapeHtml(label)}</span><strong>${value}</strong></div><i><b style="--bar-size:${Math.max(7, Math.round(value / max * 100))}%"></b></i></div>`).join('');
     };
     const load = async () => {
       try {
@@ -69,45 +127,73 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         const palette = Array.isArray(profile.palette) ? profile.palette : ['#54e8df','#bc91ff','#f4c25c'];
         root?.style.setProperty('--collector-primary', palette[0] || '#54e8df'); root?.style.setProperty('--collector-secondary', palette[1] || '#bc91ff'); root?.style.setProperty('--collector-accent', palette[2] || '#f4c25c');
         document.title = `${profile.title || 'Coleção'} · Vault TCG`;
-        setText('[data-profile-owner]', profile.owner || 'Colecionador'); setText('[data-profile-owner-name]', profile.owner || 'Colecionador'); setText('[data-profile-title]', profile.title || 'Minha coleção'); setText('[data-cover-title]', profile.title || 'Minha coleção'); setText('[data-profile-description]', profile.description || 'Coleção publicada no Vault TCG.');
+        setText('[data-profile-owner]', profile.owner || 'Colecionador'); setText('[data-profile-owner-name]', profile.owner || 'Colecionador'); setText('[data-profile-title]', profile.title || 'Minha coleção'); setText('[data-profile-description]', profile.description || 'Coleção publicada no Vault TCG.');
         setText('[data-profile-sale-status]', profile.selling === false ? 'Coleção para exposição' : 'Itens selecionados à venda');
         const sale = root?.querySelector<HTMLElement>('[data-profile-sale-status]'); sale?.classList.toggle('selling', profile.selling !== false); sale?.classList.toggle('showcase-only', profile.selling === false);
-        const avatar = root?.querySelector<HTMLElement>('[data-profile-avatar]'); if (avatar) { const photo = toImageUrl(profile.profilePhoto || ''); if (photo) { avatar.classList.add('has-photo'); avatar.innerHTML = `<img src="${photo.replace(/"/g,'&quot;')}" alt="" />`; } else avatar.textContent = String(profile.owner || 'VT').slice(0,2).toUpperCase(); }
-        const coverPlaceholder = root?.querySelector<HTMLElement>('[data-online-profile-cover]');
-        if (coverPlaceholder) {
-          const holder = document.createElement('div');
-          holder.innerHTML = collectionFlowMarkup(data.cards || [], false);
-          const flow = holder.firstElementChild as HTMLElement | null;
-          if (flow) { coverPlaceholder.replaceWith(flow); initializeOnlineImages(flow); }
-        }
-        const ambientCards = [...(data.cards || [])]
-          .filter((card: any) => Array.isArray(card.imageCandidates) && card.imageCandidates.length)
-          .sort((a: any, b: any) => Number(Boolean(b.favorite)) - Number(Boolean(a.favorite)) || Number(b.price || 0) - Number(a.price || 0))
-          .slice(0, 10);
-        const backdrop = root?.querySelector<HTMLElement>('[data-online-collection-backdrop]');
-        if (backdrop) {
-          backdrop.innerHTML = ambientCards.map((card: any, index: number) => `<img src="${escapeHtml(toImageUrl(card.imageCandidates[0]))}" alt="" loading="lazy" style="--favorite-index:${index}" />`).join('');
-        }
-        setText('[data-stat-cards]', data.cards.length); setText('[data-stat-boosters]', data.boosters.length); setText('[data-stat-kits]', data.kits.length); setText('[data-stat-albums]', data.albums.length); setText('[data-stat-products]', data.products.length);
+        const avatar = root?.querySelector<HTMLElement>('[data-profile-avatar]');
+        if (avatar) { const photo = mediaUrl(profile.profilePhoto || ''); if (photo) { avatar.classList.add('has-photo'); avatar.innerHTML = `<img src="${escapeHtml(photo)}" alt="Foto de ${escapeHtml(profile.owner || 'colecionador')}" />`; } else avatar.textContent = String(profile.owner || 'VT').slice(0,2).toUpperCase(); }
+        const banner = root?.querySelector<HTMLElement>('[data-profile-banner]');
+        if (banner) { const url = mediaUrl(profile.profileBanner || ''); banner.classList.toggle('has-image', Boolean(url)); if (url) banner.style.backgroundImage = `linear-gradient(100deg, rgba(3,8,15,.18), rgba(3,8,15,.72)), url("${url.replace(/"/g, '\\"')}")`; }
+
+        const allCards = Array.isArray(data.cards) ? data.cards : [];
+        const allBoosters = Array.isArray(data.boosters) ? data.boosters : [];
+        const allKits = Array.isArray(data.kits) ? data.kits : [];
+        const allProducts = Array.isArray(data.products) ? data.products : [];
+        const allAlbums = Array.isArray(data.albums) ? data.albums : [];
+        const sold = [...allCards, ...allBoosters, ...allKits, ...allProducts].filter((item: any) => !isActive(item));
+        const groups: Record<string, any[]> = {
+          cards: allCards.filter(isActive), boosters: allBoosters.filter(isActive), kits: allKits.filter(isActive), products: allProducts.filter(isActive), albums: allAlbums, sold,
+        };
+
+        setText('[data-stat-cards]', units(groups.cards)); setText('[data-stat-boosters]', units(groups.boosters)); setText('[data-stat-kits]', groups.kits.length); setText('[data-stat-albums]', groups.albums.length); setText('[data-stat-products]', groups.products.length);
+        const forSaleCount = [...groups.cards, ...groups.boosters, ...groups.kits, ...groups.products].filter((item: any) => item.forSale !== false).length;
+        setText('[data-stat-for-sale]', forSaleCount);
+        const years = groups.cards.map((card: any) => Number(card.year)).filter((year: number) => Number.isFinite(year) && year > 1900 && year < 2200);
+        setText('[data-stat-oldest]', years.length ? String(Math.min(...years)) : 'Não informado');
+        const setNames = groups.cards.map((card: any) => String(card.collection || '').trim()).filter(Boolean);
+        setText('[data-stat-sets]', new Set(setNames.map((name: string) => name.toLowerCase())).size || '—');
+
         const terms = profile.proposalTerms || {}; setText('[data-proposal-policy]', policyLabels[terms.policy] || 'Aceita propostas');
         setText('[data-proposal-detail]', terms.flexibleDiscounts === false && Array.isArray(terms.discountTiers) && terms.discountTiers.length ? terms.discountTiers.map((tier: any) => `A partir de R$ ${Number(tier.minValue || 0).toFixed(2).replace('.', ',')}: até ${Number(tier.maxDiscount || 0)}%`).join(' · ') : 'Entre na sua conta para montar e enviar uma proposta.');
-        const estimatedValue = Number(profile.stats?.estimatedValue ?? [...(data.cards || []), ...(data.boosters || []), ...(data.products || [])].reduce((sum: number, item: any) => sum + Math.max(0, Number(item.quantity || 0)) * Math.max(0, Number(item.price || 0)), 0));
+        const estimatedValue = Number(profile.stats?.estimatedValue ?? [...groups.cards, ...groups.boosters, ...groups.products].reduce((sum: number, item: any) => sum + quantity(item) * Math.max(0, Number(item.price || 0)), 0));
+        const publicValue = profile.showCollectionValue !== false;
         setText('[data-profile-value]', formatBRL(estimatedValue));
-        const groups: Record<string, any[]> = { albums: data.albums, cards: data.cards, boosters: data.boosters, kits: data.kits, products: data.products };
-        let total = 0;
+        root?.querySelectorAll<HTMLElement>('[data-public-value-stat]').forEach((node) => node.hidden = !publicValue);
+
+        const rarityMap = new Map<string, number>();
+        groups.cards.forEach((card: any) => { const label = String(card.rarity || card.type || 'Não informada').trim() || 'Não informada'; rarityMap.set(label, (rarityMap.get(label) || 0) + quantity(card)); });
+        const setMap = new Map<string, number>();
+        groups.cards.forEach((card: any) => { const label = String(card.collection || 'Não informada').trim() || 'Não informada'; setMap.set(label, (setMap.get(label) || 0) + quantity(card)); });
+        const sortedEntries = (map: Map<string, number>) => [...map.entries()].sort((a, b) => b[1] - a[1]);
+        const rarityBars = root?.querySelector<HTMLElement>('[data-rarity-bars]'); if (rarityBars) rarityBars.innerHTML = distributionMarkup(sortedEntries(rarityMap), 'Sem raridade/tipo suficiente para comparar.');
+        const setBars = root?.querySelector<HTMLElement>('[data-set-bars]'); if (setBars) setBars.innerHTML = distributionMarkup(sortedEntries(setMap), 'Sem coleção/era informada nas cartas.');
+
         Object.entries(groups).forEach(([key, items]) => {
-          total += items.length;
-          const section = root?.querySelector<HTMLElement>(`[data-section="${key}"]`); const grid = root?.querySelector<HTMLElement>(`[data-grid="${key}"]`);
-          if (!section || !grid || items.length === 0) return;
-          section.hidden = false; grid.innerHTML = key === 'albums' ? items.map((item) => albumMarkup(item)).join('') : items.map((item) => productMarkup(item, { hideOwner: true })).join(''); initializeOnlineImages(grid);
+          setText(`[data-tab-count="${key}"]`, items.length);
+          const grid = root?.querySelector<HTMLElement>(`[data-grid="${key}"]`);
+          if (grid) { grid.innerHTML = key === 'albums' ? items.map((item) => albumMarkup(item)).join('') : items.map((item) => productMarkup(item, { hideOwner: true })).join(''); initializeOnlineImages(grid); }
+          const empty = root?.querySelector<HTMLElement>(`[data-panel-empty="${key}"]`); if (empty) empty.hidden = items.length !== 0;
         });
+        const overviewAlbums = root?.querySelector<HTMLElement>('[data-grid="overview-albums"]');
+        if (overviewAlbums && groups.albums.length) { overviewAlbums.innerHTML = groups.albums.slice(0, 4).map((item) => albumMarkup(item, true)).join(''); initializeOnlineImages(overviewAlbums); const wrap = root?.querySelector<HTMLElement>('[data-overview-albums]'); if (wrap) wrap.hidden = false; }
+        const highlightedCards = [...groups.cards].sort((a: any, b: any) => Number(Boolean(b.favorite)) - Number(Boolean(a.favorite)) || Number(b.price || b.leaguePrice || 0) - Number(a.price || a.leaguePrice || 0)).slice(0, 8);
+        const overviewCards = root?.querySelector<HTMLElement>('[data-grid="overview-cards"]');
+        if (overviewCards && highlightedCards.length) { overviewCards.innerHTML = highlightedCards.map((item) => productMarkup(item, { hideOwner: true })).join(''); initializeOnlineImages(overviewCards); const wrap = root?.querySelector<HTMLElement>('[data-overview-cards]'); if (wrap) wrap.hidden = false; }
+
+        const ambientCards = [...groups.cards].filter((card: any) => Array.isArray(card.imageCandidates) && card.imageCandidates.length).sort((a: any, b: any) => Number(Boolean(b.favorite)) - Number(Boolean(a.favorite)) || Number(b.price || 0) - Number(a.price || 0)).slice(0, 8);
+        const backdrop = root?.querySelector<HTMLElement>('[data-online-collection-backdrop]'); if (backdrop) backdrop.innerHTML = ambientCards.map((card: any, index: number) => `<img src="${escapeHtml(toImageUrl(card.imageCandidates[0]))}" alt="" loading="lazy" style="--favorite-index:${index}" />`).join('');
+
+        const total = groups.cards.length + groups.boosters.length + groups.kits.length + groups.products.length + groups.albums.length;
         const content = root?.querySelector<HTMLElement>('[data-online-collection-content]'); if (content) content.hidden = false;
         const empty = root?.querySelector<HTMLElement>('[data-collection-is-empty]'); if (empty) empty.hidden = total !== 0;
-        const explore = root?.querySelector<HTMLElement>('[data-explore-button]'); if (explore) explore.hidden = total === 0;
+        const proposal = root?.querySelector<HTMLElement>('[data-proposal-start]'); if (proposal) proposal.hidden = profile.selling === false || forSaleCount === 0;
       } catch (error: any) {
         showError(error?.message === 'Esta coleção é privada.' ? 'Coleção privada' : 'Não foi possível abrir a coleção', error?.message || 'Tente novamente em alguns instantes.');
       }
     };
+    root?.querySelector('[data-profile-tabs]')?.addEventListener('click', (event) => { const target = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-profile-tab]') : null; if (target) activateTab(target.dataset.profileTab || 'overview'); });
+    root?.addEventListener('click', (event) => { const target = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-open-tab]') : null; if (target) activateTab(target.dataset.openTab || 'overview', true); });
+    root?.querySelector('[data-proposal-start]')?.addEventListener('click', () => activateTab('cards', true));
     root?.querySelector('[data-share-collection]')?.addEventListener('click', async () => { try { await navigator.clipboard.writeText(location.href); const button = root.querySelector<HTMLElement>('[data-share-collection] span'); if (button) { const old = button.textContent; button.textContent = 'Link copiado'; setTimeout(() => button.textContent = old, 1800); } } catch (_) {} });
     if ((window as any).VaultCloud) load(); else window.addEventListener('vault:cloud-ready', load, { once: true });
   </script>

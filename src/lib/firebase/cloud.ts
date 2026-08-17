@@ -219,7 +219,9 @@ const profileForFirestore = (profile: any, uid: string) => stripUndefined({
   selling: profile.selling !== false,
   featured: profile.featured === true,
   showQuantity: profile.showQuantity !== false,
+  showCollectionValue: profile.showCollectionValue !== false,
   profilePhoto: profile.profilePhoto || '',
+  profileBanner: profile.profileBanner || '',
   palette: Array.isArray(profile.palette) ? profile.palette.slice(0, 3) : ['#54e8df', '#bc91ff', '#f4c25c'],
   priceDisplayFallback: profile.priceDisplayFallback || 'league_average_then_lowest',
   proposalTerms: profile.proposalTerms || { policy: 'flexible', flexibleDiscounts: true, discountTiers: [] },
@@ -312,7 +314,9 @@ export async function createAccountWithCollection(input: {
       selling: input.selling !== false,
       featured: false,
       showQuantity: true,
+      showCollectionValue: true,
       profilePhoto: '',
+      profileBanner: '',
       palette: ['#54e8df', '#bc91ff', '#f4c25c'],
       priceDisplayFallback: 'league_average_then_lowest',
       proposalTerms: input.proposalTerms || { policy: 'flexible', flexibleDiscounts: true, discountTiers: [] },
@@ -389,6 +393,8 @@ export async function loadMyCollection(user?: User | null) {
       email: active.email || '',
       public: false,
       selling: false,
+      showCollectionValue: true,
+      profileBanner: '',
       version: 1,
       stats: { cards: 0, boosters: 0, kits: 0, products: 0, albums: 0, totalUnits: 0, estimatedValue: 0 },
     };
@@ -661,6 +667,18 @@ export async function loadCollectionBySlug(slug: string) {
     products: products.map((item) => addOwner(item, 'product')),
     albums: albums.map((item) => addOwner(item, 'album')),
   };
+}
+
+export async function listMyReceivedProposals(maxResults = 60) {
+  const { auth, db } = await getCloud();
+  const user = auth.currentUser;
+  if (!user) return [];
+  const size = Math.min(100, Math.max(1, Math.floor(Number(maxResults) || 60)));
+  const snapshot = await getDocs(query(collection(db, 'proposals'), where('sellerUid', '==', user.uid), firestoreLimit(size)));
+  return snapshot.docs.map((entry) => ({ id: entry.id, ...entry.data() })).sort((left: any, right: any) => {
+    const time = (value: any) => Number(value?.toMillis?.() || value?.seconds * 1000 || new Date(value || 0).getTime() || 0);
+    return time(right.createdAt) - time(left.createdAt);
+  });
 }
 
 export async function submitProposal(group: any) {
