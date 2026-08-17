@@ -12,10 +12,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 15.62,
-    "Venda Rapida": 20.9,
+    "Minimo": 11.0,
+    "Venda Rapida": 15.62,
     "Menor Liga": 22.0,
-    "Preço Médio Liga": 35.32,
     "Preço": 35.32,
     "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
     "Quantidade": 1,
@@ -68,7 +67,8 @@
       "cotacaoId": "cot-20260808-161601-700eee",
       "data": "2026-08-08T16:16:01-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Eevee ex",
@@ -83,10 +83,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 106.49,
-    "Venda Rapida": 36.0,
+    "Minimo": 18.95,
+    "Venda Rapida": 106.49,
     "Menor Liga": 37.9,
-    "Preço Médio Liga": 62.37,
     "Preço": 62.37,
     "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
     "Quantidade": 1,
@@ -167,7 +166,8 @@
       "cotacaoId": "cot-20260808-161601-700eee",
       "data": "2026-08-08T16:16:01-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Flareon ex",
@@ -182,10 +182,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 18.39,
-    "Venda Rapida": 23.75,
+    "Minimo": 12.5,
+    "Venda Rapida": 18.39,
     "Menor Liga": 25.0,
-    "Preço Médio Liga": 46.35,
     "Preço": 46.35,
     "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
     "Quantidade": 1,
@@ -238,6 +237,7 @@
       "cotacaoId": "cot-20260808-161601-700eee",
       "data": "2026-08-08T16:16:01-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   }
 ]

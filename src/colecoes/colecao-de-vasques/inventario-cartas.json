@@ -16,10 +16,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 45.09,
-    "Venda Rapida": 59.75,
+    "Minimo": 31.45,
+    "Venda Rapida": 45.09,
     "Menor Liga": 62.89,
-    "Preço Médio Liga": 79.53,
     "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
     "Imagem": "Morpeko da Marine_206.jpg",
     "Status": {
@@ -68,7 +67,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Umbreon e Darkrai-GX",
@@ -87,10 +87,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 446.88,
-    "Venda Rapida": 550.05,
+    "Minimo": 289.5,
+    "Venda Rapida": 446.88,
     "Menor Liga": 579.0,
-    "Preço Médio Liga": 780.62,
     "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
     "Imagem": "Umbreon e Darkrai-GX_SM241.jpg",
     "Status": {
@@ -167,7 +166,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Darkrai-GX",
@@ -186,10 +186,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 599.95,
-    "Venda Rapida": 802.75,
+    "Minimo": 422.5,
+    "Venda Rapida": 599.95,
     "Menor Liga": 845.0,
-    "Preço Médio Liga": 845.0,
     "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
     "Imagem": "Darkrai-GX_SV70.jpg",
     "Status": {
@@ -278,7 +277,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Stoutland",
@@ -297,10 +297,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 23.61,
-    "Venda Rapida": 33.16,
+    "Minimo": 17.45,
+    "Venda Rapida": 23.61,
     "Menor Liga": 34.9,
-    "Preço Médio Liga": 45.17,
     "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
     "Imagem": "Stoutland_248.jpg",
     "Status": {
@@ -349,7 +348,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Umbreon-GX",
@@ -368,10 +368,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 49.63,
-    "Venda Rapida": 61.75,
+    "Minimo": 32.5,
+    "Venda Rapida": 49.63,
     "Menor Liga": 65.0,
-    "Preço Médio Liga": 70.72,
     "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
     "Imagem": "Umbreon-GX_80.jpg",
     "Status": {
@@ -448,7 +447,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "M Sharpedo-EX",
@@ -467,10 +467,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 51.12,
-    "Venda Rapida": 68.4,
+    "Minimo": 36.0,
+    "Venda Rapida": 51.12,
     "Menor Liga": 72.0,
-    "Preço Médio Liga": 86.0,
     "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
     "Imagem": "M Sharpedo-EX_XY200.jpg",
     "Status": {
@@ -519,7 +518,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Dhelmise-V",
@@ -538,10 +538,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 18.82,
-    "Venda Rapida": 25.18,
+    "Minimo": 13.25,
+    "Venda Rapida": 18.82,
     "Menor Liga": 26.5,
-    "Preço Médio Liga": 29.06,
     "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
     "Imagem": "Dhelmise-V_187.jpg",
     "Status": {
@@ -590,7 +589,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Grimmsnarl-V",
@@ -609,10 +609,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 9.87,
-    "Venda Rapida": 13.2,
+    "Minimo": 6.95,
+    "Venda Rapida": 9.87,
     "Menor Liga": 13.9,
-    "Preço Médio Liga": 18.13,
     "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
     "Imagem": "Grimmsnarl-V_SV116.jpg",
     "Status": {
@@ -661,7 +660,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Zacian ex do Lupo",
@@ -680,10 +680,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 4.19,
-    "Venda Rapida": 3.32,
+    "Minimo": 1.75,
+    "Venda Rapida": 4.19,
     "Menor Liga": 3.5,
-    "Preço Médio Liga": 13.29,
     "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
     "Imagem": "Zacian ex do Lupo_193.jpg",
     "Status": {
@@ -760,7 +759,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Beedrill ex",
@@ -779,10 +779,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 16.33,
-    "Venda Rapida": 21.85,
+    "Minimo": 11.5,
+    "Venda Rapida": 16.33,
     "Menor Liga": 23.0,
-    "Preço Médio Liga": 35.77,
     "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
     "Imagem": "Beedrill ex_098.jpg",
     "Status": {
@@ -831,7 +830,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "M Rayquaza-EX",
@@ -850,10 +850,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 382.44,
-    "Venda Rapida": 284.9,
+    "Minimo": 149.95,
+    "Venda Rapida": 382.44,
     "Menor Liga": 299.9,
-    "Preço Médio Liga": 549.9,
     "Alteração de preço": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
     "Imagem": "M Rayquaza-EX_105.jpg",
     "Status": {
@@ -930,7 +929,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Gardevoir-EX",
@@ -949,10 +949,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 95.63,
-    "Venda Rapida": 56.9,
+    "Minimo": 29.95,
+    "Venda Rapida": 95.63,
     "Menor Liga": 59.9,
-    "Preço Médio Liga": 106.21,
     "Alteração de preço": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
     "Imagem": "Gardevoir-EX_RC30.jpg",
     "Status": {
@@ -1029,7 +1028,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Pikachu",
@@ -1048,10 +1048,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 108.53,
-    "Venda Rapida": 72.68,
+    "Minimo": 38.25,
+    "Venda Rapida": 108.53,
     "Menor Liga": 76.5,
-    "Preço Médio Liga": 207.35,
     "Alteração de preço": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
     "Imagem": "Pikachu_RC29.jpg",
     "Status": {
@@ -1128,7 +1127,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Darkrai",
@@ -1147,10 +1147,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 38.32,
-    "Venda Rapida": 1.89,
+    "Minimo": 0.99,
+    "Venda Rapida": 38.32,
     "Menor Liga": 1.99,
-    "Preço Médio Liga": 26.98,
     "Alteração de preço": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
     "Imagem": "Darkrai_XY22.png",
     "Status": {
@@ -1227,7 +1226,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Lycanroc-GX",
@@ -1246,10 +1246,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 12.76,
-    "Venda Rapida": 85.4,
+    "Minimo": 44.95,
+    "Venda Rapida": 12.76,
     "Menor Liga": 89.9,
-    "Preço Médio Liga": 89.9,
     "Alteração de preço": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
     "Imagem": "Lycanroc-GX_156.jpg",
     "Status": {
@@ -1335,7 +1334,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Zoroark TURBO",
@@ -1354,10 +1354,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 1.8,
-    "Venda Rapida": 10.45,
+    "Minimo": 5.5,
+    "Venda Rapida": 1.8,
     "Menor Liga": 11.0,
-    "Preço Médio Liga": 20.22,
     "Alteração de preço": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
     "Imagem": "Zoroark TURBO_92.png",
     "Status": {
@@ -1406,7 +1405,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Darkrai G",
@@ -1425,10 +1425,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 4.5,
-    "Venda Rapida": 62.7,
+    "Minimo": 33.0,
+    "Venda Rapida": 4.5,
     "Menor Liga": 66.0,
-    "Preço Médio Liga": 66.0,
     "Alteração de preço": "buylist: idioma aproximado: Inglês → Português; buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
     "Imagem": "Darkrai G_3.png",
     "Status": {
@@ -1490,7 +1489,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Alakazam-EX",
@@ -1509,10 +1509,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 74.55,
-    "Venda Rapida": 16.62,
+    "Minimo": 8.74,
+    "Venda Rapida": 74.55,
     "Menor Liga": 17.49,
-    "Preço Médio Liga": 35.72,
     "Alteração de preço": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%",
     "Imagem": "Alakazam-EX_117.jpg",
     "Status": {
@@ -1589,7 +1588,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Genesect-EX",
@@ -1608,10 +1608,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 57.47,
-    "Venda Rapida": 22.32,
+    "Minimo": 11.75,
+    "Venda Rapida": 57.47,
     "Menor Liga": 23.5,
-    "Preço Médio Liga": 60.84,
     "Alteração de preço": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%",
     "Imagem": "Genesect-EX_120.jpg",
     "Status": {
@@ -1688,7 +1687,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Lucario e Melmetal-GX",
@@ -1707,10 +1707,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 31.49,
-    "Venda Rapida": null,
+    "Minimo": null,
+    "Venda Rapida": 31.49,
     "Menor Liga": null,
-    "Preço Médio Liga": null,
     "Alteração de preço": "buylist: idioma aproximado: Inglês → Português; buylist: estado desejado SP; estado encontrado M; estimativa -10.00%",
     "Imagem": "Lucario e Melmetal-GX_120.jpg",
     "Status": {
@@ -1751,7 +1750,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Darkrai-GX",
@@ -1770,10 +1770,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 35.08,
-    "Venda Rapida": 30.4,
+    "Minimo": 16.0,
+    "Venda Rapida": 35.08,
     "Menor Liga": 32.0,
-    "Preço Médio Liga": 38.98,
     "Alteração de preço": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%",
     "Imagem": "Darkrai-GX_88a.jpg",
     "Status": {
@@ -1874,7 +1873,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Aerodactyl-GX",
@@ -1893,10 +1893,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 15.27,
-    "Venda Rapida": 19.0,
+    "Minimo": 10.0,
+    "Venda Rapida": 15.27,
     "Menor Liga": 20.0,
-    "Preço Médio Liga": 20.0,
     "Alteração de preço": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%",
     "Imagem": "Aerodactyl-GX_106.jpg",
     "Status": {
@@ -1982,7 +1981,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Darkrai",
@@ -2001,10 +2001,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 125.0,
-    "Venda Rapida": 589.0,
+    "Minimo": 310.0,
+    "Venda Rapida": 125.0,
     "Menor Liga": 620.0,
-    "Preço Médio Liga": 620.0,
     "Alteração de preço": "buylist: idioma aproximado: Inglês → Português; buylist: estado desejado HP; estado encontrado M; estimativa -50.00%",
     "Imagem": "Darkrai_BW73.png",
     "Status": {
@@ -2066,7 +2065,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Darkrai-EX",
@@ -2085,10 +2085,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 31.89,
-    "Venda Rapida": 28.45,
+    "Minimo": 14.97,
+    "Venda Rapida": 31.89,
     "Menor Liga": 29.95,
-    "Preço Médio Liga": 29.95,
     "Alteração de preço": "buylist: idioma aproximado: Inglês → Português; buylist: estado desejado SP; estado encontrado M; estimativa -10.00%",
     "Imagem": "Darkrai-EX_74.jpg",
     "Status": {
@@ -2177,7 +2176,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Dragapult-VMAX",
@@ -2196,10 +2196,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 74.97,
-    "Venda Rapida": 20.89,
+    "Minimo": 10.99,
+    "Venda Rapida": 74.97,
     "Menor Liga": 21.99,
-    "Preço Médio Liga": 39.07,
     "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
     "Imagem": "Dragapult-VMAX_93.jpg",
     "Status": {
@@ -2276,7 +2275,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Toxtricity-V",
@@ -2295,10 +2295,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 5.32,
-    "Venda Rapida": 5.53,
+    "Minimo": 2.91,
+    "Venda Rapida": 5.32,
     "Menor Liga": 5.82,
-    "Preço Médio Liga": 8.79,
     "Alteração de preço": "estado desejado MP; estado encontrado SP; estimativa -16.67%; buylist: estado desejado MP; estado encontrado M; estimativa -25.00%",
     "Imagem": "Toxtricity-V_SWSH017.jpg",
     "Status": {
@@ -2347,7 +2346,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Steelix-EX",
@@ -2366,10 +2366,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 5.27,
-    "Venda Rapida": 9.4,
+    "Minimo": 4.95,
+    "Venda Rapida": 5.27,
     "Menor Liga": 9.89,
-    "Preço Médio Liga": 12.95,
     "Alteração de preço": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%",
     "Imagem": "Steelix-EX_67.jpg",
     "Status": {
@@ -2443,7 +2442,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Magearna-EX",
@@ -2462,10 +2462,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 5.27,
-    "Venda Rapida": 6.65,
+    "Minimo": 3.5,
+    "Venda Rapida": 5.27,
     "Menor Liga": 7.0,
-    "Preço Médio Liga": 11.08,
     "Alteração de preço": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%",
     "Imagem": "Magearna-EX_75.jpg",
     "Status": {
@@ -2514,7 +2513,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Skarmory-EX",
@@ -2533,10 +2533,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 22.49,
-    "Venda Rapida": 56.9,
+    "Minimo": 29.95,
+    "Venda Rapida": 22.49,
     "Menor Liga": 59.9,
-    "Preço Médio Liga": 67.45,
     "Alteração de preço": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%",
     "Imagem": "Skarmory-EX_145.png",
     "Status": {
@@ -2585,7 +2584,8 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   },
   {
     "Nome": "Wailord ex",
@@ -2604,10 +2604,9 @@
     "Link Cardmarket": "",
     "Link Tcgplayer": "",
     "Link PriceCharting": "",
-    "Minimo": 2.8,
-    "Venda Rapida": 2.38,
+    "Minimo": 1.25,
+    "Venda Rapida": 2.8,
     "Menor Liga": 2.5,
-    "Preço Médio Liga": 8.26,
     "Alteração de preço": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%",
     "Imagem": "Wailord ex_016.jpg",
     "Status": {
@@ -2684,6 +2683,7 @@
       "cotacaoId": "formatacao-13a8f9df90a4",
       "data": "2026-08-08T16:44:23-03:00",
       "sucesso": true
-    }
+    },
+    "pricingSchemaVersion": 2
   }
 ]

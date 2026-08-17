@@ -25,11 +25,10 @@ from configuracao import (
     ESPERA_ESTABILIDADE_MAX,
     INTERVALO_TENTATIVA,
     MAX_TENTATIVAS_PAGINA,
-    MINIMO_CERTEIRO,
+    MINIMO,
     PASTA_IMAGENS,
     TENTATIVAS,
     USAR_OCR,
-    VENDA_RAPIDA,
 )
 from typing import Any
 from urllib.parse import urljoin, urlparse
@@ -1231,16 +1230,14 @@ def resumir_precos(
                 compras_filtradas = foil
                 notas_compra.append("buylist acima do marketplace: apenas ofertas com tag Foil consideradas")
 
-    minimo = max((o["preco"] for o in compras_filtradas), default=None)
-    minimo_certeiro = (menor * Decimal(str(MINIMO_CERTEIRO))).quantize(Decimal("0.01")) if menor is not None else None
-    venda_rapida = (menor * Decimal(str(VENDA_RAPIDA))).quantize(Decimal("0.01")) if menor is not None else None
+    venda_rapida = max((o["preco"] for o in compras_filtradas), default=None)
+    minimo = (menor * Decimal(str(MINIMO))).quantize(Decimal("0.01")) if menor is not None else None
 
     menor_coletado, segundo_menor_coletado, terceiro_menor_coletado = _menores(vendas, "preco_original")
     medio_coletado = _media(vendas, "preco_original")
     mediana_coletada = _mediana(vendas, "preco_original")
-    minimo_coletado = max((o.get("preco_original", o["preco"]) for o in compras_filtradas), default=None)
-    minimo_certeiro_coletado = (menor_coletado * Decimal(str(MINIMO_CERTEIRO))).quantize(Decimal("0.01")) if menor_coletado is not None else None
-    venda_rapida_coletado = (menor_coletado * Decimal(str(VENDA_RAPIDA))).quantize(Decimal("0.01")) if menor_coletado is not None else None
+    venda_rapida_coletado = max((o.get("preco_original", o["preco"]) for o in compras_filtradas), default=None)
+    minimo_coletado = (menor_coletado * Decimal(str(MINIMO))).quantize(Decimal("0.01")) if menor_coletado is not None else None
 
     notas = [*notas_venda]
     notas.extend(f"buylist: {nota}" for nota in notas_compra)
@@ -1269,7 +1266,6 @@ def resumir_precos(
         "medio": medio,
         "mediana": mediana,
         "minimo": minimo,
-        "minimo_certeiro": minimo_certeiro,
         "venda_rapida": venda_rapida,
         "menor_coletado": menor_coletado,
         "segundo_menor_coletado": segundo_menor_coletado,
@@ -1277,7 +1273,6 @@ def resumir_precos(
         "medio_coletado": medio_coletado,
         "mediana_coletada": mediana_coletada,
         "minimo_coletado": minimo_coletado,
-        "minimo_certeiro_coletado": minimo_certeiro_coletado,
         "venda_rapida_coletado": venda_rapida_coletado,
         "alteracao": "; ".join(dict.fromkeys(notas)),
         "quantidade_ofertas": len(vendas),
@@ -1410,7 +1405,8 @@ class SessaoLiga:
                 if len(valores_venda) % 2
                 else (valores_venda[meio - 1] + valores_venda[meio]) / Decimal("2")
             ).quantize(Decimal("0.01"))
-        minimo = max(valores_compra, default=None)
+        venda_rapida = max(valores_compra, default=None)
+        minimo = (menor * Decimal(str(MINIMO))).quantize(Decimal("0.01")) if menor is not None else None
 
         def quantidade_participantes(ofertas: list[dict[str, Any]]) -> int:
             chaves: set[str] = set()
@@ -1419,7 +1415,6 @@ class SessaoLiga:
                 oferta_id = str(oferta.get("oferta_id") or "").strip()
                 chaves.add(f"loja:{loja}" if loja else (f"oferta:{oferta_id}" if oferta_id else f"linha:{indice}"))
             return len(chaves)
-        minimo_certeiro = (menor * Decimal(str(MINIMO_CERTEIRO))).quantize(Decimal("0.01")) if menor is not None else None
         resultado = {
             **dados,
             "menor": menor,
@@ -1428,16 +1423,14 @@ class SessaoLiga:
             "medio": medio,
             "mediana": mediana,
             "minimo": minimo,
-            "minimo_certeiro": minimo_certeiro,
-            "venda_rapida": (menor * Decimal(str(VENDA_RAPIDA))).quantize(Decimal("0.01")) if menor is not None else None,
+            "venda_rapida": venda_rapida,
             "menor_coletado": menor,
             "segundo_menor_coletado": segundo_menor,
             "terceiro_menor_coletado": terceiro_menor,
             "medio_coletado": medio,
             "mediana_coletada": mediana,
             "minimo_coletado": minimo,
-            "minimo_certeiro_coletado": minimo_certeiro,
-            "venda_rapida_coletado": (menor * Decimal(str(VENDA_RAPIDA))).quantize(Decimal("0.01")) if menor is not None else None,
+            "venda_rapida_coletado": venda_rapida,
             "idiomas_encontrados": sorted({str(o.get("idioma") or "") for o in marketplace if str(o.get("idioma") or "")}),
             "estados_encontrados": sorted({str(o.get("estado") or "") for o in marketplace if str(o.get("estado") or "")}),
             "houve_estimativa": False,

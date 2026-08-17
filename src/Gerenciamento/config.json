@@ -3,7 +3,6 @@
   "intervaloTentativa": 1.5,
   "tentativas": 3,
   "maxTentativasPagina": 120,
-  "vendaRapida": 0.95,
   "usarOCR": true,
   "salvarParcialACadaItem": true,
   "fatoresEstado": {
@@ -14,7 +13,7 @@
     "HP": 0.5,
     "D": 0.3
   },
-  "minimoCerteiro": 0.6,
   "jitterWorkers": 0.75,
-  "esperaEstabilidadeMax": 5.0
+  "esperaEstabilidadeMax": 5.0,
+  "minimo": 0.5
 }

@@ -6,7 +6,7 @@
   "phone": "13997110421",
   "password": "",
   "selling": true,
-  "showQuantity": true,
+  "showQuantity": false,
   "featured": false,
   "version": 1,
   "proposalTerms": {

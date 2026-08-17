@@ -60,18 +60,23 @@ ready.then(() => window.dispatchEvent(new CustomEvent('vault:cloud-ready'))).cat
 ready.then(async () => {
   await watchAuth((user) => {
     document.body.dataset.authenticated = user ? 'true' : 'false';
-    document.querySelectorAll<HTMLElement>('[data-auth-nav]').forEach((link) => {
+    try { window.localStorage.setItem('vault:auth-hint', user ? '1' : '0'); } catch (_) {}
+    const siteBase = document.body.dataset.siteBase || '/';
+    document.querySelectorAll<HTMLAnchorElement>('[data-auth-nav]').forEach((link) => {
       link.textContent = user ? 'Minha coleção' : 'Entrar';
+      link.href = user ? `${siteBase}central/` : `${siteBase}cadastro/`;
       link.setAttribute('aria-label', user ? 'Abrir minha coleção' : 'Entrar ou criar uma conta');
     });
-    document.querySelectorAll<HTMLElement>('[data-auth-footer]').forEach((link) => {
+    document.querySelectorAll<HTMLAnchorElement>('[data-auth-footer]').forEach((link) => {
       link.textContent = user ? 'Minha coleção' : 'Entrar';
+      link.href = user ? `${siteBase}central/` : `${siteBase}cadastro/`;
     });
     document.querySelectorAll<HTMLAnchorElement>('[data-home-auth-cta]').forEach((link) => {
       const label = link.querySelector('span');
       if (label) label.textContent = user ? 'Minha coleção' : 'Entrar';
       const icon = link.querySelector('b');
       if (icon) icon.textContent = user ? '↗' : '→';
+      link.href = user ? `${siteBase}central/` : `${siteBase}cadastro/`;
     });
     window.dispatchEvent(new CustomEvent('vault:auth-changed', { detail: { user } }));
   });

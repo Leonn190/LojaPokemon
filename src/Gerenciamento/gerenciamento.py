@@ -222,8 +222,8 @@ class MonitorOperacao:
             "terceiroMenor": numero(dados.get("terceiro_menor")),
             "media": numero(dados.get("medio")),
             "mediana": numero(dados.get("mediana")),
-            "buylist": numero(dados.get("minimo")),
-            "vendaRapida": numero(dados.get("venda_rapida")),
+            "minimo": numero(dados.get("minimo")),
+            "buylist": numero(dados.get("venda_rapida")),
         }
         mercado = {
             "vendedoresGeral": int(dados.get("vendedores_geral") or 0),
@@ -437,7 +437,6 @@ def idioma_saida(valor: str) -> str:
 def _precos_atuais(dados: dict[str, Any], modo: str, preservar: dict[str, Any] | None = None) -> dict[str, Any]:
     """Atualiza apenas referências de mercado; o campo Preço é sempre do usuário."""
     preservar = preservar or {}
-    minimo_certeiro = numero(dados.get("minimo_certeiro"))
     minimo = numero(dados.get("minimo"))
     menor = numero(dados.get("menor"))
     segundo_menor = numero(dados.get("segundo_menor"))
@@ -446,7 +445,7 @@ def _precos_atuais(dados: dict[str, Any], modo: str, preservar: dict[str, Any] |
     mediana = numero(dados.get("mediana"))
     rapida = numero(dados.get("venda_rapida"))
     return {
-        "Minimo Certeiro": minimo_certeiro if minimo_certeiro is not None else numero(primeiro(preservar, "Minimo Certeiro", "Mínimo Certeiro")),
+        "pricingSchemaVersion": 2,
         "Minimo": minimo if minimo is not None else numero(primeiro(preservar, "Minimo", "Mínimo", "Preço mínimo")),
         "Menor Liga": menor if menor is not None else numero(primeiro(preservar, "Menor Liga", "Preço Liga mais barato")),
         "Segundo Menor Liga": segundo_menor if segundo_menor is not None else numero(primeiro(preservar, "Segundo Menor Liga")),
@@ -465,6 +464,9 @@ def _precos_atuais(dados: dict[str, Any], modo: str, preservar: dict[str, Any] |
 
 def normalizar_carta_existente(linha: dict[str, Any]) -> dict[str, Any]:
     carta = dict(linha)
+    versao_precos = inteiro_nao_negativo(linha.get("pricingSchemaVersion"), 0)
+    buylist_legada = numero(primeiro(linha, "Minimo", "Mínimo", "Preço mínimo"))
+    venda_rapida_salva = numero(primeiro(linha, "Venda Rapida", "Venda Rápida", "Venda rápida"))
     carta.update({
         "Nome": texto(primeiro(linha, "Nome")),
         "Número": texto(primeiro(linha, "Número", "Numeração")),
@@ -478,7 +480,6 @@ def normalizar_carta_existente(linha: dict[str, Any]) -> dict[str, Any]:
         "Link Cardmarket": texto(primeiro(linha, "Link Cardmarket")),
         "Link Tcgplayer": texto(primeiro(linha, "Link Tcgplayer", "Link TCGPlayer")),
         "Link PriceCharting": texto(primeiro(linha, "Link PriceCharting")),
-        "Minimo Certeiro": numero(primeiro(linha, "Minimo Certeiro", "Mínimo Certeiro")),
         "Minimo": numero(primeiro(linha, "Minimo", "Mínimo", "Preço mínimo")),
         "Menor Liga": numero(primeiro(linha, "Menor Liga", "Preço Liga mais barato")),
         "Segundo Menor Liga": numero(primeiro(linha, "Segundo Menor Liga")),
@@ -496,7 +497,11 @@ def normalizar_carta_existente(linha: dict[str, Any]) -> dict[str, Any]:
         "Imagem": texto(primeiro(linha, "Imagem")),
         "À venda": _sim_nao(primeiro(linha, "À venda", "Venda"), True),
     })
-    for legado in ("Preço Médio Liga", "Preço médio Liga", "Mínimo Certeiro"):
+    menor_liga = numero(carta.get("Menor Liga"))
+    carta["Minimo"] = round(menor_liga * 0.50, 2) if menor_liga is not None else (numero(carta.get("Minimo")) if versao_precos >= 2 else None)
+    carta["Venda Rapida"] = venda_rapida_salva if versao_precos >= 2 else (buylist_legada if buylist_legada is not None else venda_rapida_salva)
+    carta["pricingSchemaVersion"] = 2
+    for legado in ("Preço Médio Liga", "Preço médio Liga", "Mínimo Certeiro", "Minimo Certeiro"):
         carta.pop(legado, None)
     if not isinstance(carta.get("Status"), dict):
         carta["Status"] = {"nível": "OK", "motivos": []}
@@ -510,10 +515,12 @@ def normalizar_carta_existente(linha: dict[str, Any]) -> dict[str, Any]:
 
 def normalizar_booster_existente(linha: dict[str, Any]) -> dict[str, Any]:
     booster = dict(linha)
+    versao_precos = inteiro_nao_negativo(linha.get("pricingSchemaVersion"), 0)
+    buylist_legada = numero(primeiro(linha, "Minimo", "Preço mínimo", "Mínimo"))
+    venda_rapida_salva = numero(primeiro(linha, "Venda Rapida", "Venda rápida", "Venda Rápida"))
     booster.update({
         "Tipo de pacote": texto(primeiro(linha, "Tipo de pacote", "Coleção", "Nome")),
         "Quantidade": inteiro_nao_negativo(primeiro(linha, "Quantidade"), 1),
-        "Minimo Certeiro": numero(primeiro(linha, "Minimo Certeiro", "Mínimo Certeiro")),
         "Minimo": numero(primeiro(linha, "Minimo", "Preço mínimo", "Mínimo")),
         "Menor Liga": numero(primeiro(linha, "Menor Liga", "Preço Liga mais barato")),
         "Segundo Menor Liga": numero(primeiro(linha, "Segundo Menor Liga")),
@@ -531,7 +538,11 @@ def normalizar_booster_existente(linha: dict[str, Any]) -> dict[str, Any]:
         "Imagem": texto(primeiro(linha, "Imagem")),
         "À venda": _sim_nao(primeiro(linha, "À venda", "Venda"), True),
     })
-    for legado in ("Preço mínimo", "Venda rápida", "Preço Liga mais barato", "Preço médio Liga", "Preço Médio Liga", "Mínimo Certeiro"):
+    menor_liga = numero(booster.get("Menor Liga"))
+    booster["Minimo"] = round(menor_liga * 0.50, 2) if menor_liga is not None else (numero(booster.get("Minimo")) if versao_precos >= 2 else None)
+    booster["Venda Rapida"] = venda_rapida_salva if versao_precos >= 2 else (buylist_legada if buylist_legada is not None else venda_rapida_salva)
+    booster["pricingSchemaVersion"] = 2
+    for legado in ("Preço mínimo", "Venda rápida", "Preço Liga mais barato", "Preço médio Liga", "Preço Médio Liga", "Mínimo Certeiro", "Minimo Certeiro"):
         booster.pop(legado, None)
     if not isinstance(booster.get("Status"), dict):
         booster["Status"] = {"nível": "OK", "motivos": []}
@@ -1235,7 +1246,7 @@ def _mesclar_cartas(existentes: list[dict[str, Any]], novas: list[dict[str, Any]
             if not texto(atual.get(campo)) and texto(nova.get(campo)):
                 atual[campo] = nova[campo]
         for campo in (
-            "Minimo Certeiro", "Minimo", "Menor Liga", "Segundo Menor Liga", "Terceiro Menor Liga",
+            "Minimo", "Menor Liga", "Segundo Menor Liga", "Terceiro Menor Liga",
             "Media Liga", "Mediana Liga", "Venda Rapida",
             "Vendedores Geral", "Vendedores Específicos", "Compradores Geral", "Compradores Específicos",
             "Alteração de preço", "Preço coletado", "Preço estimado", "Status", "Última cotação",
@@ -1258,7 +1269,7 @@ def _mesclar_boosters(existentes: list[dict[str, Any]], novos: list[dict[str, An
         if not texto(atual.get("Imagem")) and texto(novo.get("Imagem")):
             atual["Imagem"] = novo["Imagem"]
         for campo in (
-            "Minimo Certeiro", "Minimo", "Menor Liga", "Segundo Menor Liga", "Terceiro Menor Liga",
+            "Minimo", "Menor Liga", "Segundo Menor Liga", "Terceiro Menor Liga",
             "Media Liga", "Mediana Liga", "Venda Rapida",
             "Vendedores Geral", "Vendedores Específicos", "Compradores Geral", "Compradores Específicos",
             "Alteração de preço", "Preço coletado", "Preço estimado", "Status", "Última cotação",
@@ -1343,7 +1354,7 @@ def _aplicar_patches_usuario(existentes: list[dict[str, Any]], patches: list[dic
 
         if identidade_alterada:
             for campo in (
-                "Minimo Certeiro", "Minimo", "Menor Liga", "Segundo Menor Liga", "Terceiro Menor Liga",
+                "Minimo", "Menor Liga", "Segundo Menor Liga", "Terceiro Menor Liga",
                 "Media Liga", "Mediana Liga", "Venda Rapida", "Vendedores Geral", "Vendedores Específicos",
                 "Compradores Geral", "Compradores Específicos", "Preço coletado", "Preço estimado", "Última cotação",
             ):
@@ -1675,11 +1686,13 @@ def _sincronizar_ultima_cotacao_importada(
 def _mesclar_perfil_editavel(perfil: dict[str, Any], perfil_update: dict[str, Any]) -> None:
     campos = (
         "owner", "title", "description", "email", "phone", "password",
-        "selling", "showQuantity", "featured", "proposalTerms", "profilePhoto", "palette", "priceDisplayFallback",
+        "selling", "featured", "proposalTerms", "profilePhoto", "palette", "priceDisplayFallback",
     )
     for campo in campos:
         if campo in perfil_update:
             perfil[campo] = perfil_update[campo]
+    # Quantidade de kits nunca é exibida publicamente no schema atual.
+    perfil["showQuantity"] = False
 
 
 def atualizar_colecao(item: Path, modo_padrao: str = MODO_MENOR, destino_manual: Path | None = None, workers: int = 1) -> Path:
@@ -1978,8 +1991,7 @@ def _totais_snapshot(cartas: list[dict[str, Any]], boosters: list[dict[str, Any]
         return round(sum((numero(x.get(campo)) or 0) * inteiro_nao_negativo(x.get("Quantidade"), 0) for x in itens), 2)
     return {
         "preço": soma(cartas, "Preço") + soma(boosters, "Preço"),
-        "minimoCerteiro": soma(cartas, "Minimo Certeiro") + soma(boosters, "Minimo Certeiro"),
-        "buylist": soma(cartas, "Minimo") + soma(boosters, "Minimo"),
+        "buylist": soma(cartas, "Venda Rapida") + soma(boosters, "Venda Rapida"),
         "menor": soma(cartas, "Menor Liga") + soma(boosters, "Menor Liga"),
         "media": soma(cartas, "Media Liga") + soma(boosters, "Media Liga"),
         "vendaRapida": soma(cartas, "Venda Rapida") + soma(boosters, "Venda Rapida"),

@@ -6,7 +6,7 @@
   "phone": "11 910657657",
   "password": "",
   "selling": true,
-  "showQuantity": true,
+  "showQuantity": false,
   "featured": false,
   "version": 1,
   "collectionId": "colecao-de-nath",

@@ -42,8 +42,7 @@ PADRAO_CONFIG: dict[str, Any] = {
     "intervaloTentativa": 1.5,
     "tentativas": 3,
     "maxTentativasPagina": 120,
-    "vendaRapida": 0.95,
-    "minimoCerteiro": 0.60,
+    "minimo": 0.50,
     "usarOCR": True,
     "salvarParcialACadaItem": True,
     "jitterWorkers": 0.75,
@@ -79,8 +78,7 @@ INTERVALO_TENTATIVA = float(CONFIG.get("intervaloTentativa", 1.5))
 MAX_TENTATIVAS_PAGINA = int(CONFIG.get("maxTentativasPagina", 120))
 ESPERA_PAGINA = float(CONFIG.get("esperaPagina", 5))
 TENTATIVAS = max(1, int(CONFIG.get("tentativas", 3)))
-VENDA_RAPIDA = float(CONFIG.get("vendaRapida", 0.95))
-MINIMO_CERTEIRO = float(CONFIG.get("minimoCerteiro", 0.60))
+MINIMO = float(CONFIG.get("minimo", 0.50))
 USAR_OCR = bool(CONFIG.get("usarOCR", True))
 SALVAR_PARCIAL = bool(CONFIG.get("salvarParcialACadaItem", True))
 JITTER_WORKERS = max(0.0, float(CONFIG.get("jitterWorkers", 0.75)))

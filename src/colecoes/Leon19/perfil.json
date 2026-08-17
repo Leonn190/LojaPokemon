@@ -7,7 +7,7 @@
   "email": "euleonsoto@gmail.com",
   "phone": "13 99158-5788",
   "password": "",
-  "showQuantity": true,
+  "showQuantity": false,
   "version": 2,
   "collectionId": "Leon19",
   "proposalTerms": {

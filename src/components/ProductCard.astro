@@ -24,7 +24,7 @@ const kitDiscount = item.kind === 'kit' && item.sourceTotal && item.price !== nu
   : 0;
 const blocksDefinedPrice = item.proposalTerms.policy === 'no_defined_price' || item.proposalTerms.policy === 'fixed_price_multi_only';
 const canPropose = item.forSale && item.proposalTerms.policy !== 'none' && !(item.kind === 'card' && price !== null && blocksDefinedPrice);
-const showPublicQuantity = item.kind === 'kit' && item.showQuantity;
+const showPublicQuantity = false;
 ---
 
 <article

@@ -25,11 +25,7 @@ def registrar_variacoes(nome: str, item_id: str, tipo: str, anterior: dict[str, 
         "tipo": tipo,
         "nome": nome,
         "quantidade": int(atual.get("Quantidade") or 1),
-        "Minimo Certeiro": _variacao(
-            anterior.get("Minimo Certeiro") or anterior.get("Mínimo Certeiro"),
-            atual.get("Minimo Certeiro") or atual.get("Mínimo Certeiro"),
-        ),
-        "Minimo (buylist)": _variacao(
+        "Minimo": _variacao(
             anterior.get("Minimo") or anterior.get("Preço mínimo"),
             atual.get("Minimo") or atual.get("Preço mínimo"),
         ),
@@ -118,8 +114,7 @@ def salvar_relatorio(
     totais_antes = sessao.get("totaisAntes") if isinstance(sessao.get("totaisAntes"), dict) else {}
     preco_antigo = float(totais_antes.get("preço", 0.0)) if totais_antes else (_somar_total(cartas_antes, "Preço") + _somar_total(boosters_antes, "Preço"))
     preco_novo = _somar_total(cartas_depois, "Preço") + _somar_total(boosters_depois, "Preço")
-    minimo_certeiro_total = _somar_total(cartas_depois, "Minimo Certeiro", "Mínimo Certeiro") + _somar_total(boosters_depois, "Minimo Certeiro", "Mínimo Certeiro")
-    buylist_total = _somar_total(cartas_depois, "Minimo", "Preço mínimo") + _somar_total(boosters_depois, "Minimo", "Preço mínimo")
+    minimo_total = _somar_total(cartas_depois, "Minimo", "Preço mínimo") + _somar_total(boosters_depois, "Minimo", "Preço mínimo")
     menor_total = _somar_total(cartas_depois, "Menor Liga", "Preço Liga mais barato") + _somar_total(boosters_depois, "Menor Liga", "Preço Liga mais barato")
     media_total = _somar_total(cartas_depois, "Media Liga", "Preço Médio Liga") + _somar_total(boosters_depois, "Media Liga", "Preço médio Liga")
     mediana_total = _somar_total(cartas_depois, "Mediana Liga") + _somar_total(boosters_depois, "Mediana Liga")
@@ -147,12 +142,12 @@ def salvar_relatorio(
         "preçoTotalNovo": round(preco_novo, 2),
         "variaçãoAbsoluta": diferenca,
         "variaçãoPercentual": percentual,
-        "minimoCerteiroTotal": round(minimo_certeiro_total, 2),
-        "buylistTotal": round(buylist_total, 2),
+        "minimoTotal": round(minimo_total, 2),
         "menorLigaTotal": round(menor_total, 2),
         "mediaLigaTotal": round(media_total, 2),
         "medianaLigaTotal": round(mediana_total, 2),
         "vendaRapidaTotal": round(venda_rapida_total, 2),
+        "buylistTotal": round(venda_rapida_total, 2),
         "tempoExecucaoSegundos": duracao_total,
         "tempoExecucaoFormatado": _fmt_duracao(duracao_total),
         "execucoes": len(execucoes),
@@ -198,12 +193,11 @@ def salvar_relatorio(
         f"Preço total antigo: {_fmt(preco_antigo)}",
         f"Preço total novo: {_fmt(preco_novo)}",
         f"Variação: {_fmt(diferenca)}" + ("" if percentual is None else f" ({percentual:+.2f}%)".replace(".", ",")),
-        f"Mínimo certeiro total: {_fmt(minimo_certeiro_total)}",
-        f"Buylist total: {_fmt(buylist_total)}",
+        f"Mínimo total (50% do Menor Liga): {_fmt(minimo_total)}",
+        f"Venda rápida / buylist total: {_fmt(venda_rapida_total)}",
         f"Total pelo menor preço da Liga: {_fmt(menor_total)}",
         f"Total pela média da Liga: {_fmt(media_total)}",
         f"Total pela mediana da Liga: {_fmt(mediana_total)}",
-        f"Venda rápida total: {_fmt(venda_rapida_total)}",
         "",
         "VARIAÇÃO POR ITEM",
         "=" * 78,
@@ -211,14 +205,13 @@ def salvar_relatorio(
     for r in resultados:
         linhas.extend([
             f"{r.get('tipo','').upper()} | {r.get('nome')} | {r.get('id')}",
-            f"  Minimo Certeiro: {_fmt_var(r['Minimo Certeiro'])}",
-            f"  Minimo / buylist: {_fmt_var(r['Minimo (buylist)'])}",
+            f"  Minimo (50% do Menor Liga): {_fmt_var(r['Minimo'])}",
             f"  Menor Liga: {_fmt_var(r['Menor Liga'])}",
             f"  Segundo Menor Liga: {_fmt_var(r['Segundo Menor Liga'])}",
             f"  Terceiro Menor Liga: {_fmt_var(r['Terceiro Menor Liga'])}",
             f"  Media Liga: {_fmt_var(r['Media Liga'])}",
             f"  Mediana Liga: {_fmt_var(r['Mediana Liga'])}",
-            f"  Venda Rapida: {_fmt_var(r['Venda Rapida'])}",
+            f"  Venda Rapida / buylist: {_fmt_var(r['Venda Rapida'])}",
             f"  Status: {(r.get('Status') or {}).get('nível', 'OK')}",
         ])
         mercado = r.get("mercado") if isinstance(r.get("mercado"), dict) else {}

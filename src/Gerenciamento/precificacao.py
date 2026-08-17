@@ -433,7 +433,6 @@ def preco_objeto(dados: dict[str, Any], estimado: bool) -> dict[str, Any]:
     sufixo = "" if estimado else "_coletado"
     mediana_chave = "mediana" if estimado else "mediana_coletada"
     return {
-        "Minimo Certeiro": numero(dados.get(f"minimo_certeiro{sufixo}")),
         "Minimo": numero(dados.get(f"minimo{sufixo}")),
         "Menor Liga": numero(dados.get(f"menor{sufixo}")),
         "Segundo Menor Liga": numero(dados.get(f"segundo_menor{sufixo}")),
@@ -466,7 +465,7 @@ def registrar_historico(
         "cotacaoId": cotacao_id,
         "data": data,
         "sucesso": sucesso,
-        "Minimo Certeiro": numero(item.get("Minimo Certeiro") or item.get("Mínimo Certeiro")),
+        "pricingSchemaVersion": 2,
         "Minimo": numero(item.get("Minimo") or item.get("Preço mínimo")),
         "Menor Liga": numero(item.get("Menor Liga") or item.get("Preço Liga mais barato")),
         "Segundo Menor Liga": numero(item.get("Segundo Menor Liga")),

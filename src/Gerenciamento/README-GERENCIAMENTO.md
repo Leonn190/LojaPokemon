@@ -21,7 +21,7 @@ historico/
 └── movimentacoes.jsonl
 ```
 
-`cartas.jsonl` e `boosters.jsonl` guardam as cotizações. Cada linha é uma cotização independente com `itemId`, `cotacaoId`, data, preços, status, erro e `sucesso`. O histórico de mercado guarda `Minimo Certeiro`, `Minimo`, `Menor Liga`, `Segundo Menor Liga`, `Terceiro Menor Liga`, `Media Liga`, `Mediana Liga`, `Venda Rapida` e os contadores de compradores/vendedores; o campo `Preço` não entra no histórico porque é uma escolha manual do colecionador. O inventário mantém apenas `Última cotação` quando houve sucesso. Assim, uma falha não faz o item parecer atualizado e o inventário não cresce indefinidamente.
+`cartas.jsonl` e `boosters.jsonl` guardam as cotizações. Cada linha é uma cotização independente com `itemId`, `cotacaoId`, data, preços, status, erro e `sucesso`. O histórico de mercado guarda `Minimo`, `Menor Liga`, `Segundo Menor Liga`, `Terceiro Menor Liga`, `Media Liga`, `Mediana Liga`, `Venda Rapida` e os contadores de compradores/vendedores; o campo `Preço` não entra no histórico porque é uma escolha manual do colecionador. O inventário mantém apenas `Última cotação` quando houve sucesso. Assim, uma falha não faz o item parecer atualizado e o inventário não cresce indefinidamente.
 
 `movimentacoes.jsonl` é a timeline de estoque. Cada evento registra `eventId`, `updateId`, `collectionId`, `version`, `date`, `eventType`, `itemType`, `itemId`, nome, saldo anterior, delta, saldo posterior, origem e observação. A primeira formatação gera eventos de `entrada`; updates posteriores inferem entradas/saídas pela diferença de quantidade e preservam eventos explícitos de `venda` criados pelo botão **Vendi 1** do site. Assim, diminuir quantidade não apaga a história do item.
 
@@ -76,13 +76,12 @@ A conversão entre estados usa a diferença direta entre os fatores. Exemplo: SP
 
 As referências calculadas pelo gerenciador são:
 
-- `Minimo Certeiro` = `Menor Liga × 0,60`;
-- `Minimo` = maior buylist compatível;
+- `Minimo` = 50% do `Menor Liga`;
 - `Menor Liga` = menor oferta compatível;
 - `Segundo Menor Liga` e `Terceiro Menor Liga` = próximas ofertas compatíveis, úteis para medir profundidade;
 - `Media Liga` = média das ofertas compatíveis;
 - `Mediana Liga` = mediana das ofertas compatíveis;
-- `Venda Rapida` = `Menor Liga × 0,95`;
+- `Venda Rapida` = maior buylist compatível;
 - `Vendedores Geral` / `Compradores Geral` = participantes encontrados no mercado inteiro;
 - `Vendedores Específicos` / `Compradores Específicos` = participantes da mesma combinação de idioma + estado da carta (para boosters, o próprio produto).
 

@@ -12,18 +12,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 12.5,
+    "Minimo": 6.92,
     "Menor Liga": 13.85,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 13.7,
+    "Venda Rapida": 12.5,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Battle Styles",
@@ -38,18 +38,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 75.0,
+    "Minimo": 50.0,
     "Menor Liga": 100.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 90.0,
+    "Venda Rapida": 75.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Escuridão Incandescente",
@@ -64,18 +64,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 45.0,
+    "Minimo": 34.5,
     "Menor Liga": 69.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 62.0,
+    "Venda Rapida": 45.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Evolving Skies",
@@ -90,18 +90,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 380.0,
+    "Minimo": 225.0,
     "Menor Liga": 450.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 425.0,
+    "Venda Rapida": 380.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Sword & Shield",
@@ -116,18 +116,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 75.0,
+    "Minimo": 50.0,
     "Menor Liga": 100.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 90.0,
+    "Venda Rapida": 75.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Fenda Paradoxal",
@@ -142,18 +142,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 28.0,
+    "Minimo": 19.5,
     "Menor Liga": 39.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 33.0,
+    "Venda Rapida": 28.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Paradox Rift (suíço)",
@@ -168,18 +168,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 36.0,
+    "Minimo": null,
     "Menor Liga": null,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 50.0,
+    "Venda Rapida": 36.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Obsidiana em Chamas",
@@ -194,18 +194,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 17.5,
+    "Minimo": 12.0,
     "Menor Liga": 24.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 22.0,
+    "Venda Rapida": 17.5,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Origem Perdida",
@@ -220,18 +220,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 28.0,
+    "Minimo": 20.0,
     "Menor Liga": 40.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 35.0,
+    "Venda Rapida": 28.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Lost Origin",
@@ -246,18 +246,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 40.0,
+    "Minimo": null,
     "Menor Liga": null,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 58.0,
+    "Venda Rapida": 40.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Reinado Arrepiante",
@@ -272,18 +272,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 38.0,
+    "Minimo": 30.0,
     "Menor Liga": 60.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 52.0,
+    "Venda Rapida": 38.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Chilling Reign",
@@ -298,18 +298,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 86.0,
+    "Minimo": 60.0,
     "Menor Liga": 120.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 105.0,
+    "Venda Rapida": 86.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Fusion Strike",
@@ -324,18 +324,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 100.0,
+    "Minimo": null,
     "Menor Liga": null,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 135.0,
+    "Venda Rapida": 100.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Golpe Fusão",
@@ -350,18 +350,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 62.0,
+    "Minimo": 40.0,
     "Menor Liga": 80.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 72.0,
+    "Venda Rapida": 62.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Vivid Voltage",
@@ -376,18 +376,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 85.0,
+    "Minimo": null,
     "Menor Liga": null,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 100.0,
+    "Venda Rapida": 85.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Astros Cintilantes",
@@ -402,18 +402,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 58.0,
+    "Minimo": 40.0,
     "Menor Liga": 80.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 72.0,
+    "Venda Rapida": 58.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Brilliant Stars",
@@ -428,18 +428,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 100.0,
+    "Minimo": null,
     "Menor Liga": null,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 135.0,
+    "Venda Rapida": 100.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Amigos da Jornada",
@@ -454,18 +454,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 9.8,
+    "Minimo": 5.25,
     "Menor Liga": 10.49,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 10.25,
+    "Venda Rapida": 9.8,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Escarlate e Violeta",
@@ -480,18 +480,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 26.0,
+    "Minimo": 19.5,
     "Menor Liga": 39.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 35.0,
+    "Venda Rapida": 26.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Estrelas Radiantes",
@@ -506,18 +506,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 25.0,
+    "Minimo": 17.5,
     "Menor Liga": 35.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 32.0,
+    "Venda Rapida": 25.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Astral Radiance",
@@ -532,18 +532,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 72.0,
+    "Minimo": 45.0,
     "Menor Liga": 90.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 85.0,
+    "Venda Rapida": 72.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Evoluções em Paldea",
@@ -558,18 +558,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 20.0,
+    "Minimo": 15.0,
     "Menor Liga": 30.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 26.0,
+    "Venda Rapida": 20.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Megaevolução",
@@ -584,18 +584,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 8.0,
+    "Minimo": 4.45,
     "Menor Liga": 8.9,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 8.8,
+    "Venda Rapida": 8.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Realeza Absoluta",
@@ -610,18 +610,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 38.0,
+    "Minimo": 24.5,
     "Menor Liga": 49.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 45.0,
+    "Venda Rapida": 38.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Pokémon GO (americano)",
@@ -636,18 +636,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 50.0,
+    "Minimo": null,
     "Menor Liga": null,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 60.0,
+    "Venda Rapida": 50.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Pokémon GO (brasileiro)",
@@ -662,18 +662,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 35.0,
+    "Minimo": 22.5,
     "Menor Liga": 45.0,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 42.0,
+    "Venda Rapida": 35.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Caos Ascendente",
@@ -688,18 +688,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 7.0,
+    "Minimo": 3.92,
     "Menor Liga": 7.83,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 7.6,
+    "Venda Rapida": 7.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Caos Ascendente (suíço)",
@@ -714,18 +714,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 15.0,
+    "Minimo": null,
     "Menor Liga": null,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 20.0,
+    "Venda Rapida": 15.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Coroa Estelar",
@@ -740,18 +740,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 13.0,
+    "Minimo": 7.35,
     "Menor Liga": 14.7,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 14.5,
+    "Venda Rapida": 13.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Shining Fates",
@@ -766,18 +766,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 140.0,
+    "Minimo": 91.2,
     "Menor Liga": 182.4,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 170.0,
+    "Venda Rapida": 140.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Fogo Fantasmagórico",
@@ -792,18 +792,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 8.2,
+    "Minimo": 4.45,
     "Menor Liga": 8.9,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 8.85,
+    "Venda Rapida": 8.2,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Evoluções Prismáticas",
@@ -818,18 +818,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 11.0,
+    "Minimo": 6.09,
     "Menor Liga": 12.18,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 12.0,
+    "Venda Rapida": 11.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Equilíbrio Perfeito",
@@ -844,18 +844,18 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 7.0,
+    "Minimo": 3.91,
     "Menor Liga": 7.82,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 7.5,
+    "Venda Rapida": 7.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   },
   {
     "Tipo de pacote": "Equilíbrio Perfeito (suíço)",
@@ -870,17 +870,17 @@
       "nível": "OK",
       "motivos": []
     },
-    "Minimo Certeiro": null,
-    "Minimo": 15.0,
+    "Minimo": null,
     "Menor Liga": null,
     "Segundo Menor Liga": null,
     "Terceiro Menor Liga": null,
     "Media Liga": null,
     "Mediana Liga": null,
-    "Venda Rapida": 20.0,
+    "Venda Rapida": 15.0,
     "Vendedores Geral": 0,
     "Vendedores Específicos": 0,
     "Compradores Geral": 0,
-    "Compradores Específicos": 0
+    "Compradores Específicos": 0,
+    "pricingSchemaVersion": 2
   }
 ]

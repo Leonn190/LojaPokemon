@@ -37,8 +37,8 @@ interface OwnedItemBase {
 
 export interface PriceHistoryEntry {
   date: string;
-  minimumCertain: number | null;
-  minimumBuylist: number | null;
+  pricingSchemaVersion: 2;
+  minimum: number | null;
   leagueLowest: number | null;
   leagueSecond: number | null;
   leagueThird: number | null;
@@ -82,7 +82,7 @@ export interface CardItem extends OwnedItemBase {
   linkCardmarket: string;
   linkTcgplayer: string;
   linkPriceCharting: string;
-  certainMinimumPrice: number | null;
+  pricingSchemaVersion: 2;
   minimumPrice: number | null;
   quickSalePrice: number | null;
   leaguePrice: number | null;
@@ -103,7 +103,7 @@ export interface CardItem extends OwnedItemBase {
 export interface BoosterItem extends OwnedItemBase {
   kind: 'booster';
   linkLiga: string;
-  certainMinimumPrice: number | null;
+  pricingSchemaVersion: 2;
   minimumPrice: number | null;
   quickSalePrice: number | null;
   leaguePrice: number | null;
@@ -365,6 +365,35 @@ const parseDecimal = (value: unknown): number | null => {
     : cleaned;
   const parsed = Number(normalized);
   return Number.isFinite(parsed) ? parsed : null;
+};
+
+
+const readPricingSchemaVersion = (row: Record<string, any>): number => {
+  const raw = Number(row.pricingSchemaVersion ?? row['Pricing Schema Version'] ?? 0);
+  return Number.isFinite(raw) ? raw : 0;
+};
+
+/**
+ * Pricing schema v2:
+ * - Minimo = 50% do Menor Liga
+ * - Venda Rapida = melhor valor de buylist
+ *
+ * Collections created before v2 stored buylist in Minimo and a 95% Liga value in
+ * Venda Rapida. Keeping the conversion here makes old local snapshots safe to
+ * open without silently presenting the old meanings under the new labels.
+ */
+const normalizeMarketPricing = (row: Record<string, any>, leagueLowest: number | null) => {
+  const schemaV2 = readPricingSchemaVersion(row) >= 2;
+  const legacyBuylist = parseDecimal(row['Minimo'] ?? row['Preço mínimo']);
+  const storedMinimum = parseDecimal(row['Minimo'] ?? row['Preço mínimo']);
+  const storedQuickSale = parseDecimal(row['Venda Rapida'] ?? row['Venda rápida']);
+  return {
+    pricingSchemaVersion: 2 as const,
+    minimumPrice: leagueLowest === null
+      ? (schemaV2 ? storedMinimum : null)
+      : Math.round(leagueLowest * 50) / 100,
+    quickSalePrice: schemaV2 ? storedQuickSale : (legacyBuylist ?? storedQuickSale),
+  };
 };
 
 const parseQuantity = (value: unknown): number => {
@@ -667,7 +696,7 @@ export const getCollections = (): CollectorCollection[] => {
     const collectionSlug = slugify(folderName);
     const title = profile.title?.trim() || `Coleção de ${owner}`;
     const description = profile.description?.trim() || 'Coleção Pokémon organizada no Vault TCG.';
-    const showQuantity = profile.showQuantity !== false;
+    const showQuantity = false;
     const proposalTerms = normalizeProposalTerms(profile);
     const ownerPhone = profile.phone?.trim() || '';
     const usedImages = new Map<string, number>();
@@ -695,16 +724,18 @@ export const getCollections = (): CollectorCollection[] => {
     rawCardHistory.forEach((entry) => {
       const itemId = String(entry.itemId ?? entry.Id ?? '').trim();
       if (!itemId || entry.sucesso === false || entry.erro) return;
+      const leagueLowest = parseDecimal(entry['Menor Liga'] ?? entry['Preço Liga mais barato']);
+      const normalizedPricing = normalizeMarketPricing(entry, leagueLowest);
       const historyEntry: PriceHistoryEntry = {
         date: String(entry.data ?? ''),
-        minimumCertain: parseDecimal(entry['Minimo Certeiro'] ?? entry['Mínimo Certeiro']),
-        minimumBuylist: parseDecimal(entry['Minimo'] ?? entry['Preço mínimo']),
-        leagueLowest: parseDecimal(entry['Menor Liga'] ?? entry['Preço Liga mais barato']),
+        pricingSchemaVersion: 2,
+        minimum: normalizedPricing.minimumPrice,
+        leagueLowest,
         leagueSecond: parseDecimal(entry['Segundo Menor Liga']),
         leagueThird: parseDecimal(entry['Terceiro Menor Liga']),
         leagueAverage: parseDecimal(entry['Media Liga'] ?? entry['Preço Médio Liga'] ?? entry['Preço médio Liga']),
         leagueMedian: parseDecimal(entry['Mediana Liga']),
-        quickSale: parseDecimal(entry['Venda Rapida'] ?? entry['Venda rápida']),
+        quickSale: normalizedPricing.quickSalePrice,
         sellersGeneral: parseQuantity(entry['Vendedores Geral']),
         sellersSpecific: parseQuantity(entry['Vendedores Específicos']),
         buyersGeneral: parseQuantity(entry['Compradores Geral']),
@@ -721,16 +752,18 @@ export const getCollections = (): CollectorCollection[] => {
     rawBoosterHistory.forEach((entry) => {
       const itemId = String(entry.itemId ?? entry.Id ?? '').trim();
       if (!itemId || entry.sucesso === false || entry.erro) return;
+      const leagueLowest = parseDecimal(entry['Menor Liga'] ?? entry['Preço Liga mais barato']);
+      const normalizedPricing = normalizeMarketPricing(entry, leagueLowest);
       const historyEntry: PriceHistoryEntry = {
         date: String(entry.data ?? ''),
-        minimumCertain: parseDecimal(entry['Minimo Certeiro'] ?? entry['Mínimo Certeiro']),
-        minimumBuylist: parseDecimal(entry['Minimo'] ?? entry['Preço mínimo']),
-        leagueLowest: parseDecimal(entry['Menor Liga'] ?? entry['Preço Liga mais barato']),
+        pricingSchemaVersion: 2,
+        minimum: normalizedPricing.minimumPrice,
+        leagueLowest,
         leagueSecond: parseDecimal(entry['Segundo Menor Liga']),
         leagueThird: parseDecimal(entry['Terceiro Menor Liga']),
         leagueAverage: parseDecimal(entry['Media Liga'] ?? entry['Preço Médio Liga'] ?? entry['Preço médio Liga']),
         leagueMedian: parseDecimal(entry['Mediana Liga']),
-        quickSale: parseDecimal(entry['Venda Rapida'] ?? entry['Venda rápida']),
+        quickSale: normalizedPricing.quickSalePrice,
         sellersGeneral: parseQuantity(entry['Vendedores Geral']),
         sellersSpecific: parseQuantity(entry['Vendedores Específicos']),
         buyersGeneral: parseQuantity(entry['Compradores Geral']),
@@ -751,10 +784,8 @@ export const getCollections = (): CollectorCollection[] => {
       const year = String(row['Ano'] ?? '').trim() || 'Não informado';
       const type = String(row['Tipo'] ?? '').trim() || 'Não informado';
       const quantity = parseQuantity(row['Quantidade']);
-      const certainMinimumPrice = parseDecimal(row['Minimo Certeiro']) ?? parseDecimal(row['Mínimo Certeiro']);
-      const minimumPrice = parseDecimal(row['Minimo']) ?? parseDecimal(row['Preço mínimo']);
-      const quickSalePrice = parseDecimal(row['Venda Rapida']) ?? parseDecimal(row['Venda rápida']);
       const leaguePrice = parseDecimal(row['Menor Liga']) ?? parseDecimal(row['Preço Liga mais barato']);
+      const { pricingSchemaVersion, minimumPrice, quickSalePrice } = normalizeMarketPricing(row, leaguePrice);
       const secondLeaguePrice = parseDecimal(row['Segundo Menor Liga']);
       const thirdLeaguePrice = parseDecimal(row['Terceiro Menor Liga']);
       const averageLeaguePrice = parseDecimal(row['Media Liga']) ?? parseDecimal(row['Preço Médio Liga']) ?? parseDecimal(row['Preço médio Liga']);
@@ -791,7 +822,7 @@ export const getCollections = (): CollectorCollection[] => {
         linkCardmarket: String(row['Link Cardmarket'] ?? ''),
         linkTcgplayer: String(row['Link Tcgplayer'] ?? row['Link TCGPlayer'] ?? ''),
         linkPriceCharting: String(row['Link PriceCharting'] ?? ''),
-        certainMinimumPrice,
+        pricingSchemaVersion,
         minimumPrice,
         quickSalePrice,
         leaguePrice,
@@ -824,10 +855,8 @@ export const getCollections = (): CollectorCollection[] => {
       .map((row) => {
         const name = String(row['Tipo de pacote'] ?? row['Coleção'] ?? row['Nome'] ?? '').trim() || 'Booster sem nome';
         const quantity = parseQuantity(row['Quantidade']);
-        const certainMinimumPrice = parseDecimal(row['Minimo Certeiro']) ?? parseDecimal(row['Mínimo Certeiro']);
-        const minimumPrice = parseDecimal(row['Preço mínimo']) ?? parseDecimal(row['Minimo']);
-        const quickSalePrice = parseDecimal(row['Venda rápida']) ?? parseDecimal(row['Venda Rapida']);
         const leaguePrice = parseDecimal(row['Preço Liga mais barato']) ?? parseDecimal(row['Preço Mais Baixo Liga']) ?? parseDecimal(row['Menor Liga']);
+        const { pricingSchemaVersion, minimumPrice, quickSalePrice } = normalizeMarketPricing(row, leaguePrice);
         const secondLeaguePrice = parseDecimal(row['Segundo Menor Liga']);
         const thirdLeaguePrice = parseDecimal(row['Terceiro Menor Liga']);
         const averageLeaguePrice = parseDecimal(row['Media Liga']) ?? parseDecimal(row['Preço médio Liga']) ?? parseDecimal(row['Preço Médio Liga']);
@@ -850,7 +879,7 @@ export const getCollections = (): CollectorCollection[] => {
           forSale,
           showQuantity,
           linkLiga: String(row['Link Liga'] ?? ''),
-          certainMinimumPrice,
+          pricingSchemaVersion,
           minimumPrice,
           quickSalePrice,
           leaguePrice,
@@ -1043,7 +1072,7 @@ export const getEditableCollections = () => getCollections().map((collection) =>
       phone: profile.phone || '',
       password: profile.password || '',
       selling: collection.selling,
-      showQuantity: profile.showQuantity !== false,
+      showQuantity: false,
       featured: collection.featured,
       proposalTerms: collection.proposalTerms,
       version: Number((profile as Record<string, unknown>).version || 1),
@@ -1052,10 +1081,10 @@ export const getEditableCollections = () => getCollections().map((collection) =>
       palette: collection.palette,
       priceDisplayFallback: collection.priceDisplayFallback,
     },
-    cards: collection.cards.map(({ id, name, number, collection: set, language, condition, year, type, quantity, finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, favorite, priceHistory, advancedData, image, imageCandidates }) => ({
-      id, name, number, collection: set, language, condition, year, type, quantity, price: finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, favorite, priceHistory, advancedData, image, imageCandidates,
+    cards: collection.cards.map(({ id, name, number, collection: set, language, condition, year, type, quantity, finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, pricingSchemaVersion, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, favorite, priceHistory, advancedData, image, imageCandidates }) => ({
+      id, name, number, collection: set, language, condition, year, type, quantity, price: finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, pricingSchemaVersion, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, favorite, priceHistory, advancedData, image, imageCandidates,
     })),
-    boosters: collection.boosters.map(({ id, name, quantity, finalPrice, forSale, linkLiga, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, priceHistory, advancedData, image, imageCandidates }) => ({ id, name, quantity, price: finalPrice, forSale, linkLiga, certainMinimumPrice, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, priceHistory, advancedData, image, imageCandidates })),
+    boosters: collection.boosters.map(({ id, name, quantity, finalPrice, forSale, linkLiga, pricingSchemaVersion, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, priceHistory, advancedData, image, imageCandidates }) => ({ id, name, quantity, price: finalPrice, forSale, linkLiga, pricingSchemaVersion, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, priceHistory, advancedData, image, imageCandidates })),
     kits: collection.kits.map(({ id, name, description, contents, contentItems, sourceTotal, quantity, price, forSale, image, imageCandidates }) => ({ id, name, description, contents, contentItems, sourceTotal, quantity, price, forSale, image, imageCandidates })),
     products: collection.products.map(({ id, name, description, quantity, price, forSale, linkLiga, image, imageCandidates }) => ({ id, name, description, quantity, price, forSale, linkLiga, image, imageCandidates })),
     albums: collection.albums.map((album) => ({
