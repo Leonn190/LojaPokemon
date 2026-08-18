@@ -787,3 +787,13 @@
   .password-change-form { grid-template-columns: 1fr; }
   .password-change-form .form-field:first-child { grid-column: auto; }
 }
+
+/* MYP autofill + cotação no backend */
+.myp-autofill-section { border-color: rgba(84,232,223,.18); background: linear-gradient(145deg, rgba(84,232,223,.045), rgba(255,255,255,.012)); }
+.myp-autofill-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.myp-autofill-actions small { color:var(--muted-2); font-size:.49rem; line-height:1.45; }
+.myp-autofill-actions small[data-state="success"] { color:#79e69c; }
+.myp-autofill-actions small[data-state="error"] { color:#ff8194; }
+.myp-autofill-actions small[data-state="loading"] { color:#54e8df; }
+.security-feedback[data-state="loading"] { color:#54e8df; }
+.security-feedback[data-state="warning"] { color:#f4c25c; }

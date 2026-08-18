@@ -65,14 +65,16 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
               <article><span>▤</span><small>Álbuns</small><strong data-dashboard-albums>0</strong><em>álbuns criados</em></article>
               <article><span>▦</span><small>Kits</small><strong data-dashboard-kits>0</strong><em>unidades na coleção</em></article>
             </div>
-            <section class="editor-card-valuation" aria-label="Cotação das cartas">
-              <header><div><span class="section-eyebrow">Somente cartas</span><h4>Cotação da coleção</h4></div><small>Totais ponderados pela quantidade de cada carta</small></header>
+            <section class="editor-card-valuation" aria-label="Cotação das cartas pela MYP">
+              <header><div><span class="section-eyebrow">Somente cartas</span><h4>Cotação MYP da coleção</h4><small>Totais ponderados pela quantidade. As cartas antigas passam a usar a MYP quando forem recotizadas.</small></div><button type="button" class="secondary-cta compact" data-refresh-myp-quotes><span>Atualizar cotações MYP</span><b>↻</b></button></header>
               <div class="editor-card-valuation-grid">
-                <article><small>Valor médio</small><strong data-dashboard-card-average>R$ 0,00</strong></article>
-                <article><small>Menor da Liga</small><strong data-dashboard-card-league>R$ 0,00</strong></article>
-                <article><small>Venda rápida</small><strong data-dashboard-card-quick>R$ 0,00</strong><em>buylist</em></article>
-                <article><small>Mínimo</small><strong data-dashboard-card-minimum>R$ 0,00</strong><em>50% do Menor da Liga</em></article>
+                <article><small>Mais barato certificado</small><strong data-dashboard-card-certified-low>R$ 0,00</strong></article>
+                <article><small>Mais barato geral</small><strong data-dashboard-card-general-low>R$ 0,00</strong></article>
+                <article><small>Média certificada</small><strong data-dashboard-card-certified-average>R$ 0,00</strong></article>
+                <article><small>Média geral</small><strong data-dashboard-card-general-average>R$ 0,00</strong></article>
+                <article><small>Mínimo</small><strong data-dashboard-card-minimum>R$ 0,00</strong><em>50% do mais barato certificado</em></article>
               </div>
+              <p class="security-feedback" data-myp-refresh-feedback></p>
             </section>
             <section class="account-score-section" aria-label="Scores da conta">
               <header class="account-score-heading">
@@ -236,7 +238,7 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         <header><div><span class="section-eyebrow">Negociação</span><h3>Termos de propostas da coleção</h3><p>Essas regras são exibidas publicamente e usadas pelo site para bloquear propostas incompatíveis.</p></div><span class="proposal-settings-badge">Pix após aceite</span></header>
         <div class="workspace-proposal-grid">
           <label><span>Regra principal</span><select data-proposal-policy><option value="flexible">Sou flexível quanto às regras</option><option value="none">Não aceito nenhuma proposta</option><option value="fixed_price_multi_only">Sem proposta para cartas precificadas e somente com mais de um produto</option><option value="no_defined_price">Sem proposta para cartas com preço definido</option><option value="multi_only">Propostas apenas com mais de um produto</option></select></label>
-          <label><span>Preço exibido quando “Preço” estiver vazio</span><select data-price-display-fallback><option value="league_average_then_lowest">Média Liga; se faltar, Menor Liga</option><option value="league_lowest_then_average">Menor Liga; se faltar, Média Liga</option><option value="consult">Mostrar “Consultar”</option></select></label>
+          <label><span>Preço exibido quando “Preço” estiver vazio</span><select data-price-display-fallback><option value="league_average_then_lowest">Média de mercado; se faltar, menor preço</option><option value="league_lowest_then_average">Menor preço; se faltar, média de mercado</option><option value="consult">Mostrar “Consultar”</option></select></label>
           <label class="proposal-flexible-check"><input type="checkbox" data-flexible-discounts /><span><strong>Descontos flexíveis</strong><small>Permite que o comprador sugira qualquer percentual.</small></span></label>
         </div>
         <div class="workspace-tier-heading"><div><strong>Marcos máximos de desconto</strong><small>O maior marco alcançado pelo valor da proposta define o limite.</small></div><button type="button" data-add-discount-tier><span>＋</span> Adicionar marco</button></div>
@@ -314,8 +316,15 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
       <section class="editor-modal-dialog editor-form-dialog tcg-item-dialog" role="dialog" aria-modal="true" aria-labelledby="card-modal-title">
         <header class="editor-modal-header"><div><span class="section-eyebrow" data-card-modal-eyebrow>Nova carta</span><h2 id="card-modal-title">Adicionar carta</h2><p>Identifique a impressão com metadados próprios. Coleção, classe, tipo e integridade são liberados conforme as escolhas anteriores.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
         <form class="editor-item-form editor-modal-form" data-card-form data-edit-index="">
+          <div class="modal-form-section myp-autofill-section">
+            <header><strong>Preencher informações automaticamente</strong><small>Cole o link da carta na MYP. Nome, numeração, ano, Era, coleção, grupo, classe, tipo, imagem e cotação serão preenchidos pela API do Vault.</small></header>
+            <div class="modal-form-grid">
+              <label class="wide"><span>Link da MYP</span><input name="linkMyp" type="url" placeholder="https://mypcards.com/pokemon/produto/..." data-card-myp-link /></label>
+              <div class="wide myp-autofill-actions"><button type="button" class="secondary-cta" data-card-myp-fill><span>Preencher pela MYP</span><b>↯</b></button><small data-card-myp-status>Você ainda poderá revisar qualquer campo antes de adicionar.</small></div>
+            </div>
+          </div>
           <div class="modal-form-section">
-            <header><strong>Informações principais</strong><small>Nome, numeração e ano da impressão.</small></header>
+            <header><strong>Informações principais</strong><small>Preenchidas automaticamente pela MYP ou manualmente.</small></header>
             <div class="modal-form-grid">
               <label class="wide"><span>Nome da carta</span><input name="name" required placeholder="Ex.: Giratina V" /></label>
               <label><span>Numeração</span><input name="number" required maxlength="40" placeholder="Ex.: 251/198, GG65/GG70, SVP 001" /></label>
@@ -323,14 +332,14 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
             </div>
           </div>
           <div class="modal-form-section">
-            <header><strong>Classificação</strong><small>As opções incompatíveis são eliminadas automaticamente.</small></header>
+            <header><strong>Classificação</strong><small>A MYP preenche estes campos; você pode revisar antes de salvar.</small></header>
             <div class="modal-form-grid">
               <label><span>Era</span><select name="era" required data-card-era><option value="">Selecione a Era</option>{Object.values(TCG_CONFIG.eras).map((era) => <option value={era.id}>{era.label}</option>)}</select></label>
               <label><span>Grupo</span><select name="group" required data-card-group><option value="">Selecione o Grupo</option>{TCG_CONFIG.groups.map((group) => <option value={group.id}>{group.label}</option>)}</select></label>
               <label><span>Estado</span><select name="condition" required data-card-condition><option value="">Selecione o Estado</option><option value="NM">NM</option><option value="SP">SP</option><option value="MP">MP</option><option value="HP">HP</option><option value="D">D</option></select></label>
               <label data-card-field="collection" hidden><span>Coleção</span><select name="collectionId" required disabled data-card-collection></select><small data-card-collection-code></small></label>
               <label data-card-field="class" hidden><span>Classe</span><select name="cardClass" required disabled data-card-class></select></label>
-              <label data-card-field="integrity" hidden><span>Integridade</span><div class="integrity-input-wrap"><input name="integrity" type="number" required disabled data-card-integrity /><b>%</b></div><small data-card-integrity-hint></small></label>
+              <label data-card-field="integrity" hidden><span>Integridade</span><div class="integrity-input-wrap"><input name="integrity" type="number" required disabled data-card-integrity /><b>%</b></div><small data-card-integrity-hint>Valor sugerido pelo Estado; ajuste se quiser informar com mais precisão.</small></label>
               <label data-card-field="type" hidden><span>Tipo</span><select name="type" required disabled data-card-type></select><small>Somente para Grupo Pokémon.</small></label>
               <label><span>Idioma</span><select name="language" required data-card-language><option value="">Selecione o Idioma</option>{TCG_CONFIG.languages.map((language) => <option value={language.id} selected={language.id === 'BR'}>{language.label}</option>)}</select></label>
             </div>
@@ -363,7 +372,7 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
           <main class="card-advanced-main">
             <div class="card-market-metrics" data-card-market-metrics></div>
             <section class="card-chart-panel">
-              <header><div><strong>Histórico de preços</strong><small>Minimo, Menor Liga, Media Liga, Mediana Liga e Venda Rapida.</small></div><span data-card-chart-period></span></header>
+              <header><div><strong>Histórico de preços</strong><small>Referências de mercado registradas em cada cotização.</small></div><span data-card-chart-period></span></header>
               <div class="card-price-chart" data-card-price-chart></div>
               <div class="card-chart-legend" data-card-chart-legend></div>
             </section>
@@ -547,6 +556,7 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
       let selectedAlbumCardId = '';
       let activeKitEditIndex = -1;
       let activeCardEditIndex = -1;
+      let cardMypDraft = null;
       let activeBoosterEditIndex = -1;
       let boosterImagesDraft = [''];
       let profileDirty = false;
@@ -725,7 +735,7 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         const imageKey = clean(item?._id || item?.itemId || item?.id || item?.albumId || '');
         return `<div class="inventory-thumb"><span>${escapeHtml(initials)}</span>${urls[0] ? `<img src="${escapeHtml(urls[0])}" alt="${escapeHtml(name)}" loading="lazy" data-image-candidates="${escapeHtml(JSON.stringify(urls.slice(1)))}" data-image-index="0" data-image-item-id="${escapeHtml(imageKey)}" />` : ''}</div>`;
       };
-      const itemPrice = (item) => item?.price ?? item?.leaguePrice ?? null;
+      const itemPrice = (item) => item?.price ?? item?.averageGeneralPrice ?? item?.cheapestGeneralPrice ?? item?.leaguePrice ?? null;
       const itemName = (item, kind) => item?.name || item?.collection || getNameFromLink(item?.linkLiga || '', kind === 'cards' ? 'Carta sem nome' : kind === 'products' ? 'Produto Pokémon' : 'Booster sem nome');
       const allMovements = () => state ? [...(state.movements || []), ...(state.pendingMovements || [])] : [];
       const queueSaleMovement = (kind, item, before, after) => {
@@ -815,20 +825,28 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
           condition: clean(item.condition || item.Estado || '').toUpperCase(),
           integrity,
           quantity: toQuantity(item.quantity ?? item.Quantidade),
-          pricingSchemaVersion: 2, minimumPrice: null, quickSalePrice: null, leaguePrice: toPrice(item.leaguePrice), secondLeaguePrice: toPrice(item.secondLeaguePrice), thirdLeaguePrice: toPrice(item.thirdLeaguePrice), averageLeaguePrice: toPrice(item.averageLeaguePrice), medianLeaguePrice: toPrice(item.medianLeaguePrice), price: toPrice(item.price ?? item.Preço),
+          pricingSchemaVersion: Number(item.pricingSchemaVersion || 0), pricingSource: clean(item.pricingSource || item['Fonte de cotação'] || ''),
+          minimumPrice: toPrice(item.minimumPrice), cheapestCertifiedPrice: toPrice(item.cheapestCertifiedPrice ?? item.mypCheapestCertified), cheapestGeneralPrice: toPrice(item.cheapestGeneralPrice ?? item.mypCheapestGeneral), averageCertifiedPrice: toPrice(item.averageCertifiedPrice ?? item.mypAverageCertified), averageGeneralPrice: toPrice(item.averageGeneralPrice ?? item.mypAverageGeneral), price: toPrice(item.price ?? item.Preço),
+          certifiedOffers: Number(item.certifiedOffers ?? item.mypCertifiedOffers ?? 0), otherOffers: Number(item.otherOffers ?? item.mypOtherOffers ?? 0), totalOffers: Number(item.totalOffers ?? item.mypTotalOffers ?? 0),
+          leaguePrice: toPrice(item.leaguePrice), secondLeaguePrice: toPrice(item.secondLeaguePrice), thirdLeaguePrice: toPrice(item.thirdLeaguePrice), averageLeaguePrice: toPrice(item.averageLeaguePrice), medianLeaguePrice: toPrice(item.medianLeaguePrice), quickSalePrice: toPrice(item.quickSalePrice),
           sellersGeneral: Number(item.sellersGeneral || 0), sellersSpecific: Number(item.sellersSpecific || 0), buyersGeneral: Number(item.buyersGeneral || 0), buyersSpecific: Number(item.buyersSpecific || 0),
           linkLiga: item.linkLiga || item['Link Liga'] || '', linkMyp: item.linkMyp || item['Link MYP'] || '', linkCardmarket: item.linkCardmarket || item['Link Cardmarket'] || '', linkTcgplayer: item.linkTcgplayer || item['Link Tcgplayer'] || '', linkPriceCharting: item.linkPriceCharting || item['Link PriceCharting'] || '',
           favorite: item.favorite === true || item.Favorita === true, priceHistory: Array.isArray(item.priceHistory) ? item.priceHistory : [], advancedData: item.advancedData && typeof item.advancedData === 'object' ? item.advancedData : {},
           forSale: item.forSale !== false && item['À venda'] !== false, image, imageCandidates: Array.isArray(item.imageCandidates) && item.imageCandidates.length ? item.imageCandidates : image ? [image] : [],
         };
-        const pricingV2 = Number(item.pricingSchemaVersion || 0) >= 2;
-        const legacyBuylist = toPrice(item.minimumPrice);
-        normalized.minimumPrice = normalized.leaguePrice === null ? (pricingV2 ? legacyBuylist : null) : Math.round(normalized.leaguePrice * 50) / 100;
-        normalized.quickSalePrice = pricingV2 ? toPrice(item.quickSalePrice) : (legacyBuylist ?? toPrice(item.quickSalePrice));
+        const hasMypPricing = [normalized.cheapestCertifiedPrice, normalized.cheapestGeneralPrice, normalized.averageCertifiedPrice, normalized.averageGeneralPrice].some((value) => value !== null);
+        if (hasMypPricing || normalizeText(normalized.pricingSource) === 'myp') {
+          normalized.pricingSchemaVersion = Math.max(3, Number(normalized.pricingSchemaVersion || 0));
+          normalized.pricingSource = 'MYP';
+          normalized.minimumPrice = normalized.cheapestCertifiedPrice === null ? toPrice(item.minimumPrice) : Math.round(normalized.cheapestCertifiedPrice * 50) / 100;
+        } else {
+          // Compatibilidade de leitura com registros antigos. A interface e novas cotações usam somente MYP.
+          normalized.minimumPrice = toPrice(item.minimumPrice);
+        }
         normalized.searchText = normalizeText(`${normalized.name} ${normalized.number} ${normalized.collection} ${normalized.collectionCode} ${eraDisplay(normalized.era)} ${groupDisplay(normalized.group)} ${normalized.cardClass} ${normalized.type} ${languageDisplay(normalized.language)} ${normalized.condition} ${normalized.integrity ?? ''} ${normalized.year}`);
         normalized._id = item._id || item.id || item.Id || stableCardId(normalized);
         normalized._isNew = item._isNew ?? isNew;
-        normalized._isDirty = item._isDirty ?? (!pricingV2 && !isNew);
+        normalized._isDirty = item._isDirty ?? isNew;
         return normalized;
       };
       const normalizeBooster = (item = {}, isNew = false) => {
@@ -953,8 +971,9 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         if (range) {
           setFieldVisible('[data-card-field="integrity"]', true);
           integrity.min = String(range.min); integrity.max = String(range.max);
-          if (resetIntegrity || (integrity.value && (Number(integrity.value) < range.min || Number(integrity.value) > range.max))) integrity.value = '';
-          const hint = root.querySelector('[data-card-integrity-hint]'); if (hint) hint.textContent = `${range.min}% – ${range.max}% para ${condition}`;
+          const suggestedIntegrity = Math.round((Number(range.min) + Number(range.max)) / 2);
+          if (resetIntegrity || !integrity.value || Number(integrity.value) < range.min || Number(integrity.value) > range.max) integrity.value = String(suggestedIntegrity);
+          const hint = root.querySelector('[data-card-integrity-hint]'); if (hint) hint.textContent = `${range.min}% – ${range.max}% para ${condition} · sugestão automática: ${suggestedIntegrity}%`;
         } else {
           setFieldVisible('[data-card-field="integrity"]', false); if (integrity) integrity.value = '';
           const hint = root.querySelector('[data-card-integrity-hint]'); if (hint) hint.textContent = '';
@@ -1006,6 +1025,108 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         if (!clean(payload.number) || clean(payload.number).length > 40) return 'Informe uma Numeração válida.';
         return '';
       };
+      const mypHistoryEntry = (result) => {
+        const prices = result?.prices || {};
+        return {
+          date: result?.fetchedAt || new Date().toISOString(),
+          pricingSchemaVersion: 3,
+          source: 'MYP',
+          minimum: toPrice(prices.minimum),
+          cheapestCertified: toPrice(prices.cheapestCertified),
+          cheapestGeneral: toPrice(prices.cheapestGeneral),
+          averageCertified: toPrice(prices.averageCertified),
+          averageGeneral: toPrice(prices.averageGeneral),
+        };
+      };
+      const mypCardPatch = (result, current = {}) => {
+        const prices = result?.prices || {};
+        const quote = mypHistoryEntry(result);
+        const history = Array.isArray(current.priceHistory) ? [...current.priceHistory] : [];
+        const last = history[history.length - 1];
+        const sameQuote = last && ['minimum', 'cheapestCertified', 'cheapestGeneral', 'averageCertified', 'averageGeneral'].every((field) => toPrice(last[field]) === toPrice(quote[field]));
+        if (!sameQuote || clean(last?.source).toUpperCase() !== 'MYP') history.push(quote);
+        return {
+          pricingSchemaVersion: 3,
+          pricingSource: 'MYP',
+          linkMyp: clean(result?.linkMyp || current.linkMyp || ''),
+          minimumPrice: toPrice(prices.minimum),
+          cheapestCertifiedPrice: toPrice(prices.cheapestCertified),
+          cheapestGeneralPrice: toPrice(prices.cheapestGeneral),
+          averageCertifiedPrice: toPrice(prices.averageCertified),
+          averageGeneralPrice: toPrice(prices.averageGeneral),
+          certifiedOffers: Number(prices.certifiedOffers || 0),
+          otherOffers: Number(prices.otherOffers || 0),
+          totalOffers: Number(prices.totalOffers || 0),
+          priceHistory: history.slice(-120),
+          advancedData: {
+            ...(current.advancedData || {}),
+            MYP: {
+              fonte: 'MYP Cards',
+              codigo: result?.metadata?.mypCode || '',
+              codigoEdicao: result?.mypEditionCode || '',
+              tipoCarta: result?.metadata?.cardType || '',
+              raridade: result?.metadata?.rarity || '',
+              lancamento: result?.metadata?.releaseDate || '',
+              hp: result?.metadata?.hp || '',
+              ilustrador: result?.metadata?.illustrator || '',
+              ofertasCertificadas: Number(prices.certifiedOffers || 0),
+              ofertasOutrosVendedores: Number(prices.otherOffers || 0),
+              ofertasTotais: Number(prices.totalOffers || 0),
+            },
+            'Última cotação': { data: quote.date, fonte: 'MYP' },
+          },
+        };
+      };
+      const setCardAutofillStatus = (message, mode = '') => {
+        const node = root.querySelector('[data-card-myp-status]');
+        if (!node) return;
+        node.textContent = message;
+        if (mode) node.dataset.state = mode; else delete node.dataset.state;
+      };
+      const applyMypResultToCardForm = (result) => {
+        const form = root.querySelector('[data-card-form]');
+        if (!form) throw new Error('Formulário de carta não encontrado.');
+        if (!result?.eraId || !getEraConfig(result.eraId)) throw new Error('A Era retornada pela MYP ainda não está mapeada no Vault.');
+        const groupId = normalizeGroupId(result.groupId || result.group);
+        if (!groupId) throw new Error('O Grupo retornado pela MYP ainda não está mapeado no Vault.');
+        form.elements.linkMyp.value = clean(result.linkMyp || form.elements.linkMyp.value);
+        form.elements.name.value = clean(result.name);
+        form.elements.number.value = clean(result.number);
+        form.elements.year.value = result.year || '';
+        form.elements.era.value = clean(result.eraId);
+        form.elements.group.value = groupId;
+        syncCardForm({ resetCollection: true, resetClass: true, resetType: true });
+        const collection = findCollection(result.eraId, result.collectionId || result.collection);
+        if (!collection) throw new Error(`A coleção "${result.collection || 'retornada pela MYP'}" ainda não está mapeada no Vault.`);
+        form.elements.collectionId.value = collection.id;
+        syncCardForm();
+        if (!getEraConfig(result.eraId)?.classes?.[groupId]?.includes(result.cardClass)) throw new Error(`A classe "${result.cardClass || 'desconhecida'}" retornada pela MYP ainda não está mapeada para esta Era.`);
+        form.elements.cardClass.value = result.cardClass;
+        if (groupId === 'pokemon') {
+          const era = getEraConfig(result.eraId);
+          if (!era?.pokemonTypes?.includes(result.type)) throw new Error(`O tipo "${result.type || 'desconhecido'}" retornado pela MYP ainda não está mapeado para esta Era.`);
+          form.elements.type.value = result.type;
+        }
+        form.elements.image.value = clean(result.image);
+        cardMypDraft = result;
+        const prices = result.prices || {};
+        setCardAutofillStatus(`Preenchido pela MYP · certificado ${prettyPrice(prices.cheapestCertified)} · geral ${prettyPrice(prices.cheapestGeneral)} · mínimo ${prettyPrice(prices.minimum)}`, 'success');
+      };
+      const refreshMypQuoteForCard = async (item) => {
+        if (!clean(item?.linkMyp)) throw new Error('Esta carta ainda não possui link da MYP.');
+        const result = await window.VaultCloud?.fetchMypCardInfo?.(item.linkMyp);
+        if (!result) throw new Error('A API MYP não retornou dados.');
+        const patched = normalizeCard({
+          ...item,
+          ...mypCardPatch(result, item),
+          image: item.image || result.image || '',
+          imageCandidates: item.imageCandidates?.length ? item.imageCandidates : (result.image ? [result.image] : []),
+        }, false);
+        patched._isNew = item._isNew;
+        patched._isDirty = true;
+        return patched;
+      };
+
       const validateBoosterPayload = (payload) => {
         const era = getEraConfig(payload.era); if (!era) return 'Selecione uma Era válida.';
         const collection = findCollection(era.id, payload.collectionId); if (!collection) return 'Selecione uma Coleção pertencente à Era escolhida.';
@@ -1017,10 +1138,12 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
       };
       const resetCardForm = () => {
         activeCardEditIndex = -1;
+        cardMypDraft = null;
         const form = root.querySelector('[data-card-form]'); if (!form) return;
         form.reset(); form.dataset.editIndex = '';
         form.elements.quantity.value = 1; form.elements.language.value = 'BR'; form.elements.forSale.checked = true;
         showFormFeedback('[data-card-form-feedback]');
+        const mypStatus = root.querySelector('[data-card-myp-status]'); if (mypStatus) mypStatus.textContent = 'Você ainda poderá revisar qualquer campo antes de adicionar.';
         const title = root.querySelector('#card-modal-title'); if (title) title.textContent = 'Adicionar carta';
         const eyebrow = root.querySelector('[data-card-modal-eyebrow]'); if (eyebrow) eyebrow.textContent = 'Nova carta';
         const submit = root.querySelector('[data-card-submit-label]'); if (submit) submit.textContent = 'Adicionar carta';
@@ -1028,7 +1151,8 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
       };
       const openCardEditor = (index) => {
         const item = state?.cards?.[index]; const form = root.querySelector('[data-card-form]'); if (!item || !form) return;
-        activeCardEditIndex = index; form.dataset.editIndex = String(index); form.reset();
+        activeCardEditIndex = index; cardMypDraft = null; form.dataset.editIndex = String(index); form.reset();
+        form.elements.linkMyp.value = item.linkMyp || '';
         form.elements.name.value = item.name || ''; form.elements.number.value = item.number || ''; form.elements.year.value = item.year || '';
         form.elements.era.value = item.era || inferEraFromCollection(item.collection); form.elements.group.value = item.group || '';
         form.elements.condition.value = item.condition || ''; form.elements.language.value = normalizeLanguageCode(item.language) || '';
@@ -1040,6 +1164,8 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         const title = root.querySelector('#card-modal-title'); if (title) title.textContent = `Editar ${item.name || 'carta'}`;
         const eyebrow = root.querySelector('[data-card-modal-eyebrow]'); if (eyebrow) eyebrow.textContent = 'Editar carta';
         const submit = root.querySelector('[data-card-submit-label]'); if (submit) submit.textContent = 'Salvar alterações';
+        const mypStatus = root.querySelector('[data-card-myp-status]');
+        if (mypStatus) mypStatus.textContent = item.pricingSource === 'MYP' ? `Cotação MYP carregada · ${formatQuoteDate(lastQuoteDate(item))}` : 'Cole um link MYP e clique em preencher para atualizar os dados e a cotação.';
         showFormFeedback('[data-card-form-feedback]'); openModal('card');
       };
       const resetBoosterForm = () => {
@@ -1338,7 +1464,9 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
             history.slice(-24).forEach((entry, index) => {
               const date = quoteDate(entry);
               if (!date) return;
-              const price = toPrice(entry.leagueLowest ?? entry.leaguePrice ?? entry['Menor Liga']);
+              const price = kind === 'cards'
+                ? toPrice(entry.cheapestCertified ?? entry['Mais Barato Certificado'] ?? entry.leagueLowest ?? entry.leaguePrice ?? entry['Menor Liga'])
+                : toPrice(entry.leagueLowest ?? entry.leaguePrice ?? entry['Menor Liga']);
               rows.push({
                 eventId: `price:${item._id}:${date}:${index}`,
                 eventType: 'price_update',
@@ -1347,7 +1475,7 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
                 name: itemName(item, kind),
                 date,
                 price,
-                note: price === null ? 'Cotização atualizada.' : `Menor Liga atualizado para ${prettyPrice(price)}.`,
+                note: price === null ? 'Cotização atualizada.' : `${kind === 'cards' ? 'Mais barato certificado MYP' : 'Menor Liga'} atualizado para ${prettyPrice(price)}.`,
                 version: 0,
               });
             });
@@ -1369,8 +1497,10 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
           else if (invalidImageKeys.has(clean(item._id || item.id || item.albumId || ''))) add('critical', kind, index, 'image-invalid', `${name}: imagem inválida`, 'Nenhuma das imagens cadastradas pôde ser carregada neste navegador.');
           if (itemPrice(item) === null) add('warning', kind, index, 'price', `${name}: sem preço`, 'O item será exibido como “Consultar” quando não houver referência disponível.');
           if (!clean(item.name)) add('critical', kind, index, 'info', 'Item sem nome', 'Preencha as informações básicas do item.');
-          if ((kind === 'cards' || kind === 'boosters') && !toPrice(item.price) && !toPrice(item.leaguePrice) && !(item.priceHistory || []).length) add('warning', kind, index, 'quote', `${name}: ainda não cotizado`, 'Nenhuma referência de cotização foi encontrada.');
+          if (kind === 'cards' && !toPrice(item.price) && !toPrice(item.cheapestCertifiedPrice) && !(item.priceHistory || []).length) add('warning', kind, index, 'quote', `${name}: ainda não cotizado na MYP`, 'Adicione o link da MYP ou atualize as cotações para obter as referências de mercado.');
+          if (kind === 'boosters' && !toPrice(item.price) && !toPrice(item.leaguePrice) && !(item.priceHistory || []).length) add('warning', kind, index, 'quote', `${name}: ainda não cotizado`, 'Nenhuma referência de cotização foi encontrada.');
           if (kind === 'cards') {
+            if (!clean(item.linkMyp)) add('warning', kind, index, 'myp-link', `${name}: sem link MYP`, 'O link da MYP é necessário para preencher e recotizar esta carta automaticamente.');
             if (!clean(item.condition)) add('critical', kind, index, 'condition', `${name}: sem estado`, 'Defina o estado de conservação.');
             if (!clean(item.language)) add('critical', kind, index, 'language', `${name}: sem idioma`, 'Defina o idioma da carta.');
             if (!clean(item.collection)) add('warning', kind, index, 'collection', `${name}: coleção Pokémon ausente`, 'Informe a coleção para melhorar busca e estatísticas.');
@@ -1474,10 +1604,12 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         root.querySelector('[data-dashboard-products]').textContent = String(quantityOf(state.products));
         root.querySelector('[data-dashboard-albums]').textContent = String(state.albums.length);
         root.querySelector('[data-dashboard-kits]').textContent = String(quantityOf(state.kits));
-        root.querySelector('[data-dashboard-card-average]').textContent = prettyPrice(cardMetricTotal('averageLeaguePrice'));
-        root.querySelector('[data-dashboard-card-league]').textContent = prettyPrice(cardMetricTotal('leaguePrice'));
-        root.querySelector('[data-dashboard-card-quick]').textContent = prettyPrice(cardMetricTotal('quickSalePrice'));
-        root.querySelector('[data-dashboard-card-minimum]').textContent = prettyPrice(cardMetricTotal('minimumPrice'));
+        const dashboardMetric = (selector, field) => { const node = root.querySelector(selector); if (node) node.textContent = prettyPrice(cardMetricTotal(field)); };
+        dashboardMetric('[data-dashboard-card-certified-low]', 'cheapestCertifiedPrice');
+        dashboardMetric('[data-dashboard-card-general-low]', 'cheapestGeneralPrice');
+        dashboardMetric('[data-dashboard-card-certified-average]', 'averageCertifiedPrice');
+        dashboardMetric('[data-dashboard-card-general-average]', 'averageGeneralPrice');
+        dashboardMetric('[data-dashboard-card-minimum]', 'minimumPrice');
         renderAccountScores();
         renderSales();
         renderProposals();
@@ -1515,43 +1647,62 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
             <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>${escapeHtml(item.number || 'Sem numeração')}</small><em>${escapeHtml(`${item.collection || 'Coleção a consultar'}${collectionCode}`)}</em></div></div>
             <div class="inventory-info-cell"><span>${escapeHtml(eraDisplay(item.era) || 'Era —')}</span><span>${escapeHtml(groupDisplay(item.group) || 'Grupo —')}</span><span>${escapeHtml(item.cardClass || 'Classe —')}</span>${item.group === 'pokemon' && item.type ? `<span>${escapeHtml(item.type)}</span>` : ''}<span>${escapeHtml(languageDisplay(item.language) || 'Idioma —')}</span><span>${escapeHtml(`${item.condition || 'Estado —'} · ${integrityLabel}`)}</span><span>${escapeHtml(item.year || 'Ano —')}</span></div>
             <div class="inventory-links-cell">${linkButtons([{ label: 'MYP', url: item.linkMyp }, { label: 'Cardmarket', url: item.linkCardmarket }, { label: 'TCGplayer', url: item.linkTcgplayer }, { label: 'PriceCharting', url: item.linkPriceCharting }])}</div>
-            <div class="inventory-prices-cell">${priceReadout('Mínimo', item.minimumPrice)}${priceReadout('Menor Liga', item.leaguePrice)}${priceReadout('Média Liga', item.averageLeaguePrice)}${priceReadout('Mediana Liga', item.medianLeaguePrice)}${priceReadout('Venda rápida', item.quickSalePrice)}${priceInput('cards', index, 'price', 'Preço', item.price)}${quoteSummaryMarkup(item)}</div>
+            <div class="inventory-prices-cell">${priceReadout('Mais barato certificado', item.cheapestCertifiedPrice)}${priceReadout('Mais barato geral', item.cheapestGeneralPrice)}${priceReadout('Média certificada', item.averageCertifiedPrice)}${priceReadout('Média geral', item.averageGeneralPrice)}${priceReadout('Mínimo', item.minimumPrice)}${priceInput('cards', index, 'price', 'Preço', item.price)}${quoteSummaryMarkup(item, 'cards')}</div>
             <div class="inventory-control-cell"><button type="button" class="inventory-favorite ${item.favorite ? 'active' : ''}" data-favorite-card="${index}" title="Favoritar carta"><span>${item.favorite ? '★' : '☆'}</span>${item.favorite ? 'Favorita' : 'Favoritar'}</button><button type="button" class="inventory-edit-button" data-edit-card="${index}"><span>✎</span> Editar cadastro</button><button type="button" class="inventory-details-button" data-card-details="${index}"><span>↗</span> Análise</button>${quantityInput('cards', index, item.quantity)}${soldButton('cards', index, item.quantity)}${saleToggle('cards', index, item.forSale)}${removeButton('cards', index, name)}</div>
           </article>`;
         }).join('')}</div>`;
       };
 
       const cardMetrics = [
-        { key: 'minimum', field: 'minimumPrice', label: 'Minimo', color: '#f4c25c' },
-        { key: 'leagueLowest', field: 'leaguePrice', label: 'Menor Liga', color: '#77a9ff' },
-        { key: 'leagueAverage', field: 'averageLeaguePrice', label: 'Media Liga', color: '#bc91ff' },
-        { key: 'leagueMedian', field: 'medianLeaguePrice', label: 'Mediana Liga', color: '#f59bcf' },
-        { key: 'quickSale', field: 'quickSalePrice', label: 'Venda Rapida', color: '#7ce5a4' },
+        { key: 'cheapestCertified', field: 'cheapestCertifiedPrice', label: 'Mais Barato Certificado', color: '#77a9ff' },
+        { key: 'cheapestGeneral', field: 'cheapestGeneralPrice', label: 'Mais Barato Geral', color: '#7ce5a4' },
+        { key: 'averageCertified', field: 'averageCertifiedPrice', label: 'Média Certificada', color: '#bc91ff' },
+        { key: 'averageGeneral', field: 'averageGeneralPrice', label: 'Média Geral', color: '#f59bcf' },
+        { key: 'minimum', field: 'minimumPrice', label: 'Mínimo', color: '#f4c25c' },
       ];
-      const normalizedHistory = (item) => {
-        const points = (Array.isArray(item.priceHistory) ? item.priceHistory : []).map((entry) => ({
-          date: entry.date || '',
-          minimum: Number(entry.pricingSchemaVersion || 0) >= 2
-            ? toPrice(entry.minimum ?? entry.Minimo)
-            : (() => { const lowest = toPrice(entry.leagueLowest ?? entry['Menor Liga']); return lowest === null ? null : Math.round(lowest * 50) / 100; })(),
-          leagueLowest: toPrice(entry.leagueLowest ?? entry['Menor Liga']),
-          leagueAverage: toPrice(entry.leagueAverage ?? entry['Media Liga'] ?? entry['Preço Médio Liga']),
-          leagueMedian: toPrice(entry.leagueMedian ?? entry['Mediana Liga']),
-          quickSale: Number(entry.pricingSchemaVersion || 0) >= 2
-            ? toPrice(entry.quickSale ?? entry['Venda Rapida'])
-            : (toPrice(entry['minimumBuylist'] ?? entry.Minimo) ?? toPrice(entry.quickSale ?? entry['Venda Rapida'])),
-        }));
-        const currentDate = item.advancedData?.['Última cotação']?.data || item.advancedData?.['Ultima cotacao']?.data || new Date().toISOString();
-        const current = { date: currentDate, pricingSchemaVersion: 2, minimum: item.minimumPrice, leagueLowest: item.leaguePrice, leagueAverage: item.averageLeaguePrice, leagueMedian: item.medianLeaguePrice, quickSale: item.quickSalePrice };
+      const boosterMetrics = [
+        { key: 'minimum', field: 'minimumPrice', label: 'Mínimo', color: '#f4c25c' },
+        { key: 'leagueLowest', field: 'leaguePrice', label: 'Menor Liga', color: '#77a9ff' },
+        { key: 'leagueAverage', field: 'averageLeaguePrice', label: 'Média Liga', color: '#bc91ff' },
+        { key: 'leagueMedian', field: 'medianLeaguePrice', label: 'Mediana Liga', color: '#f59bcf' },
+        { key: 'quickSale', field: 'quickSalePrice', label: 'Venda Rápida', color: '#7ce5a4' },
+      ];
+      const normalizedHistory = (item, kind = 'cards') => {
+        const metrics = kind === 'cards' ? cardMetrics : boosterMetrics;
+        const points = (Array.isArray(item.priceHistory) ? item.priceHistory : []).map((entry) => kind === 'cards'
+          ? {
+              date: entry.date || '',
+              cheapestCertified: toPrice(entry.cheapestCertified ?? entry['Mais Barato Certificado']),
+              cheapestGeneral: toPrice(entry.cheapestGeneral ?? entry['Mais Barato Geral']),
+              averageCertified: toPrice(entry.averageCertified ?? entry['Media Certificada'] ?? entry['Média Certificada']),
+              averageGeneral: toPrice(entry.averageGeneral ?? entry['Media Geral'] ?? entry['Média Geral']),
+              minimum: toPrice(entry.minimum ?? entry.Minimo ?? entry['Mínimo']),
+            }
+          : {
+              date: entry.date || '',
+              minimum: Number(entry.pricingSchemaVersion || 0) >= 2
+                ? toPrice(entry.minimum ?? entry.Minimo)
+                : (() => { const lowest = toPrice(entry.leagueLowest ?? entry['Menor Liga']); return lowest === null ? null : Math.round(lowest * 50) / 100; })(),
+              leagueLowest: toPrice(entry.leagueLowest ?? entry['Menor Liga']),
+              leagueAverage: toPrice(entry.leagueAverage ?? entry['Media Liga'] ?? entry['Preço Médio Liga']),
+              leagueMedian: toPrice(entry.leagueMedian ?? entry['Mediana Liga']),
+              quickSale: Number(entry.pricingSchemaVersion || 0) >= 2
+                ? toPrice(entry.quickSale ?? entry['Venda Rapida'])
+                : (toPrice(entry['minimumBuylist'] ?? entry.Minimo) ?? toPrice(entry.quickSale ?? entry['Venda Rapida'])),
+            });
+        const currentDate = lastQuoteDate(item) || new Date().toISOString();
+        const current = kind === 'cards'
+          ? { date: currentDate, pricingSchemaVersion: 3, cheapestCertified: item.cheapestCertifiedPrice, cheapestGeneral: item.cheapestGeneralPrice, averageCertified: item.averageCertifiedPrice, averageGeneral: item.averageGeneralPrice, minimum: item.minimumPrice }
+          : { date: currentDate, pricingSchemaVersion: 2, minimum: item.minimumPrice, leagueLowest: item.leaguePrice, leagueAverage: item.averageLeaguePrice, leagueMedian: item.medianLeaguePrice, quickSale: item.quickSalePrice };
         const last = points[points.length - 1];
-        const same = last && cardMetrics.every((metric) => toPrice(last[metric.key]) === toPrice(current[metric.key]));
-        const hasCurrentMarketValue = cardMetrics.some((metric) => toPrice(current[metric.key]) !== null);
+        const same = last && metrics.every((metric) => toPrice(last[metric.key]) === toPrice(current[metric.key]));
+        const hasCurrentMarketValue = metrics.some((metric) => toPrice(current[metric.key]) !== null);
         if (hasCurrentMarketValue && !same) points.push(current);
         return points;
       };
       const lastQuoteDate = (item) => {
         const history = Array.isArray(item.priceHistory) ? item.priceHistory : [];
-        const fromAdvanced = item.advancedData?.['Última cotação']?.data || item.advancedData?.['Ultima cotacao']?.data || '';
+        const fromAdvanced = item.lastQuoteAt || item.advancedData?.['Última cotação']?.data || item.advancedData?.['Ultima cotacao']?.data || '';
         return fromAdvanced || history[history.length - 1]?.date || '';
       };
       const formatQuoteDate = (value) => {
@@ -1559,13 +1710,14 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         const date = new Date(value);
         return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
       };
-      const leagueEvolution = (item) => {
-        const points = normalizedHistory(item).filter((point) => toPrice(point.leagueLowest) !== null);
+      const marketEvolution = (item, kind = 'cards') => {
+        const field = kind === 'cards' ? 'cheapestCertified' : 'leagueLowest';
+        const points = normalizedHistory(item, kind).filter((point) => toPrice(point[field]) !== null);
         const latest = points[points.length - 1];
         const previous = points.length > 1 ? points[points.length - 2] : null;
         const first = points.length > 1 ? points[0] : null;
         const calc = (basePoint) => {
-          const current = toPrice(latest?.leagueLowest); const baseValue = toPrice(basePoint?.leagueLowest);
+          const current = toPrice(latest?.[field]); const baseValue = toPrice(basePoint?.[field]);
           if (current === null || baseValue === null) return null;
           const delta = current - baseValue;
           const pct = baseValue ? delta / baseValue * 100 : null;
@@ -1579,37 +1731,46 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         const pct = variation.pct === null ? '—' : `${variation.pct > 0 ? '+' : ''}${variation.pct.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`;
         return `<div><span>${label}</span><strong class="${variation.direction}">${sign}${escapeHtml(prettyPrice(variation.delta))}</strong><small class="${variation.direction}">${escapeHtml(pct)}</small></div>`;
       };
-      const quoteSummaryMarkup = (item) => {
-        const evolution = leagueEvolution(item);
-        return `<div class="inventory-quote-summary"><div class="quote-date"><span>Última cotização</span><strong>${escapeHtml(formatQuoteDate(lastQuoteDate(item)))}</strong><small>base: Menor Liga</small></div>${variationMini('Desde a última', evolution.previous)}${variationMini('Desde a primeira', evolution.first)}</div>`;
+      const quoteSummaryMarkup = (item, kind = 'cards') => {
+        const evolution = marketEvolution(item, kind);
+        const basis = kind === 'cards' ? 'Mais barato certificado MYP' : 'Menor Liga';
+        return `<div class="inventory-quote-summary"><div class="quote-date"><span>Última cotização</span><strong>${escapeHtml(formatQuoteDate(lastQuoteDate(item)))}</strong><small>base: ${basis}</small></div>${variationMini('Desde a última', evolution.previous)}${variationMini('Desde a primeira', evolution.first)}</div>`;
       };
       const marketDepthMarkup = (item, kind) => {
+        if (kind === 'cards') {
+          return [
+            ['Ofertas certificadas', String(item.certifiedOffers || 0), 'Lojistas e Certificados'],
+            ['Outros vendedores', String(item.otherOffers || 0), 'Demais vendedores'],
+            ['Ofertas totais', String(item.totalOffers || 0), 'ofertas MYP lidas'],
+            ['Fonte', item.pricingSource || '—', 'cotação atual'],
+          ].map(([label, value, note]) => `<article><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></article>`).join('');
+        }
         return [
           ['2º menor Liga', prettyPrice(item.secondLeaguePrice), 'profundidade'],
           ['3º menor Liga', prettyPrice(item.thirdLeaguePrice), 'profundidade'],
           ['Vendendo · geral', String(item.sellersGeneral || 0), 'participantes'],
-          ['Vendendo · específico', String(item.sellersSpecific || 0), kind === 'cards' ? 'mesmo idioma + estado' : 'mesmo produto'],
+          ['Vendendo · específico', String(item.sellersSpecific || 0), 'mesmo produto'],
           ['Comprando · geral', String(item.buyersGeneral || 0), 'participantes'],
-          ['Comprando · específico', String(item.buyersSpecific || 0), kind === 'cards' ? 'mesmo idioma + estado' : 'mesmo produto'],
+          ['Comprando · específico', String(item.buyersSpecific || 0), 'mesmo produto'],
         ].map(([label, value, note]) => `<article><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></article>`).join('');
       };
 
-      const chartMarkup = (points) => {
+      const chartMarkup = (points, metrics = cardMetrics) => {
         const width = 760; const height = 280; const left = 54; const right = 18; const top = 22; const bottom = 38;
-        const values = points.flatMap((point) => cardMetrics.map((metric) => toPrice(point[metric.key])).filter((value) => value !== null));
+        const values = points.flatMap((point) => metrics.map((metric) => toPrice(point[metric.key])).filter((value) => value !== null));
         if (!values.length) return '<div class="card-chart-empty"><span>⌁</span><strong>Sem histórico suficiente</strong><p>A próxima cotização adicionará pontos ao gráfico.</p></div>';
         const minValue = Math.min(...values); const maxValue = Math.max(...values); const spread = Math.max(1, maxValue - minValue);
         const low = Math.max(0, minValue - spread * .12); const high = maxValue + spread * .12;
         const x = (index) => left + (points.length <= 1 ? (width - left - right) / 2 : index * (width - left - right) / (points.length - 1));
         const y = (value) => top + (high - value) / Math.max(.01, high - low) * (height - top - bottom);
         const grid = Array.from({ length: 5 }, (_, index) => { const value = high - index * (high - low) / 4; const py = y(value); return `<g><line x1="${left}" x2="${width-right}" y1="${py}" y2="${py}" class="chart-grid-line"/><text x="${left-8}" y="${py+4}" text-anchor="end">${escapeHtml(prettyPrice(value).replace('R$ ', ''))}</text></g>`; }).join('');
-        const lines = cardMetrics.map((metric) => {
+        const lines = metrics.map((metric) => {
           const chunks = []; let current = [];
           points.forEach((point, index) => { const value = toPrice(point[metric.key]); if (value === null) { if (current.length) chunks.push(current); current = []; } else current.push(`${x(index)},${y(value)}`); });
           if (current.length) chunks.push(current);
           return chunks.filter((chunk) => chunk.length > 1).map((chunk) => `<polyline points="${chunk.join(' ')}" fill="none" stroke="${metric.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
         }).join('');
-        const dots = cardMetrics.map((metric) => points.map((point, index) => {
+        const dots = metrics.map((metric) => points.map((point, index) => {
           const value = toPrice(point[metric.key]);
           if (value === null) return '';
           return `<circle cx="${x(index)}" cy="${y(value)}" r="${points.length === 1 ? 5.2 : 3.6}" fill="${metric.color}" stroke="rgba(4,12,22,.9)" stroke-width="2"><title>${escapeHtml(metric.label)}: ${escapeHtml(prettyPrice(value))}</title></circle>`;
@@ -1621,7 +1782,7 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
       const renderJsonBlocks = (data) => {
         const groups = [
           ['Identificação', ['Id', 'Nome', 'Numeração', 'Ano', 'Era', 'Coleção', 'Código da Coleção', 'Grupo', 'Classe', 'Tipo', 'Idioma', 'Estado', 'Integridade', 'Favorita', 'À venda']],
-          ['Mercado', ['Minimo', 'Menor Liga', 'Segundo Menor Liga', 'Terceiro Menor Liga', 'Media Liga', 'Mediana Liga', 'Venda Rapida', 'Vendedores Geral', 'Vendedores Específicos', 'Compradores Geral', 'Compradores Específicos', 'Última cotação', 'Preço']],
+          ['Mercado', ['Mais Barato Certificado', 'Mais Barato Geral', 'Média Certificada', 'Média Geral', 'Mínimo', 'Fonte de cotação', 'Ofertas Certificadas', 'Outros Vendedores', 'Ofertas Totais', 'Minimo', 'Menor Liga', 'Segundo Menor Liga', 'Terceiro Menor Liga', 'Media Liga', 'Mediana Liga', 'Venda Rapida', 'Vendedores Geral', 'Vendedores Específicos', 'Compradores Geral', 'Compradores Específicos', 'Última cotação', 'Preço']],
           ['Referências', ['Link MYP', 'Link Cardmarket', 'Link Tcgplayer', 'Link PriceCharting', 'Imagem', 'Imagens']],
         ];
         const used = new Set(groups.flatMap(([, keys]) => keys));
@@ -1645,6 +1806,7 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         if (!item) return;
         const modal = root.querySelector('[data-editor-modal="card-details"]'); if (!modal) return;
         const isCard = kind === 'cards';
+        const metrics = isCard ? cardMetrics : boosterMetrics;
         modal.querySelector('[data-card-details-title]').textContent = `${itemName(item, kind)} — análise`;
         modal.querySelector('[data-card-details-name]').textContent = itemName(item, kind);
         modal.querySelector('[data-card-details-number]').textContent = isCard ? (item.number || 'Sem numeração') : 'Booster lacrado';
@@ -1652,13 +1814,13 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         modal.querySelector('[data-card-details-image]').innerHTML = renderImage(item, item.name);
         const status = item.advancedData?.Status || item.status || {};
         const statusNode = modal.querySelector('[data-card-details-status]');
-        statusNode.innerHTML = `<span>${escapeHtml(status['nível'] || 'OK')}</span><p>${escapeHtml(Array.isArray(status.motivos) && status.motivos.length ? status.motivos.map((entry) => entry.mensagem || entry).join(' · ') : 'Nenhuma suspeita registrada.')}</p>`;
-        modal.querySelector('[data-card-market-metrics]').innerHTML = cardMetrics.map((metric) => `<article><span>${escapeHtml(metric.label)}</span><strong>${escapeHtml(prettyPrice(item[metric.field]))}</strong><i style="--metric-color:${metric.color}"></i></article>`).join('');
-        const points = normalizedHistory(item);
-        modal.querySelector('[data-card-price-chart]').innerHTML = chartMarkup(points);
-        modal.querySelector('[data-card-chart-legend]').innerHTML = cardMetrics.map((metric) => `<span><i style="--metric-color:${metric.color}"></i>${escapeHtml(metric.label)}</span>`).join('');
+        statusNode.innerHTML = `<span>${escapeHtml(status['nível'] || 'OK')}</span><p>${escapeHtml(Array.isArray(status.motivos) && status.motivos.length ? status.motivos.map((entry) => entry.mensagem || entry).join(' · ') : isCard && item.pricingSource === 'MYP' ? 'Cotação MYP ativa.' : 'Nenhuma suspeita registrada.')}</p>`;
+        modal.querySelector('[data-card-market-metrics]').innerHTML = metrics.map((metric) => `<article><span>${escapeHtml(metric.label)}</span><strong>${escapeHtml(prettyPrice(item[metric.field]))}</strong><i style="--metric-color:${metric.color}"></i></article>`).join('');
+        const points = normalizedHistory(item, kind);
+        modal.querySelector('[data-card-price-chart]').innerHTML = chartMarkup(points, metrics);
+        modal.querySelector('[data-card-chart-legend]').innerHTML = metrics.map((metric) => `<span><i style="--metric-color:${metric.color}"></i>${escapeHtml(metric.label)}</span>`).join('');
         modal.querySelector('[data-card-chart-period]').textContent = points.length > 1 ? `${points.length} pontos` : 'valor atual';
-        modal.querySelector('[data-card-variations]').innerHTML = cardMetrics.map((metric) => {
+        modal.querySelector('[data-card-variations]').innerHTML = metrics.map((metric) => {
           const values = points.map((point) => toPrice(point[metric.key])).filter((value) => value !== null);
           if (values.length < 2) return `<article><span>${escapeHtml(metric.label)}</span><strong>Sem comparação</strong><small>aguardando histórico</small></article>`;
           const first = values[0]; const last = values[values.length - 1]; const delta = last - first; const pct = first ? delta / first * 100 : null;
@@ -1668,8 +1830,24 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         modal.querySelector('[data-card-movements]').innerHTML = movementTimelineMarkup(item);
         modal.querySelector('[data-card-market-depth]').innerHTML = marketDepthMarkup(item, kind);
         const advancedData = { ...(item.advancedData || {}) };
-        Object.keys(advancedData).forEach((key) => { if (/^(?:quantidade|quantity|qtd\.?)(?:\s|$)/i.test(key.trim()) || /^(?:link\s+liga|liga|ligaurl|linkliga|urlliga)$/i.test(key.trim())) delete advancedData[key]; });
-        const marketFields = {
+        Object.keys(advancedData).forEach((key) => {
+          const trimmed = key.trim();
+          if (/^(?:quantidade|quantity|qtd\.?)(?:\s|$)/i.test(trimmed) || /^(?:link\s+liga|liga|ligaurl|linkliga|urlliga)$/i.test(trimmed)) delete advancedData[key];
+          if (isCard && /^(?:Minimo|Menor Liga|Segundo Menor Liga|Terceiro Menor Liga|Media Liga|Mediana Liga|Venda Rapida|Vendedores Geral|Vendedores Específicos|Compradores Geral|Compradores Específicos)$/i.test(trimmed)) delete advancedData[key];
+        });
+        const marketFields = isCard ? {
+          'Mais Barato Certificado': item.cheapestCertifiedPrice,
+          'Mais Barato Geral': item.cheapestGeneralPrice,
+          'Média Certificada': item.averageCertifiedPrice,
+          'Média Geral': item.averageGeneralPrice,
+          'Mínimo': item.minimumPrice,
+          'Fonte de cotação': item.pricingSource || null,
+          'Ofertas Certificadas': item.certifiedOffers,
+          'Outros Vendedores': item.otherOffers,
+          'Ofertas Totais': item.totalOffers,
+          Preço: item.price,
+          'Última cotação': advancedData['Última cotação'] || (lastQuoteDate(item) ? { data: lastQuoteDate(item), fonte: 'MYP' } : null),
+        } : {
           Minimo: item.minimumPrice, 'Menor Liga': item.leaguePrice, 'Segundo Menor Liga': item.secondLeaguePrice, 'Terceiro Menor Liga': item.thirdLeaguePrice, 'Media Liga': item.averageLeaguePrice, 'Mediana Liga': item.medianLeaguePrice, 'Venda Rapida': item.quickSalePrice,
           'Vendedores Geral': item.sellersGeneral, 'Vendedores Específicos': item.sellersSpecific, 'Compradores Geral': item.buyersGeneral, 'Compradores Específicos': item.buyersSpecific, Preço: item.price, 'Última cotação': advancedData['Última cotação'] || (lastQuoteDate(item) ? { data: lastQuoteDate(item) } : null),
         };
@@ -1682,6 +1860,7 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
       const openCardDetails = (index) => openAssetDetails('cards', index);
       const openBoosterDetails = (index) => openAssetDetails('boosters', index);
 
+
       const renderBoosters = () => {
         const rows = state.boosters.map((item, index) => ({ item, index })).filter(({ item }) => matchesSearch(item) && matchesInventoryMetadata(item, 'boosters'));
         if (!rows.length) return emptyInventory('boosters');
@@ -1691,7 +1870,7 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
           return `<article class="inventory-record booster-inventory-record" data-booster-details-row="${index}">
             <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>Pacote lacrado</small><em>${escapeHtml(`${item.collection || 'Coleção —'}${code}`)}</em></div></div>
             <div class="inventory-info-cell"><span>${escapeHtml(eraDisplay(item.era) || 'Era —')}</span><span>${escapeHtml(item.collection || 'Coleção —')}</span><span>${escapeHtml(languageDisplay(item.language) || 'Idioma —')}</span><span>${escapeHtml(item.year || 'Ano —')}</span><span>${(item.images || []).length || (item.image ? 1 : 0)} imagem(ns)</span></div>
-            <div class="inventory-prices-cell">${priceReadout('Mínimo', item.minimumPrice)}${priceReadout('Menor Liga', item.leaguePrice)}${priceReadout('Média Liga', item.averageLeaguePrice)}${priceReadout('Mediana Liga', item.medianLeaguePrice)}${priceReadout('Venda rápida', item.quickSalePrice)}${priceInput('boosters', index, 'price', 'Preço', item.price)}${quoteSummaryMarkup(item)}</div>
+            <div class="inventory-prices-cell">${priceReadout('Mínimo', item.minimumPrice)}${priceReadout('Menor Liga', item.leaguePrice)}${priceReadout('Média Liga', item.averageLeaguePrice)}${priceReadout('Mediana Liga', item.medianLeaguePrice)}${priceReadout('Venda rápida', item.quickSalePrice)}${priceInput('boosters', index, 'price', 'Preço', item.price)}${quoteSummaryMarkup(item, 'boosters')}</div>
             <div class="inventory-control-cell"><button type="button" class="inventory-edit-button" data-edit-booster="${index}"><span>✎</span> Editar cadastro</button><button type="button" class="inventory-details-button" data-booster-details="${index}"><span>↗</span> Análise</button>${quantityInput('boosters', index, item.quantity)}${soldButton('boosters', index, item.quantity)}${saleToggle('boosters', index, item.forSale)}${removeButton('boosters', index, name)}</div>
           </article>`;
         }).join('')}</div>`;
@@ -1945,6 +2124,28 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         const matchingCondition = integrityCondition(value);
         if (matchingCondition && form.elements.condition.value !== matchingCondition) { form.elements.condition.value = matchingCondition; syncCardForm(); form.elements.integrity.value = String(value); }
       });
+      root.querySelector('[data-card-myp-link]')?.addEventListener('input', (event) => {
+        if (cardMypDraft && clean(cardMypDraft.linkMyp) !== clean(event.target.value)) cardMypDraft = null;
+      });
+      root.querySelector('[data-card-myp-fill]')?.addEventListener('click', async (event) => {
+        const form = root.querySelector('[data-card-form]');
+        const button = event.currentTarget;
+        const link = clean(form?.elements?.linkMyp?.value);
+        if (!form || !link) { setCardAutofillStatus('Cole primeiro o link da carta na MYP.', 'error'); form?.elements?.linkMyp?.focus(); return; }
+        button.disabled = true;
+        setCardAutofillStatus('Consultando a MYP pelo backend do Vault…', 'loading');
+        try {
+          await window.VaultCloud?.ready;
+          if (!window.VaultCloud?.fetchMypCardInfo) throw new Error('A versão atual do frontend não encontrou a API MYP.');
+          const result = await window.VaultCloud.fetchMypCardInfo(link);
+          applyMypResultToCardForm(result);
+        } catch (error) {
+          cardMypDraft = null;
+          setCardAutofillStatus(error?.message || 'Não foi possível preencher esta carta pela MYP.', 'error');
+        } finally {
+          button.disabled = false;
+        }
+      });
       root.querySelector('[data-booster-era]')?.addEventListener('change', () => syncBoosterForm({ resetCollection: true }));
       root.querySelector('[data-booster-collection]')?.addEventListener('change', () => syncBoosterForm());
       root.querySelector('[data-add-booster-image]')?.addEventListener('click', () => { if (boosterImagesDraft.length >= 5) return; boosterImagesDraft.push(''); renderBoosterImageEditor(); });
@@ -2022,18 +2223,24 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
 
       root.querySelector('[data-card-form]')?.addEventListener('submit', (event) => {
         event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
-        const data = new FormData(form); const era = clean(data.get('era')); const collection = findCollection(era, clean(data.get('collectionId'))); const group = normalizeGroupId(data.get('group')); const image = clean(data.get('image'));
+        const data = new FormData(form); const era = clean(data.get('era')); const collection = findCollection(era, clean(data.get('collectionId'))); const group = normalizeGroupId(data.get('group')); const image = clean(data.get('image')); const linkMyp = clean(data.get('linkMyp'));
         const payload = {
           name: clean(data.get('name')), number: clean(data.get('number')), year: clean(data.get('year')), era,
           collectionId: collection?.id || clean(data.get('collectionId')), collection: collection?.label || '', collectionCode: collection?.code || '',
           group, cardClass: clean(data.get('cardClass')), type: group === 'pokemon' ? clean(data.get('type')) : '', language: normalizeLanguageCode(data.get('language')),
-          condition: clean(data.get('condition')).toUpperCase(), integrity: Number(data.get('integrity')), quantity: data.get('quantity'), price: data.get('price'), image, imageCandidates: image ? [image] : [], forSale: data.get('forSale') === 'on',
+          condition: clean(data.get('condition')).toUpperCase(), integrity: Number(data.get('integrity')), quantity: data.get('quantity'), price: data.get('price'), linkMyp, image, imageCandidates: image ? [image] : [], forSale: data.get('forSale') === 'on',
         };
         const error = validateCardPayload(payload); if (error) { showFormFeedback('[data-card-form-feedback]', error); return; }
+        const draftMatches = cardMypDraft && clean(cardMypDraft.linkMyp) === linkMyp;
         if (activeCardEditIndex >= 0 && state.cards[activeCardEditIndex]) {
-          const current = state.cards[activeCardEditIndex]; const edited = normalizeCard({ ...current, ...payload, _id: current._id, _isNew: current._isNew }, false); edited._isDirty = current._isNew ? current._isDirty : true; state.cards[activeCardEditIndex] = edited;
+          const current = state.cards[activeCardEditIndex];
+          const pricingPatch = draftMatches ? mypCardPatch(cardMypDraft, current) : {};
+          const edited = normalizeCard({ ...current, ...payload, ...pricingPatch, _id: current._id, _isNew: current._isNew }, false);
+          edited._isDirty = true;
+          state.cards[activeCardEditIndex] = edited;
         } else {
-          state.cards.push(normalizeCard({ ...payload, _id: uid('card') }, true));
+          const pricingPatch = draftMatches ? mypCardPatch(cardMypDraft, {}) : {};
+          state.cards.push(normalizeCard({ ...payload, ...pricingPatch, _id: uid('card') }, true));
         }
         resetCardForm(); activeTab = 'cards'; closeModals(); render();
       });
@@ -2367,6 +2574,41 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         inventoryQuery = normalizeText(label);
         if (inventorySearch) inventorySearch.value = label;
         renderInventory();
+      });
+      root.querySelector('[data-refresh-myp-quotes]')?.addEventListener('click', async (event) => {
+        if (!state) return;
+        const button = event.currentTarget;
+        const feedback = root.querySelector('[data-myp-refresh-feedback]');
+        const targets = state.cards.map((item, index) => ({ item, index })).filter(({ item }) => clean(item.linkMyp));
+        if (!targets.length) {
+          if (feedback) { feedback.textContent = 'Nenhuma carta possui link MYP ainda.'; feedback.dataset.state = 'error'; }
+          return;
+        }
+        button.disabled = true;
+        let updated = 0;
+        let failed = 0;
+        try {
+          await window.VaultCloud?.ready;
+          for (let position = 0; position < targets.length; position += 1) {
+            const { item, index } = targets[position];
+            if (feedback) { feedback.textContent = `Atualizando ${position + 1}/${targets.length}: ${item.name || 'carta'}…`; feedback.dataset.state = 'loading'; }
+            try {
+              state.cards[index] = await refreshMypQuoteForCard(state.cards[index]);
+              updated += 1;
+            } catch (error) {
+              failed += 1;
+              console.warn('[Vault TCG] Falha ao atualizar MYP:', item.name, error);
+            }
+          }
+          render();
+          scheduleCloudSave(150);
+          if (feedback) {
+            feedback.textContent = failed ? `${updated} cotação(ões) atualizada(s) · ${failed} falha(s).` : `${updated} cotação(ões) MYP atualizada(s) com sucesso.`;
+            feedback.dataset.state = failed ? 'warning' : 'success';
+          }
+        } finally {
+          button.disabled = false;
+        }
       });
       root.querySelector('[data-refresh-attention]')?.addEventListener('click', () => renderAttention());
       root.querySelectorAll('[data-movement-filter]').forEach((button) => button.addEventListener('click', () => {

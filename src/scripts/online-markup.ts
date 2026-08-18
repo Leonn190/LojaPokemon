@@ -117,7 +117,7 @@ export const productMarkup = (item: any, options: { compact?: boolean; hideOwner
 export const collectionFlowMarkup = (cards: any[], compact = false) => {
   const usable = (Array.isArray(cards) ? cards : [])
     .filter((card) => imageCandidates(card).length > 0)
-    .sort((left, right) => (Number(right?.price ?? right?.leaguePrice ?? 0) - Number(left?.price ?? left?.leaguePrice ?? 0)) || String(left?.name || '').localeCompare(String(right?.name || ''), 'pt-BR'))
+    .sort((left, right) => (Number(right?.price ?? right?.averageGeneralPrice ?? right?.cheapestGeneralPrice ?? right?.leaguePrice ?? 0) - Number(left?.price ?? left?.averageGeneralPrice ?? left?.cheapestGeneralPrice ?? left?.leaguePrice ?? 0)) || String(left?.name || '').localeCompare(String(right?.name || ''), 'pt-BR'))
     .slice(0, compact ? 12 : 18);
   if (!usable.length) return '<div class="collection-flow collection-flow-empty"><span>VT</span><small>Coleção em construção</small></div>';
   const minimum = compact ? 9 : 15;

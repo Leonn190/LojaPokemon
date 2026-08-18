@@ -79,3 +79,29 @@ imagens/perfis/leon.webp
 ```
 
 O arquivo real precisa existir dentro de `public/` no mesmo caminho. Não salve Base64 ou arquivos binários no Firestore.
+
+## Backend MYP + Gmail no Render
+
+Esta versão usa um backend separado para consultar a MYP sem abrir Chrome/Selenium e para enviar o Gmail de verificação sem expor a senha de app no frontend.
+
+O repositório do backend é entregue no ZIP `Vault-TCG-Backend-Render.zip`. O `render.yaml` dele cria o serviço `vault-tcg-myp-api-leonn190`, portanto o frontend já usa por padrão:
+
+```text
+https://vault-tcg-myp-api-leonn190.onrender.com
+```
+
+Se você escolher outro nome/URL no Render, defina `PUBLIC_VAULT_API_URL` antes do build do Astro.
+
+### Novo fluxo de cartas
+
+No editor, em **Adicionar carta**, use **Preencher pela MYP**. Informe o link MYP e a API preenche nome, numeração, ano, Era, coleção, grupo, classe, tipo, imagem e cotação. O usuário escolhe Estado, Idioma e Quantidade; a Integridade recebe automaticamente um valor sugerido dentro da faixa do Estado e continua editável.
+
+As novas referências salvas para cartas são:
+
+- Mais Barato Certificado;
+- Mais Barato Geral;
+- Média Certificada;
+- Média Geral;
+- Mínimo = 50% do Mais Barato Certificado.
+
+O botão **Atualizar cotações MYP** na Visão geral recota em sequência todas as cartas que possuam `linkMyp`. Registros antigos continuam legíveis para não quebrar o Firestore, mas novas cotações de cartas usam a MYP.

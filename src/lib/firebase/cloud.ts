@@ -1,5 +1,4 @@
 import { initializeApp, getApps, type FirebaseApp, type FirebaseOptions } from 'firebase/app';
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import {
   createUserWithEmailAndPassword,
   deleteUser,
@@ -34,6 +33,39 @@ import {
   writeBatch,
   type Firestore,
 } from 'firebase/firestore';
+
+
+const VAULT_API_URL = String(
+  import.meta.env.PUBLIC_VAULT_API_URL || 'https://vault-tcg-myp-api-leonn190.onrender.com',
+).replace(/\/+$/, '');
+
+const vaultApiFetch = async (path: string, init: RequestInit = {}) => {
+  const response = await fetch(`${VAULT_API_URL}${path}`, {
+    ...init,
+    headers: {
+      Accept: 'application/json',
+      ...(init.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(init.headers || {}),
+    },
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok || payload?.ok === false) {
+    const error = new Error(payload?.error || `A API do Vault respondeu HTTP ${response.status}.`);
+    (error as any).status = response.status;
+    throw error;
+  }
+  return payload;
+};
+
+export const fetchMypCardInfo = async (url: string) => {
+  const link = String(url || '').trim();
+  if (!link) throw new Error('Cole o link da carta na MYP.');
+  const payload = await vaultApiFetch(`/api/myp/card?url=${encodeURIComponent(link)}`);
+  if (!payload?.data) throw new Error('A MYP não retornou dados para esta carta.');
+  return payload.data;
+};
+
+export const vaultApiUrl = VAULT_API_URL;
 
 const PROJECT_DEFAULTS: FirebaseOptions = {
   apiKey: 'AIzaSyAH2-yNZl048tTL57BCq7gdh82YBZH7GmU',
@@ -162,8 +194,12 @@ const resolvePublicPrice = (item: any, fallback = 'league_average_then_lowest') 
   if (direct !== null) return direct;
   if (item?.kind !== 'card' && item?.kind !== 'booster') return null;
   if (fallback === 'consult') return null;
-  const average = numberOrNull(item?.averageLeaguePrice ?? item?.leagueAverage);
-  const lowest = numberOrNull(item?.leaguePrice ?? item?.leagueLowest);
+  const average = item?.kind === 'card'
+    ? numberOrNull(item?.averageGeneralPrice ?? item?.averageLeaguePrice ?? item?.leagueAverage)
+    : numberOrNull(item?.averageLeaguePrice ?? item?.leagueAverage);
+  const lowest = item?.kind === 'card'
+    ? numberOrNull(item?.cheapestGeneralPrice ?? item?.leaguePrice ?? item?.leagueLowest)
+    : numberOrNull(item?.leaguePrice ?? item?.leagueLowest);
   return fallback === 'league_lowest_then_average' ? (lowest ?? average) : (average ?? lowest);
 };
 
@@ -292,7 +328,7 @@ const buildStats = (state: any) => {
   const albums = state?.albums || [];
   const totalUnits = [...cards, ...boosters, ...kits, ...products].reduce((sum, item) => sum + Math.max(0, Number(item.quantity || 0)), 0);
   const estimatedValue = [...cards, ...boosters, ...kits, ...products].reduce((sum, item) => {
-    const price = item.price ?? item.leaguePrice ?? 0;
+    const price = item.price ?? item.averageGeneralPrice ?? item.cheapestGeneralPrice ?? item.leaguePrice ?? 0;
     return sum + Math.max(0, Number(item.quantity || 0)) * Math.max(0, Number(price || 0));
   }, 0);
   return { cards: cards.length, boosters: boosters.length, kits: kits.length, products: products.length, albums: albums.length, totalUnits, estimatedValue };
@@ -379,23 +415,29 @@ export async function signOut() {
 
 
 export async function sendAccountVerificationEmail() {
-  const { app, auth } = await getCloud();
+  const { auth } = await getCloud();
   const user = auth.currentUser;
   if (!user) throw new Error('Sua sessão expirou. Entre novamente.');
   if (user.emailVerified) return { alreadyVerified: true, email: user.email || '', delivery: 'already-verified' };
 
-  // Preferimos o backend do Vault porque ele envia o template visual pelo Gmail.
-  // Se as Cloud Functions ainda não estiverem publicadas, o Firebase Auth padrão
-  // continua funcionando como fallback para não quebrar a verificação.
+  // O Gmail customizado agora roda no backend do Render. O token Firebase prova
+  // para o servidor quem é o usuário sem expor a senha de app do Gmail no site.
   try {
-    const functions = getFunctions(app, 'us-central1');
-    const sendVaultVerificationEmail = httpsCallable(functions, 'sendVaultVerificationEmail');
-    const response: any = await sendVaultVerificationEmail({
-      returnUrl: typeof window !== 'undefined' ? window.location.href.split('#')[0] : '',
+    const idToken = await user.getIdToken(true);
+    const payload = await vaultApiFetch('/api/email/verification', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${idToken}` },
+      body: JSON.stringify({
+        returnUrl: typeof window !== 'undefined' ? window.location.href.split('#')[0] : '',
+      }),
     });
-    return { alreadyVerified: false, email: user.email || '', delivery: response?.data?.delivery || 'gmail' };
+    return {
+      alreadyVerified: Boolean(payload?.alreadyVerified),
+      email: payload?.email || user.email || '',
+      delivery: payload?.delivery || 'gmail-render',
+    };
   } catch (error) {
-    console.warn('[Vault TCG] Backend de e-mail indisponível; usando verificação padrão do Firebase.', error);
+    console.warn('[Vault TCG] Backend do Render indisponível; usando verificação padrão do Firebase.', error);
     await sendEmailVerification(user);
     return { alreadyVerified: false, email: user.email || '', delivery: 'firebase-fallback' };
   }
@@ -567,7 +609,10 @@ export async function saveEditorState(state: any, options: { profileDirty?: bool
     rarity: card.rarity || card.type || '',
     type: card.type || '',
     price: resolvePublicPrice({ ...card, kind: 'card' }, state.profile.priceDisplayFallback),
-    leaguePrice: numberOrNull(card.leaguePrice),
+    cheapestCertifiedPrice: numberOrNull(card.cheapestCertifiedPrice),
+    cheapestGeneralPrice: numberOrNull(card.cheapestGeneralPrice),
+    averageCertifiedPrice: numberOrNull(card.averageCertifiedPrice),
+    averageGeneralPrice: numberOrNull(card.averageGeneralPrice),
     imageCandidates: Array.isArray(card.imageCandidates) ? card.imageCandidates.filter(Boolean).slice(0, 5) : (card.image ? [card.image] : []),
   }));
   state.profile.email = user.email || state.profile.email || '';

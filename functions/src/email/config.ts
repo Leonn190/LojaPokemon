@@ -5,8 +5,8 @@ export const VAULT_GMAIL_CONFIG = Object.freeze({
   port: 465,
   secure: true,
   user: String(process.env.GMAIL_USER || '').trim(),
-  // Mantido exatamente como solicitado como fallback/placeholder server-side.
-  appPassword: normalizeAppPassword(String(process.env.GMAIL_APP_PASSWORD || 'aryd uqik xmct wvqs')),
+  // Segredo somente por variável de ambiente. Nunca embutir senha de app no repositório.
+  appPassword: normalizeAppPassword(String(process.env.GMAIL_APP_PASSWORD || '')),
   senderName: 'Vault TCG',
 });
 

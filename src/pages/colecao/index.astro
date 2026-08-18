@@ -176,7 +176,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         });
         const overviewAlbums = root?.querySelector<HTMLElement>('[data-grid="overview-albums"]');
         if (overviewAlbums && groups.albums.length) { overviewAlbums.innerHTML = groups.albums.slice(0, 4).map((item) => albumMarkup(item, true)).join(''); initializeOnlineImages(overviewAlbums); const wrap = root?.querySelector<HTMLElement>('[data-overview-albums]'); if (wrap) wrap.hidden = false; }
-        const highlightedCards = [...groups.cards].sort((a: any, b: any) => Number(Boolean(b.favorite)) - Number(Boolean(a.favorite)) || Number(b.price || b.leaguePrice || 0) - Number(a.price || a.leaguePrice || 0)).slice(0, 8);
+        const highlightedCards = [...groups.cards].sort((a: any, b: any) => Number(Boolean(b.favorite)) - Number(Boolean(a.favorite)) || Number(b.price || b.averageGeneralPrice || b.cheapestGeneralPrice || b.leaguePrice || 0) - Number(a.price || a.averageGeneralPrice || a.cheapestGeneralPrice || a.leaguePrice || 0)).slice(0, 8);
         const overviewCards = root?.querySelector<HTMLElement>('[data-grid="overview-cards"]');
         if (overviewCards && highlightedCards.length) { overviewCards.innerHTML = highlightedCards.map((item) => productMarkup(item, { hideOwner: true })).join(''); initializeOnlineImages(overviewCards); const wrap = root?.querySelector<HTMLElement>('[data-overview-cards]'); if (wrap) wrap.hidden = false; }
 
