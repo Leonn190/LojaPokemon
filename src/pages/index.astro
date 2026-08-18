@@ -47,7 +47,7 @@ const homePreloads = firstFrameCards.map((card) => card.imageCandidates[0]).filt
                     <div class="nexus-hero-flow-card">
                       <ProductImage
                         item={card}
-                        eager={sequence === 0 && (cardIndex * 8 + laneIndex) < 4}
+                        eager={sequence === 0 && (cardIndex * 8 + laneIndex) < 12}
                         deferred={sequence !== 0 || (cardIndex * 8 + laneIndex) >= 12}
                         interactive={false}
                       />
@@ -126,42 +126,99 @@ const homePreloads = firstFrameCards.map((card) => card.imageCandidates[0]).filt
     }
     document.addEventListener('visibilitychange', syncHeroAnimation);
 
-    const deferredHeroImages = Array.from(document.querySelectorAll<HTMLImageElement>('.nexus-hero-card-flow img[data-defer-load="true"]'));
-    let deferredHeroCursor = 0;
+    const allHeroImages = Array.from(document.querySelectorAll<HTMLImageElement>('.nexus-hero-card-flow img'));
+    const markHeroImageReady = (image: HTMLImageElement) => image.closest('.image-stage')?.classList.add('hero-wall-image-ready');
+    allHeroImages.forEach((image) => {
+      image.addEventListener('load', () => markHeroImageReady(image), { once: true });
+      if (image.complete && image.naturalWidth > 0) markHeroImageReady(image);
+    });
+
+    const primaryHeroImages = Array.from(document.querySelectorAll<HTMLImageElement>('.nexus-hero-flow-track .nexus-hero-flow-set:first-child img'));
+    primaryHeroImages.slice(0, 12).forEach((image) => {
+      image.loading = 'eager';
+      image.fetchPriority = 'high';
+    });
+
     const activateDeferredHeroImage = (image: HTMLImageElement) => {
       const source = image.dataset.deferredSrc;
       if (!source || image.getAttribute('src')) return;
+      image.loading = 'eager';
       image.removeAttribute('data-defer-load');
       delete image.dataset.deferredSrc;
       image.src = source;
       (window as any).VaultHydrate?.(image.parentElement || document);
     };
+
+    /* Mantém o primeiro frame leve (12 artes), mas começa a completar a parede
+       imediatamente durante a animação de entrada. */
+    const primaryDeferredHeroImages = primaryHeroImages.filter((image) => image.dataset.deferLoad === 'true');
+    let primaryDeferredCursor = 0;
+    const loadPrimaryHeroBatch = () => {
+      const end = Math.min(primaryDeferredHeroImages.length, primaryDeferredCursor + 8);
+      while (primaryDeferredCursor < end) activateDeferredHeroImage(primaryDeferredHeroImages[primaryDeferredCursor++]);
+      if (primaryDeferredCursor < primaryDeferredHeroImages.length) window.setTimeout(loadPrimaryHeroBatch, 70);
+    };
+    if (primaryDeferredHeroImages.length) window.setTimeout(loadPrimaryHeroBatch, 20);
+
+    /* A cópia usada pelo loop da animação continua progressiva e só começa
+       quando a parede principal já está sendo revelada. */
+    const deferredHeroImages = Array.from(document.querySelectorAll<HTMLImageElement>('.nexus-hero-flow-track .nexus-hero-flow-set:nth-child(2) img[data-defer-load="true"]'));
+    let deferredHeroCursor = 0;
+    let deferredHeroStarted = false;
     const loadDeferredHeroBatch = () => {
       if (document.hidden) { window.setTimeout(loadDeferredHeroBatch, 320); return; }
-      const end = Math.min(deferredHeroImages.length, deferredHeroCursor + 7);
+      const end = Math.min(deferredHeroImages.length, deferredHeroCursor + 8);
       while (deferredHeroCursor < end) activateDeferredHeroImage(deferredHeroImages[deferredHeroCursor++]);
       if (deferredHeroCursor >= deferredHeroImages.length) return;
       const idle = (window as any).requestIdleCallback;
       if (typeof idle === 'function') idle(loadDeferredHeroBatch, { timeout: 260 });
-      else window.setTimeout(loadDeferredHeroBatch, 170);
+      else window.setTimeout(loadDeferredHeroBatch, 140);
     };
-    window.setTimeout(loadDeferredHeroBatch, 260);
+    const startDeferredHeroLoad = () => {
+      if (deferredHeroStarted) return;
+      deferredHeroStarted = true;
+      window.setTimeout(loadDeferredHeroBatch, 80);
+    };
+
+    const waitForHeroWall = () => {
+      if (!primaryHeroImages.length) return Promise.resolve();
+      const waitForImage = (image: HTMLImageElement) => new Promise<void>((resolve) => {
+        if (image.complete && image.naturalWidth > 0) { resolve(); return; }
+        let settled = false;
+        const done = () => { if (!settled) { settled = true; resolve(); } };
+        image.addEventListener('load', done, { once: true });
+        image.addEventListener('error', done, { once: true });
+      });
+      return Promise.race([
+        Promise.all(primaryHeroImages.map(waitForImage)).then(() => undefined),
+        new Promise<void>((resolve) => window.setTimeout(resolve, 1800)),
+      ]);
+    };
 
     const intro = document.querySelector<HTMLElement>('[data-vault-intro]');
     const finishIntro = () => {
       if (!intro) return;
       intro.classList.remove('vault-intro-pending', 'vault-intro-running', 'vault-intro-revealing', 'vault-intro-copy');
       intro.classList.add('vault-intro-complete');
+      startDeferredHeroLoad();
     };
     if (intro) {
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduced) finishIntro();
       else {
         intro.classList.add('vault-intro-running');
-        window.setTimeout(() => intro.classList.add('vault-intro-revealing'), 520);
-        window.setTimeout(() => intro.classList.add('vault-intro-copy'), 1180);
-        window.setTimeout(finishIntro, 2050);
-        window.setTimeout(finishIntro, 3200);
+        (async () => {
+          await Promise.all([
+            waitForHeroWall(),
+            new Promise<void>((resolve) => window.setTimeout(resolve, 720)),
+          ]);
+          if (intro.classList.contains('vault-intro-complete')) return;
+          intro.classList.add('vault-intro-revealing');
+          startDeferredHeroLoad();
+          window.setTimeout(() => intro.classList.add('vault-intro-copy'), 650);
+          window.setTimeout(finishIntro, 1530);
+        })();
+        window.setTimeout(finishIntro, 3800);
       }
     }
 
@@ -239,10 +296,14 @@ const homePreloads = firstFrameCards.map((card) => card.imageCandidates[0]).filt
             previewMap.set(String(key), list);
           });
         });
+        const hasUsablePreview = (profile: any) => Array.isArray(profile.previewCards) && profile.previewCards.some((card: any) =>
+          (Array.isArray(card?.imageCandidates) && card.imageCandidates.some(Boolean)) || Boolean(card?.image)
+        );
         const collectionsWithCovers = collections.map((profile: any) => {
           const keys = [profile.uid, profile.ownerUid, profile.slug, profile.collectionId].filter(Boolean).map(String);
           const mappedPreview = keys.flatMap((key) => previewMap.get(key) || []).filter((card, index, list) => list.indexOf(card) === index).slice(0, 12);
-          const previewCards = Array.isArray(profile.previewCards) && profile.previewCards.length ? profile.previewCards : mappedPreview;
+          const storedPreview = Array.isArray(profile.previewCards) ? profile.previewCards : [];
+          const previewCards = storedPreview.length ? storedPreview : mappedPreview;
           return { ...profile, previewCards };
         });
 
@@ -251,6 +312,23 @@ const homePreloads = firstFrameCards.map((card) => card.imageCandidates[0]).filt
         renderCarousel('kits', shuffle(kits).slice(0, 14), (item) => productMarkup(item, { compact: true }), 10);
         renderCarousel('products', shuffle(products).slice(0, 14), (item) => productMarkup(item, { compact: true }), 10);
         renderCarousel('albums', shuffle(albums).slice(0, 14), (item) => albumMarkup(item, true), 12);
+
+        const previewQueue = collectionsWithCovers.filter((profile: any) => !hasUsablePreview(profile));
+        if (previewQueue.length && typeof cloud.listPublicCollectionPreview === 'function') {
+          const worker = async () => {
+            while (previewQueue.length) {
+              const profile = previewQueue.shift();
+              if (!profile) return;
+              const uid = String(profile.uid || profile.ownerUid || '').trim();
+              if (!uid) continue;
+              try {
+                const preview = await cloud.listPublicCollectionPreview(uid, 12);
+                if (Array.isArray(preview) && preview.length) profile.previewCards = preview;
+              } catch (_) {}
+            }
+          };
+          await Promise.all([worker(), worker(), worker()]);
+        }
         renderCarousel('collections', shuffle(collectionsWithCovers), (item) => collectionMarkup(item, true), Math.max(1, collectionsWithCovers.length));
       } catch (_) {
         document.querySelectorAll<HTMLElement>('[data-home-carousel]').forEach((section) => {

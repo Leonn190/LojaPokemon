@@ -826,3 +826,20 @@ body.modal-open .collection-album-belt { animation-play-state: paused !important
 
 /* Evita gastar GPU com o mural quando ele já saiu da viewport ou a aba está oculta. */
 .nexus-hero-card-flow.is-paused .nexus-hero-flow-track { animation-play-state: paused !important; }
+
+
+/* O mural da abertura é revelado apenas com artes reais. Enquanto alguma
+   imagem ainda está chegando, não exibimos o placeholder da carta por baixo. */
+.nexus-hero-card-flow .image-fallback { opacity: 0 !important; }
+.nexus-hero-card-flow .image-stage.no-image .image-fallback { opacity: 0 !important; }
+
+.nexus-hero-card-flow .image-stage {
+  opacity: 0;
+  background: transparent;
+  box-shadow: none;
+  transition: opacity .16s ease;
+}
+.nexus-hero-card-flow .image-stage.hero-wall-image-ready {
+  opacity: 1;
+  box-shadow: 0 17px 34px rgba(0,0,0,.52), inset 0 0 0 1px rgba(255,255,255,.07);
+}

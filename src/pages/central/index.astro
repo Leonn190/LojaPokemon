@@ -33,7 +33,6 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         <div>
           <span class="section-eyebrow">Editor da coleção</span>
           <h2 data-workspace-title>Sua coleção</h2>
-          <p data-workspace-meta>Versão 1</p>
         </div>
         <div class="workspace-header-actions">
           <span class="workspace-save-state" data-cloud-save-state><i></i> Tudo salvo</span>
@@ -1159,7 +1158,6 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         workspace.hidden = false;
         if (editorHero) editorHero.hidden = true;
         root.querySelector('[data-workspace-title]').textContent = state.profile.title;
-        root.querySelector('[data-workspace-meta]').textContent = `${state.profile.owner} · versão ${state.profile.version}`;
         const publicProfileLink = root.querySelector('[data-open-public-profile]');
         if (publicProfileLink) publicProfileLink.href = `${base}colecao/?slug=${encodeURIComponent(state.profile.collectionId || safeSlug(state.profile.title))}`;
         root.querySelectorAll('[data-profile-field]').forEach((input) => { input.value = state.profile[input.dataset.profileField] || ''; });
@@ -2210,8 +2208,6 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
           renderInventory();
           updateTabs();
         }
-        const tabs = root.querySelector('.editor-admin-tabs');
-        if (tabs) tabs.scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
       root.querySelectorAll('[data-admin-nav]').forEach((button) => button.addEventListener('click', () => navigateAdmin(button.dataset.adminNav, button.dataset.adminInventory || '')));
       root.addEventListener('click', (event) => {
@@ -2260,7 +2256,6 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         profileDirty = true;
         if (['owner', 'title', 'phone'].includes(field)) mirrorDirty = true;
         if (field === 'title') root.querySelector('[data-workspace-title]').textContent = input.value || 'Minha coleção';
-        if (field === 'owner') root.querySelector('[data-workspace-meta]').textContent = `${input.value || 'Colecionador'} · versão ${state.profile.version}`;
         renderPersonalization();
         scheduleCloudSave();
       }));

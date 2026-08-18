@@ -178,3 +178,55 @@
   .explore-account-link { grid-column: auto; }
   .catalog-grid.free-catalog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 6px; }
 }
+
+
+/* Ajustes 18/08/2026 — cabeçalhos limpos, modo livre e consistência visual. */
+.catalog-hero-grid {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  text-align: center;
+}
+.catalog-hero-grid > div:first-child {
+  width: min(100%, 900px);
+  display: grid;
+  justify-items: center;
+}
+.catalog-hero-grid .hero-badge { justify-self: center; }
+.catalog-hero p { margin-inline: auto; }
+.catalog-hero-stats { display: none !important; }
+
+.catalog-results-heading-clean {
+  min-height: 32px;
+  align-items: center;
+}
+.catalog-results-heading-clean .section-kicker { margin: 0; }
+.collections-load-status {
+  display: block;
+  min-height: 18px;
+  margin: -9px 2px 16px;
+  color: var(--muted-2);
+  font-size: .62rem;
+  text-align: right;
+}
+
+/* A regra antiga de gerenciamento fazia somente a busca de cartas ocupar duas
+   colunas da toolbar, empurrando o Modo livre para baixo. */
+.online-catalog-section[data-kind="card"] .explore-search-toolbar > .search-control {
+  grid-column: auto;
+}
+
+/* No modo livre, regras mais específicas dos cards de booster/kit ainda
+   preservavam o painel alto da mídia. Aqui a arte volta a ficar realmente só. */
+.product-card.free-catalog-card .product-card-media {
+  min-height: 0;
+  padding: 6px;
+  overflow: visible;
+  background: transparent;
+}
+.product-card.free-catalog-card[data-kind="booster"] .booster-visual {
+  width: min(100%, 180px);
+}
+
+@media (max-width: 620px) {
+  .online-catalog-section[data-kind="card"] .explore-search-toolbar > .search-control { grid-column: 1 / -1; }
+}

@@ -5,7 +5,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   <section class="catalog-hero album-catalog-hero">
     <div class="shell catalog-hero-grid">
       <div data-reveal><span class="hero-badge"><i></i> Organização visual</span><h1>Álbuns virtuais</h1><p>Explore álbuns montados pelos colecionadores. Coleções privadas permanecem fora desta área.</p></div>
-      <div class="catalog-hero-stats" data-reveal><div><strong data-album-total>—</strong><span>álbuns publicados</span></div><div><strong data-album-cards>—</strong><span>cartas posicionadas</span></div></div>
     </div>
   </section>
 
@@ -21,7 +20,6 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         <button class="clear-button explore-clear-filters" type="button" data-album-clear-filters>Limpar filtros</button>
       </div>
     </div>
-    <div class="albums-catalog-summary"><strong data-album-count aria-live="polite">—</strong></div>
     <div class="album-skeleton-grid" data-album-skeleton aria-hidden="true">
       {Array.from({ length: 6 }, () => <article class="album-skeleton-card"><div class="album-skeleton-cover skeleton-pulse"></div><div><i class="skeleton-pulse"></i><b class="skeleton-pulse"></b><span class="skeleton-pulse"></span><span class="skeleton-pulse short"></span></div></article>)}
     </div>

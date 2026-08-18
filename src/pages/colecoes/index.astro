@@ -7,11 +7,6 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
   <section class="catalog-hero collections-catalog-hero">
     <div class="shell catalog-hero-grid">
       <div data-reveal><span class="hero-badge"><i></i> Perfis da comunidade</span><h1>Coleções da comunidade</h1><p>Somente contas que escolheram deixar a coleção pública aparecem aqui. Uma conta também pode manter a coleção completamente vazia e privada apenas para comprar e fazer propostas.</p></div>
-      <div class="catalog-hero-stats" data-reveal>
-        <div><strong data-online-collection-total>—</strong><span>coleções públicas</span></div>
-        <div><strong data-online-card-total>—</strong><span>cartas publicadas</span></div>
-        <div><strong data-online-booster-total>—</strong><span>boosters publicados</span></div>
-      </div>
     </div>
   </section>
 
@@ -28,7 +23,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         <a class="explore-account-link" href={`${base}cadastro/`}>Entrar / criar conta <b>→</b></a>
       </div>
     </div>
-    <div class="collections-summary"><strong data-collection-count>—</strong> <span data-collection-label>coleções</span> <small data-collection-status aria-live="polite"></small></div>
+    <small class="collections-load-status" data-collection-status aria-live="polite"></small>
     <div class="collection-skeleton-grid" data-collection-skeleton aria-hidden="true">
       {Array.from({ length: 6 }, () => <article class="collection-skeleton-card"><div class="collection-skeleton-cover skeleton-pulse"></div><div class="collection-skeleton-copy"><div><i class="skeleton-pulse"></i><b class="skeleton-pulse"></b></div><span class="skeleton-pulse"></span><span class="skeleton-pulse short"></span><em class="skeleton-pulse"></em></div></article>)}
     </div>
