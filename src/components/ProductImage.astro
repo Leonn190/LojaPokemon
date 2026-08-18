@@ -38,7 +38,7 @@ const normalizeRarity = (value: string) => value
   .replace(/[\u0300-\u036f]/g, '')
   .trim()
   .toLowerCase();
-const rarityText = isCard ? normalizeRarity(item.type || '') : '';
+const rarityText = isCard ? normalizeRarity(item.cardClass || item.type || '') : '';
 const compactRarity = rarityText.replace(/[^a-z0-9]+/g, '');
 const premiumTokens = [
   'full art', 'ultra rara', 'ultra rare', 'secret', 'secreta', 'gold', 'dourad', 'rainbow',

@@ -161,7 +161,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         root?.querySelectorAll<HTMLElement>('[data-public-value-stat]').forEach((node) => node.hidden = !publicValue);
 
         const rarityMap = new Map<string, number>();
-        groups.cards.forEach((card: any) => { const label = String(card.rarity || card.type || 'Não informada').trim() || 'Não informada'; rarityMap.set(label, (rarityMap.get(label) || 0) + quantity(card)); });
+        groups.cards.forEach((card: any) => { const label = String(card.cardClass || card.rarity || card.type || 'Não informada').trim() || 'Não informada'; rarityMap.set(label, (rarityMap.get(label) || 0) + quantity(card)); });
         const setMap = new Map<string, number>();
         groups.cards.forEach((card: any) => { const label = String(card.collection || 'Não informada').trim() || 'Não informada'; setMap.set(label, (setMap.get(label) || 0) + quantity(card)); });
         const sortedEntries = (map: Map<string, number>) => [...map.entries()].sort((a, b) => b[1] - a[1]);

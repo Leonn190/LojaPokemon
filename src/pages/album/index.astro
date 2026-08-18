@@ -109,7 +109,8 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       return [
         ['data-product-id', `card:${card.slug || card.id || card._id || ''}`],
         ['data-kind', 'card'], ['data-name', card.name], ['data-number', card.number], ['data-collection', card.collection],
-        ['data-language', card.language], ['data-condition', card.condition], ['data-year', card.year], ['data-type', card.type || 'Carta Pokémon'],
+        ['data-era', card.era], ['data-collection-id', card.collectionId], ['data-collection-code', card.collectionCode], ['data-group', card.group], ['data-card-class', card.cardClass], ['data-pokemon-type', card.cardClass ? card.type : card.pokemonType],
+        ['data-language', card.language], ['data-condition', card.condition], ['data-integrity', card.integrity], ['data-year', card.year], ['data-type', card.cardClass || card.type || 'Carta Pokémon'],
         ['data-description', ''], ['data-contents', ''], ['data-link-liga', card.linkLiga], ['data-owner', card.ownerName],
         ['data-owner-uid', card.ownerUid || card.collectionUid], ['data-owner-collection', card.ownerCollectionName], ['data-owner-slug', card.ownerCollectionSlug],
         ['data-owner-phone', card.ownerPhone], ['data-proposal-policy', policy], ['data-proposal-flexible', card.proposalTerms?.flexibleDiscounts === false ? 'false' : 'true'],

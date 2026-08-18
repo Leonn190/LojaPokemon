@@ -554,3 +554,69 @@
   .auth-panel { padding: 18px 15px; }
 }
 .central-collection-editor .workspace-proposal-settings { border-radius: 20px; }
+
+/* Cadastro estruturado TCG: filtros dependentes, integridade e galeria de boosters. */
+.inventory-metadata-filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(145px, 1fr));
+  gap: 9px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(4,12,22,.34);
+}
+.inventory-metadata-filters[hidden] { display: none !important; }
+.inventory-metadata-filters > label { min-width: 0; display: grid; gap: 5px; color: var(--muted-2); font-size: .52rem; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; }
+.inventory-metadata-filters select,
+.inventory-metadata-filters input {
+  width: 100%; min-height: 35px; border: 1px solid var(--line); border-radius: 9px; outline: 0;
+  color: var(--text); background: #0a1625; padding: 7px 9px; font: inherit; font-size: .59rem; text-transform: none;
+}
+.inventory-metadata-filters select:disabled { opacity: .46; cursor: not-allowed; }
+.inventory-metadata-filters select:focus,
+.inventory-metadata-filters input:focus { border-color: rgba(84,232,223,.4); box-shadow: 0 0 0 2px rgba(84,232,223,.055); }
+.inventory-metadata-filters > button {
+  align-self: end; min-height: 35px; border: 1px solid var(--line); border-radius: 9px; color: var(--muted);
+  background: rgba(255,255,255,.025); font: inherit; font-size: .57rem; font-weight: 850; cursor: pointer;
+}
+.inventory-metadata-filters > button:hover { color: var(--text); border-color: rgba(84,232,223,.3); }
+.inventory-integrity-filter, .integrity-input-wrap { position: relative; display: flex; align-items: center; }
+.inventory-integrity-filter input, .integrity-input-wrap input { padding-right: 32px; }
+.inventory-integrity-filter b, .integrity-input-wrap b { position: absolute; right: 11px; color: var(--muted-2); font-size: .58rem; pointer-events: none; }
+
+.modal-form-section { display: grid; gap: 13px; padding: 15px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.014); }
+.modal-form-section > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.modal-form-section > header strong, .modal-form-section > header small { display: block; }
+.modal-form-section > header strong { font-size: .72rem; }
+.modal-form-section > header small { margin-top: 3px; color: var(--muted-2); font-size: .57rem; font-weight: 500; }
+.modal-form-grid [hidden] { display: none !important; }
+.editor-form-feedback { margin: 0; padding: 11px 12px; border: 1px solid rgba(255,157,157,.22); border-radius: 11px; color: #ffc3c3; background: rgba(255,120,120,.055); font-size: .62rem; }
+.editor-form-feedback[hidden] { display: none !important; }
+.booster-images-section > header { align-items: center; }
+.booster-image-editor { display: grid; gap: 9px; }
+.booster-image-row { display: grid; grid-template-columns: 72px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 9px; border: 1px solid var(--line); border-radius: 12px; background: rgba(4,12,22,.42); }
+.booster-image-preview { position: relative; width: 70px; height: 92px; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--line); border-radius: 9px; background: rgba(255,255,255,.025); color: var(--muted-2); }
+.booster-image-preview img { width: 100%; height: 100%; object-fit: contain; }
+.booster-image-preview b { position: absolute; left: 5px; bottom: 5px; padding: 3px 5px; border-radius: 6px; color: #04101a; background: var(--cyan); font-size: .44rem; }
+.booster-image-row > label { min-width: 0; display: grid; gap: 5px; color: var(--muted); font-size: .58rem; font-weight: 800; }
+.booster-image-row input { width: 100%; border: 1px solid var(--line); border-radius: 9px; outline: 0; color: var(--text); background: rgba(255,255,255,.035); padding: 9px 10px; font: inherit; font-size: .6rem; }
+.booster-image-actions { display: flex; gap: 5px; }
+.booster-image-actions button { width: 29px; height: 29px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); background: rgba(255,255,255,.025); cursor: pointer; }
+.booster-image-actions button:disabled { opacity: .3; cursor: not-allowed; }
+.booster-image-counter { color: var(--muted-2); font-size: .55rem; }
+
+.integrity-filter-wrap { position: relative; min-height: 42px; }
+.integrity-filter-wrap input { padding-right: 28px; }
+.integrity-filter-wrap b { position: absolute; right: 12px; color: var(--muted-2); font-size: .62rem; }
+.online-catalog-section[data-kind="card"] .filter-panel { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.online-catalog-section[data-kind="card"] .search-control { grid-column: span 2; }
+
+@media (max-width: 900px) {
+  .inventory-metadata-filters { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+@media (max-width: 620px) {
+  .inventory-metadata-filters { grid-template-columns: 1fr; }
+  .booster-image-row { grid-template-columns: 58px minmax(0,1fr); }
+  .booster-image-preview { width: 56px; height: 76px; }
+  .booster-image-actions { grid-column: 2; }
+  .online-catalog-section[data-kind="card"] .search-control { grid-column: auto; }
+}

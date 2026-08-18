@@ -4,7 +4,6 @@ import re
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any
-from urllib.parse import parse_qs, urlsplit
 
 from configuracao import ESTADOS_ORDEM, FATORES_ESTADO, chave_texto
 
@@ -72,24 +71,39 @@ def sigla_idioma(idioma: str) -> str:
 
 
 def identificador_carta(carta: dict[str, Any]) -> str:
-    link = str(carta.get("Link Liga") or carta.get("Liga") or carta.get("Link") or "")
-    qs = parse_qs(urlsplit(link).query)
-    edicao = (qs.get("ed") or [""])[0] or str(carta.get("Coleção") or "COLECAO")
-    numero_carta = str(carta.get("Número") or carta.get("Numeração") or (qs.get("num") or [""])[0] or "SEM-NUMERO")
-    idioma = sigla_idioma(str(carta.get("Idioma") or "BR"))
+    """Gera identidade estável sem usar URL externa como chave primária."""
+    colecao = str(
+        carta.get("collectionId")
+        or carta.get("Coleção ID")
+        or carta.get("Coleção")
+        or carta.get("collection")
+        or "COLECAO"
+    )
+    numero_carta = str(carta.get("Número") or carta.get("Numeração") or carta.get("number") or "SEM-NUMERO")
+    idioma = sigla_idioma(str(carta.get("Idioma") or carta.get("language") or "SEM-IDIOMA"))
+    estado_bruto = str(carta.get("Estado") or carta.get("condition") or "SEM-ESTADO")
     try:
-        estado = normalizar_estado(str(carta.get("Estado") or "NM"))
+        estado = normalizar_estado(estado_bruto)
     except ValueError:
-        estado = _slug(str(carta.get("Estado") or "NM"))
-    return f"{_slug(edicao)}-{_slug(numero_carta)}-{idioma}-{estado}"
+        estado = _slug(estado_bruto)
+    return f"{_slug(colecao)}-{_slug(numero_carta)}-{idioma}-{estado}"
 
 
 def identificador_booster(booster: dict[str, Any]) -> str:
-    link = str(booster.get("Link Liga") or booster.get("Liga") or booster.get("Link") or "")
-    qs = parse_qs(urlsplit(link).query)
-    edicao = (qs.get("ed") or [""])[0]
-    nome = str(booster.get("Tipo de pacote") or booster.get("Coleção") or booster.get("Nome") or "BOOSTER")
-    return f"BOOSTER-{_slug(edicao or nome)}"
+    """Gera identidade de booster pelos próprios metadados, nunca pela Liga."""
+    colecao = str(
+        booster.get("collectionId")
+        or booster.get("Coleção ID")
+        or booster.get("Coleção")
+        or booster.get("collection")
+        or booster.get("Tipo de pacote")
+        or booster.get("Nome")
+        or booster.get("name")
+        or "BOOSTER"
+    )
+    idioma = sigla_idioma(str(booster.get("Idioma") or booster.get("language") or "SEM-IDIOMA"))
+    ano = _slug(str(booster.get("Ano") or booster.get("year") or "SEM-ANO"))
+    return f"BOOSTER-{_slug(colecao)}-{idioma}-{ano}"
 
 
 def _oferta_preco(oferta: dict[str, Any]) -> Decimal | None:

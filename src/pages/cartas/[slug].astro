@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProductImage from '../../components/ProductImage.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import { formatBRL, getCards, type CardItem } from '../../lib/catalog';
+import { getEra, languageLabel as getLanguageLabel } from '../../lib/tcg-metadata';
 
 export function getStaticPaths() {
   return getCards().map((card) => ({ params: { slug: card.slug }, props: { card } }));
@@ -11,12 +12,17 @@ export function getStaticPaths() {
 interface Props { card: CardItem; }
 const { card } = Astro.props;
 const base = import.meta.env.BASE_URL;
+const eraLabel = getEra(card.era)?.label || card.era || 'Não informada';
+const groupLabel = card.group === 'pokemon' ? 'Pokémon' : card.group === 'trainer' ? 'Treinador' : card.group === 'energy' ? 'Energia' : 'Não informado';
+const classLabel = card.cardClass || 'Não informada';
+const typeLabel = card.group === 'pokemon' ? (card.type || 'Não informado') : '';
+const language = card.languageLabel || getLanguageLabel(card.language) || card.language || 'Não informado';
 const allCards = getCards();
 const related = allCards
   .filter((item) => item.slug !== card.slug)
   .sort((a, b) => {
-    const scoreA = Number(a.collection === card.collection) * 3 + Number(a.type === card.type) * 2;
-    const scoreB = Number(b.collection === card.collection) * 3 + Number(b.type === card.type) * 2;
+    const scoreA = Number(a.collection === card.collection) * 3 + Number((a.cardClass || a.type) === (card.cardClass || card.type)) * 2 + Number(a.type === card.type);
+    const scoreB = Number(b.collection === card.collection) * 3 + Number((b.cardClass || b.type) === (card.cardClass || card.type)) * 2 + Number(b.type === card.type);
     return scoreB - scoreA || (b.price ?? 0) - (a.price ?? 0);
   })
   .slice(0, 4);
@@ -24,7 +30,7 @@ const related = allCards
 
 <BaseLayout
   title={`${card.name} ${card.number}`}
-  description={`${card.name} ${card.number}, da coleção ${card.collection}. Veja imagem, estado, idioma, ano, tipo e preço registrado no catálogo.`}
+  description={`${card.name} ${card.number}, da coleção ${card.collection}. Veja imagem, classificação, estado, idioma, ano e preço registrado no catálogo.`}
   active="cards"
   bodyClass="detail-page"
 >
@@ -41,7 +47,7 @@ const related = allCards
 
       <article class="detail-content" data-reveal>
         <div class="detail-tags">
-          <span>{card.type}</span>
+          <span>{classLabel}</span>
           <span class={`condition-badge condition-${card.condition.toLowerCase()}`}>{card.condition}</span>
         </div>
         <span class="detail-number">{card.number}</span>
@@ -54,12 +60,16 @@ const related = allCards
         </div>
 
         <dl class="detail-specs">
-          <div><dt>Coleção</dt><dd>{card.collection}</dd></div>
-          <div><dt>Número</dt><dd>{card.number}</dd></div>
-          <div><dt>Idioma</dt><dd>{card.language}</dd></div>
-          <div><dt>Estado</dt><dd>{card.condition}</dd></div>
-          <div><dt>Ano</dt><dd>{card.year}</dd></div>
-          <div><dt>Tipo</dt><dd>{card.type}</dd></div>
+          <div><dt>Era</dt><dd>{eraLabel}</dd></div>
+          <div><dt>Coleção</dt><dd>{card.collection}{card.collectionCode ? ` · ${card.collectionCode}` : ''}</dd></div>
+          <div><dt>Numeração</dt><dd>{card.number}</dd></div>
+          <div><dt>Grupo</dt><dd>{groupLabel}</dd></div>
+          <div><dt>Classe</dt><dd>{classLabel}</dd></div>
+          {card.group === 'pokemon' && <div><dt>Tipo</dt><dd>{typeLabel}</dd></div>}
+          <div><dt>Idioma</dt><dd>{language}</dd></div>
+          <div><dt>Estado</dt><dd>{card.condition || 'Não informado'}</dd></div>
+          <div><dt>Integridade</dt><dd>{card.integrity ? `${card.integrity}%` : 'Não informada'}</dd></div>
+          <div><dt>Ano</dt><dd>{card.year || 'Não informado'}</dd></div>
         </dl>
 
         <a class="back-catalog-button" href={`${base}cartas/`}><span>←</span> Voltar para todas as cartas</a>

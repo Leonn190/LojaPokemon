@@ -1,8 +1,15 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getEditableCollections } from '../../lib/catalog';
+import legacyClaims from '../../data/legacy-claim-verifiers.json';
+import { TCG_CONFIG } from '../../lib/tcg-metadata';
 
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+const legacyCollections = getEditableCollections().map((collection) => ({ ...collection, profile: { ...collection.profile, email: '', phone: '', password: '' } }));
+const legacyJson = JSON.stringify(legacyCollections).replace(/</g, '\\u003c');
+const legacyClaimsJson = JSON.stringify(legacyClaims).replace(/</g, '\\u003c');
+const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
 ---
 
 <BaseLayout
@@ -11,6 +18,9 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
   active="central"
   bodyClass="central-page"
 >
+  <script type="application/json" data-legacy-collections set:html={legacyJson}></script>
+  <script type="application/json" data-legacy-claims set:html={legacyClaimsJson}></script>
+  <script type="application/json" data-tcg-config set:html={tcgConfigJson}></script>
 
   <section class="shell collection-editor central-collection-editor" data-editor-root data-base={base}>
     <div class="central-auth-gate" data-editor-notice>
@@ -76,6 +86,18 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
               </section>
             </div>
           </section>
+
+      {legacyCollections.length > 0 && (
+        <details class="editor-legacy-migration" data-legacy-migration data-admin-section="settings">
+          <summary><span>↥</span><div><strong>Migrar uma coleção antiga</strong><small>Uso único: transfere os dados da versão anterior para esta conta.</small></div><b>+</b></summary>
+          <div class="legacy-migration-body">
+            <label class="form-field"><span>Coleção antiga</span><select data-legacy-select><option value="">Selecione…</option>{legacyCollections.map((collection) => <option value={collection.profile.collectionId || collection.slug}>{collection.profile.title} · {collection.profile.owner}</option>)}</select></label>
+            <label class="form-field"><span>Senha antiga dessa coleção</span><input type="password" autocomplete="off" data-legacy-password placeholder="A senha usada no sistema antigo" /><small>Sua senha antiga é usada apenas para confirmar a migração.</small></label>
+            <button type="button" class="secondary-cta" data-legacy-import><span>Migrar dados para esta conta</span><b>↥</b></button>
+            <p class="import-feedback" data-legacy-feedback></p>
+          </div>
+        </details>
+      )}
 
       <section class="editor-profile-settings settings-profile-card" data-profile-settings id="editor-settings" data-admin-section="settings">
         <header class="settings-section-heading"><span>✎</span><div><strong>Dados da conta e coleção</strong><small>Nome, telefone, Gmail/e-mail e informações públicas da sua coleção.</small></div></header>
@@ -161,7 +183,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
       <section class="editor-command-section editor-command-section-compact" aria-label="Adicionar itens à coleção" data-admin-section="inventory">
         <div class="editor-command-grid">
-          <button type="button" class="editor-command-card" data-open-modal="card"><span>◇</span><strong>Adicionar carta</strong><small>Cadastre pelo link da Liga e estado.</small><b>＋</b></button>
+          <button type="button" class="editor-command-card" data-open-modal="card"><span>◇</span><strong>Adicionar carta</strong><small>Cadastre com metadados próprios, sem depender da Liga.</small><b>＋</b></button>
           <button type="button" class="editor-command-card" data-open-modal="booster"><span>▱</span><strong>Adicionar booster</strong><small>Inclua pacotes lacrados no estoque.</small><b>＋</b></button>
           <button type="button" class="editor-command-card is-kit" data-open-modal="kit"><span>▦</span><strong>Adicionar kit</strong><small>Monte visualmente com drag and drop.</small><b>＋</b></button>
           <button type="button" class="editor-command-card is-product" data-open-modal="product"><span>▣</span><strong>Adicionar produto</strong><small>Cadastre um produto Pokémon fechado.</small><b>＋</b></button>
@@ -182,6 +204,18 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
           <button type="button" data-inventory-tab="products"><span>Produtos</span><b data-tab-count="products">0</b></button>
           <button type="button" data-inventory-tab="albums"><span>Álbuns</span><b data-tab-count="albums">0</b></button>
         </nav>
+
+        <div class="inventory-metadata-filters" data-inventory-metadata-filters>
+          <label><span>Era</span><select data-inventory-filter="era"><option value="">Todas</option>{Object.values(TCG_CONFIG.eras).map((era) => <option value={era.id}>{era.label}</option>)}</select></label>
+          <label><span>Coleção</span><select data-inventory-filter="collectionId" disabled><option value="">Todas</option></select></label>
+          <label><span>Grupo</span><select data-inventory-filter="group"><option value="">Todos</option>{TCG_CONFIG.groups.map((group) => <option value={group.id}>{group.label}</option>)}</select></label>
+          <label><span>Classe</span><select data-inventory-filter="cardClass" disabled><option value="">Todas</option></select></label>
+          <label><span>Tipo</span><select data-inventory-filter="type" disabled><option value="">Todos</option></select></label>
+          <label><span>Idioma</span><select data-inventory-filter="language"><option value="">Todos</option>{TCG_CONFIG.languages.map((language) => <option value={language.id}>{language.label}</option>)}</select></label>
+          <label><span>Estado</span><select data-inventory-filter="condition"><option value="">Todos</option>{Object.keys(TCG_CONFIG.conditions).map((condition) => <option value={condition}>{condition}</option>)}</select></label>
+          <label><span>Integridade</span><div class="inventory-integrity-filter"><input type="number" min="1" max="100" step="1" placeholder="1–100" data-inventory-filter="integrity" /><b>%</b></div></label>
+          <button type="button" data-clear-inventory-filters>Limpar filtros</button>
+        </div>
 
         <div class="editor-inventory" data-editor-inventory></div>
       </section>
@@ -211,24 +245,41 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
     <div class="editor-modal" data-editor-modal="card" hidden>
       <button class="editor-modal-backdrop" type="button" data-close-modal aria-label="Fechar"></button>
-      <section class="editor-modal-dialog editor-form-dialog" role="dialog" aria-modal="true" aria-labelledby="card-modal-title">
-        <header class="editor-modal-header"><div><span class="section-eyebrow">Nova carta</span><h2 id="card-modal-title">Adicionar carta</h2><p>Cadastre os dados diretamente no Vault. O link da Liga continua opcional como referência para cotização futura.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
-        <form class="editor-item-form editor-modal-form" data-card-form>
-          <div class="modal-form-grid">
-            <label class="wide"><span>Nome da carta</span><input name="name" required placeholder="Ex.: Giratina V" /></label>
-            <label><span>Número</span><input name="number" placeholder="Ex.: 186/196" /></label>
-            <label><span>Coleção Pokémon</span><input name="collection" required placeholder="Ex.: Origem Perdida" /></label>
-            <label><span>Tipo / raridade</span><input name="type" placeholder="Ex.: Arte Secreta" /></label>
-            <label><span>Ano</span><input name="year" placeholder="2022" /></label>
-            <label><span>Estado</span><select name="condition" required><option value="NM">NM</option><option value="SP">SP</option><option value="MP">MP</option><option value="HP">HP</option><option value="D">D</option></select></label>
-            <label><span>Idioma</span><input name="language" required value="Português (PT-BR)" /></label>
-            <label><span>Quantidade</span><input name="quantity" type="number" min="1" value="1" required /></label>
-            <label><span>Preço final (opcional)</span><input name="price" type="number" min="0" step="0.01" placeholder="Ex.: 45.90" /></label>
-            <label class="wide"><span>Imagem local (opcional)</span><input name="image" placeholder="imagens/cartas/minha-carta.webp" /><small>Use o caminho da imagem disponível no projeto.</small></label>
-            <label class="wide"><span>Link da Liga (opcional)</span><input name="linkLiga" type="url" placeholder="https://www.ligapokemon.com.br/..." /></label>
+      <section class="editor-modal-dialog editor-form-dialog tcg-item-dialog" role="dialog" aria-modal="true" aria-labelledby="card-modal-title">
+        <header class="editor-modal-header"><div><span class="section-eyebrow" data-card-modal-eyebrow>Nova carta</span><h2 id="card-modal-title">Adicionar carta</h2><p>Identifique a impressão com metadados próprios. Coleção, classe, tipo e integridade são liberados conforme as escolhas anteriores.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
+        <form class="editor-item-form editor-modal-form" data-card-form data-edit-index="">
+          <div class="modal-form-section">
+            <header><strong>Informações principais</strong><small>Nome, numeração e ano da impressão.</small></header>
+            <div class="modal-form-grid">
+              <label class="wide"><span>Nome da carta</span><input name="name" required placeholder="Ex.: Giratina V" /></label>
+              <label><span>Numeração</span><input name="number" required maxlength="40" placeholder="Ex.: 251/198, GG65/GG70, SVP 001" /></label>
+              <label><span>Ano</span><input name="year" type="number" min="1996" max="2100" required placeholder="2026" /></label>
+            </div>
           </div>
+          <div class="modal-form-section">
+            <header><strong>Classificação</strong><small>As opções incompatíveis são eliminadas automaticamente.</small></header>
+            <div class="modal-form-grid">
+              <label><span>Era</span><select name="era" required data-card-era><option value="">Selecione a Era</option>{Object.values(TCG_CONFIG.eras).map((era) => <option value={era.id}>{era.label}</option>)}</select></label>
+              <label><span>Grupo</span><select name="group" required data-card-group><option value="">Selecione o Grupo</option>{TCG_CONFIG.groups.map((group) => <option value={group.id}>{group.label}</option>)}</select></label>
+              <label><span>Estado</span><select name="condition" required data-card-condition><option value="">Selecione o Estado</option><option value="NM">NM</option><option value="SP">SP</option><option value="MP">MP</option><option value="HP">HP</option><option value="D">D</option></select></label>
+              <label data-card-field="collection" hidden><span>Coleção</span><select name="collectionId" required disabled data-card-collection></select><small data-card-collection-code></small></label>
+              <label data-card-field="class" hidden><span>Classe</span><select name="cardClass" required disabled data-card-class></select></label>
+              <label data-card-field="integrity" hidden><span>Integridade</span><div class="integrity-input-wrap"><input name="integrity" type="number" required disabled data-card-integrity /><b>%</b></div><small data-card-integrity-hint></small></label>
+              <label data-card-field="type" hidden><span>Tipo</span><select name="type" required disabled data-card-type></select><small>Somente para Grupo Pokémon.</small></label>
+              <label><span>Idioma</span><select name="language" required data-card-language><option value="">Selecione o Idioma</option>{TCG_CONFIG.languages.map((language) => <option value={language.id} selected={language.id === 'BR'}>{language.label}</option>)}</select></label>
+            </div>
+          </div>
+          <div class="modal-form-section">
+            <header><strong>Estoque e imagem</strong><small>Controles operacionais continuam independentes da classificação.</small></header>
+            <div class="modal-form-grid">
+              <label><span>Quantidade</span><input name="quantity" type="number" min="1" value="1" required /></label>
+              <label><span>Preço final (opcional)</span><input name="price" type="number" min="0" step="0.01" placeholder="Ex.: 45.90" /></label>
+              <label class="wide"><span>Imagem</span><input name="image" placeholder="URL ou caminho da imagem já disponível no projeto" data-card-image /><small>Registros antigos com formato legado continuam aceitos.</small></label>
+            </div>
+          </div>
+          <p class="editor-form-feedback" data-card-form-feedback hidden></p>
           <label class="modal-sale-check"><input name="forSale" type="checkbox" checked /><span><strong>Disponível para venda</strong><small>Pode ser alterado individualmente no inventário.</small></span></label>
-          <footer class="modal-form-actions"><button type="button" class="secondary-cta" data-close-modal><span>Cancelar</span><b>×</b></button><button type="submit" class="primary-cta"><span>Adicionar carta</span><b>＋</b></button></footer>
+          <footer class="modal-form-actions"><button type="button" class="secondary-cta" data-close-modal><span>Cancelar</span><b>×</b></button><button type="submit" class="primary-cta"><span data-card-submit-label>Adicionar carta</span><b>＋</b></button></footer>
         </form>
       </section>
     </div>
@@ -261,18 +312,29 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
     <div class="editor-modal" data-editor-modal="booster" hidden>
       <button class="editor-modal-backdrop" type="button" data-close-modal aria-label="Fechar"></button>
-      <section class="editor-modal-dialog editor-form-dialog" role="dialog" aria-modal="true" aria-labelledby="booster-modal-title">
-        <header class="editor-modal-header"><div><span class="section-eyebrow">Novo booster</span><h2 id="booster-modal-title">Adicionar booster</h2><p>Cadastre o booster diretamente. A quantidade fica privada e a imagem continua vinculada ao item.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
-        <form class="editor-item-form editor-modal-form" data-booster-form>
-          <div class="modal-form-grid">
-            <label class="wide"><span>Nome do booster</span><input name="name" required placeholder="Ex.: Evolving Skies" /></label>
-            <label><span>Quantidade</span><input name="quantity" type="number" min="1" value="1" required /></label>
-            <label><span>Preço final (opcional)</span><input name="price" type="number" min="0" step="0.01" placeholder="Ex.: 30.00" /></label>
-            <label class="wide"><span>Imagem local (opcional)</span><input name="image" placeholder="imagens/boosters/evolving-skies.webp" /></label>
-            <label class="wide"><span>Link da Liga (opcional)</span><input name="linkLiga" type="url" placeholder="https://www.ligapokemon.com.br/..." /></label>
+      <section class="editor-modal-dialog editor-form-dialog tcg-item-dialog" role="dialog" aria-modal="true" aria-labelledby="booster-modal-title">
+        <header class="editor-modal-header"><div><span class="section-eyebrow" data-booster-modal-eyebrow>Novo booster</span><h2 id="booster-modal-title">Adicionar booster</h2><p>Booster usa uma estrutura própria: nome, ano, Era, coleção, idioma e até cinco imagens.</p></div><button type="button" data-close-modal aria-label="Fechar">×</button></header>
+        <form class="editor-item-form editor-modal-form" data-booster-form data-edit-index="">
+          <div class="modal-form-section">
+            <header><strong>Identificação</strong><small>Coleção é liberada depois da Era.</small></header>
+            <div class="modal-form-grid">
+              <label class="wide"><span>Nome do booster</span><input name="name" required placeholder="Ex.: Booster Caos Ascendente" /></label>
+              <label><span>Ano</span><input name="year" type="number" min="1996" max="2100" required placeholder="2026" /></label>
+              <label><span>Era</span><select name="era" required data-booster-era><option value="">Selecione a Era</option>{Object.values(TCG_CONFIG.eras).map((era) => <option value={era.id}>{era.label}</option>)}</select></label>
+              <label data-booster-field="collection" hidden><span>Coleção</span><select name="collectionId" required disabled data-booster-collection></select><small data-booster-collection-code></small></label>
+              <label><span>Idioma</span><select name="language" required><option value="">Selecione o Idioma</option>{TCG_CONFIG.languages.map((language) => <option value={language.id} selected={language.id === 'BR'}>{language.label}</option>)}</select></label>
+              <label><span>Quantidade</span><input name="quantity" type="number" min="1" value="1" required /></label>
+              <label><span>Preço final (opcional)</span><input name="price" type="number" min="0" step="0.01" placeholder="Ex.: 30.00" /></label>
+            </div>
           </div>
+          <div class="modal-form-section booster-images-section">
+            <header><div><strong>Imagens do booster</strong><small>A primeira imagem é a capa. Máximo de 5.</small></div><button type="button" class="secondary-cta compact" data-add-booster-image><span>Adicionar imagem</span><b>＋</b></button></header>
+            <div class="booster-image-editor" data-booster-image-editor></div>
+            <small class="booster-image-counter" data-booster-image-counter>0/5 imagens</small>
+          </div>
+          <p class="editor-form-feedback" data-booster-form-feedback hidden></p>
           <label class="modal-sale-check"><input name="forSale" type="checkbox" checked /><span><strong>Disponível para venda</strong><small>Pode ser alterado individualmente no inventário.</small></span></label>
-          <footer class="modal-form-actions"><button type="button" class="secondary-cta" data-close-modal><span>Cancelar</span><b>×</b></button><button type="submit" class="primary-cta"><span>Adicionar booster</span><b>＋</b></button></footer>
+          <footer class="modal-form-actions"><button type="button" class="secondary-cta" data-close-modal><span>Cancelar</span><b>×</b></button><button type="submit" class="primary-cta"><span data-booster-submit-label>Adicionar booster</span><b>＋</b></button></footer>
         </form>
       </section>
     </div>
@@ -284,7 +346,6 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         <form class="editor-item-form editor-modal-form" data-product-form>
           <div class="modal-form-grid">
             <label class="wide"><span>Nome do produto</span><input name="name" required placeholder="Ex.: Elite Trainer Box" /></label>
-            <label class="wide"><span>Link da Liga (opcional)</span><input name="linkLiga" type="url" placeholder="https://www.ligapokemon.com.br/..." /></label>
             <label><span>Quantidade</span><input name="quantity" type="number" min="1" value="1" required /></label>
             <label><span>Preço (opcional)</span><input name="price" type="number" min="0" step="0.01" /></label>
             <label class="wide"><span>Imagem local (opcional)</span><input name="image" placeholder="imagens/produtos/meu-produto.webp" /><small>Use o caminho da imagem disponível no projeto.</small></label>
@@ -385,6 +446,12 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       const root = document.querySelector('[data-editor-root]');
       if (!root) return;
 
+      let legacyCollections = [];
+      let legacyClaims = [];
+      try { legacyCollections = JSON.parse(document.querySelector('[data-legacy-collections]')?.textContent || '[]'); } catch (_) {}
+      try { legacyClaims = JSON.parse(document.querySelector('[data-legacy-claims]')?.textContent || '[]'); } catch (_) {}
+      let tcgConfig = { eras: {}, groups: [], languages: [], conditions: {} };
+      try { tcgConfig = JSON.parse(document.querySelector('[data-tcg-config]')?.textContent || '{}'); } catch (_) {}
 
       const base = root.dataset.base || '/';
       const panels = [...root.querySelectorAll('[data-start-panel]')];
@@ -394,6 +461,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       const inventory = root.querySelector('[data-editor-inventory]');
       const inventorySection = root.querySelector('[data-inventory-section]');
       const inventorySearch = root.querySelector('[data-inventory-search]');
+      const inventoryMetadataFilters = root.querySelector('[data-inventory-metadata-filters]');
       const updateButton = null;
       const saveStateBadge = root.querySelector('[data-cloud-save-state]');
       const modalElements = [...root.querySelectorAll('[data-editor-modal]')];
@@ -403,6 +471,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       let state = null;
       let activeTab = 'cards';
       let inventoryQuery = '';
+      const inventoryFilters = { era: '', collectionId: '', group: '', cardClass: '', type: '', language: '', condition: '', integrity: '' };
       let kitFilter = 'all';
       let kitQuery = '';
       let idSeed = 0;
@@ -411,6 +480,9 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       let albumCardQuery = '';
       let selectedAlbumCardId = '';
       let activeKitEditIndex = -1;
+      let activeCardEditIndex = -1;
+      let activeBoosterEditIndex = -1;
+      let boosterImagesDraft = [''];
       let profileDirty = false;
       let privacyDirty = false;
       let mirrorDirty = false;
@@ -462,6 +534,14 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       };
 
       const clean = (value) => String(value ?? '').trim();
+      const bytesFromBase64 = (value) => Uint8Array.from(atob(String(value || '')), (char) => char.charCodeAt(0));
+      const equalBytes = (left, right) => left.length === right.length && left.every((value, index) => value === right[index]);
+      const verifyLegacyPassword = async (password, claim) => {
+        if (!claim || !password || !window.crypto?.subtle) return false;
+        const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(String(password)), 'PBKDF2', false, ['deriveBits']);
+        const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: bytesFromBase64(claim.salt), iterations: Number(claim.iterations || 210000) }, key, 256);
+        return equalBytes(new Uint8Array(bits), bytesFromBase64(claim.verifier));
+      };
       const toPrice = (value) => {
         const raw = clean(value).replace(/R\$/gi, '').replace(/\s/g, '');
         if (!raw || raw === '-') return null;
@@ -479,14 +559,86 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       const uid = (prefix) => `${prefix}-${Date.now().toString(36)}-${(idSeed += 1).toString(36)}`;
       const normalizeText = (value) => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
       const stableIdPart = (value) => clean(value).replace(/[^A-Za-z0-9]+/g, '-').replace(/(^-|-$)/g, '').toUpperCase() || 'SEM';
-      const stableLanguage = (value) => { const key = normalizeText(value); if (key.includes('portugu') || key === 'br' || key === 'pt br') return 'BR'; if (key.includes('ingles') || key === 'ing' || key === 'en') return 'ING'; return stableIdPart(value).slice(0, 5); };
-      const stableCardId = (item = {}) => {
-        let edition = clean(item.collection); let number = clean(item.number);
-        try { const url = new URL(item.linkLiga || ''); edition = url.searchParams.get('ed') || edition; number = number || url.searchParams.get('num') || ''; } catch (_) {}
-        return `${stableIdPart(edition || 'COLECAO')}-${stableIdPart(number || 'SEM-NUMERO')}-${stableLanguage(item.language || 'BR')}-${stableIdPart(item.condition || 'NM')}`;
+      const tcgEras = () => Object.values(tcgConfig.eras || {});
+      const getEraConfig = (value) => {
+        const key = normalizeText(value).replace(/[^a-z0-9]+/g, '_').replace(/(^_|_$)/g, '');
+        if (tcgConfig.eras?.[value]) return tcgConfig.eras[value];
+        return tcgEras().find((era) => normalizeText(era.id) === normalizeText(value) || normalizeText(era.label) === normalizeText(value) || normalizeText(era.id).replace(/[^a-z0-9]/g, '') === key.replace(/[^a-z0-9]/g, '')) || null;
       };
-      const stableBoosterId = (item = {}) => { let edition = ''; try { edition = new URL(item.linkLiga || '').searchParams.get('ed') || ''; } catch (_) {} return `BOOSTER-${stableIdPart(edition || item.name || 'BOOSTER')}`; };
-      const stableProductId = (item = {}) => `PRODUTO-${stableIdPart(item.name || getNameFromLink(item.linkLiga || '', 'PRODUTO'))}`;
+      const findCollection = (eraValue, collectionValue) => {
+        const era = getEraConfig(eraValue); if (!era) return null;
+        const target = normalizeText(collectionValue);
+        const direct = (era.collections || []).find((entry) => [entry.id, entry.label].some((value) => normalizeText(value) === target));
+        if (direct) return direct;
+        const byCode = (era.collections || []).filter((entry) => normalizeText(entry.code) === target);
+        return byCode.length === 1 ? byCode[0] : null;
+      };
+      const inferEraFromCollection = (collectionValue) => {
+        const target = normalizeText(collectionValue); if (!target) return '';
+        const matches = tcgEras().filter((era) => (era.collections || []).some((entry) => [entry.id, entry.label, entry.code].some((value) => normalizeText(value) === target)));
+        return matches.length === 1 ? matches[0].id : '';
+      };
+      const normalizeGroupId = (value) => {
+        const key = normalizeText(value);
+        if (key === 'pokemon') return 'pokemon';
+        if (key === 'trainer' || key === 'treinador') return 'trainer';
+        if (key === 'energy' || key === 'energia') return 'energy';
+        return '';
+      };
+      const normalizeLanguageCode = (value) => {
+        const key = normalizeText(value);
+        const aliases = { ing: 'ING', en: 'ING', ingles: 'ING', br: 'BR', 'pt-br': 'BR', 'pt br': 'BR', portugues: 'POR', 'portugues pt br': 'BR', 'portugues pt-br': 'BR', japones: 'JAP', jap: 'JAP', chines: 'CH', ch: 'CH', alemao: 'ALE', ale: 'ALE', frances: 'FRA', fra: 'FRA', por: 'POR', espanhol: 'ESP', esp: 'ESP' };
+        if (aliases[key]) return aliases[key];
+        const option = (tcgConfig.languages || []).find((entry) => normalizeText(entry.id) === key || normalizeText(entry.label) === key);
+        return option?.id || clean(value).toUpperCase();
+      };
+      const languageDisplay = (value) => (tcgConfig.languages || []).find((entry) => entry.id === normalizeLanguageCode(value))?.label || clean(value);
+      const eraDisplay = (value) => getEraConfig(value)?.label || clean(value);
+      const groupDisplay = (value) => (tcgConfig.groups || []).find((entry) => entry.id === normalizeGroupId(value))?.label || clean(value);
+      const conditionRange = (condition) => tcgConfig.conditions?.[clean(condition).toUpperCase()] || null;
+      const integrityCondition = (value) => { const number = Number(value); if (!Number.isFinite(number) || number < 1 || number > 100) return ''; if (number <= 20) return 'D'; if (number <= 40) return 'HP'; if (number <= 60) return 'MP'; if (number <= 80) return 'SP'; return 'NM'; };
+      const inventoryFilter = (name) => inventoryMetadataFilters?.querySelector(`[data-inventory-filter="${name}"]`);
+      const syncInventoryFilters = ({ resetCollection = false, resetClass = false, resetType = false } = {}) => {
+        if (!inventoryMetadataFilters) return;
+        const era = getEraConfig(inventoryFilter('era')?.value);
+        const group = normalizeGroupId(inventoryFilter('group')?.value);
+        const collectionSelect = inventoryFilter('collectionId');
+        const classSelect = inventoryFilter('cardClass');
+        const typeSelect = inventoryFilter('type');
+        const oldCollection = resetCollection ? '' : clean(collectionSelect?.value);
+        const oldClass = resetClass ? '' : clean(classSelect?.value);
+        const oldType = resetType ? '' : clean(typeSelect?.value);
+        fillSelect(collectionSelect, era ? (era.collections || []).map((entry) => ({ value: entry.id, label: `${entry.label}${entry.code ? ` — ${entry.code}` : ''}` })) : [], 'Todas', oldCollection);
+        if (collectionSelect) collectionSelect.disabled = !era;
+        fillSelect(classSelect, era && group ? (era.classes?.[group] || []).map((value) => ({ value, label: value })) : [], 'Todas', oldClass);
+        if (classSelect) classSelect.disabled = !(era && group);
+        fillSelect(typeSelect, era && group === 'pokemon' ? (era.pokemonTypes || []).map((value) => ({ value, label: value })) : [], 'Todos', oldType);
+        if (typeSelect) typeSelect.disabled = !(era && group === 'pokemon');
+        inventoryMetadataFilters.querySelectorAll('[data-inventory-filter]').forEach((control) => { inventoryFilters[control.dataset.inventoryFilter] = clean(control.value); });
+      };
+      const matchesInventoryMetadata = (item, kind = 'cards') => {
+        if (inventoryFilters.era && clean(item.era) !== inventoryFilters.era) return false;
+        if (inventoryFilters.collectionId && clean(item.collectionId) !== inventoryFilters.collectionId) return false;
+        if (inventoryFilters.language && normalizeLanguageCode(item.language) !== inventoryFilters.language) return false;
+        if (kind !== 'cards') return true;
+        if (inventoryFilters.group && normalizeGroupId(item.group) !== inventoryFilters.group) return false;
+        if (inventoryFilters.cardClass && clean(item.cardClass) !== inventoryFilters.cardClass) return false;
+        if (inventoryFilters.type && clean(item.type) !== inventoryFilters.type) return false;
+        if (inventoryFilters.condition && clean(item.condition).toUpperCase() !== inventoryFilters.condition) return false;
+        if (inventoryFilters.integrity && Number(item.integrity) !== Number(inventoryFilters.integrity)) return false;
+        return true;
+      };
+      const updateInventoryFilterVisibility = () => {
+        if (!inventoryMetadataFilters) return;
+        const isCard = activeTab === 'cards';
+        const isBooster = activeTab === 'boosters';
+        inventoryMetadataFilters.hidden = !(isCard || isBooster);
+        ['group', 'cardClass', 'type', 'condition', 'integrity'].forEach((name) => { const control = inventoryFilter(name); const label = control?.closest('label'); if (label) label.hidden = !isCard; });
+      };
+      const stableLanguage = (value) => normalizeLanguageCode(value) || 'BR';
+      const stableCardId = (item = {}) => `${stableIdPart(item.collectionId || item.collection || 'COLECAO')}-${stableIdPart(item.number || 'SEM-NUMERO')}-${stableLanguage(item.language || 'BR')}-${stableIdPart(item.condition || 'NM')}`;
+      const stableBoosterId = (item = {}) => `BOOSTER-${stableIdPart(item.collectionId || item.collection || item.name || 'BOOSTER')}-${stableLanguage(item.language || 'BR')}-${stableIdPart(item.year || 'ANO')}`;
+      const stableProductId = (item = {}) => `PRODUTO-${stableIdPart(item.name || 'PRODUTO')}`;
       const getNameFromLink = (link, fallback) => {
         try {
           const url = new URL(link);
@@ -508,7 +660,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         return `<div class="inventory-thumb"><span>${escapeHtml(initials)}</span>${urls[0] ? `<img src="${escapeHtml(urls[0])}" alt="${escapeHtml(name)}" loading="lazy" data-image-candidates="${escapeHtml(JSON.stringify(urls.slice(1)))}" data-image-index="0" data-image-item-id="${escapeHtml(imageKey)}" />` : ''}</div>`;
       };
       const itemPrice = (item) => item?.price ?? item?.leaguePrice ?? null;
-      const itemName = (item, kind) => item?.name || item?.collection || getNameFromLink(item?.linkLiga || '', kind === 'cards' ? 'Carta da Liga' : kind === 'products' ? 'Produto Pokémon' : 'Booster da Liga');
+      const itemName = (item, kind) => item?.name || item?.collection || getNameFromLink(item?.linkLiga || '', kind === 'cards' ? 'Carta sem nome' : kind === 'products' ? 'Produto Pokémon' : 'Booster sem nome');
       const allMovements = () => state ? [...(state.movements || []), ...(state.pendingMovements || [])] : [];
       const queueSaleMovement = (kind, item, before, after) => {
         if (!state) return;
@@ -567,37 +719,82 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       };
 
       const normalizeCard = (item = {}, isNew = false) => {
+        const rawCollection = clean(item.collection || item['Coleção'] || '');
+        const era = getEraConfig(item.era || item.Era)?.id || inferEraFromCollection(rawCollection);
+        const collectionMatch = findCollection(era, item.collectionId || item['Coleção ID'] || rawCollection);
+        const group = normalizeGroupId(item.group || item.Grupo);
+        const explicitPokemonType = clean(item.pokemonType || item['Tipo Pokémon'] || item['Tipo Elemental']);
+        const explicitClass = clean(item.cardClass || item.classe || item.Classe || item.rarity || item.Raridade);
+        const legacyType = clean(item.Tipo || item.type);
+        const legacyClass = explicitClass || (!explicitPokemonType ? legacyType : '');
+        const pokemonType = explicitPokemonType || (explicitClass && group === 'pokemon' ? clean(item.type) : '');
+        const language = normalizeLanguageCode(item.language || item.Idioma || '') || '';
+        const integrityRaw = Number(item.integrity ?? item.Integridade);
+        const integrity = Number.isFinite(integrityRaw) && integrityRaw >= 1 && integrityRaw <= 100 ? Math.round(integrityRaw) : null;
+        const image = clean(item.image || item.Imagem || '');
         const normalized = {
           ...item,
-          name: item.name || getNameFromLink(item.linkLiga || '', 'Carta da Liga'), number: item.number || '', collection: item.collection || '', year: item.year || '', type: item.type || '',
-          language: item.language || 'Português (PT-BR)', condition: item.condition || 'NM', quantity: toQuantity(item.quantity),
-          pricingSchemaVersion: 2, minimumPrice: null, quickSalePrice: null, leaguePrice: toPrice(item.leaguePrice), secondLeaguePrice: toPrice(item.secondLeaguePrice), thirdLeaguePrice: toPrice(item.thirdLeaguePrice), averageLeaguePrice: toPrice(item.averageLeaguePrice), medianLeaguePrice: toPrice(item.medianLeaguePrice), price: toPrice(item.price),
+          name: item.name || item.Nome || getNameFromLink(item.linkLiga || '', 'Carta sem nome'),
+          number: clean(item.number || item.Número || item.Numeração || ''),
+          year: clean(item.year || item.Ano || ''),
+          era,
+          collectionId: collectionMatch?.id || clean(item.collectionId || item['Coleção ID'] || ''),
+          collection: collectionMatch?.label || rawCollection,
+          collectionCode: collectionMatch?.code || clean(item.collectionCode || item['Código da Coleção'] || ''),
+          group,
+          cardClass: legacyClass,
+          type: pokemonType,
+          language,
+          languageLabel: languageDisplay(language),
+          condition: clean(item.condition || item.Estado || '').toUpperCase(),
+          integrity,
+          quantity: toQuantity(item.quantity ?? item.Quantidade),
+          pricingSchemaVersion: 2, minimumPrice: null, quickSalePrice: null, leaguePrice: toPrice(item.leaguePrice), secondLeaguePrice: toPrice(item.secondLeaguePrice), thirdLeaguePrice: toPrice(item.thirdLeaguePrice), averageLeaguePrice: toPrice(item.averageLeaguePrice), medianLeaguePrice: toPrice(item.medianLeaguePrice), price: toPrice(item.price ?? item.Preço),
           sellersGeneral: Number(item.sellersGeneral || 0), sellersSpecific: Number(item.sellersSpecific || 0), buyersGeneral: Number(item.buyersGeneral || 0), buyersSpecific: Number(item.buyersSpecific || 0),
-          linkLiga: item.linkLiga || '', linkMyp: item.linkMyp || '', linkCardmarket: item.linkCardmarket || '', linkTcgplayer: item.linkTcgplayer || '', linkPriceCharting: item.linkPriceCharting || '',
-          favorite: item.favorite === true, priceHistory: Array.isArray(item.priceHistory) ? item.priceHistory : [], advancedData: item.advancedData && typeof item.advancedData === 'object' ? item.advancedData : {},
-          forSale: item.forSale !== false, image: item.image || '', imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : [],
+          linkLiga: item.linkLiga || item['Link Liga'] || '', linkMyp: item.linkMyp || item['Link MYP'] || '', linkCardmarket: item.linkCardmarket || item['Link Cardmarket'] || '', linkTcgplayer: item.linkTcgplayer || item['Link Tcgplayer'] || '', linkPriceCharting: item.linkPriceCharting || item['Link PriceCharting'] || '',
+          favorite: item.favorite === true || item.Favorita === true, priceHistory: Array.isArray(item.priceHistory) ? item.priceHistory : [], advancedData: item.advancedData && typeof item.advancedData === 'object' ? item.advancedData : {},
+          forSale: item.forSale !== false && item['À venda'] !== false, image, imageCandidates: Array.isArray(item.imageCandidates) && item.imageCandidates.length ? item.imageCandidates : image ? [image] : [],
         };
         const pricingV2 = Number(item.pricingSchemaVersion || 0) >= 2;
         const legacyBuylist = toPrice(item.minimumPrice);
         normalized.minimumPrice = normalized.leaguePrice === null ? (pricingV2 ? legacyBuylist : null) : Math.round(normalized.leaguePrice * 50) / 100;
         normalized.quickSalePrice = pricingV2 ? toPrice(item.quickSalePrice) : (legacyBuylist ?? toPrice(item.quickSalePrice));
+        normalized.searchText = normalizeText(`${normalized.name} ${normalized.number} ${normalized.collection} ${normalized.collectionCode} ${eraDisplay(normalized.era)} ${groupDisplay(normalized.group)} ${normalized.cardClass} ${normalized.type} ${languageDisplay(normalized.language)} ${normalized.condition} ${normalized.integrity ?? ''} ${normalized.year}`);
         normalized._id = item._id || item.id || item.Id || stableCardId(normalized);
         normalized._isNew = item._isNew ?? isNew;
         normalized._isDirty = item._isDirty ?? (!pricingV2 && !isNew);
         return normalized;
       };
       const normalizeBooster = (item = {}, isNew = false) => {
+        const rawCollection = clean(item.collection || item['Coleção'] || item.name || item['Tipo de pacote'] || '');
+        const era = getEraConfig(item.era || item.Era)?.id || inferEraFromCollection(rawCollection);
+        const collectionMatch = findCollection(era, item.collectionId || item['Coleção ID'] || rawCollection);
+        const language = normalizeLanguageCode(item.language || item.Idioma || '') || '';
+        const legacyImage = clean(item.image || item.Imagem || '');
+        const explicitImages = Array.isArray(item.images || item.Imagens) ? (item.images || item.Imagens).map((value) => clean(value)).filter(Boolean).slice(0, 5) : [];
+        const images = [...new Set([...explicitImages, ...(legacyImage ? [legacyImage] : [])])].slice(0, 5);
         const normalized = {
           ...item,
-          name: item.name || getNameFromLink(item.linkLiga || '', 'Booster da Liga'), quantity: toQuantity(item.quantity),
-          pricingSchemaVersion: 2, minimumPrice: null, quickSalePrice: null, leaguePrice: toPrice(item.leaguePrice), secondLeaguePrice: toPrice(item.secondLeaguePrice), thirdLeaguePrice: toPrice(item.thirdLeaguePrice), averageLeaguePrice: toPrice(item.averageLeaguePrice), medianLeaguePrice: toPrice(item.medianLeaguePrice), price: toPrice(item.price),
+          name: item.name || item['Tipo de pacote'] || getNameFromLink(item.linkLiga || '', 'Booster sem nome'),
+          year: clean(item.year || item.Ano || ''),
+          era,
+          collectionId: collectionMatch?.id || clean(item.collectionId || item['Coleção ID'] || ''),
+          collection: collectionMatch?.label || rawCollection,
+          collectionCode: collectionMatch?.code || clean(item.collectionCode || item['Código da Coleção'] || ''),
+          language,
+          languageLabel: languageDisplay(language),
+          images,
+          quantity: toQuantity(item.quantity ?? item.Quantidade),
+          pricingSchemaVersion: 2, minimumPrice: null, quickSalePrice: null, leaguePrice: toPrice(item.leaguePrice), secondLeaguePrice: toPrice(item.secondLeaguePrice), thirdLeaguePrice: toPrice(item.thirdLeaguePrice), averageLeaguePrice: toPrice(item.averageLeaguePrice), medianLeaguePrice: toPrice(item.medianLeaguePrice), price: toPrice(item.price ?? item.Preço),
           sellersGeneral: Number(item.sellersGeneral || 0), sellersSpecific: Number(item.sellersSpecific || 0), buyersGeneral: Number(item.buyersGeneral || 0), buyersSpecific: Number(item.buyersSpecific || 0),
-          linkLiga: item.linkLiga || '', priceHistory: Array.isArray(item.priceHistory) ? item.priceHistory : [], advancedData: item.advancedData && typeof item.advancedData === 'object' ? item.advancedData : {}, forSale: item.forSale !== false, image: item.image || '', imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : [],
+          linkLiga: item.linkLiga || item['Link Liga'] || '', priceHistory: Array.isArray(item.priceHistory) ? item.priceHistory : [], advancedData: item.advancedData && typeof item.advancedData === 'object' ? item.advancedData : {}, forSale: item.forSale !== false && item['À venda'] !== false,
+          image: images[0] || legacyImage, imageCandidates: images.length ? images : Array.isArray(item.imageCandidates) ? item.imageCandidates : legacyImage ? [legacyImage] : [],
         };
         const pricingV2 = Number(item.pricingSchemaVersion || 0) >= 2;
         const legacyBuylist = toPrice(item.minimumPrice);
         normalized.minimumPrice = normalized.leaguePrice === null ? (pricingV2 ? legacyBuylist : null) : Math.round(normalized.leaguePrice * 50) / 100;
         normalized.quickSalePrice = pricingV2 ? toPrice(item.quickSalePrice) : (legacyBuylist ?? toPrice(item.quickSalePrice));
+        normalized.searchText = normalizeText(`${normalized.name} ${normalized.collection} ${normalized.collectionCode} ${eraDisplay(normalized.era)} ${languageDisplay(normalized.language)} ${normalized.year} booster pacote`);
         normalized._id = item._id || item.id || item.Id || stableBoosterId(normalized);
         normalized._isNew = item._isNew ?? isNew;
         normalized._isDirty = item._isDirty ?? (!pricingV2 && !isNew);
@@ -641,6 +838,164 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         }) : legacyKitContents(item.contents, cards, boosters);
         const sourceTotal = toPrice(item.sourceTotal) ?? contentItems.reduce((sum, entry) => sum + (entry.unitPrice || 0) * entry.quantity, 0);
         return { ...item, _id: item._id || item.id || item.Id || uid('kit'), _isNew: item._isNew ?? false, name: item.name || 'Kit sem nome', description: item.description || '', contents: item.contents || contentItems.map((entry) => `${entry.quantity}x ${entry.name}`).join(' | '), contentItems, sourceTotal, quantity: toQuantity(item.quantity), price: toPrice(item.price), forSale: item.forSale !== false, image: item.image || '', imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : [] };
+      };
+
+      const fillSelect = (select, options, placeholder, selected = '') => {
+        if (!select) return;
+        select.innerHTML = `<option value="">${escapeHtml(placeholder)}</option>${options.map((entry) => `<option value="${escapeHtml(entry.value)}" ${entry.value === selected ? 'selected' : ''}>${escapeHtml(entry.label)}</option>`).join('')}`;
+      };
+      const setFieldVisible = (selector, visible) => {
+        const field = root.querySelector(selector); if (!field) return;
+        field.hidden = !visible;
+        const control = field.querySelector('select, input'); if (control) control.disabled = !visible;
+      };
+      const syncCardForm = ({ resetCollection = false, resetClass = false, resetType = false, resetIntegrity = false } = {}) => {
+        const form = root.querySelector('[data-card-form]'); if (!form) return;
+        const eraId = clean(form.elements.era?.value);
+        const groupId = clean(form.elements.group?.value);
+        const condition = clean(form.elements.condition?.value).toUpperCase();
+        const era = getEraConfig(eraId);
+        const collectionSelect = form.querySelector('[data-card-collection]');
+        const classSelect = form.querySelector('[data-card-class]');
+        const typeSelect = form.querySelector('[data-card-type]');
+        const integrity = form.querySelector('[data-card-integrity]');
+        const previousCollection = resetCollection ? '' : clean(collectionSelect?.value);
+        const previousClass = resetClass ? '' : clean(classSelect?.value);
+        const previousType = resetType ? '' : clean(typeSelect?.value);
+        if (era) {
+          setFieldVisible('[data-card-field="collection"]', true);
+          fillSelect(collectionSelect, (era.collections || []).map((entry) => ({ value: entry.id, label: `${entry.label}${entry.code ? ` — ${entry.code}` : ''}` })), 'Selecione a Coleção', previousCollection);
+          const selectedCollection = findCollection(era.id, collectionSelect?.value);
+          const code = root.querySelector('[data-card-collection-code]'); if (code) code.textContent = selectedCollection?.code ? `Código: ${selectedCollection.code}` : '';
+        } else {
+          setFieldVisible('[data-card-field="collection"]', false); if (collectionSelect) collectionSelect.innerHTML = '';
+          const code = root.querySelector('[data-card-collection-code]'); if (code) code.textContent = '';
+        }
+        if (era && groupId && era.classes?.[groupId]) {
+          setFieldVisible('[data-card-field="class"]', true);
+          fillSelect(classSelect, era.classes[groupId].map((value) => ({ value, label: value })), 'Selecione a Classe', previousClass);
+        } else {
+          setFieldVisible('[data-card-field="class"]', false); if (classSelect) classSelect.innerHTML = '';
+        }
+        if (era && groupId === 'pokemon') {
+          setFieldVisible('[data-card-field="type"]', true);
+          fillSelect(typeSelect, (era.pokemonTypes || []).map((value) => ({ value, label: value })), 'Selecione o Tipo', previousType);
+        } else {
+          setFieldVisible('[data-card-field="type"]', false); if (typeSelect) { typeSelect.innerHTML = ''; typeSelect.value = ''; }
+        }
+        const range = conditionRange(condition);
+        if (range) {
+          setFieldVisible('[data-card-field="integrity"]', true);
+          integrity.min = String(range.min); integrity.max = String(range.max);
+          if (resetIntegrity || (integrity.value && (Number(integrity.value) < range.min || Number(integrity.value) > range.max))) integrity.value = '';
+          const hint = root.querySelector('[data-card-integrity-hint]'); if (hint) hint.textContent = `${range.min}% – ${range.max}% para ${condition}`;
+        } else {
+          setFieldVisible('[data-card-field="integrity"]', false); if (integrity) integrity.value = '';
+          const hint = root.querySelector('[data-card-integrity-hint]'); if (hint) hint.textContent = '';
+        }
+      };
+      const syncBoosterForm = ({ resetCollection = false } = {}) => {
+        const form = root.querySelector('[data-booster-form]'); if (!form) return;
+        const era = getEraConfig(form.elements.era?.value);
+        const select = form.querySelector('[data-booster-collection]');
+        const previous = resetCollection ? '' : clean(select?.value);
+        if (era) {
+          setFieldVisible('[data-booster-field="collection"]', true);
+          fillSelect(select, (era.collections || []).map((entry) => ({ value: entry.id, label: `${entry.label}${entry.code ? ` — ${entry.code}` : ''}` })), 'Selecione a Coleção', previous);
+          const selected = findCollection(era.id, select?.value);
+          const code = root.querySelector('[data-booster-collection-code]'); if (code) code.textContent = selected?.code ? `Código: ${selected.code}` : '';
+        } else {
+          setFieldVisible('[data-booster-field="collection"]', false); if (select) select.innerHTML = '';
+          const code = root.querySelector('[data-booster-collection-code]'); if (code) code.textContent = '';
+        }
+      };
+      const boosterImageSrc = (value) => /^(?:https?:|data:|blob:)/i.test(clean(value)) ? clean(value) : clean(value) ? `${base}${clean(value).replace(/^\/+/, '')}` : '';
+      const renderBoosterImageEditor = () => {
+        const editor = root.querySelector('[data-booster-image-editor]'); if (!editor) return;
+        if (!boosterImagesDraft.length) boosterImagesDraft = [''];
+        editor.innerHTML = boosterImagesDraft.map((value, index) => {
+          const src = boosterImageSrc(value);
+          return `<div class="booster-image-row" data-booster-image-row="${index}"><div class="booster-image-preview">${src ? `<img src="${escapeHtml(src)}" alt="Prévia ${index + 1}" loading="lazy" />` : '<span>▱</span>'}${index === 0 ? '<b>Capa</b>' : ''}</div><label><span>Imagem ${index + 1}</span><input type="text" value="${escapeHtml(value)}" placeholder="URL ou caminho da imagem" data-booster-image-input="${index}" /></label><div class="booster-image-actions"><button type="button" data-booster-image-up="${index}" ${index === 0 ? 'disabled' : ''} aria-label="Mover imagem para cima">↑</button><button type="button" data-booster-image-down="${index}" ${index === boosterImagesDraft.length - 1 ? 'disabled' : ''} aria-label="Mover imagem para baixo">↓</button><button type="button" data-booster-image-remove="${index}" aria-label="Remover imagem">×</button></div></div>`;
+        }).join('');
+        const count = boosterImagesDraft.filter((value) => clean(value)).length;
+        const counter = root.querySelector('[data-booster-image-counter]'); if (counter) counter.textContent = `${count}/5 imagens`;
+        const add = root.querySelector('[data-add-booster-image]'); if (add) add.disabled = boosterImagesDraft.length >= 5;
+      };
+      const showFormFeedback = (selector, message = '') => {
+        const node = root.querySelector(selector); if (!node) return;
+        node.hidden = !message; node.textContent = message;
+      };
+      const validateCardPayload = (payload) => {
+        const era = getEraConfig(payload.era); if (!era) return 'Selecione uma Era válida.';
+        const collection = findCollection(era.id, payload.collectionId); if (!collection) return 'Selecione uma Coleção pertencente à Era escolhida.';
+        const group = normalizeGroupId(payload.group); if (!group) return 'Selecione um Grupo válido.';
+        if (!era.classes?.[group]?.includes(payload.cardClass)) return 'Selecione uma Classe compatível com Era + Grupo.';
+        if (group === 'pokemon' && !era.pokemonTypes?.includes(payload.type)) return 'Selecione um Tipo válido para esta Era.';
+        if (group !== 'pokemon' && payload.type) return 'Tipo só pode ser salvo em cartas do Grupo Pokémon.';
+        const languageValid = (tcgConfig.languages || []).some((entry) => entry.id === payload.language); if (!languageValid) return 'Selecione um Idioma válido.';
+        const range = conditionRange(payload.condition); if (!range) return 'Selecione um Estado válido.';
+        if (!Number.isFinite(payload.integrity) || payload.integrity < range.min || payload.integrity > range.max) return `Integridade deve ficar entre ${range.min}% e ${range.max}% para ${payload.condition}.`;
+        const year = Number(payload.year); if (!Number.isFinite(year) || year < 1996 || year > 2100) return 'Informe um Ano válido.';
+        if (!clean(payload.name)) return 'Informe o Nome da carta.';
+        if (!clean(payload.number) || clean(payload.number).length > 40) return 'Informe uma Numeração válida.';
+        return '';
+      };
+      const validateBoosterPayload = (payload) => {
+        const era = getEraConfig(payload.era); if (!era) return 'Selecione uma Era válida.';
+        const collection = findCollection(era.id, payload.collectionId); if (!collection) return 'Selecione uma Coleção pertencente à Era escolhida.';
+        if (!(tcgConfig.languages || []).some((entry) => entry.id === payload.language)) return 'Selecione um Idioma válido.';
+        const year = Number(payload.year); if (!Number.isFinite(year) || year < 1996 || year > 2100) return 'Informe um Ano válido.';
+        if (!clean(payload.name)) return 'Informe o Nome do booster.';
+        if ((payload.images || []).length > 5) return 'Um Booster pode possuir no máximo 5 imagens.';
+        return '';
+      };
+      const resetCardForm = () => {
+        activeCardEditIndex = -1;
+        const form = root.querySelector('[data-card-form]'); if (!form) return;
+        form.reset(); form.dataset.editIndex = '';
+        form.elements.quantity.value = 1; form.elements.language.value = 'BR'; form.elements.forSale.checked = true;
+        showFormFeedback('[data-card-form-feedback]');
+        const title = root.querySelector('#card-modal-title'); if (title) title.textContent = 'Adicionar carta';
+        const eyebrow = root.querySelector('[data-card-modal-eyebrow]'); if (eyebrow) eyebrow.textContent = 'Nova carta';
+        const submit = root.querySelector('[data-card-submit-label]'); if (submit) submit.textContent = 'Adicionar carta';
+        syncCardForm({ resetCollection: true, resetClass: true, resetType: true, resetIntegrity: true });
+      };
+      const openCardEditor = (index) => {
+        const item = state?.cards?.[index]; const form = root.querySelector('[data-card-form]'); if (!item || !form) return;
+        activeCardEditIndex = index; form.dataset.editIndex = String(index); form.reset();
+        form.elements.name.value = item.name || ''; form.elements.number.value = item.number || ''; form.elements.year.value = item.year || '';
+        form.elements.era.value = item.era || inferEraFromCollection(item.collection); form.elements.group.value = item.group || '';
+        form.elements.condition.value = item.condition || ''; form.elements.language.value = normalizeLanguageCode(item.language) || '';
+        form.elements.quantity.value = toQuantity(item.quantity, 1); form.elements.price.value = item.price ?? ''; form.elements.image.value = item.image || ''; form.elements.forSale.checked = item.forSale !== false;
+        syncCardForm();
+        form.elements.collectionId.value = item.collectionId || findCollection(form.elements.era.value, item.collection)?.id || ''; syncCardForm();
+        form.elements.cardClass.value = item.cardClass || ''; if (form.elements.type && item.group === 'pokemon') form.elements.type.value = item.type || '';
+        form.elements.integrity.value = item.integrity ?? '';
+        const title = root.querySelector('#card-modal-title'); if (title) title.textContent = `Editar ${item.name || 'carta'}`;
+        const eyebrow = root.querySelector('[data-card-modal-eyebrow]'); if (eyebrow) eyebrow.textContent = 'Editar carta';
+        const submit = root.querySelector('[data-card-submit-label]'); if (submit) submit.textContent = 'Salvar alterações';
+        showFormFeedback('[data-card-form-feedback]'); openModal('card');
+      };
+      const resetBoosterForm = () => {
+        activeBoosterEditIndex = -1; boosterImagesDraft = [''];
+        const form = root.querySelector('[data-booster-form]'); if (!form) return;
+        form.reset(); form.dataset.editIndex = ''; form.elements.quantity.value = 1; form.elements.language.value = 'BR'; form.elements.forSale.checked = true;
+        const title = root.querySelector('#booster-modal-title'); if (title) title.textContent = 'Adicionar booster';
+        const eyebrow = root.querySelector('[data-booster-modal-eyebrow]'); if (eyebrow) eyebrow.textContent = 'Novo booster';
+        const submit = root.querySelector('[data-booster-submit-label]'); if (submit) submit.textContent = 'Adicionar booster';
+        showFormFeedback('[data-booster-form-feedback]'); syncBoosterForm({ resetCollection: true }); renderBoosterImageEditor();
+      };
+      const openBoosterEditor = (index) => {
+        const item = state?.boosters?.[index]; const form = root.querySelector('[data-booster-form]'); if (!item || !form) return;
+        activeBoosterEditIndex = index; form.dataset.editIndex = String(index); form.reset();
+        form.elements.name.value = item.name || ''; form.elements.year.value = item.year || ''; form.elements.era.value = item.era || inferEraFromCollection(item.collection);
+        form.elements.language.value = normalizeLanguageCode(item.language) || ''; form.elements.quantity.value = toQuantity(item.quantity, 1); form.elements.price.value = item.price ?? ''; form.elements.forSale.checked = item.forSale !== false;
+        syncBoosterForm(); form.elements.collectionId.value = item.collectionId || findCollection(form.elements.era.value, item.collection)?.id || ''; syncBoosterForm();
+        boosterImagesDraft = (Array.isArray(item.images) && item.images.length ? item.images : item.image ? [item.image] : []).slice(0, 5); if (!boosterImagesDraft.length) boosterImagesDraft = ['']; renderBoosterImageEditor();
+        const title = root.querySelector('#booster-modal-title'); if (title) title.textContent = `Editar ${item.name || 'booster'}`;
+        const eyebrow = root.querySelector('[data-booster-modal-eyebrow]'); if (eyebrow) eyebrow.textContent = 'Editar booster';
+        const submit = root.querySelector('[data-booster-submit-label]'); if (submit) submit.textContent = 'Salvar alterações';
+        showFormFeedback('[data-booster-form-feedback]'); openModal('booster');
       };
 
       const parseAlbumFormat = (value = '3x3') => {
@@ -991,6 +1346,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         if (!state) return;
         root.querySelectorAll('[data-inventory-tab]').forEach((button) => button.classList.toggle('active', button.dataset.inventoryTab === activeTab));
         Object.keys(tabLabel).forEach((kind) => { const count = root.querySelector(`[data-tab-count="${kind}"]`); if (count) count.textContent = String(state[kind].length); });
+        updateInventoryFilterVisibility();
       };
 
       const priceInput = (kind, index, field, label, value) => `<label class="inventory-price-field editable"><span>${label}</span><input type="number" min="0" step="0.01" value="${value ?? ''}" placeholder="—" data-item-edit="${kind}:${index}:${field}" /></label>`;
@@ -1008,16 +1364,18 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       const emptyInventory = (kind) => `<div class="inventory-tab-empty"><span>${kind === 'cards' ? '◇' : kind === 'boosters' ? '▱' : kind === 'kits' ? '▦' : kind === 'products' ? '▣' : '▤'}</span><strong>Nenhum item nesta aba</strong><p>Use uma das ações acima para adicionar ${tabLabel[kind].toLowerCase()}.</p><button type="button" class="primary-cta" data-empty-add="${kind === 'cards' ? 'card' : kind === 'boosters' ? 'booster' : kind === 'kits' ? 'kit' : kind === 'products' ? 'product' : 'album'}"><span>Adicionar agora</span><b>＋</b></button></div>`;
 
       const renderCards = () => {
-        const rows = state.cards.map((item, index) => ({ item, index })).filter(({ item }) => matchesSearch(item));
+        const rows = state.cards.map((item, index) => ({ item, index })).filter(({ item }) => matchesSearch(item) && matchesInventoryMetadata(item, 'cards'));
         if (!rows.length) return emptyInventory('cards');
-        return `<div class="inventory-sheet inventory-card-sheet"><div class="inventory-sheet-head"><span>Imagem e identificação</span><span>Informações</span><span>Links</span><span>Preços</span><span>Controle</span></div>${rows.map(({ item, index }) => {
+        return `<div class="inventory-sheet inventory-card-sheet"><div class="inventory-sheet-head"><span>Imagem e identificação</span><span>Classificação</span><span>Referências</span><span>Preços</span><span>Controle</span></div>${rows.map(({ item, index }) => {
           const name = itemName(item, 'cards');
+          const collectionCode = item.collectionCode ? ` · ${item.collectionCode}` : '';
+          const integrityLabel = item.integrity ? `${item.integrity}%` : 'Integridade —';
           return `<article class="inventory-record card-inventory-record" data-card-details-row="${index}">
-            <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>${escapeHtml(item.number || 'Sem numeração')}</small><em>${escapeHtml(item.collection || 'Coleção a consultar')}</em></div></div>
-            <div class="inventory-info-cell"><span>${escapeHtml(item.year || 'Ano —')}</span><span>${escapeHtml(item.condition || 'Estado —')}</span><span>${escapeHtml(item.language || 'Idioma —')}</span><span>${escapeHtml(item.type || 'Tipo —')}</span></div>
-            <div class="inventory-links-cell">${linkButtons([{ label: 'Liga', url: item.linkLiga }, { label: 'MYP', url: item.linkMyp }, { label: 'Cardmarket', url: item.linkCardmarket }, { label: 'TCGplayer', url: item.linkTcgplayer }, { label: 'PriceCharting', url: item.linkPriceCharting }])}</div>
+            <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>${escapeHtml(item.number || 'Sem numeração')}</small><em>${escapeHtml(`${item.collection || 'Coleção a consultar'}${collectionCode}`)}</em></div></div>
+            <div class="inventory-info-cell"><span>${escapeHtml(eraDisplay(item.era) || 'Era —')}</span><span>${escapeHtml(groupDisplay(item.group) || 'Grupo —')}</span><span>${escapeHtml(item.cardClass || 'Classe —')}</span>${item.group === 'pokemon' && item.type ? `<span>${escapeHtml(item.type)}</span>` : ''}<span>${escapeHtml(languageDisplay(item.language) || 'Idioma —')}</span><span>${escapeHtml(`${item.condition || 'Estado —'} · ${integrityLabel}`)}</span><span>${escapeHtml(item.year || 'Ano —')}</span></div>
+            <div class="inventory-links-cell">${linkButtons([{ label: 'MYP', url: item.linkMyp }, { label: 'Cardmarket', url: item.linkCardmarket }, { label: 'TCGplayer', url: item.linkTcgplayer }, { label: 'PriceCharting', url: item.linkPriceCharting }])}</div>
             <div class="inventory-prices-cell">${priceReadout('Mínimo', item.minimumPrice)}${priceReadout('Menor Liga', item.leaguePrice)}${priceReadout('Média Liga', item.averageLeaguePrice)}${priceReadout('Mediana Liga', item.medianLeaguePrice)}${priceReadout('Venda rápida', item.quickSalePrice)}${priceInput('cards', index, 'price', 'Preço', item.price)}${quoteSummaryMarkup(item)}</div>
-            <div class="inventory-control-cell"><button type="button" class="inventory-favorite ${item.favorite ? 'active' : ''}" data-favorite-card="${index}" title="Favoritar carta"><span>${item.favorite ? '★' : '☆'}</span>${item.favorite ? 'Favorita' : 'Favoritar'}</button><button type="button" class="inventory-details-button" data-card-details="${index}"><span>↗</span> Análise</button>${quantityInput('cards', index, item.quantity)}${soldButton('cards', index, item.quantity)}${saleToggle('cards', index, item.forSale)}${removeButton('cards', index, name)}</div>
+            <div class="inventory-control-cell"><button type="button" class="inventory-favorite ${item.favorite ? 'active' : ''}" data-favorite-card="${index}" title="Favoritar carta"><span>${item.favorite ? '★' : '☆'}</span>${item.favorite ? 'Favorita' : 'Favoritar'}</button><button type="button" class="inventory-edit-button" data-edit-card="${index}"><span>✎</span> Editar cadastro</button><button type="button" class="inventory-details-button" data-card-details="${index}"><span>↗</span> Análise</button>${quantityInput('cards', index, item.quantity)}${soldButton('cards', index, item.quantity)}${saleToggle('cards', index, item.forSale)}${removeButton('cards', index, name)}</div>
           </article>`;
         }).join('')}</div>`;
       };
@@ -1121,9 +1479,9 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       };
       const renderJsonBlocks = (data) => {
         const groups = [
-          ['Identificação', ['Id', 'Nome', 'Número', 'Coleção', 'Ano', 'Tipo', 'Idioma', 'Estado', 'Favorita', 'À venda']],
+          ['Identificação', ['Id', 'Nome', 'Numeração', 'Ano', 'Era', 'Coleção', 'Código da Coleção', 'Grupo', 'Classe', 'Tipo', 'Idioma', 'Estado', 'Integridade', 'Favorita', 'À venda']],
           ['Mercado', ['Minimo', 'Menor Liga', 'Segundo Menor Liga', 'Terceiro Menor Liga', 'Media Liga', 'Mediana Liga', 'Venda Rapida', 'Vendedores Geral', 'Vendedores Específicos', 'Compradores Geral', 'Compradores Específicos', 'Última cotação', 'Preço']],
-          ['Referências', ['Link Liga', 'Link MYP', 'Link Cardmarket', 'Link Tcgplayer', 'Link PriceCharting', 'Imagem']],
+          ['Referências', ['Link MYP', 'Link Cardmarket', 'Link Tcgplayer', 'Link PriceCharting', 'Imagem', 'Imagens']],
         ];
         const used = new Set(groups.flatMap(([, keys]) => keys));
         const extras = Object.keys(data).filter((key) => !used.has(key));
@@ -1149,7 +1507,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         modal.querySelector('[data-card-details-title]').textContent = `${itemName(item, kind)} — análise`;
         modal.querySelector('[data-card-details-name]').textContent = itemName(item, kind);
         modal.querySelector('[data-card-details-number]').textContent = isCard ? (item.number || 'Sem numeração') : 'Booster lacrado';
-        modal.querySelector('[data-card-details-meta]').textContent = isCard ? [item.collection, item.language, item.condition].filter(Boolean).join(' · ') : 'Mercado de boosters · Liga Pokémon';
+        modal.querySelector('[data-card-details-meta]').textContent = isCard ? [eraDisplay(item.era), item.collection, groupDisplay(item.group), item.cardClass, item.type, languageDisplay(item.language), item.condition ? `${item.condition}${item.integrity ? ` · ${item.integrity}%` : ''}` : '', item.year].filter(Boolean).join(' · ') : [eraDisplay(item.era), item.collection, languageDisplay(item.language), item.year].filter(Boolean).join(' · ');
         modal.querySelector('[data-card-details-image]').innerHTML = renderImage(item, item.name);
         const status = item.advancedData?.Status || item.status || {};
         const statusNode = modal.querySelector('[data-card-details-status]');
@@ -1169,14 +1527,14 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         modal.querySelector('[data-card-movements]').innerHTML = movementTimelineMarkup(item);
         modal.querySelector('[data-card-market-depth]').innerHTML = marketDepthMarkup(item, kind);
         const advancedData = { ...(item.advancedData || {}) };
-        Object.keys(advancedData).forEach((key) => { if (/^(?:quantidade|quantity|qtd\.?)(?:\s|$)/i.test(key.trim())) delete advancedData[key]; });
+        Object.keys(advancedData).forEach((key) => { if (/^(?:quantidade|quantity|qtd\.?)(?:\s|$)/i.test(key.trim()) || /^(?:link\s+liga|liga|ligaurl|linkliga|urlliga)$/i.test(key.trim())) delete advancedData[key]; });
         const marketFields = {
           Minimo: item.minimumPrice, 'Menor Liga': item.leaguePrice, 'Segundo Menor Liga': item.secondLeaguePrice, 'Terceiro Menor Liga': item.thirdLeaguePrice, 'Media Liga': item.averageLeaguePrice, 'Mediana Liga': item.medianLeaguePrice, 'Venda Rapida': item.quickSalePrice,
           'Vendedores Geral': item.sellersGeneral, 'Vendedores Específicos': item.sellersSpecific, 'Compradores Geral': item.buyersGeneral, 'Compradores Específicos': item.buyersSpecific, Preço: item.price, 'Última cotação': advancedData['Última cotação'] || (lastQuoteDate(item) ? { data: lastQuoteDate(item) } : null),
         };
         const jsonData = isCard
-          ? { ...advancedData, Id: item._id, Nome: item.name, Número: item.number, Coleção: item.collection, Ano: item.year, Tipo: item.type, Idioma: item.language, Estado: item.condition, ...marketFields, Favorita: item.favorite, 'À venda': item.forSale, 'Link Liga': item.linkLiga, 'Link MYP': item.linkMyp, 'Link Cardmarket': item.linkCardmarket, 'Link Tcgplayer': item.linkTcgplayer, 'Link PriceCharting': item.linkPriceCharting, Imagem: item.image }
-          : { ...advancedData, Id: item._id, 'Tipo de pacote': item.name, ...marketFields, 'À venda': item.forSale, 'Link Liga': item.linkLiga, Imagem: item.image };
+          ? { ...advancedData, Id: item._id, Nome: item.name, 'Numeração': item.number, Ano: item.year, Era: eraDisplay(item.era), Coleção: item.collection, 'Código da Coleção': item.collectionCode, Grupo: groupDisplay(item.group), Classe: item.cardClass, Tipo: item.group === 'pokemon' ? item.type : null, Idioma: languageDisplay(item.language), Estado: item.condition, Integridade: item.integrity ? `${item.integrity}%` : null, ...marketFields, Favorita: item.favorite, 'À venda': item.forSale, 'Link MYP': item.linkMyp, 'Link Cardmarket': item.linkCardmarket, 'Link Tcgplayer': item.linkTcgplayer, 'Link PriceCharting': item.linkPriceCharting, Imagem: item.image }
+          : { ...advancedData, Id: item._id, Nome: item.name, Ano: item.year, Era: eraDisplay(item.era), Coleção: item.collection, 'Código da Coleção': item.collectionCode, Idioma: languageDisplay(item.language), Imagens: item.images || (item.image ? [item.image] : []), ...marketFields, 'À venda': item.forSale };
         modal.querySelector('[data-card-json]').innerHTML = renderJsonBlocks(jsonData);
         openModal('card-details');
       };
@@ -1184,15 +1542,16 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       const openBoosterDetails = (index) => openAssetDetails('boosters', index);
 
       const renderBoosters = () => {
-        const rows = state.boosters.map((item, index) => ({ item, index })).filter(({ item }) => matchesSearch(item));
+        const rows = state.boosters.map((item, index) => ({ item, index })).filter(({ item }) => matchesSearch(item) && matchesInventoryMetadata(item, 'boosters'));
         if (!rows.length) return emptyInventory('boosters');
-        return `<div class="inventory-sheet booster-inventory-sheet"><div class="inventory-sheet-head"><span>Imagem e booster</span><span>Link</span><span>Preços</span><span>Controle</span></div>${rows.map(({ item, index }) => {
+        return `<div class="inventory-sheet booster-inventory-sheet"><div class="inventory-sheet-head"><span>Imagem e booster</span><span>Metadados</span><span>Preços</span><span>Controle</span></div>${rows.map(({ item, index }) => {
           const name = itemName(item, 'boosters');
+          const code = item.collectionCode ? ` · ${item.collectionCode}` : '';
           return `<article class="inventory-record booster-inventory-record" data-booster-details-row="${index}">
-            <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>Pacote lacrado</small></div></div>
-            <div class="inventory-links-cell">${linkButtons([{ label: 'Liga', url: item.linkLiga }])}</div>
+            <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>Pacote lacrado</small><em>${escapeHtml(`${item.collection || 'Coleção —'}${code}`)}</em></div></div>
+            <div class="inventory-info-cell"><span>${escapeHtml(eraDisplay(item.era) || 'Era —')}</span><span>${escapeHtml(item.collection || 'Coleção —')}</span><span>${escapeHtml(languageDisplay(item.language) || 'Idioma —')}</span><span>${escapeHtml(item.year || 'Ano —')}</span><span>${(item.images || []).length || (item.image ? 1 : 0)} imagem(ns)</span></div>
             <div class="inventory-prices-cell">${priceReadout('Mínimo', item.minimumPrice)}${priceReadout('Menor Liga', item.leaguePrice)}${priceReadout('Média Liga', item.averageLeaguePrice)}${priceReadout('Mediana Liga', item.medianLeaguePrice)}${priceReadout('Venda rápida', item.quickSalePrice)}${priceInput('boosters', index, 'price', 'Preço', item.price)}${quoteSummaryMarkup(item)}</div>
-            <div class="inventory-control-cell"><button type="button" class="inventory-details-button" data-booster-details="${index}"><span>↗</span> Análise</button>${quantityInput('boosters', index, item.quantity)}${soldButton('boosters', index, item.quantity)}${saleToggle('boosters', index, item.forSale)}${removeButton('boosters', index, name)}</div>
+            <div class="inventory-control-cell"><button type="button" class="inventory-edit-button" data-edit-booster="${index}"><span>✎</span> Editar cadastro</button><button type="button" class="inventory-details-button" data-booster-details="${index}"><span>↗</span> Análise</button>${quantityInput('boosters', index, item.quantity)}${soldButton('boosters', index, item.quantity)}${saleToggle('boosters', index, item.forSale)}${removeButton('boosters', index, name)}</div>
           </article>`;
         }).join('')}</div>`;
       };
@@ -1223,7 +1582,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
           const name = itemName(item, 'products');
           return `<article class="inventory-record product-inventory-record">
             <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>${escapeHtml(item.description || 'Produto Pokémon lacrado')}</small></div></div>
-            <div class="inventory-links-cell">${linkButtons([{ label: 'Liga', url: item.linkLiga }])}</div>
+            <div class="inventory-links-cell"><span class="legacy-reference-note">ID interno</span></div>
             <div class="inventory-prices-cell product-price-cell">${priceInput('products', index, 'price', 'Preço', item.price)}</div>
             <div class="inventory-control-cell">${quantityInput('products', index, item.quantity)}${soldButton('products', index, item.quantity)}${saleToggle('products', index, item.forSale)}${removeButton('products', index, name)}</div>
           </article>`;
@@ -1409,12 +1768,60 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         setTimeout(() => modal.querySelector('input:not([type="checkbox"]), textarea, select')?.focus(), 20);
       };
       const closeModals = () => { modalElements.forEach((modal) => { modal.hidden = true; }); document.body.classList.remove('editor-modal-open'); };
-      root.querySelectorAll('[data-open-modal]').forEach((button) => button.addEventListener('click', () => { if (button.dataset.openModal === 'kit') resetKitComposer(); openModal(button.dataset.openModal); }));
+      root.querySelectorAll('[data-open-modal]').forEach((button) => button.addEventListener('click', () => {
+        if (button.dataset.openModal === 'kit') resetKitComposer();
+        if (button.dataset.openModal === 'card') resetCardForm();
+        if (button.dataset.openModal === 'booster') resetBoosterForm();
+        openModal(button.dataset.openModal);
+      }));
       root.addEventListener('click', (event) => { const close = event.target.closest('[data-close-modal]'); if (close) closeModals(); });
       document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeModals(); });
 
       root.querySelectorAll('[data-inventory-tab]').forEach((button) => button.addEventListener('click', () => { activeTab = button.dataset.inventoryTab; inventoryQuery = ''; if (inventorySearch) inventorySearch.value = ''; render(); }));
+      inventoryMetadataFilters?.addEventListener('change', (event) => {
+        const target = event.target.closest('[data-inventory-filter]'); if (!target) return;
+        const name = target.dataset.inventoryFilter;
+        inventoryFilters[name] = clean(target.value);
+        if (name === 'era') syncInventoryFilters({ resetCollection: true, resetClass: true, resetType: true });
+        else if (name === 'group') syncInventoryFilters({ resetClass: true, resetType: true });
+        else syncInventoryFilters();
+        renderInventory();
+      });
+      inventoryFilter('integrity')?.addEventListener('input', (event) => { inventoryFilters.integrity = clean(event.target.value); renderInventory(); });
+      root.querySelector('[data-clear-inventory-filters]')?.addEventListener('click', () => {
+        Object.keys(inventoryFilters).forEach((key) => { inventoryFilters[key] = ''; const control = inventoryFilter(key); if (control) control.value = ''; });
+        syncInventoryFilters({ resetCollection: true, resetClass: true, resetType: true }); renderInventory();
+      });
+      syncInventoryFilters();
       inventorySearch?.addEventListener('input', (event) => { inventoryQuery = normalizeText(event.target.value); renderInventory(); });
+
+      root.querySelector('[data-card-era]')?.addEventListener('change', () => syncCardForm({ resetCollection: true, resetClass: true, resetType: true }));
+      root.querySelector('[data-card-group]')?.addEventListener('change', () => syncCardForm({ resetClass: true, resetType: true }));
+      root.querySelector('[data-card-condition]')?.addEventListener('change', () => syncCardForm({ resetIntegrity: true }));
+      root.querySelector('[data-card-collection]')?.addEventListener('change', () => syncCardForm());
+      root.querySelector('[data-card-integrity]')?.addEventListener('change', (event) => {
+        const form = root.querySelector('[data-card-form]'); const value = Number(event.target.value); if (!form || !Number.isFinite(value)) return;
+        const matchingCondition = integrityCondition(value);
+        if (matchingCondition && form.elements.condition.value !== matchingCondition) { form.elements.condition.value = matchingCondition; syncCardForm(); form.elements.integrity.value = String(value); }
+      });
+      root.querySelector('[data-booster-era]')?.addEventListener('change', () => syncBoosterForm({ resetCollection: true }));
+      root.querySelector('[data-booster-collection]')?.addEventListener('change', () => syncBoosterForm());
+      root.querySelector('[data-add-booster-image]')?.addEventListener('click', () => { if (boosterImagesDraft.length >= 5) return; boosterImagesDraft.push(''); renderBoosterImageEditor(); });
+      root.querySelector('[data-booster-image-editor]')?.addEventListener('input', (event) => {
+        const input = event.target.closest('[data-booster-image-input]'); if (!input) return;
+        const index = Number(input.dataset.boosterImageInput); if (!Number.isInteger(index) || index < 0 || index >= boosterImagesDraft.length) return;
+        boosterImagesDraft[index] = clean(input.value);
+        const counter = root.querySelector('[data-booster-image-counter]'); if (counter) counter.textContent = `${boosterImagesDraft.filter((value) => clean(value)).length}/5 imagens`;
+      });
+      root.querySelector('[data-booster-image-editor]')?.addEventListener('change', (event) => { if (event.target.closest('[data-booster-image-input]')) renderBoosterImageEditor(); });
+      root.querySelector('[data-booster-image-editor]')?.addEventListener('click', (event) => {
+        const remove = event.target.closest('[data-booster-image-remove]');
+        const up = event.target.closest('[data-booster-image-up]');
+        const down = event.target.closest('[data-booster-image-down]');
+        if (remove) { const index = Number(remove.dataset.boosterImageRemove); boosterImagesDraft.splice(index, 1); if (!boosterImagesDraft.length) boosterImagesDraft = ['']; renderBoosterImageEditor(); return; }
+        if (up) { const index = Number(up.dataset.boosterImageUp); if (index > 0) [boosterImagesDraft[index - 1], boosterImagesDraft[index]] = [boosterImagesDraft[index], boosterImagesDraft[index - 1]]; renderBoosterImageEditor(); return; }
+        if (down) { const index = Number(down.dataset.boosterImageDown); if (index >= 0 && index < boosterImagesDraft.length - 1) [boosterImagesDraft[index + 1], boosterImagesDraft[index]] = [boosterImagesDraft[index], boosterImagesDraft[index + 1]]; renderBoosterImageEditor(); }
+      });
 
       root.querySelector('[data-new-profile-form]')?.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -1474,22 +1881,40 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
       root.querySelector('[data-card-form]')?.addEventListener('submit', (event) => {
         event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
-        const data = new FormData(form); const linkLiga = clean(data.get('linkLiga')); const image = clean(data.get('image'));
-        state.cards.push(normalizeCard({ linkLiga, name: clean(data.get('name')), number: clean(data.get('number')), collection: clean(data.get('collection')), type: clean(data.get('type')), year: clean(data.get('year')), condition: clean(data.get('condition')), language: clean(data.get('language')), quantity: data.get('quantity'), price: data.get('price'), image, imageCandidates: image ? [image] : [], forSale: data.get('forSale') === 'on' }, true));
-        form.reset(); form.querySelector('[name="quantity"]').value = 1; form.querySelector('[name="language"]').value = 'Português (PT-BR)'; form.querySelector('[name="forSale"]').checked = true;
-        activeTab = 'cards'; closeModals(); render(); inventorySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const data = new FormData(form); const era = clean(data.get('era')); const collection = findCollection(era, clean(data.get('collectionId'))); const group = normalizeGroupId(data.get('group')); const image = clean(data.get('image'));
+        const payload = {
+          name: clean(data.get('name')), number: clean(data.get('number')), year: clean(data.get('year')), era,
+          collectionId: collection?.id || clean(data.get('collectionId')), collection: collection?.label || '', collectionCode: collection?.code || '',
+          group, cardClass: clean(data.get('cardClass')), type: group === 'pokemon' ? clean(data.get('type')) : '', language: normalizeLanguageCode(data.get('language')),
+          condition: clean(data.get('condition')).toUpperCase(), integrity: Number(data.get('integrity')), quantity: data.get('quantity'), price: data.get('price'), image, imageCandidates: image ? [image] : [], forSale: data.get('forSale') === 'on',
+        };
+        const error = validateCardPayload(payload); if (error) { showFormFeedback('[data-card-form-feedback]', error); return; }
+        if (activeCardEditIndex >= 0 && state.cards[activeCardEditIndex]) {
+          const current = state.cards[activeCardEditIndex]; const edited = normalizeCard({ ...current, ...payload, _id: current._id, _isNew: current._isNew }, false); edited._isDirty = current._isNew ? current._isDirty : true; state.cards[activeCardEditIndex] = edited;
+        } else {
+          state.cards.push(normalizeCard({ ...payload, _id: uid('card') }, true));
+        }
+        resetCardForm(); activeTab = 'cards'; closeModals(); render();
       });
       root.querySelector('[data-booster-form]')?.addEventListener('submit', (event) => {
         event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
-        const data = new FormData(form); const linkLiga = clean(data.get('linkLiga')); const image = clean(data.get('image'));
-        state.boosters.push(normalizeBooster({ linkLiga, name: clean(data.get('name')), quantity: data.get('quantity'), price: data.get('price'), image, imageCandidates: image ? [image] : [], forSale: data.get('forSale') === 'on' }, true));
-        form.reset(); form.querySelector('[name="quantity"]').value = 1; form.querySelector('[name="forSale"]').checked = true;
-        activeTab = 'boosters'; closeModals(); render(); inventorySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const data = new FormData(form); const era = clean(data.get('era')); const collection = findCollection(era, clean(data.get('collectionId'))); const images = boosterImagesDraft.map((value) => clean(value)).filter(Boolean).slice(0, 5);
+        const payload = {
+          name: clean(data.get('name')), year: clean(data.get('year')), era, collectionId: collection?.id || clean(data.get('collectionId')), collection: collection?.label || '', collectionCode: collection?.code || '',
+          language: normalizeLanguageCode(data.get('language')), quantity: data.get('quantity'), price: data.get('price'), images, image: images[0] || '', imageCandidates: [...images], forSale: data.get('forSale') === 'on',
+        };
+        const error = validateBoosterPayload(payload); if (error) { showFormFeedback('[data-booster-form-feedback]', error); return; }
+        if (activeBoosterEditIndex >= 0 && state.boosters[activeBoosterEditIndex]) {
+          const current = state.boosters[activeBoosterEditIndex]; const edited = normalizeBooster({ ...current, ...payload, _id: current._id, _isNew: current._isNew }, false); edited._isDirty = current._isNew ? current._isDirty : true; state.boosters[activeBoosterEditIndex] = edited;
+        } else {
+          state.boosters.push(normalizeBooster({ ...payload, _id: uid('booster') }, true));
+        }
+        resetBoosterForm(); activeTab = 'boosters'; closeModals(); render();
       });
       root.querySelector('[data-product-form]')?.addEventListener('submit', (event) => {
         event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
         const data = new FormData(form);
-        state.products.push(normalizeProduct({ name: clean(data.get('name')), linkLiga: clean(data.get('linkLiga')), quantity: data.get('quantity'), price: data.get('price'), image: clean(data.get('image')), forSale: data.get('forSale') === 'on' }, true));
+        state.products.push(normalizeProduct({ name: clean(data.get('name')), quantity: data.get('quantity'), price: data.get('price'), image: clean(data.get('image')), forSale: data.get('forSale') === 'on' }, true));
         form.reset(); form.querySelector('[name="quantity"]').value = 1; form.querySelector('[name="forSale"]').checked = true;
         activeTab = 'products'; closeModals(); render(); inventorySection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
@@ -1735,6 +2160,8 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         const favorite = event.target.closest('[data-favorite-card]');
         if (favorite && state) { const item = state.cards[Number(favorite.dataset.favoriteCard)]; if (item) { item.favorite = !item.favorite; if (!item._isNew) item._isDirty = true; renderInventory(); } return; }
         const editKit = event.target.closest('[data-edit-kit]'); if (editKit) { openKitEditor(Number(editKit.dataset.editKit)); return; }
+        const editCard = event.target.closest('[data-edit-card]'); if (editCard) { openCardEditor(Number(editCard.dataset.editCard)); return; }
+        const editBooster = event.target.closest('[data-edit-booster]'); if (editBooster) { openBoosterEditor(Number(editBooster.dataset.editBooster)); return; }
         const details = event.target.closest('[data-card-details]'); if (details) { openCardDetails(Number(details.dataset.cardDetails)); return; }
         const boosterDetails = event.target.closest('[data-booster-details]'); if (boosterDetails) { openBoosterDetails(Number(boosterDetails.dataset.boosterDetails)); return; }
         const row = event.target.closest('[data-card-details-row]');
@@ -1783,6 +2210,8 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
           renderInventory();
           updateTabs();
         }
+        const tabs = root.querySelector('.editor-admin-tabs');
+        if (tabs) tabs.scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
       root.querySelectorAll('[data-admin-nav]').forEach((button) => button.addEventListener('click', () => navigateAdmin(button.dataset.adminNav, button.dataset.adminInventory || '')));
       root.addEventListener('click', (event) => {
@@ -1835,6 +2264,45 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         renderPersonalization();
         scheduleCloudSave();
       }));
+
+      root.querySelector('[data-legacy-import]')?.addEventListener('click', async () => {
+        const feedback = root.querySelector('[data-legacy-feedback]');
+        const select = root.querySelector('[data-legacy-select]');
+        const passwordInput = root.querySelector('[data-legacy-password]');
+        if (!state || !feedback || !select || !passwordInput) return;
+        const collectionId = clean(select.value);
+        const legacy = legacyCollections.find((collection) => clean(collection?.profile?.collectionId || collection?.slug) === collectionId);
+        const claim = legacyClaims.find((entry) => clean(entry?.collectionId) === collectionId);
+        if (!legacy || !claim) { feedback.textContent = 'Selecione uma coleção antiga válida.'; return; }
+        const currentItems = ['cards','boosters','kits','products','albums'].reduce((sum, kind) => sum + (state[kind]?.length || 0), 0);
+        if (currentItems > 0) { feedback.textContent = 'A migração só é permitida em uma coleção vazia para evitar sobrescrever dados da conta.'; return; }
+        feedback.textContent = 'Verificando a senha antiga…';
+        try {
+          const valid = await verifyLegacyPassword(passwordInput.value, claim);
+          if (!valid) { feedback.textContent = 'A senha antiga não confere para essa coleção.'; return; }
+          const currentProfile = { ...state.profile };
+          const migrationProfile = {
+            ...legacy.profile,
+            ...currentProfile,
+            profilePhoto: legacy.profile?.profilePhoto || currentProfile.profilePhoto || '',
+            palette: legacy.profile?.palette || currentProfile.palette,
+            showQuantity: false,
+            priceDisplayFallback: legacy.profile?.priceDisplayFallback || currentProfile.priceDisplayFallback,
+          };
+          activate(migrationProfile, legacy, 'cloud');
+          ['cards', 'boosters', 'kits', 'products', 'albums'].forEach((kind) => (state?.[kind] || []).forEach((item) => { item._isNew = true; item._isDirty = true; }));
+          state.pendingMovements = [...(state.movements || [])];
+          state.movements = [];
+          profileDirty = true; privacyDirty = true; mirrorDirty = true;
+          setCloudSaveState('Migrando coleção antiga…', 'saving');
+          await flushCloudSave();
+          passwordInput.value = '';
+          feedback.textContent = 'Migração concluída. Sua coleção antiga já está disponível nesta conta.';
+          const details = root.querySelector('[data-legacy-migration]'); if (details) details.open = false;
+        } catch (error) {
+          feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível migrar a coleção.';
+        }
+      });
 
       root.querySelector('[data-profile-photo-path]')?.addEventListener('input', (event) => { if (!state) return; state.profile.profilePhoto = clean(event.target.value); profileDirty = true; renderPersonalization(); scheduleCloudSave(); });
       root.querySelector('[data-profile-banner-path]')?.addEventListener('input', (event) => { if (!state) return; state.profile.profileBanner = clean(event.target.value); profileDirty = true; renderPersonalization(); scheduleCloudSave(); });

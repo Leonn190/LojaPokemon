@@ -13,9 +13,9 @@ const { item, compact = false, catalog = false, hideOwner = false } = Astro.prop
 const price = getItemPrice(item);
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
-const itemType = item.kind === 'card' ? item.type : item.kind === 'booster' ? 'Booster avulso' : item.kind === 'kit' ? 'Kit personalizado' : 'Produto lacrado';
+const itemType = item.kind === 'card' ? (item.cardClass || item.type || 'Carta Pokémon') : item.kind === 'booster' ? 'Booster avulso' : item.kind === 'kit' ? 'Kit personalizado' : 'Produto lacrado';
 const number = item.kind === 'card' ? item.number : '';
-const pokemonCollection = item.kind === 'card' ? item.collection : item.name;
+const pokemonCollection = item.kind === 'card' || item.kind === 'booster' ? item.collection : item.name;
 const description = item.kind === 'kit' || item.kind === 'product' ? item.description : '';
 const contents = item.kind === 'kit' ? item.contents : '';
 const kitItems = item.kind === 'kit' ? item.contentItems.map((entry) => ({ ...entry, type: entry.type || '', imageCandidates: entry.imageCandidates || [] })) : [];
@@ -35,9 +35,17 @@ const showPublicQuantity = false;
   data-name={item.name}
   data-number={number}
   data-collection={pokemonCollection}
-  data-language={item.kind === 'card' ? item.language : ''}
+  data-era={item.kind === 'card' || item.kind === 'booster' ? item.era : ''}
+  data-collection-id={item.kind === 'card' || item.kind === 'booster' ? item.collectionId : ''}
+  data-collection-code={item.kind === 'card' || item.kind === 'booster' ? item.collectionCode : ''}
+  data-group={item.kind === 'card' ? item.group : ''}
+  data-card-class={item.kind === 'card' ? item.cardClass : ''}
+  data-pokemon-type={item.kind === 'card' ? (item.cardClass ? item.type : (item as any).pokemonType || '') : ''}
+  data-language={item.kind === 'card' || item.kind === 'booster' ? item.language : ''}
+  data-language-label={item.kind === 'card' || item.kind === 'booster' ? item.languageLabel : ''}
   data-condition={item.kind === 'card' ? item.condition : ''}
-  data-year={item.kind === 'card' ? item.year : ''}
+  data-integrity={item.kind === 'card' && item.integrity !== null ? String(item.integrity) : ''}
+  data-year={item.kind === 'card' || item.kind === 'booster' ? item.year : ''}
   data-type={itemType}
   data-description={description}
   data-contents={contents}
@@ -63,9 +71,14 @@ const showPublicQuantity = false;
   data-search={catalog ? item.searchText : undefined}
   data-price={catalog ? String(price ?? -1) : undefined}
   data-quantity={catalog ? String(item.quantity) : undefined}
-  data-filter-collection={catalog && item.kind === 'card' ? item.collection : undefined}
+  data-filter-era={catalog && item.kind === 'card' ? item.era : undefined}
+  data-filter-collection={catalog && item.kind === 'card' ? item.collectionId : undefined}
+  data-filter-group={catalog && item.kind === 'card' ? item.group : undefined}
+  data-filter-class={catalog && item.kind === 'card' ? item.cardClass : undefined}
+  data-filter-type={catalog && item.kind === 'card' ? (item.cardClass ? item.type : (item as any).pokemonType || '') : undefined}
+  data-filter-language={catalog && item.kind === 'card' ? item.language : undefined}
   data-filter-condition={catalog && item.kind === 'card' ? item.condition : undefined}
-  data-filter-type={catalog && item.kind === 'card' ? item.type : undefined}
+  data-filter-integrity={catalog && item.kind === 'card' && item.integrity !== null ? String(item.integrity) : undefined}
   data-filter-owner={catalog ? item.ownerCollectionSlug : undefined}
 >
   <button class="product-open-button" type="button" data-open-product aria-label={`Ver detalhes de ${item.name}`}>

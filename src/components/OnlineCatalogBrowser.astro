@@ -1,4 +1,5 @@
 ---
+import { TCG_CONFIG } from '../lib/tcg-metadata';
 interface Props {
   kind: 'card' | 'booster' | 'kit' | 'product';
   showOwnerFilter?: boolean;
@@ -6,7 +7,7 @@ interface Props {
 const { kind, showOwnerFilter = true } = Astro.props;
 const noun = kind === 'card' ? 'cartas' : kind === 'booster' ? 'boosters' : kind === 'kit' ? 'kits' : 'produtos';
 const placeholder = kind === 'card'
-  ? 'Nome, número, coleção, tipo...'
+  ? 'Nome, número, coleção, classe, tipo...'
   : kind === 'booster'
     ? 'Nome da coleção ou do booster...'
     : kind === 'kit'
@@ -14,7 +15,7 @@ const placeholder = kind === 'card'
       : 'Nome do produto lacrado...';
 const skeletonCount = kind === 'card' ? 8 : 6;
 ---
-<section class="shell catalog-section online-catalog-section" data-online-catalog data-kind={kind} data-owner-filter={showOwnerFilter ? 'true' : 'false'}>
+<section class="shell catalog-section online-catalog-section" data-online-catalog data-kind={kind} data-owner-filter={showOwnerFilter ? 'true' : 'false'} data-tcg-config={JSON.stringify(TCG_CONFIG)}>
   <div class:list={['filter-panel', kind !== 'card' && 'compact-filter-panel']} data-reveal>
     <div class="search-control">
       <label for={`${kind}-search`}>Pesquisar {noun}</label>
@@ -27,18 +28,14 @@ const skeletonCount = kind === 'card' ? 8 : 6;
 
     {kind === 'card' && (
       <>
-        <div class="select-control">
-          <label>Coleção Pokémon</label>
-          <div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">▦</span><select data-online-collection><option value="">Todas</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div>
-        </div>
-        <div class="select-control">
-          <label>Tipo</label>
-          <div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◆</span><select data-online-type><option value="">Todos</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div>
-        </div>
-        <div class="select-control">
-          <label>Estado</label>
-          <div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">✓</span><select data-online-condition><option value="">Todos</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div>
-        </div>
+        <div class="select-control"><label>Era</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◈</span><select data-online-era><option value="">Todas</option>{Object.values(TCG_CONFIG.eras).map((era) => <option value={era.id}>{era.label}</option>)}</select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+        <div class="select-control"><label>Coleção</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">▦</span><select data-online-collection disabled><option value="">Todas</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+        <div class="select-control"><label>Grupo</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◎</span><select data-online-group><option value="">Todos</option>{TCG_CONFIG.groups.map((group) => <option value={group.id}>{group.label}</option>)}</select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+        <div class="select-control"><label>Classe</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◇</span><select data-online-class disabled><option value="">Todas</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+        <div class="select-control"><label>Tipo</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◆</span><select data-online-type disabled><option value="">Todos</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+        <div class="select-control"><label>Idioma</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">A</span><select data-online-language><option value="">Todos</option>{TCG_CONFIG.languages.map((language) => <option value={language.id}>{language.label}</option>)}</select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+        <div class="select-control"><label>Estado</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">✓</span><select data-online-condition><option value="">Todos</option>{Object.keys(TCG_CONFIG.conditions).map((condition) => <option value={condition}>{condition}</option>)}</select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+        <div class="select-control"><label>Integridade</label><div class="search-input-wrap integrity-filter-wrap"><input type="number" min="1" max="100" step="1" placeholder="1–100" data-online-integrity /><b>%</b></div></div>
       </>
     )}
 
@@ -89,9 +86,14 @@ const skeletonCount = kind === 'card' ? 8 : 6;
     const status = root.querySelector<HTMLElement>('[data-online-status]');
     const empty = root.querySelector<HTMLElement>('[data-online-empty]');
     const search = root.querySelector<HTMLInputElement>('[data-online-search]');
+    const eraFilter = root.querySelector<HTMLSelectElement>('[data-online-era]');
     const collectionFilter = root.querySelector<HTMLSelectElement>('[data-online-collection]');
+    const groupFilter = root.querySelector<HTMLSelectElement>('[data-online-group]');
+    const classFilter = root.querySelector<HTMLSelectElement>('[data-online-class]');
     const typeFilter = root.querySelector<HTMLSelectElement>('[data-online-type]');
+    const languageFilter = root.querySelector<HTMLSelectElement>('[data-online-language]');
     const conditionFilter = root.querySelector<HTMLSelectElement>('[data-online-condition]');
+    const integrityFilter = root.querySelector<HTMLInputElement>('[data-online-integrity]');
     const ownerFilter = root.querySelector<HTMLSelectElement>('[data-online-owner]');
     const ownerWrap = root.querySelector<HTMLElement>('[data-online-owner-wrap]');
     const sort = root.querySelector<HTMLSelectElement>('[data-online-sort]');
@@ -103,6 +105,8 @@ const skeletonCount = kind === 'card' ? 8 : 6;
     let fullyLoaded = false;
     let completePromise: Promise<void> | null = null;
     let searchTimer = 0;
+    let tcgConfig: any = { eras: {}, groups: [], languages: [], conditions: {} };
+    try { tcgConfig = JSON.parse(root.dataset.tcgConfig || '{}'); } catch (_) {}
 
     const escapeOption = (value: string) => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
     const uniqueItems = (incoming: any[]) => {
@@ -113,18 +117,26 @@ const skeletonCount = kind === 'card' ? 8 : 6;
       });
     };
 
-    const fillSelect = (select: HTMLSelectElement | null, values: string[], firstLabel: string) => {
+    const fillSelect = (select: HTMLSelectElement | null, values: Array<string | { value: string; label: string }>, firstLabel: string, reset = false) => {
       if (!select) return;
-      const current = select.value;
-      select.innerHTML = `<option value="">${firstLabel}</option>${values.map((value) => `<option value="${escapeOption(value)}">${escapeOption(value)}</option>`).join('')}`;
+      const current = reset ? '' : select.value;
+      select.innerHTML = `<option value="">${firstLabel}</option>${values.map((entry) => { const value = typeof entry === 'string' ? entry : entry.value; const label = typeof entry === 'string' ? entry : entry.label; return `<option value="${escapeOption(value)}">${escapeOption(label)}</option>`; }).join('')}`;
       if ([...select.options].some((option) => option.value === current)) select.value = current;
     };
 
+    const syncDependentFilters = ({ resetCollection = false, resetClass = false, resetType = false } = {}) => {
+      const era: any = eraFilter?.value ? tcgConfig.eras?.[eraFilter.value] : null;
+      const group = groupFilter?.value || '';
+      fillSelect(collectionFilter, era ? (era.collections || []).map((entry: any) => ({ value: entry.id, label: `${entry.label}${entry.code ? ` — ${entry.code}` : ''}` })) : [], 'Todas', resetCollection);
+      if (collectionFilter) collectionFilter.disabled = !era;
+      fillSelect(classFilter, era && group ? (era.classes?.[group] || []) : [], 'Todas', resetClass);
+      if (classFilter) classFilter.disabled = !(era && group);
+      fillSelect(typeFilter, era && group === 'pokemon' ? (era.pokemonTypes || []) : [], 'Todos', resetType);
+      if (typeFilter) typeFilter.disabled = !(era && group === 'pokemon');
+    };
+
     const hydrateFilters = () => {
-      const unique = (values: unknown[]) => [...new Set(values.map((value) => String(value || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-      fillSelect(collectionFilter, unique(items.map((item) => item.collection)), 'Todas');
-      fillSelect(typeFilter, unique(items.map((item) => item.type)), 'Todos');
-      fillSelect(conditionFilter, unique(items.map((item) => item.condition)), 'Todos');
+      syncDependentFilters();
       const ownerMap = new Map<string, string>();
       items.forEach((item) => {
         const slug = String(item.ownerCollectionSlug || item.collectionSlug || '');
@@ -141,9 +153,14 @@ const skeletonCount = kind === 'card' ? 8 : 6;
 
     const hasActiveRefinement = () => Boolean(
       normalizeText(search?.value || '')
+      || eraFilter?.value
       || collectionFilter?.value
+      || groupFilter?.value
+      || classFilter?.value
       || typeFilter?.value
+      || languageFilter?.value
       || conditionFilter?.value
+      || integrityFilter?.value
       || ownerFilter?.value
       || (sort?.value && sort.value !== 'name')
     );
@@ -151,11 +168,16 @@ const skeletonCount = kind === 'card' ? 8 : 6;
     const apply = () => {
       const query = normalizeText(search?.value || '');
       let visible = items.filter((item) => {
-        const text = normalizeText(`${item.searchText || ''} ${item.name || ''} ${item.number || ''} ${item.collection || ''} ${item.ownerName || ''} ${item.ownerCollectionName || ''}`);
+        const text = normalizeText(`${item.searchText || ''} ${item.name || ''} ${item.number || ''} ${item.collection || ''} ${item.collectionCode || ''} ${item.era || ''} ${item.group || ''} ${item.cardClass || ''} ${item.type || ''} ${item.language || ''} ${item.condition || ''} ${item.integrity ?? ''} ${item.ownerName || ''} ${item.ownerCollectionName || ''}`);
         if (query && !text.includes(query)) return false;
-        if (collectionFilter?.value && item.collection !== collectionFilter.value) return false;
+        if (eraFilter?.value && item.era !== eraFilter.value) return false;
+        if (collectionFilter?.value && item.collectionId !== collectionFilter.value) return false;
+        if (groupFilter?.value && item.group !== groupFilter.value) return false;
+        if (classFilter?.value && item.cardClass !== classFilter.value) return false;
         if (typeFilter?.value && item.type !== typeFilter.value) return false;
+        if (languageFilter?.value && item.language !== languageFilter.value) return false;
         if (conditionFilter?.value && item.condition !== conditionFilter.value) return false;
+        if (integrityFilter?.value && Number(item.integrity) !== Number(integrityFilter.value)) return false;
         if (ownerFilter?.value && String(item.ownerCollectionSlug || item.collectionSlug || '') !== ownerFilter.value) return false;
         return true;
       });
@@ -239,10 +261,14 @@ const skeletonCount = kind === 'card' ? 8 : 6;
       window.clearTimeout(searchTimer);
       searchTimer = window.setTimeout(handleRefinement, 180);
     });
-    [collectionFilter, typeFilter, conditionFilter, ownerFilter, sort].forEach((element) => element?.addEventListener('change', handleRefinement));
-    [collectionFilter, typeFilter, conditionFilter, ownerFilter, sort].forEach((element) => {
+    eraFilter?.addEventListener('change', async () => { syncDependentFilters({ resetCollection: true, resetClass: true, resetType: true }); await handleRefinement(); });
+    groupFilter?.addEventListener('change', async () => { syncDependentFilters({ resetClass: true, resetType: true }); await handleRefinement(); });
+    [collectionFilter, classFilter, typeFilter, languageFilter, conditionFilter, ownerFilter, sort].forEach((element) => element?.addEventListener('change', handleRefinement));
+    integrityFilter?.addEventListener('input', () => { window.clearTimeout(searchTimer); searchTimer = window.setTimeout(handleRefinement, 150); });
+    [eraFilter, collectionFilter, groupFilter, classFilter, typeFilter, languageFilter, conditionFilter, integrityFilter, ownerFilter, sort].forEach((element) => {
       element?.addEventListener('focus', () => { if (!fullyLoaded) ensureComplete(); }, { once: true });
     });
+    syncDependentFilters();
 
     document.addEventListener('keydown', (event) => {
       if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement as HTMLElement | null)?.tagName || '')) {

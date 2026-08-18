@@ -114,7 +114,14 @@ const canPropose = (card: CardItem) => card.forSale && card.proposalTerms.policy
                           data-language={card.language}
                           data-condition={card.condition}
                           data-year={card.year}
-                          data-type={card.type || 'Carta Pokémon'}
+                          data-era={card.era || ''}
+                          data-collection-id={card.collectionId || ''}
+                          data-collection-code={card.collectionCode || ''}
+                          data-group={card.group || ''}
+                          data-card-class={card.cardClass || ''}
+                          data-pokemon-type={card.cardClass ? (card.type || '') : (card.pokemonType || '')}
+                          data-integrity={card.integrity ?? ''}
+                          data-type={card.cardClass || card.type || 'Carta Pokémon'}
                           data-description=""
                           data-contents=""
                           data-link-liga={card.linkLiga}

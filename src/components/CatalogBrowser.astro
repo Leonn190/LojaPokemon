@@ -1,6 +1,7 @@
 ---
 import ProductCard from './ProductCard.astro';
-import type { CardItem, CatalogItem } from '../lib/catalog';
+import type { CatalogItem } from '../lib/catalog';
+import { TCG_CONFIG } from '../lib/tcg-metadata';
 
 interface Props {
   kind: 'card' | 'booster' | 'kit' | 'product';
@@ -10,16 +11,12 @@ interface Props {
 }
 
 const { kind, items, showOwnerFilter = true, hideOwnerOnCards = false } = Astro.props;
-const cards = kind === 'card' ? (items as CardItem[]) : [];
-const pokemonCollections = [...new Set(cards.map((item) => item.collection))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-const conditions = [...new Set(cards.map((item) => item.condition))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-const types = [...new Set(cards.map((item) => item.type))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 const owners = [...new Map(items.map((item) => [item.ownerCollectionSlug, item.ownerCollectionName])).entries()]
   .sort((a, b) => a[1].localeCompare(b[1], 'pt-BR'));
 const noun = kind === 'card' ? 'cartas' : kind === 'booster' ? 'boosters' : kind === 'kit' ? 'kits' : 'produtos';
 const nounSingular = kind === 'card' ? 'carta' : kind === 'booster' ? 'booster' : kind === 'kit' ? 'kit' : 'produto';
 const placeholder = kind === 'card'
-  ? 'Nome, número, coleção, tipo...'
+  ? 'Nome, número, coleção, classe, tipo...'
   : kind === 'booster'
     ? 'Nome da coleção ou do booster...'
     : kind === 'kit'
@@ -27,7 +24,7 @@ const placeholder = kind === 'card'
       : 'Nome do produto lacrado...';
 ---
 
-<section class="shell catalog-section" data-catalog-root>
+<section class="shell catalog-section" data-catalog-root data-tcg-config={JSON.stringify(TCG_CONFIG)}>
   <div class:list={['filter-panel', kind !== 'card' && 'compact-filter-panel']} data-reveal>
     <div class="search-control">
       <label for={`${kind}-search`}>Pesquisar {noun}</label>
@@ -40,41 +37,14 @@ const placeholder = kind === 'card'
 
     {kind === 'card' && (
       <>
-        <div class="select-control">
-          <label for={`${kind}-collection-filter`}>Coleção Pokémon</label>
-          <div class="select-input-wrap">
-            <span class="select-symbol" aria-hidden="true">▦</span>
-            <select id={`${kind}-collection-filter`} data-filter-collection>
-              <option value="">Todas</option>
-              {pokemonCollections.map((value) => <option value={value}>{value}</option>)}
-            </select>
-            <svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg>
-          </div>
-        </div>
-
-        <div class="select-control">
-          <label for={`${kind}-type-filter`}>Tipo</label>
-          <div class="select-input-wrap">
-            <span class="select-symbol" aria-hidden="true">◆</span>
-            <select id={`${kind}-type-filter`} data-filter-type>
-              <option value="">Todos</option>
-              {types.map((value) => <option value={value}>{value}</option>)}
-            </select>
-            <svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg>
-          </div>
-        </div>
-
-        <div class="select-control">
-          <label for={`${kind}-condition-filter`}>Estado</label>
-          <div class="select-input-wrap">
-            <span class="select-symbol" aria-hidden="true">✓</span>
-            <select id={`${kind}-condition-filter`} data-filter-condition>
-              <option value="">Todos</option>
-              {conditions.map((value) => <option value={value}>{value}</option>)}
-            </select>
-            <svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg>
-          </div>
-        </div>
+        <div class="select-control"><label for={`${kind}-era-filter`}>Era</label><div class="select-input-wrap"><span class="select-symbol">◈</span><select id={`${kind}-era-filter`} data-filter-era><option value="">Todas</option>{Object.values(TCG_CONFIG.eras).map((era) => <option value={era.id}>{era.label}</option>)}</select></div></div>
+        <div class="select-control"><label for={`${kind}-collection-filter`}>Coleção</label><div class="select-input-wrap"><span class="select-symbol">▦</span><select id={`${kind}-collection-filter`} data-filter-collection disabled><option value="">Todas</option></select></div></div>
+        <div class="select-control"><label for={`${kind}-group-filter`}>Grupo</label><div class="select-input-wrap"><span class="select-symbol">◎</span><select id={`${kind}-group-filter`} data-filter-group><option value="">Todos</option>{TCG_CONFIG.groups.map((group) => <option value={group.id}>{group.label}</option>)}</select></div></div>
+        <div class="select-control"><label for={`${kind}-class-filter`}>Classe</label><div class="select-input-wrap"><span class="select-symbol">◇</span><select id={`${kind}-class-filter`} data-filter-class disabled><option value="">Todas</option></select></div></div>
+        <div class="select-control"><label for={`${kind}-type-filter`}>Tipo</label><div class="select-input-wrap"><span class="select-symbol">◆</span><select id={`${kind}-type-filter`} data-filter-type disabled><option value="">Todos</option></select></div></div>
+        <div class="select-control"><label for={`${kind}-language-filter`}>Idioma</label><div class="select-input-wrap"><span class="select-symbol">A</span><select id={`${kind}-language-filter`} data-filter-language><option value="">Todos</option>{TCG_CONFIG.languages.map((language) => <option value={language.id}>{language.label}</option>)}</select></div></div>
+        <div class="select-control"><label for={`${kind}-condition-filter`}>Estado</label><div class="select-input-wrap"><span class="select-symbol">✓</span><select id={`${kind}-condition-filter`} data-filter-condition><option value="">Todos</option>{Object.keys(TCG_CONFIG.conditions).map((condition) => <option value={condition}>{condition}</option>)}</select></div></div>
+        <div class="select-control"><label for={`${kind}-integrity-filter`}>Integridade</label><div class="search-input-wrap integrity-filter-wrap"><input id={`${kind}-integrity-filter`} type="number" min="1" max="100" step="1" placeholder="1–100" data-filter-integrity /><b>%</b></div></div>
       </>
     )}
 
