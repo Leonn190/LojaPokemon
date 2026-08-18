@@ -1,11 +1,17 @@
 import { initializeApp, getApps, type FirebaseApp, type FirebaseOptions } from 'firebase/app';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import {
   createUserWithEmailAndPassword,
   deleteUser,
+  EmailAuthProvider,
   getAuth,
   onAuthStateChanged,
+  reauthenticateWithCredential,
+  reload,
+  sendEmailVerification,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
+  updatePassword,
   updateProfile,
   type User,
 } from 'firebase/auth';
@@ -20,6 +26,7 @@ import {
   query,
   limit as firestoreLimit,
   orderBy,
+  runTransaction,
   startAfter,
   serverTimestamp,
   setDoc,
@@ -52,6 +59,22 @@ const resolvedConfig: FirebaseOptions = {
 };
 
 let servicesPromise: Promise<{ app: FirebaseApp; auth: ReturnType<typeof getAuth>; db: Firestore }> | null = null;
+
+
+export const DEFAULT_ACCOUNT_SCORES = Object.freeze({
+  security: 30,
+  visibility: 30,
+});
+
+const normalizeScoreValue = (value: any, fallback: number) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.min(100, Math.max(0, parsed)) : fallback;
+};
+
+const normalizeAccountScores = (value: any) => ({
+  security: normalizeScoreValue(value?.security, DEFAULT_ACCOUNT_SCORES.security),
+  visibility: normalizeScoreValue(value?.visibility, DEFAULT_ACCOUNT_SCORES.visibility),
+});
 
 const PUBLIC_MIRROR_VERSION = 2;
 const PUBLIC_CACHE_REVALIDATE_AFTER = 30 * 1000;
@@ -328,6 +351,8 @@ export async function createAccountWithCollection(input: {
       displayName: profile.owner,
       email: profile.email,
       collectionSlug: slug,
+      scores: { ...DEFAULT_ACCOUNT_SCORES },
+      emailVerified: false,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -350,6 +375,77 @@ export async function signIn(email: string, password: string) {
 export async function signOut() {
   const { auth } = await getCloud();
   return firebaseSignOut(auth);
+}
+
+
+export async function sendAccountVerificationEmail() {
+  const { app, auth } = await getCloud();
+  const user = auth.currentUser;
+  if (!user) throw new Error('Sua sessão expirou. Entre novamente.');
+  if (user.emailVerified) return { alreadyVerified: true, email: user.email || '', delivery: 'already-verified' };
+
+  // Preferimos o backend do Vault porque ele envia o template visual pelo Gmail.
+  // Se as Cloud Functions ainda não estiverem publicadas, o Firebase Auth padrão
+  // continua funcionando como fallback para não quebrar a verificação.
+  try {
+    const functions = getFunctions(app, 'us-central1');
+    const sendVaultVerificationEmail = httpsCallable(functions, 'sendVaultVerificationEmail');
+    const response: any = await sendVaultVerificationEmail({
+      returnUrl: typeof window !== 'undefined' ? window.location.href.split('#')[0] : '',
+    });
+    return { alreadyVerified: false, email: user.email || '', delivery: response?.data?.delivery || 'gmail' };
+  } catch (error) {
+    console.warn('[Vault TCG] Backend de e-mail indisponível; usando verificação padrão do Firebase.', error);
+    await sendEmailVerification(user);
+    return { alreadyVerified: false, email: user.email || '', delivery: 'firebase-fallback' };
+  }
+}
+
+export async function refreshAccountVerification() {
+  const { auth, db } = await getCloud();
+  const user = auth.currentUser;
+  if (!user) throw new Error('Sua sessão expirou. Entre novamente.');
+  await reload(user);
+  if (!user.emailVerified) {
+    const accountSnapshot = await getDoc(doc(db, 'users', user.uid));
+    return {
+      verified: false,
+      scores: normalizeAccountScores(accountSnapshot.data()?.scores),
+    };
+  }
+
+  const accountRef = doc(db, 'users', user.uid);
+  const result = await runTransaction(db, async (transaction) => {
+    const snapshot = await transaction.get(accountRef);
+    const data = snapshot.data() || {};
+    const scores = normalizeAccountScores(data.scores);
+    const wasVerified = data.emailVerified === true;
+    const nextScores = wasVerified
+      ? scores
+      : { ...scores, security: Math.min(100, scores.security + 5) };
+
+    transaction.set(accountRef, {
+      email: user.email || data.email || '',
+      emailVerified: true,
+      emailVerifiedAt: wasVerified ? (data.emailVerifiedAt || serverTimestamp()) : serverTimestamp(),
+      scores: nextScores,
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
+
+    return { verified: true, scores: nextScores, awarded: !wasVerified };
+  });
+  return result;
+}
+
+export async function changeAccountPassword(currentPassword: string, nextPassword: string) {
+  const { auth } = await getCloud();
+  const user = auth.currentUser;
+  if (!user?.email) throw new Error('Sua sessão expirou. Entre novamente.');
+  if (String(nextPassword || '').length < 6) throw new Error('A nova senha precisa ter pelo menos 6 caracteres.');
+  const credential = EmailAuthProvider.credential(user.email, currentPassword);
+  await reauthenticateWithCredential(user, credential);
+  await updatePassword(user, nextPassword);
+  return true;
 }
 
 export async function currentUser(): Promise<User | null> {
@@ -400,13 +496,23 @@ export async function loadMyCollection(user?: User | null) {
     };
     const batch = writeBatch(db);
     batch.set(collectionRef, { ...profileForFirestore(profile, uid), createdAt: serverTimestamp() });
-    batch.set(doc(db, 'users', uid), { displayName: profile.owner, email: profile.email, collectionSlug: slug, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }, { merge: true });
+    batch.set(doc(db, 'users', uid), {
+      displayName: profile.owner,
+      email: profile.email,
+      collectionSlug: slug,
+      scores: { ...DEFAULT_ACCOUNT_SCORES },
+      emailVerified: active.emailVerified === true,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
     batch.set(doc(db, 'slugs', slug), { ownerUid: uid, collectionUid: uid, slug, createdAt: serverTimestamp() });
     await batch.commit();
     snapshot = await getDoc(collectionRef);
   }
   const data = snapshot.data() || {};
-  const [cards, boosters, kits, products, albums, movements] = await Promise.all([
+  const accountRef = doc(db, 'users', uid);
+  const [accountSnapshot, cards, boosters, kits, products, albums, movements] = await Promise.all([
+    getDoc(accountRef),
     readSubcollection(db, uid, 'cards'),
     readSubcollection(db, uid, 'boosters'),
     readSubcollection(db, uid, 'kits'),
@@ -414,6 +520,18 @@ export async function loadMyCollection(user?: User | null) {
     readSubcollection(db, uid, 'albums'),
     readSubcollection(db, uid, 'movements'),
   ]);
+  const accountData = accountSnapshot.data() || {};
+  const scores = normalizeAccountScores(accountData.scores);
+  if (!accountSnapshot.exists() || !accountData.scores) {
+    await setDoc(accountRef, {
+      displayName: data.owner || active.displayName || '',
+      email: active.email || '',
+      collectionSlug: data.slug || data.collectionId || uid,
+      scores,
+      emailVerified: active.emailVerified === true || accountData.emailVerified === true,
+      updatedAt: serverTimestamp(),
+    }, { merge: true });
+  }
   const profile = {
     ...data,
     ownerUid: uid,
@@ -421,6 +539,8 @@ export async function loadMyCollection(user?: User | null) {
     email: active.email || data.email || '',
     password: '',
     version: Number(data.version || 1),
+    scores,
+    emailVerified: active.emailVerified === true || accountData.emailVerified === true,
   };
   return { profile, cards, boosters, kits, products, albums, movements };
 }
@@ -722,6 +842,8 @@ export function friendlyFirebaseError(error: any) {
     'auth/invalid-email': 'O e-mail informado não é válido.',
     'auth/weak-password': 'Use uma senha mais forte, com pelo menos 6 caracteres.',
     'auth/invalid-credential': 'E-mail ou senha incorretos.',
+    'auth/wrong-password': 'A senha atual está incorreta.',
+    'auth/requires-recent-login': 'Confirme sua senha atual e tente novamente.',
     'auth/user-disabled': 'Esta conta foi desativada.',
     'auth/too-many-requests': 'Muitas tentativas seguidas. Aguarde um pouco e tente novamente.',
     'permission-denied': 'Você não tem permissão para concluir esta operação.',

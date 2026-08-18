@@ -1,0 +1,22 @@
+{
+  "name": "vault-tcg-functions",
+  "private": true,
+  "main": "lib/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "build": "tsc",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "latest",
+    "firebase-functions": "latest",
+    "nodemailer": "latest"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "latest",
+    "typescript": "latest"
+  }
+}

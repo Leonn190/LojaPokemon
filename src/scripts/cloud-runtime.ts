@@ -1,4 +1,5 @@
 import {
+  changeAccountPassword,
   createAccountWithCollection,
   currentUser,
   friendlyFirebaseError,
@@ -13,7 +14,9 @@ import {
   listMyReceivedProposals,
   loadCollectionBySlug,
   loadMyCollection,
+  refreshAccountVerification,
   saveEditorState,
+  sendAccountVerificationEmail,
   signIn,
   signOut,
   slugify,
@@ -31,6 +34,7 @@ const ready = getCloud().then(() => true);
 
 window.VaultCloud = {
   ready,
+  changeAccountPassword,
   createAccountWithCollection,
   currentUser,
   friendlyFirebaseError,
@@ -44,7 +48,9 @@ window.VaultCloud = {
   listMyReceivedProposals,
   loadCollectionBySlug,
   loadMyCollection,
+  refreshAccountVerification,
   saveEditorState,
+  sendAccountVerificationEmail,
   signIn,
   signOut,
   slugify,

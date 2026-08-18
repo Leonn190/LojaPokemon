@@ -1,0 +1,317 @@
+{
+  "fonte": "MYP Cards",
+  "link_myp": "https://mypcards.com/pokemon/produto/236529/greninja-ex",
+  "nome": "Greninja ex",
+  "numeracao": "106/167",
+  "ano": 2024,
+  "era": "Scarlet Violet",
+  "colecao": "Escarlate e Violeta: Máscaras do Crepúsculo",
+  "codigo_edicao": "TWM",
+  "grupo": "Pokémon",
+  "classe": "Ex",
+  "tipo": "Lutador",
+  "tipo_carta_myp": "Stage 2",
+  "raridade_myp": "Rara Dupla",
+  "codigo_myp": "pokemon_twm_106/167",
+  "data_lancamento": "24/05/2024",
+  "hp": "310",
+  "ilustrador": "",
+  "imagem": "https://img.mypcards.com/cdn-cgi/image/h=425,fit=contain,f=auto/img/2/2120/pokemon_twm_106_167/pokemon_twm_106_167_pt.jpg",
+  "idioma": null,
+  "estado": null,
+  "integridade": null,
+  "campos_manuais": [
+    "idioma",
+    "estado",
+    "integridade"
+  ],
+  "precos_resumo_exibidos_myp": [
+    35.9,
+    57.96,
+    13.9,
+    40.0
+  ],
+  "precos_calculados_das_ofertas_visiveis": {
+    "ofertas_lidas": 37,
+    "menor": 10.0,
+    "segundo_menor": 19.9,
+    "terceiro_menor": 35.0,
+    "media": 52.29,
+    "mediana": 50.0,
+    "por_estado": {
+      "NM": {
+        "quantidade_de_anuncios": 34,
+        "menor": 10.0,
+        "media": 50.71,
+        "mediana": 50.0
+      },
+      "SP": {
+        "quantidade_de_anuncios": 3,
+        "menor": 48.0,
+        "media": 70.16,
+        "mediana": 79.99
+      }
+    }
+  },
+  "ofertas_visiveis": [
+    {
+      "vendedor": "LastPack",
+      "acabamento": "Foil",
+      "estado": "NM",
+      "quantidade": 4,
+      "preco": 39.89
+    },
+    {
+      "vendedor": "BrtzCards",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 44.39
+    },
+    {
+      "vendedor": "PandaGamesBr",
+      "acabamento": "Foil",
+      "estado": "SP",
+      "quantidade": 1,
+      "preco": 48.0
+    },
+    {
+      "vendedor": "KinglerTCG",
+      "acabamento": "Foil",
+      "estado": "NM",
+      "quantidade": 2,
+      "preco": 52.0
+    },
+    {
+      "vendedor": "Theo298",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 53.9
+    },
+    {
+      "vendedor": "VovoLokoo",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 55.0
+    },
+    {
+      "vendedor": "GonjiTCG",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 2,
+      "preco": 60.0
+    },
+    {
+      "vendedor": "TatudoTCG",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 60.0
+    },
+    {
+      "vendedor": "RPGeek",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 60.0
+    },
+    {
+      "vendedor": "Pokeplace",
+      "acabamento": "Foil",
+      "estado": "NM",
+      "quantidade": 10,
+      "preco": 64.5
+    },
+    {
+      "vendedor": "IchiTCG",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 70.0
+    },
+    {
+      "vendedor": "VITORMAYARA",
+      "acabamento": "Foil",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 79.9
+    },
+    {
+      "vendedor": "DanfaCards",
+      "acabamento": "Foil",
+      "estado": "NM",
+      "quantidade": 3,
+      "preco": 79.99
+    },
+    {
+      "vendedor": "DKTCG",
+      "acabamento": "Foil",
+      "estado": "SP",
+      "quantidade": 2,
+      "preco": 79.99
+    },
+    {
+      "vendedor": "resetnerd",
+      "acabamento": "",
+      "estado": "SP",
+      "quantidade": 1,
+      "preco": 82.5
+    },
+    {
+      "vendedor": "AliceHK",
+      "acabamento": "Promo",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 85.0
+    },
+    {
+      "vendedor": "robinsonferrari",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 89.0
+    },
+    {
+      "vendedor": "NetoB",
+      "acabamento": "Foil",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 10.0
+    },
+    {
+      "vendedor": "MaisQueGeek",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 19.9
+    },
+    {
+      "vendedor": "Tsuyoicards",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 35.0
+    },
+    {
+      "vendedor": "ThiagoMatte",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 35.9
+    },
+    {
+      "vendedor": "Cabelo",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 38.0
+    },
+    {
+      "vendedor": "IgorDK",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 2,
+      "preco": 38.99
+    },
+    {
+      "vendedor": "whyLace",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 40.0
+    },
+    {
+      "vendedor": "K00up",
+      "acabamento": "Foil",
+      "estado": "NM",
+      "quantidade": 6,
+      "preco": 40.0
+    },
+    {
+      "vendedor": "viktorgd",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 40.0
+    },
+    {
+      "vendedor": "Marksluscas",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 40.0
+    },
+    {
+      "vendedor": "14Andrew44",
+      "acabamento": "Foil",
+      "estado": "NM",
+      "quantidade": 2,
+      "preco": 40.0
+    },
+    {
+      "vendedor": "FernandoMMS",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 2,
+      "preco": 40.0
+    },
+    {
+      "vendedor": "matt0S0",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 44.9
+    },
+    {
+      "vendedor": "brunonasc",
+      "acabamento": "Foil",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 50.0
+    },
+    {
+      "vendedor": "Zini",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 50.0
+    },
+    {
+      "vendedor": "BrunoStark",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 50.0
+    },
+    {
+      "vendedor": "CollectCards",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 53.0
+    },
+    {
+      "vendedor": "DallysonArc",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 2,
+      "preco": 55.0
+    },
+    {
+      "vendedor": "KratosTCG",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 55.0
+    },
+    {
+      "vendedor": "NagaPoint",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 2,
+      "preco": 55.0
+    }
+  ]
+}

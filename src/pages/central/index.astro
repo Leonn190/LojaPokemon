@@ -54,7 +54,7 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         <div class="editor-admin-main">
           <section class="editor-dashboard" id="editor-overview" data-admin-section="overview">
             <header class="editor-dashboard-heading">
-              <div><span class="section-eyebrow">Visão geral</span><h3>Painel da coleção</h3><p>O que importa agora: tamanho, valor, atividade recente e pontos que precisam de correção.</p></div>
+              <div><span class="section-eyebrow">Visão geral</span><h3>Painel da coleção</h3><p>O que importa agora: tamanho, valor e os scores da sua conta no Vault TCG.</p></div>
               <a class="editor-public-preview-link" data-open-public-profile href="#" target="_blank" rel="noreferrer"><span>Ver perfil público</span><b>↗</b></a>
             </header>
             <div class="editor-dashboard-metrics editor-dashboard-metrics-primary">
@@ -74,16 +74,43 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
                 <article><small>Mínimo</small><strong data-dashboard-card-minimum>R$ 0,00</strong><em>50% do Menor da Liga</em></article>
               </div>
             </section>
-            <div class="editor-dashboard-grid">
-              <section class="editor-attention-panel">
-                <header><div><span class="attention-pulse"></span><span><strong>Atenção necessária</strong><small data-attention-summary>Verificando acervo…</small></span></div><button type="button" data-refresh-attention aria-label="Rever problemas">↻</button></header>
-                <div class="editor-attention-list" data-attention-list></div>
-              </section>
-              <section class="editor-recent-panel">
-                <header><span><strong>Atividade recente</strong><small>Últimas alterações registradas</small></span><button type="button" data-admin-jump="history">Ver histórico →</button></header>
-                <div data-dashboard-recent></div>
-              </section>
-            </div>
+            <section class="account-score-section" aria-label="Scores da conta">
+              <header class="account-score-heading">
+                <div><span class="section-eyebrow">Reputação da conta</span><h4>Seus scores</h4></div>
+                <small>Os dois scores começam em 30. Novas regras poderão aumentar ou reduzir esses valores futuramente.</small>
+              </header>
+              <div class="account-score-grid">
+                <article class="account-score-card security-score-card">
+                  <div class="score-card-copy">
+                    <span class="score-card-icon">⌾</span>
+                    <div><strong>Score de segurança</strong><small>Confiança e verificações da conta</small></div>
+                  </div>
+                  <div class="score-gauge" data-score-gauge="security">
+                    <svg viewBox="0 0 240 132" role="img" aria-label="Score de segurança">
+                      <path class="score-gauge-track" pathLength="100" d="M20 112 A100 100 0 0 1 220 112"></path>
+                      <path class="score-gauge-value" pathLength="100" d="M20 112 A100 100 0 0 1 220 112" data-score-path="security"></path>
+                    </svg>
+                    <div class="score-gauge-number"><strong data-score-value="security">30</strong><span>/100</span></div>
+                  </div>
+                  <footer><span data-security-score-note>Gmail ainda não verificado</span><b data-security-score-delta>Base 30</b></footer>
+                </article>
+
+                <article class="account-score-card visibility-score-card">
+                  <div class="score-card-copy">
+                    <span class="score-card-icon">◉</span>
+                    <div><strong>Score de visibilidade</strong><small>Potencial de descoberta da coleção</small></div>
+                  </div>
+                  <div class="score-gauge" data-score-gauge="visibility">
+                    <svg viewBox="0 0 240 132" role="img" aria-label="Score de visibilidade">
+                      <path class="score-gauge-track" pathLength="100" d="M20 112 A100 100 0 0 1 220 112"></path>
+                      <path class="score-gauge-value" pathLength="100" d="M20 112 A100 100 0 0 1 220 112" data-score-path="visibility"></path>
+                    </svg>
+                    <div class="score-gauge-number"><strong data-score-value="visibility">30</strong><span>/100</span></div>
+                  </div>
+                  <footer><span>Mecânica preparada</span><b>Base 30</b></footer>
+                </article>
+              </div>
+            </section>
           </section>
 
       {legacyCollections.length > 0 && (
@@ -106,6 +133,46 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
           <label class="form-field"><span>Telefone para propostas</span><input data-profile-field="phone" placeholder="(00) 00000-0000" /></label>
           <label class="form-field"><span>Gmail / e-mail da conta</span><input type="email" data-profile-field="email" readonly aria-readonly="true" /></label>
           <label class="form-field profile-description-field"><span>Descrição</span><textarea rows="3" data-profile-field="description"></textarea></label>
+        </div>
+      </section>
+
+      <section class="account-security-settings" data-admin-section="settings" aria-label="Segurança da conta">
+        <header class="settings-section-heading"><span>⌾</span><div><strong>Segurança da conta</strong><small>Verifique seu Gmail e mantenha sua senha atualizada.</small></div></header>
+        <div class="account-security-grid">
+          <article class="account-security-card email-verification-card" data-email-verification-card>
+            <div class="account-security-card-top">
+              <span class="account-security-icon">✉</span>
+              <div><strong>Verificar Gmail</strong><small>Confirme que o endereço pertence a você e ganhe +5 no Score de segurança.</small></div>
+              <em class="verification-status pending" data-email-verification-status>Não verificado</em>
+            </div>
+            <div class="verification-email-display">
+              <span>Gmail da conta</span>
+              <strong data-security-email>—</strong>
+            </div>
+            <div class="verification-benefit">
+              <span>+5</span>
+              <div><strong>Score de segurança</strong><small>O bônus é concedido uma única vez.</small></div>
+            </div>
+            <div class="account-security-actions">
+              <button type="button" class="primary-cta compact" data-send-email-verification><span>Enviar verificação</span><b>→</b></button>
+              <button type="button" class="secondary-cta compact" data-check-email-verification><span>Já verifiquei</span><b>✓</b></button>
+            </div>
+            <p class="security-feedback" data-email-verification-feedback></p>
+          </article>
+
+          <article class="account-security-card password-change-card">
+            <div class="account-security-card-top">
+              <span class="account-security-icon">⌁</span>
+              <div><strong>Alterar senha</strong><small>Confirme sua senha atual antes de criar uma nova.</small></div>
+            </div>
+            <form class="password-change-form" data-password-change-form>
+              <label class="form-field"><span>Senha atual</span><input name="currentPassword" type="password" autocomplete="current-password" required /></label>
+              <label class="form-field"><span>Nova senha</span><input name="newPassword" type="password" autocomplete="new-password" minlength="6" required /></label>
+              <label class="form-field"><span>Confirmar nova senha</span><input name="confirmPassword" type="password" autocomplete="new-password" minlength="6" required /></label>
+              <button type="submit" class="secondary-cta compact"><span>Atualizar senha</span><b>✓</b></button>
+              <p class="security-feedback" data-password-change-feedback></p>
+            </form>
+          </article>
         </div>
       </section>
 
@@ -1063,12 +1130,17 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
       const makeState = (profile, items = {}, source = 'new') => {
         const cards = (items.cards || []).map((item) => normalizeCard(item, false));
         const boosters = (items.boosters || []).map((item) => normalizeBooster(item, false));
-        const normalizedProfile = { owner: '', title: '', description: '', email: '', phone: '', password: '', public: false, selling: true, showQuantity: false, showCollectionValue: true, featured: false, version: 1, profilePhoto: '', profileBanner: '', palette: ['#54e8df', '#bc91ff', '#f4c25c'], priceDisplayFallback: 'league_average_then_lowest', ...profile };
+        const normalizedProfile = { owner: '', title: '', description: '', email: '', phone: '', password: '', public: false, selling: true, showQuantity: false, showCollectionValue: true, featured: false, version: 1, profilePhoto: '', profileBanner: '', palette: ['#54e8df', '#bc91ff', '#f4c25c'], priceDisplayFallback: 'league_average_then_lowest', scores: { security: 30, visibility: 30 }, emailVerified: false, ...profile };
         if (!['league_average_then_lowest', 'league_lowest_then_average', 'consult'].includes(normalizedProfile.priceDisplayFallback)) normalizedProfile.priceDisplayFallback = 'league_average_then_lowest';
         normalizedProfile.palette = Array.isArray(normalizedProfile.palette) && normalizedProfile.palette.length >= 3 ? normalizedProfile.palette.slice(0, 3) : ['#54e8df', '#bc91ff', '#f4c25c'];
         normalizedProfile.profilePhoto = clean(normalizedProfile.profilePhoto);
         normalizedProfile.profileBanner = clean(normalizedProfile.profileBanner);
         normalizedProfile.showCollectionValue = normalizedProfile.showCollectionValue !== false;
+        normalizedProfile.scores = {
+          security: Number.isFinite(Number(normalizedProfile.scores?.security)) ? Math.min(100, Math.max(0, Number(normalizedProfile.scores.security))) : 30,
+          visibility: Number.isFinite(Number(normalizedProfile.scores?.visibility)) ? Math.min(100, Math.max(0, Number(normalizedProfile.scores.visibility))) : 30,
+        };
+        normalizedProfile.emailVerified = normalizedProfile.emailVerified === true;
         normalizedProfile.proposalTerms = normalizeProposalTerms(profile?.proposalTerms);
         return {
           profile: normalizedProfile,
@@ -1147,6 +1219,76 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         }
       };
 
+
+      const renderAccountScores = () => {
+        if (!state) return;
+        const scores = state.profile.scores || { security: 30, visibility: 30 };
+        ['security', 'visibility'].forEach((kind) => {
+          const parsedScore = Number(scores[kind]);
+          const score = Number.isFinite(parsedScore) ? Math.min(100, Math.max(0, parsedScore)) : 30;
+          const value = root.querySelector(`[data-score-value="${kind}"]`);
+          const path = root.querySelector(`[data-score-path="${kind}"]`);
+          if (value) value.textContent = String(Math.round(score));
+          if (path) {
+            path.style.strokeDasharray = `${score} 100`;
+            path.style.strokeDashoffset = '0';
+          }
+        });
+        const note = root.querySelector('[data-security-score-note]');
+        const delta = root.querySelector('[data-security-score-delta]');
+        if (note) note.textContent = state.profile.emailVerified ? 'Gmail verificado' : 'Gmail ainda não verificado';
+        if (delta) delta.textContent = state.profile.emailVerified ? 'Base 30 + 5 Gmail' : 'Base 30';
+      };
+
+      const renderAccountSecurity = () => {
+        if (!state) return;
+        const email = root.querySelector('[data-security-email]');
+        if (email) email.textContent = state.profile.email || '—';
+        const status = root.querySelector('[data-email-verification-status]');
+        const sendButton = root.querySelector('[data-send-email-verification]');
+        const checkButton = root.querySelector('[data-check-email-verification]');
+        const verified = state.profile.emailVerified === true;
+        if (status) {
+          status.textContent = verified ? 'Verificado' : 'Não verificado';
+          status.classList.toggle('verified', verified);
+          status.classList.toggle('pending', !verified);
+        }
+        if (sendButton) {
+          sendButton.disabled = verified;
+          const label = sendButton.querySelector('span');
+          if (label) label.textContent = verified ? 'Gmail verificado' : 'Enviar verificação';
+        }
+        if (checkButton) checkButton.disabled = verified;
+        renderAccountScores();
+      };
+
+
+      const syncEmailVerification = async (silent = false) => {
+        if (!state || !window.VaultCloud?.refreshAccountVerification) return false;
+        const feedback = root.querySelector('[data-email-verification-feedback]');
+        if (!silent && feedback) feedback.textContent = 'Conferindo a verificação no Google…';
+        try {
+          const result = await window.VaultCloud.refreshAccountVerification();
+          if (!state) return false;
+          if (result?.scores) state.profile.scores = { ...state.profile.scores, ...result.scores };
+          state.profile.emailVerified = result?.verified === true;
+          renderAccountSecurity();
+          if (!silent && feedback) {
+            feedback.textContent = result?.verified
+              ? (result?.awarded ? 'Gmail verificado. +5 pontos adicionados ao seu Score de segurança.' : 'Seu Gmail já está verificado.')
+              : 'A verificação ainda não foi concluída. Abra o e-mail recebido e clique no link.';
+            feedback.dataset.state = result?.verified ? 'success' : 'neutral';
+          }
+          return result?.verified === true;
+        } catch (error) {
+          if (!silent && feedback) {
+            feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível conferir a verificação agora.';
+            feedback.dataset.state = 'error';
+          }
+          return false;
+        }
+      };
+
       const activate = (profile, items, source = 'new') => {
         state = makeState(profile, items, source);
         profileDirty = false; privacyDirty = false; clearTimeout(cloudSaveTimer); setCloudSaveState('Tudo salvo', 'saved');
@@ -1170,11 +1312,13 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         root.querySelector('[data-flexible-discounts]').checked = state.profile.proposalTerms.flexibleDiscounts;
         renderDiscountTiers();
         renderPersonalization();
+        renderAccountSecurity();
         const versionNode = root.querySelector('[data-version-number]'); if (versionNode) versionNode.textContent = String(state.profile.version);
         if (updateButton) updateButton.hidden = source === 'new';
         activeTab = 'cards'; inventoryQuery = ''; if (inventorySearch) inventorySearch.value = '';
         render();
         window.setTimeout(() => navigateAdmin('overview'), 0);
+        if (source === 'cloud') window.setTimeout(() => syncEmailVerification(true), 120);
         if (source === 'cloud' && window.VaultCloud?.listMyReceivedProposals) {
           const proposalCollectionId = state.profile.collectionId;
           window.VaultCloud.listMyReceivedProposals().then((rows) => { if (!state || state.profile.collectionId !== proposalCollectionId) return; state.receivedProposals = Array.isArray(rows) ? rows : []; state.proposalsLoaded = true; renderProposals(); }).catch(() => { if (!state || state.profile.collectionId !== proposalCollectionId) return; state.proposalsLoaded = true; state.proposalsUnavailable = true; renderProposals(); });
@@ -1334,8 +1478,7 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         root.querySelector('[data-dashboard-card-league]').textContent = prettyPrice(cardMetricTotal('leaguePrice'));
         root.querySelector('[data-dashboard-card-quick]').textContent = prettyPrice(cardMetricTotal('quickSalePrice'));
         root.querySelector('[data-dashboard-card-minimum]').textContent = prettyPrice(cardMetricTotal('minimumPrice'));
-        renderAttention();
-        renderRecentActivity();
+        renderAccountScores();
         renderSales();
         renderProposals();
         renderPersonalization();
@@ -2248,6 +2391,67 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         else { const key = clean(image.dataset.imageItemId); if (key) invalidImageKeys.add(key); image.remove(); renderAttention(); }
       }, true);
 
+
+      root.querySelector('[data-send-email-verification]')?.addEventListener('click', async (event) => {
+        if (!state || state.profile.emailVerified) return;
+        const button = event.currentTarget;
+        const feedback = root.querySelector('[data-email-verification-feedback]');
+        button.disabled = true;
+        if (feedback) { feedback.textContent = 'Enviando o e-mail de verificação…'; feedback.dataset.state = 'neutral'; }
+        try {
+          const result = await window.VaultCloud?.sendAccountVerificationEmail?.();
+          if (result?.alreadyVerified) {
+            await syncEmailVerification(false);
+          } else if (feedback) {
+            feedback.textContent = `E-mail enviado para ${result?.email || state.profile.email}. Abra a mensagem e clique no botão de verificação.`;
+            feedback.dataset.state = 'success';
+          }
+        } catch (error) {
+          if (feedback) {
+            feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível enviar a verificação.';
+            feedback.dataset.state = 'error';
+          }
+        } finally {
+          if (!state?.profile?.emailVerified) button.disabled = false;
+        }
+      });
+
+      root.querySelector('[data-check-email-verification]')?.addEventListener('click', () => syncEmailVerification(false));
+
+      root.querySelector('[data-password-change-form]')?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const feedback = root.querySelector('[data-password-change-feedback]');
+        const data = new FormData(form);
+        const currentPassword = String(data.get('currentPassword') || '');
+        const newPassword = String(data.get('newPassword') || '');
+        const confirmPassword = String(data.get('confirmPassword') || '');
+        if (feedback) { feedback.textContent = ''; feedback.dataset.state = 'neutral'; }
+        if (newPassword.length < 6) {
+          if (feedback) { feedback.textContent = 'A nova senha precisa ter pelo menos 6 caracteres.'; feedback.dataset.state = 'error'; }
+          return;
+        }
+        if (newPassword !== confirmPassword) {
+          if (feedback) { feedback.textContent = 'A confirmação não corresponde à nova senha.'; feedback.dataset.state = 'error'; }
+          return;
+        }
+        const submit = form.querySelector('button[type="submit"]');
+        if (submit) submit.disabled = true;
+        if (feedback) feedback.textContent = 'Atualizando sua senha…';
+        try {
+          await window.VaultCloud?.changeAccountPassword?.(currentPassword, newPassword);
+          form.reset();
+          if (feedback) { feedback.textContent = 'Senha alterada com sucesso.'; feedback.dataset.state = 'success'; }
+        } catch (error) {
+          if (feedback) {
+            feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível alterar a senha.';
+            feedback.dataset.state = 'error';
+          }
+        } finally {
+          if (submit) submit.disabled = false;
+        }
+      });
+
       root.querySelectorAll('[data-profile-field]').forEach((input) => input.addEventListener('input', () => {
         if (!state) return;
         const field = input.dataset.profileField;
@@ -2361,6 +2565,14 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         if (user) loadSignedUser(user);
         else showLoggedOut();
       });
+      window.addEventListener('focus', () => {
+        if (state && !state.profile.emailVerified) syncEmailVerification(true);
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && state && !state.profile.emailVerified) syncEmailVerification(true);
+      });
+
       window.addEventListener('vault:cloud-error', (event) => {
         const feedback = root.querySelector('[data-login-feedback]');
         if (feedback) feedback.textContent = event.detail?.message || 'Não foi possível conectar ao serviço. Tente novamente.';
