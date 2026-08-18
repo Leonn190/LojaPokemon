@@ -193,7 +193,7 @@ def salvar_relatorio(
         f"Preço total antigo: {_fmt(preco_antigo)}",
         f"Preço total novo: {_fmt(preco_novo)}",
         f"Variação: {_fmt(diferenca)}" + ("" if percentual is None else f" ({percentual:+.2f}%)".replace(".", ",")),
-        f"Mínimo total (50% do Menor Liga): {_fmt(minimo_total)}",
+        f"Mínimo total (50% do Menor Liga; se Venda Rápida for menor, Venda Rápida -5%): {_fmt(minimo_total)}",
         f"Venda rápida / buylist total: {_fmt(venda_rapida_total)}",
         f"Total pelo menor preço da Liga: {_fmt(menor_total)}",
         f"Total pela média da Liga: {_fmt(media_total)}",
@@ -205,7 +205,7 @@ def salvar_relatorio(
     for r in resultados:
         linhas.extend([
             f"{r.get('tipo','').upper()} | {r.get('nome')} | {r.get('id')}",
-            f"  Minimo (50% do Menor Liga): {_fmt_var(r['Minimo'])}",
+            f"  Minimo (50% do Menor Liga; ou Venda Rapida -5%): {_fmt_var(r['Minimo'])}",
             f"  Menor Liga: {_fmt_var(r['Menor Liga'])}",
             f"  Segundo Menor Liga: {_fmt_var(r['Segundo Menor Liga'])}",
             f"  Terceiro Menor Liga: {_fmt_var(r['Terceiro Menor Liga'])}",

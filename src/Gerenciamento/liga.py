@@ -1232,12 +1232,16 @@ def resumir_precos(
 
     venda_rapida = max((o["preco"] for o in compras_filtradas), default=None)
     minimo = (menor * Decimal(str(MINIMO))).quantize(Decimal("0.01")) if menor is not None else None
+    if minimo is not None and venda_rapida is not None and venda_rapida < minimo:
+        minimo = (venda_rapida * Decimal("0.95")).quantize(Decimal("0.01"))
 
     menor_coletado, segundo_menor_coletado, terceiro_menor_coletado = _menores(vendas, "preco_original")
     medio_coletado = _media(vendas, "preco_original")
     mediana_coletada = _mediana(vendas, "preco_original")
     venda_rapida_coletado = max((o.get("preco_original", o["preco"]) for o in compras_filtradas), default=None)
     minimo_coletado = (menor_coletado * Decimal(str(MINIMO))).quantize(Decimal("0.01")) if menor_coletado is not None else None
+    if minimo_coletado is not None and venda_rapida_coletado is not None and venda_rapida_coletado < minimo_coletado:
+        minimo_coletado = (venda_rapida_coletado * Decimal("0.95")).quantize(Decimal("0.01"))
 
     notas = [*notas_venda]
     notas.extend(f"buylist: {nota}" for nota in notas_compra)
@@ -1407,6 +1411,8 @@ class SessaoLiga:
             ).quantize(Decimal("0.01"))
         venda_rapida = max(valores_compra, default=None)
         minimo = (menor * Decimal(str(MINIMO))).quantize(Decimal("0.01")) if menor is not None else None
+        if minimo is not None and venda_rapida is not None and venda_rapida < minimo:
+            minimo = (venda_rapida * Decimal("0.95")).quantize(Decimal("0.01"))
 
         def quantidade_participantes(ofertas: list[dict[str, Any]]) -> int:
             chaves: set[str] = set()

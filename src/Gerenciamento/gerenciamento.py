@@ -500,6 +500,8 @@ def normalizar_carta_existente(linha: dict[str, Any]) -> dict[str, Any]:
     menor_liga = numero(carta.get("Menor Liga"))
     carta["Minimo"] = round(menor_liga * 0.50, 2) if menor_liga is not None else (numero(carta.get("Minimo")) if versao_precos >= 2 else None)
     carta["Venda Rapida"] = venda_rapida_salva if versao_precos >= 2 else (buylist_legada if buylist_legada is not None else venda_rapida_salva)
+    if carta["Minimo"] is not None and carta["Venda Rapida"] is not None and carta["Venda Rapida"] < carta["Minimo"]:
+        carta["Minimo"] = round(carta["Venda Rapida"] * 0.95, 2)
     carta["pricingSchemaVersion"] = 2
     for legado in ("Preço Médio Liga", "Preço médio Liga", "Mínimo Certeiro", "Minimo Certeiro"):
         carta.pop(legado, None)
@@ -541,6 +543,8 @@ def normalizar_booster_existente(linha: dict[str, Any]) -> dict[str, Any]:
     menor_liga = numero(booster.get("Menor Liga"))
     booster["Minimo"] = round(menor_liga * 0.50, 2) if menor_liga is not None else (numero(booster.get("Minimo")) if versao_precos >= 2 else None)
     booster["Venda Rapida"] = venda_rapida_salva if versao_precos >= 2 else (buylist_legada if buylist_legada is not None else venda_rapida_salva)
+    if booster["Minimo"] is not None and booster["Venda Rapida"] is not None and booster["Venda Rapida"] < booster["Minimo"]:
+        booster["Minimo"] = round(booster["Venda Rapida"] * 0.95, 2)
     booster["pricingSchemaVersion"] = 2
     for legado in ("Preço mínimo", "Venda rápida", "Preço Liga mais barato", "Preço médio Liga", "Preço Médio Liga", "Mínimo Certeiro", "Minimo Certeiro"):
         booster.pop(legado, None)

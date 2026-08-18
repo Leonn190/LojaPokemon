@@ -76,7 +76,7 @@ A conversão entre estados usa a diferença direta entre os fatores. Exemplo: SP
 
 As referências calculadas pelo gerenciador são:
 
-- `Minimo` = 50% do `Menor Liga`;
+- `Minimo` = 50% do `Menor Liga`; se `Venda Rapida` for menor que esse valor, passa a ser `Venda Rapida` - 5%;
 - `Menor Liga` = menor oferta compatível;
 - `Segundo Menor Liga` e `Terceiro Menor Liga` = próximas ofertas compatíveis, úteis para medir profundidade;
 - `Media Liga` = média das ofertas compatíveis;
