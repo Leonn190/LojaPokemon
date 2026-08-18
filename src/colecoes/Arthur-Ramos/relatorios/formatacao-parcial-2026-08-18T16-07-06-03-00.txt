@@ -1,0 +1,303 @@
+FORMATACAO-PARCIAL — RELATÓRIO DE EXECUÇÃO
+========================================================================================
+Início: 2026-08-18T15:34:35-03:00
+Fim: 2026-08-18T16:07:06-03:00
+Modo: Normal | Workers: 2
+Tempo total: 32m 31s (1951.396 s)
+Itens: 64 | Sucessos: 63 | Erros: 1
+Média por item concluído: 30.491 s | throughput: 1.97 itens/min
+Repetições por falha: 1 | tentativas de item: 65
+
+ITENS
+========================================================================================
+[Suspeita] CARTA | Jirachi | W1 | 76.80s
+  Liga: menor R$ 60,00 | 2º — | 3º — | média R$ 60,00 | mediana R$ 60,00 | buylist R$ 4,50
+  Mercado: vendedores 13 geral / 1 específicos | compradores 1 geral / 0 específicos
+  - Suspeita de carta mais bem conservada por preço menor
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: buylist: estado desejado D; estado encontrado M; estimativa -70.00%
+[OK] CARTA | Greninja-EX | W2 | 80.96s
+  Liga: menor R$ 9,95 | 2º R$ 10,00 | 3º R$ 11,00 | média R$ 16,80 | mediana R$ 19,00 | buylist R$ 3,00
+  Mercado: vendedores 17 geral / 9 específicos | compradores 2 geral / 0 específicos
+  Observação: buylist: estado desejado D; estado encontrado M; estimativa -70.00%
+[Suspeita] CARTA | Diancie-EX | W1 | 13.33s
+  Liga: menor R$ 30,00 | 2º — | 3º — | média R$ 30,00 | mediana R$ 30,00 | buylist R$ 24,89
+  Mercado: vendedores 6 geral / 1 específicos | compradores 13 geral / 0 específicos
+  - Suspeita de carta mais bem conservada por preço menor
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: buylist: estado desejado MP; estado encontrado M; estimativa -25.00%
+[OK] CARTA | Xerneas-EX | W2 | 37.40s
+  Liga: menor R$ 4,00 | 2º R$ 5,95 | 3º R$ 5,99 | média R$ 8,38 | mediana R$ 7,90 | buylist R$ 6,39
+  Mercado: vendedores 21 geral / 11 específicos | compradores 12 geral / 0 específicos
+  Observação: buylist: estado desejado D; estado encontrado M; estimativa -70.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[OK] CARTA | Ho-Oh-GX | W1 | 28.34s
+  Liga: menor R$ 39,89 | 2º R$ 54,90 | 3º R$ 56,80 | média R$ 56,31 | mediana R$ 56,80 | buylist R$ 28,32
+  Mercado: vendedores 17 geral / 5 específicos | compradores 15 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[Suspeita leve] CARTA | Arcanine TURBO | W1 | 10.21s
+  Liga: menor R$ 35,00 | 2º — | 3º — | média R$ 35,00 | mediana R$ 35,00 | buylist R$ 11,24
+  Mercado: vendedores 9 geral / 0 específicos | compradores 1 geral / 0 específicos
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: idioma equivalente: Inglês → Português; buylist: idioma equivalente: Inglês → Português; buylist: estado desejado MP; estado encontrado M; estimativa -25.00%
+[OK] CARTA | Venusaur-EX | W2 | 30.88s
+  Liga: menor R$ 13,09 | 2º R$ 13,90 | 3º R$ 14,00 | média R$ 14,72 | mediana R$ 14,90 | buylist R$ 17,02
+  Mercado: vendedores 19 geral / 9 específicos | compradores 23 geral / 0 específicos
+  Observação: buylist: estado desejado D; estado encontrado M; estimativa -70.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[Suspeita leve] CARTA | Lugia Luminescente | W1 | 32.09s
+  Liga: menor R$ 535,00 | 2º — | 3º — | média R$ 535,00 | mediana R$ 535,00 | buylist R$ 379,85
+  Mercado: vendedores 22 geral / 1 específicos | compradores 15 geral / 0 específicos
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Celebi Luminescente | W2 | 29.95s
+  Liga: menor R$ 185,00 | 2º R$ 199,95 | 3º — | média R$ 192,48 | mediana R$ 192,48 | buylist R$ 131,35
+  Mercado: vendedores 18 geral / 2 específicos | compradores 13 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[Suspeita leve] CARTA | Blastoise-GX | W1 | 18.95s
+  Liga: menor R$ 119,95 | 2º — | 3º — | média R$ 119,95 | mediana R$ 119,95 | buylist R$ 70,29
+  Mercado: vendedores 13 geral / 1 específicos | compradores 14 geral / 0 específicos
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Heatran-GX | W1 | 21.65s
+  Liga: menor R$ 9,50 | 2º R$ 14,00 | 3º R$ 19,98 | média R$ 15,87 | mediana R$ 16,99 | buylist R$ 6,65
+  Mercado: vendedores 12 geral / 4 específicos | compradores 14 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Darkrai-EX | W2 | 24.07s
+  Liga: menor R$ 49,90 | 2º R$ 49,90 | 3º R$ 49,90 | média R$ 49,90 | mediana R$ 49,90 | buylist R$ 35,43
+  Mercado: vendedores 16 geral / 3 específicos | compradores 15 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[Suspeita leve] CARTA | Charizard-EX | W2 | 19.59s
+  Liga: menor R$ 58,99 | 2º — | 3º — | média R$ 58,99 | mediana R$ 58,99 | buylist R$ 63,90
+  Mercado: vendedores 11 geral / 1 específicos | compradores 15 geral / 0 específicos
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: buylist: estado desejado SP; estado encontrado M; estimativa -10.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[OK] CARTA | Charizard-EX | W1 | 36.43s
+  Liga: menor R$ 29,90 | 2º R$ 29,90 | 3º R$ 38,00 | média R$ 45,25 | mediana R$ 39,90 | buylist R$ 42,39
+  Mercado: vendedores 22 geral / 12 específicos | compradores 17 geral / 0 específicos
+  Observação: buylist: estado desejado D; estado encontrado M; estimativa -70.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[Suspeita leve] CARTA | Trevenant-EX | W2 | 17.11s
+  Liga: menor R$ 11,40 | 2º — | 3º — | média R$ 11,40 | mediana R$ 11,40 | buylist R$ 9,90
+  Mercado: vendedores 7 geral / 0 específicos | compradores 16 geral / 0 específicos
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: estado desejado HP; estado encontrado D; estimativa +20.00%; buylist: idioma equivalente: Inglês → Português; buylist: estado desejado HP; estado encontrado M; estimativa -50.00%
+[Suspeita] CARTA | Chesnaught-EX | W2 | 20.76s
+  Liga: menor R$ 4,25 | 2º R$ 4,90 | 3º R$ 6,00 | média R$ 7,72 | mediana R$ 9,50 | buylist R$ 2,40
+  Mercado: vendedores 19 geral / 7 específicos | compradores 2 geral / 0 específicos
+  - Suspeita de carta igual em outra língua por preço menor
+  Observação: buylist: estado desejado D; estado encontrado M; estimativa -70.00%
+[Suspeita leve] CARTA | Marowak-GX de Alola | W2 | 13.96s
+  Liga: menor R$ 49,99 | 2º — | 3º — | média R$ 49,99 | mediana R$ 49,99 | buylist R$ 35,49
+  Mercado: vendedores 5 geral / 0 específicos | compradores 13 geral / 0 específicos
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: idioma equivalente: Inglês → Português; buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[Suspeita leve] CARTA | Venomoth-GX | W2 | 10.85s
+  Liga: menor R$ 64,99 | 2º — | 3º — | média R$ 64,99 | mediana R$ 64,99 | buylist R$ 46,14
+  Mercado: vendedores 2 geral / 1 específicos | compradores 14 geral / 0 específicos
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[Suspeita] CARTA | Charizard-EX | W1 | 53.83s
+  Liga: menor R$ 279,90 | 2º R$ 299,90 | 3º R$ 499,00 | média R$ 541,34 | mediana R$ 574,48 | buylist R$ 447,24
+  Mercado: vendedores 30 geral / 10 específicos | compradores 16 geral / 0 específicos
+  - Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente
+  Observação: buylist: estado desejado SP; estado encontrado M; estimativa -10.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[OK] CARTA | Tapu Koko-GX | W1 | 58.89s
+  Liga: menor R$ 3,29 | 2º R$ 4,90 | 3º R$ 5,00 | média R$ 7,07 | mediana R$ 6,58 | buylist R$ 2,32
+  Mercado: vendedores 36 geral / 16 específicos | compradores 14 geral / 0 específicos
+  Observação: buylist: estado desejado D; estado encontrado M; estimativa -70.00%
+[OK] CARTA | Reshiram e Charizard-GX | W2 | 89.81s
+  Liga: menor R$ 899,90 | 2º R$ 940,00 | 3º R$ 948,99 | média R$ 937,58 | mediana R$ 948,99 | buylist R$ 638,93
+  Mercado: vendedores 37 geral / 5 específicos | compradores 15 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Lara | W1 | 26.60s
+  Liga: menor R$ 220,00 | 2º R$ 229,99 | 3º R$ 239,90 | média R$ 247,22 | mediana R$ 234,94 | buylist R$ 156,20
+  Mercado: vendedores 18 geral / 4 específicos | compradores 15 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Energia de Dobra | W2 | 19.64s
+  Liga: menor R$ 17,88 | 2º R$ 35,90 | 3º R$ 39,90 | média R$ 40,59 | mediana R$ 42,40 | buylist R$ 12,69
+  Mercado: vendedores 8 geral / 6 específicos | compradores 14 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[Suspeita] CARTA | Correio de Treinadores | W1 | 29.24s
+  Liga: menor R$ 79,90 | 2º — | 3º — | média R$ 79,90 | mediana R$ 79,90 | buylist R$ 53,18
+  Mercado: vendedores 15 geral / 1 específicos | compradores 15 geral / 0 específicos
+  - Suspeita de carta igual em outra língua por preço menor
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Recuperação de Energia | W2 | 21.08s
+  Liga: menor R$ 179,99 | 2º R$ 189,90 | 3º R$ 189,95 | média R$ 186,61 | mediana R$ 189,90 | buylist R$ 126,52
+  Mercado: vendedores 10 geral / 3 específicos | compradores 16 geral / 0 específicos
+  Observação: buylist: estado desejado SP; estado encontrado M; estimativa -10.00%
+[OK] CARTA | Martelo Avançado | W1 | 25.32s
+  Liga: menor R$ 79,50 | 2º R$ 79,90 | 3º R$ 79,90 | média R$ 94,42 | mediana R$ 79,90 | buylist R$ 63,86
+  Mercado: vendedores 19 geral / 5 específicos | compradores 16 geral / 0 específicos
+  Observação: buylist: estado desejado SP; estado encontrado M; estimativa -10.00%
+[OK] CARTA | Amigos em Galar | W1 | 12.54s
+  Liga: menor R$ 110,00 | 2º R$ 119,90 | 3º R$ 119,99 | média R$ 119,96 | mediana R$ 119,94 | buylist R$ 78,10
+  Mercado: vendedores 5 geral / 4 específicos | compradores 17 geral / 0 específicos
+  Observação: buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Mawile-V | W2 | 46.68s
+  Liga: menor R$ 9,00 | 2º R$ 9,00 | 3º R$ 9,50 | média R$ 10,04 | mediana R$ 9,94 | buylist R$ 4,26
+  Mercado: vendedores 23 geral / 8 específicos | compradores 16 geral / 0 específicos
+  Observação: buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[Suspeita leve] CARTA | Absol-EX | W1 | 22.32s
+  Liga: menor R$ 19,90 | 2º — | 3º — | média R$ 19,90 | mediana R$ 19,90 | buylist R$ 15,92
+  Mercado: vendedores 16 geral / 1 específicos | compradores 13 geral / 0 específicos
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: buylist: estado desejado MP; estado encontrado M; estimativa -25.00%
+[Suspeita leve] CARTA | Swampert-EX | W1 | 24.72s
+  Liga: menor R$ 34,90 | 2º — | 3º — | média R$ 34,90 | mediana R$ 34,90 | buylist R$ 21,30
+  Mercado: vendedores 17 geral / 1 específicos | compradores 13 geral / 0 específicos
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: buylist: estado desejado MP; estado encontrado M; estimativa -25.00%
+[Suspeita] CARTA | M Absol-EX | W2 | 45.44s
+  Liga: menor R$ 74,90 | 2º R$ 99,50 | 3º R$ 100,00 | média R$ 110,84 | mediana R$ 100,00 | buylist R$ 106,45
+  Mercado: vendedores 23 geral / 5 específicos | compradores 12 geral / 0 específicos
+  - Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente
+  Observação: buylist: estado desejado MP; estado encontrado M; estimativa -25.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[OK] CARTA | Glalie-EX | W1 | 20.98s
+  Liga: menor R$ 9,80 | 2º R$ 9,90 | 3º R$ 13,00 | média R$ 12,55 | mediana R$ 11,45 | buylist R$ 7,66
+  Mercado: vendedores 11 geral / 4 específicos | compradores 15 geral / 0 específicos
+  Observação: buylist: estado desejado SP; estado encontrado M; estimativa -10.00%
+[Suspeita] CARTA | Empoleon TURBO | W2 | 44.23s
+  Liga: menor R$ 15,90 | 2º R$ 17,90 | 3º R$ 19,90 | média R$ 27,67 | mediana R$ 22,40 | buylist R$ 18,58
+  Mercado: vendedores 21 geral / 6 específicos | compradores 12 geral / 0 específicos
+  - Suspeita de carta mais bem conservada por preço menor
+  Observação: buylist: estado desejado MP; estado encontrado M; estimativa -25.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[Suspeita] CARTA | Solgaleo-GX | W2 | 39.34s
+  Liga: menor R$ 13,00 | 2º R$ 17,90 | 3º R$ 19,98 | média R$ 20,77 | mediana R$ 19,98 | buylist R$ 44,69
+  Mercado: vendedores 24 geral / 5 específicos | compradores 14 geral / 0 específicos
+  - Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente
+  Observação: buylist: estado desejado SP; estado encontrado M; estimativa -10.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[Suspeita] CARTA | Yveltal-EX | W1 | 85.65s
+  Liga: menor R$ 8,00 | 2º R$ 9,99 | 3º R$ 9,99 | média R$ 12,77 | mediana R$ 13,46 | buylist R$ 17,57
+  Mercado: vendedores 40 geral / 9 específicos | compradores 13 geral / 0 específicos
+  - Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente
+  Observação: buylist: estado desejado MP; estado encontrado M; estimativa -25.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[OK] CARTA | Cobalion-GX | W1 | 19.82s
+  Liga: menor R$ 12,50 | 2º R$ 13,00 | 3º R$ 18,00 | média R$ 20,42 | mediana R$ 19,58 | buylist R$ 9,23
+  Mercado: vendedores 13 geral / 0 específicos | compradores 25 geral / 0 específicos
+  Observação: idioma equivalente: Inglês → Português; buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[Suspeita] CARTA | Metagross-GX | W1 | 25.63s
+  Liga: menor R$ 9,00 | 2º R$ 9,75 | 3º R$ 12,90 | média R$ 11,41 | mediana R$ 11,32 | buylist R$ 4,21
+  Mercado: vendedores 22 geral / 4 específicos | compradores 14 geral / 0 específicos
+  - Suspeita de carta mais bem conservada por preço menor
+  Observação: buylist: estado desejado MP; estado encontrado M; estimativa -25.00%
+[OK] CARTA | Magearna-EX | W2 | 65.63s
+  Liga: menor R$ 7,00 | 2º R$ 8,90 | 3º R$ 9,49 | média R$ 10,01 | mediana R$ 9,90 | buylist R$ 4,97
+  Mercado: vendedores 29 geral / 7 específicos | compradores 13 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Noivern TURBO | W1 | 20.08s
+  Liga: menor R$ 6,29 | 2º R$ 25,50 | 3º R$ 50,92 | média R$ 27,57 | mediana R$ 25,50 | buylist R$ 30,35
+  Mercado: vendedores 15 geral / 0 específicos | compradores 14 geral / 0 específicos
+  Observação: estado desejado MP; estado encontrado SP; estimativa -15.00%; buylist: idioma equivalente: Inglês → Português; buylist: estado desejado MP; estado encontrado M; estimativa -25.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[Suspeita leve] CARTA | Scizor-GX | W2 | 17.82s
+  Liga: menor R$ 60,49 | 2º — | 3º — | média R$ 60,49 | mediana R$ 60,49 | buylist R$ 24,50
+  Mercado: vendedores 9 geral / 0 específicos | compradores 15 geral / 0 específicos
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: estado desejado NM; estado encontrado SP; estimativa +10.00%; buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Dragonite-EX | W1 | 13.28s
+  Liga: menor R$ 24,90 | 2º R$ 54,99 | 3º — | média R$ 39,94 | mediana R$ 39,94 | buylist R$ 8,99
+  Mercado: vendedores 11 geral / 2 específicos | compradores 1 geral / 0 específicos
+  Observação: buylist: estado desejado MP; estado encontrado M; estimativa -25.00%
+[Suspeita] CARTA | Raichu TURBO | W2 | 17.96s
+  Liga: menor R$ 29,99 | 2º R$ 49,99 | 3º — | média R$ 39,99 | mediana R$ 39,99 | buylist R$ 15,00
+  Mercado: vendedores 14 geral / 2 específicos | compradores 2 geral / 0 específicos
+  - Suspeita de carta mais bem conservada por preço menor
+  Observação: buylist: estado desejado HP; estado encontrado M; estimativa -50.00%
+[Suspeita leve] CARTA | Ampharos-EX | W2 | 15.38s
+  Liga: menor R$ 14,50 | 2º — | 3º — | média R$ 14,50 | mediana R$ 14,50 | buylist R$ 6,37
+  Mercado: vendedores 6 geral / 1 específicos | compradores 15 geral / 0 específicos
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: buylist: estado desejado D; estado encontrado M; estimativa -70.00%
+[OK] CARTA | Pikachu-EX | W1 | 35.15s
+  Liga: menor R$ 19,90 | 2º R$ 19,99 | 3º R$ 19,99 | média R$ 24,36 | mediana R$ 19,99 | buylist R$ 31,92
+  Mercado: vendedores 24 geral / 5 específicos | compradores 14 geral / 0 específicos
+  Observação: buylist: estado desejado HP; estado encontrado M; estimativa -50.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[Suspeita] CARTA | Lugia TURBO | W2 | 18.19s
+  Liga: menor R$ 29,90 | 2º R$ 37,50 | 3º R$ 69,50 | média R$ 45,63 | mediana R$ 37,50 | buylist R$ 35,78
+  Mercado: vendedores 10 geral / 3 específicos | compradores 14 geral / 0 específicos
+  - Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente
+  Observação: buylist: estado desejado SP; estado encontrado M; estimativa -10.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[OK] CARTA | Hoopa-EX | W1 | 20.13s
+  Liga: menor R$ 9,40 | 2º R$ 10,50 | 3º R$ 21,90 | média R$ 13,93 | mediana R$ 10,50 | buylist R$ 4,49
+  Mercado: vendedores 14 geral / 3 específicos | compradores 11 geral / 0 específicos
+  Observação: buylist: estado desejado SP; estado encontrado M; estimativa -10.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[OK] CARTA | Hawlucha-EX | W2 | 23.91s
+  Liga: menor R$ 6,90 | 2º R$ 11,00 | 3º R$ 12,90 | média R$ 10,27 | mediana R$ 11,00 | buylist R$ 7,43
+  Mercado: vendedores 15 geral / 3 específicos | compradores 14 geral / 0 específicos
+  Observação: buylist: estado desejado D; estado encontrado M; estimativa -70.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[OK] CARTA | Hoopa-EX | W1 | 21.85s
+  Liga: menor R$ 69,90 | 2º R$ 69,90 | 3º R$ 77,90 | média R$ 72,57 | mediana R$ 69,90 | buylist R$ 49,63
+  Mercado: vendedores 13 geral / 3 específicos | compradores 13 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | Beheeyem TURBO | W1 | 36.25s
+  Liga: menor R$ 12,00 | 2º R$ 15,00 | 3º R$ 18,90 | média R$ 18,88 | mediana R$ 18,90 | buylist R$ 9,58
+  Mercado: vendedores 20 geral / 7 específicos | compradores 13 geral / 0 específicos
+  Observação: buylist: estado desejado SP; estado encontrado M; estimativa -10.00%
+[Suspeita] CARTA | Regirock-EX | W2 | 71.20s
+  Liga: menor R$ 4,98 | 2º R$ 12,99 | 3º R$ 14,90 | média R$ 16,27 | mediana R$ 15,00 | buylist R$ 7,03
+  Mercado: vendedores 27 geral / 10 específicos | compradores 24 geral / 0 específicos
+  - Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%; buylist: buylist acima do marketplace: apenas ofertas com tag Foil consideradas
+[OK] CARTA | Lycanroc-GX | W1 | 38.16s
+  Liga: menor R$ 7,00 | 2º R$ 8,00 | 3º R$ 8,76 | média R$ 12,28 | mediana R$ 12,95 | buylist R$ 5,44
+  Mercado: vendedores 23 geral / 10 específicos | compradores 14 geral / 0 específicos
+  Observação: buylist: estado desejado SP; estado encontrado M; estimativa -10.00%
+[OK] CARTA | Espeon-GX | W1 | 23.38s
+  Liga: menor R$ 40,00 | 2º R$ 40,00 | 3º R$ 44,90 | média R$ 48,97 | mediana R$ 44,95 | buylist R$ 28,40
+  Mercado: vendedores 19 geral / 6 específicos | compradores 16 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[OK] CARTA | M Gardevoir-EX | W2 | 70.12s
+  Liga: menor R$ 97,05 | 2º R$ 104,00 | 3º R$ 105,00 | média R$ 108,17 | mediana R$ 105,00 | buylist R$ 70,15
+  Mercado: vendedores 27 geral / 5 específicos | compradores 25 geral / 0 específicos
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[Suspeita] CARTA | Gengar-EX | W2 | 31.84s
+  Liga: menor R$ 119,90 | 2º R$ 120,00 | 3º R$ 125,00 | média R$ 121,63 | mediana R$ 120,00 | buylist R$ 124,24
+  Mercado: vendedores 16 geral / 3 específicos | compradores 16 geral / 0 específicos
+  - Suspeita de carta mais bem conservada por preço menor
+  Observação: buylist: estado desejado HP; estado encontrado M; estimativa -50.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[OK] CARTA | Lucario-GX | W2 | 11.12s
+  Liga: menor R$ 27,50 | 2º R$ 29,59 | 3º — | média R$ 28,54 | mediana R$ 28,54 | buylist R$ 5,99
+  Mercado: vendedores 7 geral / 0 específicos | compradores 1 geral / 0 específicos
+  Observação: estado desejado NM; estado encontrado SP; estimativa +10.00%; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[Suspeita] CARTA | Togekiss-EX | W2 | 17.86s
+  Liga: menor R$ 18,40 | 2º R$ 21,74 | 3º R$ 22,99 | média R$ 21,04 | mediana R$ 21,74 | buylist R$ 24,28
+  Mercado: vendedores 11 geral / 0 específicos | compradores 15 geral / 0 específicos
+  - Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente
+  Observação: estado desejado SP; estado encontrado MP; estimativa +15.00%; buylist: estado desejado SP; estado encontrado M; estimativa -10.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[OK] CARTA | M Diancie-EX | W2 | 21.59s
+  Liga: menor R$ 49,99 | 2º R$ 50,00 | 3º R$ 139,99 | média R$ 79,99 | mediana R$ 50,00 | buylist R$ 14,99
+  Mercado: vendedores 16 geral / 3 específicos | compradores 2 geral / 0 específicos
+  Observação: buylist: estado desejado MP; estado encontrado M; estimativa -25.00%
+[OK] CARTA | Mewtwo-GX | W2 | 13.63s
+  Liga: menor R$ 93,49 | 2º R$ 219,89 | 3º — | média R$ 156,69 | mediana R$ 156,69 | buylist R$ 14,99
+  Mercado: vendedores 10 geral / 0 específicos | compradores 1 geral / 0 específicos
+  Observação: estado desejado NM; estado encontrado SP; estimativa +10.00%; buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[Suspeita leve] CARTA | Gardevoir-EX | W2 | 17.80s
+  Liga: menor R$ 39,90 | 2º — | 3º — | média R$ 39,90 | mediana R$ 39,90 | buylist R$ 37,28
+  Mercado: vendedores 9 geral / 1 específicos | compradores 16 geral / 0 específicos
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: buylist: estado desejado MP; estado encontrado M; estimativa -25.00%
+[OK] CARTA | Gardevoir-EX | W2 | 17.35s
+  Liga: menor R$ 24,90 | 2º R$ 28,00 | 3º R$ 29,89 | média R$ 27,60 | mediana R$ 28,00 | buylist R$ 14,91
+  Mercado: vendedores 9 geral / 3 específicos | compradores 16 geral / 0 específicos
+  Observação: buylist: estado desejado D; estado encontrado M; estimativa -70.00%
+[OK] CARTA | Gardevoir-EX | W2 | 37.17s
+  Liga: menor R$ 12,90 | 2º R$ 14,50 | 3º R$ 14,90 | média R$ 15,45 | mediana R$ 14,70 | buylist R$ 12,76
+  Mercado: vendedores 19 geral / 4 específicos | compradores 26 geral / 0 específicos
+  Observação: buylist: estado desejado D; estado encontrado M; estimativa -70.00%
+[OK] CARTA | Gardevoir-EX | W2 | 79.75s
+  Liga: menor R$ 59,90 | 2º R$ 69,90 | 3º R$ 75,00 | média R$ 103,41 | mediana R$ 94,99 | buylist R$ 95,63
+  Mercado: vendedores 33 geral / 12 específicos | compradores 16 geral / 0 específicos
+  Observação: buylist: estado desejado D; estado encontrado M; estimativa -70.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[Suspeita leve] CARTA | Groudon-EX | W2 | 26.53s
+  Liga: menor R$ 19,90 | 2º — | 3º — | média R$ 19,90 | mediana R$ 19,90 | buylist R$ 15,91
+  Mercado: vendedores 19 geral / 1 específicos | compradores 13 geral / 0 específicos
+  - Suspeita leve: apenas uma loja vende a carta compatível nessa cotação
+  Observação: buylist: estado desejado SP; estado encontrado M; estimativa -10.00%
+[ERRO] CARTA | Marshadow e Machamp-GX | W2 | 547.58s
+  Erro: A página da Liga não ficou disponível. Verifique a janela do Chrome e conclua manualmente qualquer verificação de segurança.
+
+EXTRAS
+========================================================================================
+{
+  "pendentes": 1
+}

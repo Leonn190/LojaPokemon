@@ -24,6 +24,7 @@ from configuracao import (
     FATORES_ESTADO,
     ESPERA_ESTABILIDADE_MAX,
     INTERVALO_TENTATIVA,
+    JITTER_WORKERS,
     MAX_TENTATIVAS_PAGINA,
     MINIMO,
     PASTA_IMAGENS,
@@ -1311,13 +1312,61 @@ class SessaoLiga:
     def __enter__(self) -> "SessaoLiga":
         if self.atraso_inicial:
             time.sleep(self.atraso_inicial)
+        self._abrir_chrome()
+        if USAR_OCR:
+            self._ocr = ddddocr.DdddOcr(show_ad=False, beta=True)
+        return self
+
+    def _abrir_chrome(self) -> None:
+        """Abre (ou reabre) o Chrome exclusivo deste worker."""
         print(f"[Worker {self.worker_id}] Abrindo Chrome independente...")
         self._pasta_perfil_temporario = Path(tempfile.mkdtemp(prefix=f"nexus-tcg-w{self.worker_id}-"))
         self.navegador, self.processo = abrir_navegador("about:blank", self._pasta_perfil_temporario)
         self.aba_base = self.navegador.current_window_handle
-        if USAR_OCR:
-            self._ocr = ddddocr.DdddOcr(show_ad=False, beta=True)
-        return self
+
+    def _encerrar_chrome(self) -> None:
+        """Fecha apenas Chrome/WebDriver, preservando OCR e cache do worker."""
+        if self.navegador is not None:
+            try:
+                self.navegador.quit()
+            except Exception:
+                pass
+            self.navegador = None
+        if self.processo is not None and self.processo.poll() is None:
+            try:
+                self.processo.terminate()
+                self.processo.wait(timeout=5)
+            except Exception:
+                try:
+                    self.processo.kill()
+                except Exception:
+                    pass
+        self.processo = None
+        self.aba_base = None
+        if self._pasta_perfil_temporario is not None:
+            for _ in range(5):
+                shutil.rmtree(self._pasta_perfil_temporario, ignore_errors=True)
+                if not self._pasta_perfil_temporario.exists():
+                    break
+                time.sleep(0.4)
+            self._pasta_perfil_temporario = None
+
+    def _reiniciar_chrome(self) -> None:
+        print(f"  [W{self.worker_id}] Sessão do Chrome morreu; recriando o navegador...")
+        self._encerrar_chrome()
+        self._abrir_chrome()
+
+    @staticmethod
+    def _erro_sessao_morta(erro: Exception) -> bool:
+        texto = str(erro).lower()
+        return any(termo in texto for termo in (
+            "invalid session id",
+            "session deleted",
+            "disconnected: not connected to devtools",
+            "chrome not reachable",
+            "target window already closed",
+            "no such window",
+        ))
 
     def __exit__(self, exc_type: Any, exc: Any, traceback: Any) -> None:
         self.fechar()
@@ -1355,6 +1404,12 @@ class SessaoLiga:
                 ultimo_erro = erro
                 if tentativa < TENTATIVAS:
                     print(f"  [W{self.worker_id}] Falha temporária: {erro}. Tentando novamente...")
+                    if self._erro_sessao_morta(erro):
+                        try:
+                            self._reiniciar_chrome()
+                        except Exception as erro_reinicio:
+                            ultimo_erro = erro_reinicio
+                            print(f"  [W{self.worker_id}] Falha ao recriar Chrome: {erro_reinicio}")
                     time.sleep(min(1.0, INTERVALO_TENTATIVA))
         if ultimo_erro is not None:
             raise ultimo_erro
@@ -1455,31 +1510,9 @@ class SessaoLiga:
         return resultado
 
     def fechar(self) -> None:
-        if self.navegador is not None:
-            try:
-                self.navegador.quit()
-            except Exception:
-                pass
-            self.navegador = None
-        if self.processo is not None and self.processo.poll() is None:
-            try:
-                self.processo.terminate()
-                self.processo.wait(timeout=5)
-            except Exception:
-                try:
-                    self.processo.kill()
-                except Exception:
-                    pass
-        self.processo = None
+        self._encerrar_chrome()
         self._ocr = None
         self._cache_digitos.clear()
-        if self._pasta_perfil_temporario is not None:
-            for _ in range(5):
-                shutil.rmtree(self._pasta_perfil_temporario, ignore_errors=True)
-                if not self._pasta_perfil_temporario.exists():
-                    break
-                time.sleep(0.4)
-            self._pasta_perfil_temporario = None
 
 
 def formatar_decimal_csv(valor: Decimal | None) -> str:

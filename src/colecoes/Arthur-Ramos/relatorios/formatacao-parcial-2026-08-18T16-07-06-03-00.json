@@ -1,0 +1,4086 @@
+{
+  "resumo": {
+    "iniciadoEm": "2026-08-18T15:34:35-03:00",
+    "finalizadoEm": "2026-08-18T16:07:06-03:00",
+    "modoVelocidade": "Normal",
+    "workers": 2,
+    "total": 64,
+    "concluidos": 64,
+    "sucessos": 63,
+    "erros": 1,
+    "duracaoSegundos": 1951.396,
+    "duracaoFormatada": "32m 31s",
+    "mediaSegundosPorItem": 30.491,
+    "itensPorMinuto": 1.97,
+    "repeticoes": 1,
+    "tentativasConsultaItens": 65,
+    "operacao": "formatacao-parcial",
+    "itensRegistrados": 64
+  },
+  "itens": [
+    {
+      "nome": "Jirachi",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 76.804,
+      "precos": {
+        "menor": 60.0,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 60.0,
+        "mediana": 60.0,
+        "minimo": 4.28,
+        "buylist": 4.5
+      },
+      "mercado": {
+        "vendedoresGeral": 13,
+        "vendedoresEspecificos": 1,
+        "compradoresGeral": 1,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 1
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "estado_melhor_mais_barato",
+            "mensagem": "Suspeita de carta mais bem conservada por preço menor",
+            "evidencia": {
+              "referencia": {
+                "loja": "Brandao Card Game",
+                "preco": 60.0,
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "Foil",
+                "ofertaId": "31951904",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=207836&tcg=31951904"
+              },
+              "comparacao": {
+                "loja": "Monster Games Cards",
+                "preco": 47.0,
+                "idioma": "Português",
+                "estado": "MP",
+                "extra": "",
+                "ofertaId": "46241",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=39542&tcg=46241"
+              },
+              "diferenca": 13.0
+            }
+          },
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 14,
+              "lidas": 14,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 1,
+            "lidas": 1,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 13,
+          "vendedoresEspecificos": 1,
+          "compradoresGeral": 1,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 60.0
+        }
+      },
+      "observacao": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%"
+    },
+    {
+      "nome": "Greninja-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 80.958,
+      "precos": {
+        "menor": 9.95,
+        "segundoMenor": 10.0,
+        "terceiroMenor": 11.0,
+        "media": 16.8,
+        "mediana": 19.0,
+        "minimo": 2.85,
+        "buylist": 3.0
+      },
+      "mercado": {
+        "vendedoresGeral": 17,
+        "vendedoresEspecificos": 9,
+        "compradoresGeral": 2,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 9,
+        "buylistLida": 2
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 21,
+            "lidas": 21,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 2,
+            "lidas": 2,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 17,
+          "vendedoresEspecificos": 9,
+          "compradoresGeral": 2,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 10.0,
+          "terceiroMenorLiga": 11.0,
+          "medianaLiga": 19.0
+        }
+      },
+      "observacao": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%"
+    },
+    {
+      "nome": "Diancie-EX",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 13.332,
+      "precos": {
+        "menor": 30.0,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 30.0,
+        "mediana": 30.0,
+        "minimo": 15.0,
+        "buylist": 24.89
+      },
+      "mercado": {
+        "vendedoresGeral": 6,
+        "vendedoresEspecificos": 1,
+        "compradoresGeral": 13,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 13
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "estado_melhor_mais_barato",
+            "mensagem": "Suspeita de carta mais bem conservada por preço menor",
+            "evidencia": {
+              "referencia": {
+                "loja": "Pharaohs Shop",
+                "preco": 30.0,
+                "idioma": "Português",
+                "estado": "MP",
+                "extra": "Foil",
+                "ofertaId": "31670451",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=155555&tcg=31670451"
+              },
+              "comparacao": {
+                "loja": "Platinumtcg",
+                "preco": 22.48,
+                "idioma": "Português",
+                "estado": "SP",
+                "extra": "Foil",
+                "ofertaId": "29727536",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=238651&tcg=29727536"
+              },
+              "diferenca": 7.52
+            }
+          },
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 7,
+              "lidas": 7,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 7,
+            "lidas": 7,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 13,
+            "lidas": 13,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 6,
+          "vendedoresEspecificos": 1,
+          "compradoresGeral": 13,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 30.0
+        }
+      },
+      "observacao": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%"
+    },
+    {
+      "nome": "Xerneas-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 37.396,
+      "precos": {
+        "menor": 4.0,
+        "segundoMenor": 5.95,
+        "terceiroMenor": 5.99,
+        "media": 8.38,
+        "mediana": 7.9,
+        "minimo": 2.0,
+        "buylist": 6.39
+      },
+      "mercado": {
+        "vendedoresGeral": 21,
+        "vendedoresEspecificos": 11,
+        "compradoresGeral": 12,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 11,
+        "buylistLida": 12
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 26,
+            "lidas": 26,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 12,
+            "lidas": 12,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 21,
+          "vendedoresEspecificos": 11,
+          "compradoresGeral": 12,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 5.95,
+          "terceiroMenorLiga": 5.99,
+          "medianaLiga": 7.9
+        }
+      },
+      "observacao": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Ho-Oh-GX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 28.335,
+      "precos": {
+        "menor": 39.89,
+        "segundoMenor": 54.9,
+        "terceiroMenor": 56.8,
+        "media": 56.31,
+        "mediana": 56.8,
+        "minimo": 19.94,
+        "buylist": 28.32
+      },
+      "mercado": {
+        "vendedoresGeral": 17,
+        "vendedoresEspecificos": 5,
+        "compradoresGeral": 15,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 5,
+        "buylistLida": 15
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 24,
+            "lidas": 24,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 15,
+            "lidas": 15,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 17,
+          "vendedoresEspecificos": 5,
+          "compradoresGeral": 15,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 54.9,
+          "terceiroMenorLiga": 56.8,
+          "medianaLiga": 56.8
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Arcanine TURBO",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 10.206,
+      "precos": {
+        "menor": 35.0,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 35.0,
+        "mediana": 35.0,
+        "minimo": 10.68,
+        "buylist": 11.24
+      },
+      "mercado": {
+        "vendedoresGeral": 9,
+        "vendedoresEspecificos": 0,
+        "compradoresGeral": 1,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 1
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 9,
+              "lidas": 9,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 9,
+            "lidas": 9,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 1,
+            "lidas": 1,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 9,
+          "vendedoresEspecificos": 0,
+          "compradoresGeral": 1,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 35.0
+        }
+      },
+      "observacao": "idioma equivalente: Inglês → Português; buylist: idioma equivalente: Inglês → Português; buylist: estado desejado MP; estado encontrado M; estimativa -25.00%"
+    },
+    {
+      "nome": "Venusaur-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 30.881,
+      "precos": {
+        "menor": 13.09,
+        "segundoMenor": 13.9,
+        "terceiroMenor": 14.0,
+        "media": 14.72,
+        "mediana": 14.9,
+        "minimo": 6.54,
+        "buylist": 17.02
+      },
+      "mercado": {
+        "vendedoresGeral": 19,
+        "vendedoresEspecificos": 9,
+        "compradoresGeral": 23,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 9,
+        "buylistLida": 12
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 21,
+            "lidas": 21,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 23,
+            "lidas": 23,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 19,
+          "vendedoresEspecificos": 9,
+          "compradoresGeral": 23,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 13.9,
+          "terceiroMenorLiga": 14.0,
+          "medianaLiga": 14.9
+        }
+      },
+      "observacao": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Lugia Luminescente",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 32.086,
+      "precos": {
+        "menor": 535.0,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 535.0,
+        "mediana": 535.0,
+        "minimo": 267.5,
+        "buylist": 379.85
+      },
+      "mercado": {
+        "vendedoresGeral": 22,
+        "vendedoresEspecificos": 1,
+        "compradoresGeral": 15,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 15
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 28,
+              "lidas": 28,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 28,
+            "lidas": 28,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 15,
+            "lidas": 15,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 22,
+          "vendedoresEspecificos": 1,
+          "compradoresGeral": 15,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 535.0
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Celebi Luminescente",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 29.948,
+      "precos": {
+        "menor": 185.0,
+        "segundoMenor": 199.95,
+        "terceiroMenor": null,
+        "media": 192.48,
+        "mediana": 192.48,
+        "minimo": 92.5,
+        "buylist": 131.35
+      },
+      "mercado": {
+        "vendedoresGeral": 18,
+        "vendedoresEspecificos": 2,
+        "compradoresGeral": 13,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 2,
+        "buylistLida": 13
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 21,
+            "lidas": 21,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 13,
+            "lidas": 13,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 18,
+          "vendedoresEspecificos": 2,
+          "compradoresGeral": 13,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 199.95,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 192.48
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Blastoise-GX",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 18.953,
+      "precos": {
+        "menor": 119.95,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 119.95,
+        "mediana": 119.95,
+        "minimo": 59.98,
+        "buylist": 70.29
+      },
+      "mercado": {
+        "vendedoresGeral": 13,
+        "vendedoresEspecificos": 1,
+        "compradoresGeral": 14,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 14
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 14,
+              "lidas": 14,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 13,
+          "vendedoresEspecificos": 1,
+          "compradoresGeral": 14,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 119.95
+        }
+      },
+      "observacao": "buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Heatran-GX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 21.651,
+      "precos": {
+        "menor": 9.5,
+        "segundoMenor": 14.0,
+        "terceiroMenor": 19.98,
+        "media": 15.87,
+        "mediana": 16.99,
+        "minimo": 4.75,
+        "buylist": 6.65
+      },
+      "mercado": {
+        "vendedoresGeral": 12,
+        "vendedoresEspecificos": 4,
+        "compradoresGeral": 14,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 4,
+        "buylistLida": 14
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 18,
+            "lidas": 18,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 12,
+          "vendedoresEspecificos": 4,
+          "compradoresGeral": 14,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 14.0,
+          "terceiroMenorLiga": 19.98,
+          "medianaLiga": 16.99
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Darkrai-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 24.066,
+      "precos": {
+        "menor": 49.9,
+        "segundoMenor": 49.9,
+        "terceiroMenor": 49.9,
+        "media": 49.9,
+        "mediana": 49.9,
+        "minimo": 24.95,
+        "buylist": 35.43
+      },
+      "mercado": {
+        "vendedoresGeral": 16,
+        "vendedoresEspecificos": 3,
+        "compradoresGeral": 15,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 3,
+        "buylistLida": 15
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 17,
+            "lidas": 17,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 15,
+            "lidas": 15,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 16,
+          "vendedoresEspecificos": 3,
+          "compradoresGeral": 15,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 49.9,
+          "terceiroMenorLiga": 49.9,
+          "medianaLiga": 49.9
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Charizard-EX",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 19.595,
+      "precos": {
+        "menor": 58.99,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 58.99,
+        "mediana": 58.99,
+        "minimo": 29.5,
+        "buylist": 63.9
+      },
+      "mercado": {
+        "vendedoresGeral": 11,
+        "vendedoresEspecificos": 1,
+        "compradoresGeral": 15,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 15
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 11,
+              "lidas": 11,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 11,
+            "lidas": 11,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 15,
+            "lidas": 15,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 11,
+          "vendedoresEspecificos": 1,
+          "compradoresGeral": 15,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 58.99
+        }
+      },
+      "observacao": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Charizard-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 36.434,
+      "precos": {
+        "menor": 29.9,
+        "segundoMenor": 29.9,
+        "terceiroMenor": 38.0,
+        "media": 45.25,
+        "mediana": 39.9,
+        "minimo": 14.95,
+        "buylist": 42.39
+      },
+      "mercado": {
+        "vendedoresGeral": 22,
+        "vendedoresEspecificos": 12,
+        "compradoresGeral": 17,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 13,
+        "buylistLida": 15
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 29,
+            "lidas": 29,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 17,
+            "lidas": 17,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 22,
+          "vendedoresEspecificos": 12,
+          "compradoresGeral": 17,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 29.9,
+          "terceiroMenorLiga": 38.0,
+          "medianaLiga": 39.9
+        }
+      },
+      "observacao": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Trevenant-EX",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 17.105,
+      "precos": {
+        "menor": 11.4,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 11.4,
+        "mediana": 11.4,
+        "minimo": 5.7,
+        "buylist": 9.9
+      },
+      "mercado": {
+        "vendedoresGeral": 7,
+        "vendedoresEspecificos": 0,
+        "compradoresGeral": 16,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 16
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 9,
+              "lidas": 9,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 9,
+            "lidas": 9,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 16,
+            "lidas": 16,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 7,
+          "vendedoresEspecificos": 0,
+          "compradoresGeral": 16,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 11.4
+        }
+      },
+      "observacao": "estado desejado HP; estado encontrado D; estimativa +20.00%; buylist: idioma equivalente: Inglês → Português; buylist: estado desejado HP; estado encontrado M; estimativa -50.00%"
+    },
+    {
+      "nome": "Chesnaught-EX",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 20.76,
+      "precos": {
+        "menor": 4.25,
+        "segundoMenor": 4.9,
+        "terceiroMenor": 6.0,
+        "media": 7.72,
+        "mediana": 9.5,
+        "minimo": 2.12,
+        "buylist": 2.4
+      },
+      "mercado": {
+        "vendedoresGeral": 19,
+        "vendedoresEspecificos": 7,
+        "compradoresGeral": 2,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 7,
+        "buylistLida": 2
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "outro_idioma_mais_barato",
+            "mensagem": "Suspeita de carta igual em outra língua por preço menor",
+            "evidencia": {
+              "referencia": {
+                "loja": "Coleciona Geek",
+                "preco": 4.25,
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "Foil",
+                "ofertaId": "17224579",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=459129&tcg=17224579"
+              },
+              "comparacao": {
+                "loja": "Salto Geek",
+                "preco": 4.15,
+                "idioma": "Inglês",
+                "estado": "D",
+                "extra": "Foil",
+                "ofertaId": "30105936",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=39828&tcg=30105936"
+              },
+              "diferenca": 0.1
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 20,
+            "lidas": 20,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 2,
+            "lidas": 2,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 19,
+          "vendedoresEspecificos": 7,
+          "compradoresGeral": 2,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 4.9,
+          "terceiroMenorLiga": 6.0,
+          "medianaLiga": 9.5
+        }
+      },
+      "observacao": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%"
+    },
+    {
+      "nome": "Marowak-GX de Alola",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 13.965,
+      "precos": {
+        "menor": 49.99,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 49.99,
+        "mediana": 49.99,
+        "minimo": 25.0,
+        "buylist": 35.49
+      },
+      "mercado": {
+        "vendedoresGeral": 5,
+        "vendedoresEspecificos": 0,
+        "compradoresGeral": 13,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 13
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 7,
+              "lidas": 7,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 7,
+            "lidas": 7,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 13,
+            "lidas": 13,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 5,
+          "vendedoresEspecificos": 0,
+          "compradoresGeral": 13,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 49.99
+        }
+      },
+      "observacao": "idioma equivalente: Inglês → Português; buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Venomoth-GX",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 10.854,
+      "precos": {
+        "menor": 64.99,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 64.99,
+        "mediana": 64.99,
+        "minimo": 32.5,
+        "buylist": 46.14
+      },
+      "mercado": {
+        "vendedoresGeral": 2,
+        "vendedoresEspecificos": 1,
+        "compradoresGeral": 14,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 14
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 3,
+              "lidas": 3,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 3,
+            "lidas": 3,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 2,
+          "vendedoresEspecificos": 1,
+          "compradoresGeral": 14,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 64.99
+        }
+      },
+      "observacao": "buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Charizard-EX",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 53.832,
+      "precos": {
+        "menor": 279.9,
+        "segundoMenor": 299.9,
+        "terceiroMenor": 499.0,
+        "media": 541.34,
+        "mediana": 574.48,
+        "minimo": 139.95,
+        "buylist": 447.24
+      },
+      "mercado": {
+        "vendedoresGeral": 30,
+        "vendedoresEspecificos": 10,
+        "compradoresGeral": 16,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 10,
+        "buylistLida": 15
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "buylist_acima_marketplace",
+            "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+            "evidencia": {
+              "comparacao": "mesmo_idioma_estado_ajustado",
+              "estadoReferencia": "SP",
+              "idiomaReferencia": "Português",
+              "venda": {
+                "loja": "Triade TCG",
+                "preco": 279.9,
+                "idioma": "Português",
+                "estado": "SP",
+                "extra": "Foil",
+                "ofertaId": "32103769",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=767399&tcg=32103769"
+              },
+              "buylist": {
+                "loja": "",
+                "preco": 402.52,
+                "idioma": "Português",
+                "estado": "M",
+                "extra": "Foil",
+                "ofertaId": "24402776",
+                "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24402776"
+              },
+              "diferenca": 122.62
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 39,
+            "lidas": 39,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 16,
+            "lidas": 16,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 30,
+          "vendedoresEspecificos": 10,
+          "compradoresGeral": 16,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 299.9,
+          "terceiroMenorLiga": 499.0,
+          "medianaLiga": 574.48
+        }
+      },
+      "observacao": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Tapu Koko-GX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 58.893,
+      "precos": {
+        "menor": 3.29,
+        "segundoMenor": 4.9,
+        "terceiroMenor": 5.0,
+        "media": 7.07,
+        "mediana": 6.58,
+        "minimo": 1.64,
+        "buylist": 2.32
+      },
+      "mercado": {
+        "vendedoresGeral": 36,
+        "vendedoresEspecificos": 16,
+        "compradoresGeral": 14,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 16,
+        "buylistLida": 14
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 45,
+            "lidas": 45,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 36,
+          "vendedoresEspecificos": 16,
+          "compradoresGeral": 14,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 4.9,
+          "terceiroMenorLiga": 5.0,
+          "medianaLiga": 6.58
+        }
+      },
+      "observacao": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%"
+    },
+    {
+      "nome": "Reshiram e Charizard-GX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 89.811,
+      "precos": {
+        "menor": 899.9,
+        "segundoMenor": 940.0,
+        "terceiroMenor": 948.99,
+        "media": 937.58,
+        "mediana": 948.99,
+        "minimo": 449.95,
+        "buylist": 638.93
+      },
+      "mercado": {
+        "vendedoresGeral": 37,
+        "vendedoresEspecificos": 5,
+        "compradoresGeral": 15,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 5,
+        "buylistLida": 15
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 45,
+            "lidas": 45,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 15,
+            "lidas": 15,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 37,
+          "vendedoresEspecificos": 5,
+          "compradoresGeral": 15,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 940.0,
+          "terceiroMenorLiga": 948.99,
+          "medianaLiga": 948.99
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Lara",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 26.602,
+      "precos": {
+        "menor": 220.0,
+        "segundoMenor": 229.99,
+        "terceiroMenor": 239.9,
+        "media": 247.22,
+        "mediana": 234.94,
+        "minimo": 110.0,
+        "buylist": 156.2
+      },
+      "mercado": {
+        "vendedoresGeral": 18,
+        "vendedoresEspecificos": 4,
+        "compradoresGeral": 15,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 4,
+        "buylistLida": 15
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 21,
+            "lidas": 21,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 15,
+            "lidas": 15,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 18,
+          "vendedoresEspecificos": 4,
+          "compradoresGeral": 15,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 229.99,
+          "terceiroMenorLiga": 239.9,
+          "medianaLiga": 234.94
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Energia de Dobra",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 19.645,
+      "precos": {
+        "menor": 17.88,
+        "segundoMenor": 35.9,
+        "terceiroMenor": 39.9,
+        "media": 40.59,
+        "mediana": 42.4,
+        "minimo": 8.94,
+        "buylist": 12.69
+      },
+      "mercado": {
+        "vendedoresGeral": 8,
+        "vendedoresEspecificos": 6,
+        "compradoresGeral": 14,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 6,
+        "buylistLida": 14
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 12,
+            "lidas": 12,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 8,
+          "vendedoresEspecificos": 6,
+          "compradoresGeral": 14,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 35.9,
+          "terceiroMenorLiga": 39.9,
+          "medianaLiga": 42.4
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Correio de Treinadores",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 29.242,
+      "precos": {
+        "menor": 79.9,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 79.9,
+        "mediana": 79.9,
+        "minimo": 39.95,
+        "buylist": 53.18
+      },
+      "mercado": {
+        "vendedoresGeral": 15,
+        "vendedoresEspecificos": 1,
+        "compradoresGeral": 15,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 15
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "outro_idioma_mais_barato",
+            "mensagem": "Suspeita de carta igual em outra língua por preço menor",
+            "evidencia": {
+              "referencia": {
+                "loja": "Nerdz Cards",
+                "preco": 79.9,
+                "idioma": "Português",
+                "estado": "NM",
+                "extra": "Foil",
+                "ofertaId": "26545263",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=150020&tcg=26545263"
+              },
+              "comparacao": {
+                "loja": "SnakeTCG",
+                "preco": 74.9,
+                "idioma": "Inglês",
+                "estado": "NM",
+                "extra": "Foil",
+                "ofertaId": "31404814",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=544156&tcg=31404814"
+              },
+              "diferenca": 5.0
+            }
+          },
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 25,
+              "lidas": 25,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 25,
+            "lidas": 25,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 15,
+            "lidas": 15,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 15,
+          "vendedoresEspecificos": 1,
+          "compradoresGeral": 15,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 79.9
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Recuperação de Energia",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 21.078,
+      "precos": {
+        "menor": 179.99,
+        "segundoMenor": 189.9,
+        "terceiroMenor": 189.95,
+        "media": 186.61,
+        "mediana": 189.9,
+        "minimo": 90.0,
+        "buylist": 126.52
+      },
+      "mercado": {
+        "vendedoresGeral": 10,
+        "vendedoresEspecificos": 3,
+        "compradoresGeral": 16,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 3,
+        "buylistLida": 16
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 16,
+            "lidas": 16,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 10,
+          "vendedoresEspecificos": 3,
+          "compradoresGeral": 16,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 189.9,
+          "terceiroMenorLiga": 189.95,
+          "medianaLiga": 189.9
+        }
+      },
+      "observacao": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%"
+    },
+    {
+      "nome": "Martelo Avançado",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 25.318,
+      "precos": {
+        "menor": 79.5,
+        "segundoMenor": 79.9,
+        "terceiroMenor": 79.9,
+        "media": 94.42,
+        "mediana": 79.9,
+        "minimo": 39.75,
+        "buylist": 63.86
+      },
+      "mercado": {
+        "vendedoresGeral": 19,
+        "vendedoresEspecificos": 5,
+        "compradoresGeral": 16,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 5,
+        "buylistLida": 16
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 23,
+            "lidas": 23,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 16,
+            "lidas": 16,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 19,
+          "vendedoresEspecificos": 5,
+          "compradoresGeral": 16,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 79.9,
+          "terceiroMenorLiga": 79.9,
+          "medianaLiga": 79.9
+        }
+      },
+      "observacao": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%"
+    },
+    {
+      "nome": "Amigos em Galar",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 12.536,
+      "precos": {
+        "menor": 110.0,
+        "segundoMenor": 119.9,
+        "terceiroMenor": 119.99,
+        "media": 119.96,
+        "mediana": 119.94,
+        "minimo": 55.0,
+        "buylist": 78.1
+      },
+      "mercado": {
+        "vendedoresGeral": 5,
+        "vendedoresEspecificos": 4,
+        "compradoresGeral": 17,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 4,
+        "buylistLida": 17
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 5,
+            "lidas": 5,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 17,
+            "lidas": 17,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 5,
+          "vendedoresEspecificos": 4,
+          "compradoresGeral": 17,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 119.9,
+          "terceiroMenorLiga": 119.99,
+          "medianaLiga": 119.94
+        }
+      },
+      "observacao": "buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Mawile-V",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 46.677,
+      "precos": {
+        "menor": 9.0,
+        "segundoMenor": 9.0,
+        "terceiroMenor": 9.5,
+        "media": 10.04,
+        "mediana": 9.94,
+        "minimo": 4.05,
+        "buylist": 4.26
+      },
+      "mercado": {
+        "vendedoresGeral": 23,
+        "vendedoresEspecificos": 8,
+        "compradoresGeral": 16,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 8,
+        "buylistLida": 16
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 30,
+            "lidas": 30,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 16,
+            "lidas": 16,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 23,
+          "vendedoresEspecificos": 8,
+          "compradoresGeral": 16,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 9.0,
+          "terceiroMenorLiga": 9.5,
+          "medianaLiga": 9.94
+        }
+      },
+      "observacao": "buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Absol-EX",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 22.324,
+      "precos": {
+        "menor": 19.9,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 19.9,
+        "mediana": 19.9,
+        "minimo": 9.95,
+        "buylist": 15.92
+      },
+      "mercado": {
+        "vendedoresGeral": 16,
+        "vendedoresEspecificos": 1,
+        "compradoresGeral": 13,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 13
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 19,
+              "lidas": 19,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 19,
+            "lidas": 19,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 13,
+            "lidas": 13,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 16,
+          "vendedoresEspecificos": 1,
+          "compradoresGeral": 13,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 19.9
+        }
+      },
+      "observacao": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%"
+    },
+    {
+      "nome": "Swampert-EX",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 24.72,
+      "precos": {
+        "menor": 34.9,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 34.9,
+        "mediana": 34.9,
+        "minimo": 17.45,
+        "buylist": 21.3
+      },
+      "mercado": {
+        "vendedoresGeral": 17,
+        "vendedoresEspecificos": 1,
+        "compradoresGeral": 13,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 13
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 22,
+              "lidas": 22,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 22,
+            "lidas": 22,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 13,
+            "lidas": 13,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 17,
+          "vendedoresEspecificos": 1,
+          "compradoresGeral": 13,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 34.9
+        }
+      },
+      "observacao": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%"
+    },
+    {
+      "nome": "M Absol-EX",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 45.435,
+      "precos": {
+        "menor": 74.9,
+        "segundoMenor": 99.5,
+        "terceiroMenor": 100.0,
+        "media": 110.84,
+        "mediana": 100.0,
+        "minimo": 37.45,
+        "buylist": 106.45
+      },
+      "mercado": {
+        "vendedoresGeral": 23,
+        "vendedoresEspecificos": 5,
+        "compradoresGeral": 12,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 5,
+        "buylistLida": 12
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "buylist_acima_marketplace",
+            "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+            "evidencia": {
+              "comparacao": "mesmo_idioma_estado_ajustado",
+              "estadoReferencia": "MP",
+              "idiomaReferencia": "Português",
+              "venda": {
+                "loja": "Taverna do Colecionador",
+                "preco": 74.9,
+                "idioma": "Português",
+                "estado": "MP",
+                "extra": "Foil",
+                "ofertaId": "30750772",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=689263&tcg=30750772"
+              },
+              "buylist": {
+                "loja": "",
+                "preco": 79.84,
+                "idioma": "Português",
+                "estado": "M",
+                "extra": "Foil",
+                "ofertaId": "24402659",
+                "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24402659"
+              },
+              "diferenca": 4.94
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 29,
+            "lidas": 29,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 12,
+            "lidas": 12,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 23,
+          "vendedoresEspecificos": 5,
+          "compradoresGeral": 12,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 99.5,
+          "terceiroMenorLiga": 100.0,
+          "medianaLiga": 100.0
+        }
+      },
+      "observacao": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Glalie-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 20.979,
+      "precos": {
+        "menor": 9.8,
+        "segundoMenor": 9.9,
+        "terceiroMenor": 13.0,
+        "media": 12.55,
+        "mediana": 11.45,
+        "minimo": 4.9,
+        "buylist": 7.66
+      },
+      "mercado": {
+        "vendedoresGeral": 11,
+        "vendedoresEspecificos": 4,
+        "compradoresGeral": 15,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 4,
+        "buylistLida": 15
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 16,
+            "lidas": 16,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 15,
+            "lidas": 15,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 11,
+          "vendedoresEspecificos": 4,
+          "compradoresGeral": 15,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 9.9,
+          "terceiroMenorLiga": 13.0,
+          "medianaLiga": 11.45
+        }
+      },
+      "observacao": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%"
+    },
+    {
+      "nome": "Empoleon TURBO",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 44.231,
+      "precos": {
+        "menor": 15.9,
+        "segundoMenor": 17.9,
+        "terceiroMenor": 19.9,
+        "media": 27.67,
+        "mediana": 22.4,
+        "minimo": 7.95,
+        "buylist": 18.58
+      },
+      "mercado": {
+        "vendedoresGeral": 21,
+        "vendedoresEspecificos": 6,
+        "compradoresGeral": 12,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 6,
+        "buylistLida": 12
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "estado_melhor_mais_barato",
+            "mensagem": "Suspeita de carta mais bem conservada por preço menor",
+            "evidencia": {
+              "referencia": {
+                "loja": "KimuraCardShopping",
+                "preco": 15.9,
+                "idioma": "Português",
+                "estado": "MP",
+                "extra": "Foil",
+                "ofertaId": "31877014",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=558231&tcg=31877014"
+              },
+              "comparacao": {
+                "loja": "Coleciona Geek",
+                "preco": 15.72,
+                "idioma": "Português",
+                "estado": "SP",
+                "extra": "Foil",
+                "ofertaId": "25229826",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=459129&tcg=25229826"
+              },
+              "diferenca": 0.18
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 32,
+            "lidas": 32,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 12,
+            "lidas": 12,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 21,
+          "vendedoresEspecificos": 6,
+          "compradoresGeral": 12,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 17.9,
+          "terceiroMenorLiga": 19.9,
+          "medianaLiga": 22.4
+        }
+      },
+      "observacao": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Solgaleo-GX",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 39.345,
+      "precos": {
+        "menor": 13.0,
+        "segundoMenor": 17.9,
+        "terceiroMenor": 19.98,
+        "media": 20.77,
+        "mediana": 19.98,
+        "minimo": 6.5,
+        "buylist": 44.69
+      },
+      "mercado": {
+        "vendedoresGeral": 24,
+        "vendedoresEspecificos": 5,
+        "compradoresGeral": 14,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 5,
+        "buylistLida": 13
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "buylist_acima_marketplace",
+            "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+            "evidencia": {
+              "comparacao": "mesmo_idioma_estado_ajustado",
+              "estadoReferencia": "SP",
+              "idiomaReferencia": "Português",
+              "venda": {
+                "loja": "Geek Awards TCG",
+                "preco": 13.0,
+                "idioma": "Português",
+                "estado": "SP",
+                "extra": "Foil",
+                "ofertaId": "29162134",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=49124&tcg=29162134"
+              },
+              "buylist": {
+                "loja": "",
+                "preco": 40.22,
+                "idioma": "Português",
+                "estado": "M",
+                "extra": "Foil",
+                "ofertaId": "24403439",
+                "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24403439"
+              },
+              "diferenca": 27.22
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 28,
+            "lidas": 28,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 24,
+          "vendedoresEspecificos": 5,
+          "compradoresGeral": 14,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 17.9,
+          "terceiroMenorLiga": 19.98,
+          "medianaLiga": 19.98
+        }
+      },
+      "observacao": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Yveltal-EX",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 85.646,
+      "precos": {
+        "menor": 8.0,
+        "segundoMenor": 9.99,
+        "terceiroMenor": 9.99,
+        "media": 12.77,
+        "mediana": 13.46,
+        "minimo": 4.0,
+        "buylist": 17.57
+      },
+      "mercado": {
+        "vendedoresGeral": 40,
+        "vendedoresEspecificos": 9,
+        "compradoresGeral": 13,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 9,
+        "buylistLida": 12
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "buylist_acima_marketplace",
+            "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+            "evidencia": {
+              "comparacao": "mesmo_idioma_estado_ajustado",
+              "estadoReferencia": "MP",
+              "idiomaReferencia": "Português",
+              "venda": {
+                "loja": "Brandao Card Game",
+                "preco": 8.0,
+                "idioma": "Português",
+                "estado": "MP",
+                "extra": "Foil",
+                "ofertaId": "30839766",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=207836&tcg=30839766"
+              },
+              "buylist": {
+                "loja": "",
+                "preco": 13.18,
+                "idioma": "Português",
+                "estado": "M",
+                "extra": "Foil",
+                "ofertaId": "24402654",
+                "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24402654"
+              },
+              "diferenca": 5.18
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 50,
+            "lidas": 50,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 13,
+            "lidas": 13,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 40,
+          "vendedoresEspecificos": 9,
+          "compradoresGeral": 13,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 9.99,
+          "terceiroMenorLiga": 9.99,
+          "medianaLiga": 13.46
+        }
+      },
+      "observacao": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Cobalion-GX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 19.818,
+      "precos": {
+        "menor": 12.5,
+        "segundoMenor": 13.0,
+        "terceiroMenor": 18.0,
+        "media": 20.42,
+        "mediana": 19.58,
+        "minimo": 6.25,
+        "buylist": 9.23
+      },
+      "mercado": {
+        "vendedoresGeral": 13,
+        "vendedoresEspecificos": 0,
+        "compradoresGeral": 25,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 6,
+        "buylistLida": 25
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 25,
+            "lidas": 25,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 13,
+          "vendedoresEspecificos": 0,
+          "compradoresGeral": 25,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 13.0,
+          "terceiroMenorLiga": 18.0,
+          "medianaLiga": 19.58
+        }
+      },
+      "observacao": "idioma equivalente: Inglês → Português; buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Metagross-GX",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 25.632,
+      "precos": {
+        "menor": 9.0,
+        "segundoMenor": 9.75,
+        "terceiroMenor": 12.9,
+        "media": 11.41,
+        "mediana": 11.32,
+        "minimo": 4.0,
+        "buylist": 4.21
+      },
+      "mercado": {
+        "vendedoresGeral": 22,
+        "vendedoresEspecificos": 4,
+        "compradoresGeral": 14,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 4,
+        "buylistLida": 14
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "estado_melhor_mais_barato",
+            "mensagem": "Suspeita de carta mais bem conservada por preço menor",
+            "evidencia": {
+              "referencia": {
+                "loja": "Deck do Rei",
+                "preco": 9.0,
+                "idioma": "Português",
+                "estado": "MP",
+                "extra": "Foil",
+                "ofertaId": "28841425",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=148284&tcg=28841425"
+              },
+              "comparacao": {
+                "loja": "Top Deck TCG Store",
+                "preco": 7.9,
+                "idioma": "Português",
+                "estado": "NM",
+                "extra": "Foil",
+                "ofertaId": "32355970",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=82783&tcg=32355970"
+              },
+              "diferenca": 1.1
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 25,
+            "lidas": 25,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 22,
+          "vendedoresEspecificos": 4,
+          "compradoresGeral": 14,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 9.75,
+          "terceiroMenorLiga": 12.9,
+          "medianaLiga": 11.32
+        }
+      },
+      "observacao": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%"
+    },
+    {
+      "nome": "Magearna-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 65.632,
+      "precos": {
+        "menor": 7.0,
+        "segundoMenor": 8.9,
+        "terceiroMenor": 9.49,
+        "media": 10.01,
+        "mediana": 9.9,
+        "minimo": 3.5,
+        "buylist": 4.97
+      },
+      "mercado": {
+        "vendedoresGeral": 29,
+        "vendedoresEspecificos": 7,
+        "compradoresGeral": 13,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 7,
+        "buylistLida": 13
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 39,
+            "lidas": 39,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 13,
+            "lidas": 13,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 29,
+          "vendedoresEspecificos": 7,
+          "compradoresGeral": 13,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 8.9,
+          "terceiroMenorLiga": 9.49,
+          "medianaLiga": 9.9
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Noivern TURBO",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 20.083,
+      "precos": {
+        "menor": 6.29,
+        "segundoMenor": 25.5,
+        "terceiroMenor": 50.92,
+        "media": 27.57,
+        "mediana": 25.5,
+        "minimo": 3.14,
+        "buylist": 30.35
+      },
+      "mercado": {
+        "vendedoresGeral": 15,
+        "vendedoresEspecificos": 0,
+        "compradoresGeral": 14,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 3,
+        "buylistLida": 14
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 17,
+            "lidas": 17,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 15,
+          "vendedoresEspecificos": 0,
+          "compradoresGeral": 14,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 25.5,
+          "terceiroMenorLiga": 50.92,
+          "medianaLiga": 25.5
+        }
+      },
+      "observacao": "estado desejado MP; estado encontrado SP; estimativa -15.00%; buylist: idioma equivalente: Inglês → Português; buylist: estado desejado MP; estado encontrado M; estimativa -25.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Scizor-GX",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 17.82,
+      "precos": {
+        "menor": 60.49,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 60.49,
+        "mediana": 60.49,
+        "minimo": 23.28,
+        "buylist": 24.5
+      },
+      "mercado": {
+        "vendedoresGeral": 9,
+        "vendedoresEspecificos": 0,
+        "compradoresGeral": 15,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 15
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 10,
+              "lidas": 10,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 10,
+            "lidas": 10,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 15,
+            "lidas": 15,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 9,
+          "vendedoresEspecificos": 0,
+          "compradoresGeral": 15,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 60.49
+        }
+      },
+      "observacao": "estado desejado NM; estado encontrado SP; estimativa +10.00%; buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Dragonite-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 13.283,
+      "precos": {
+        "menor": 24.9,
+        "segundoMenor": 54.99,
+        "terceiroMenor": null,
+        "media": 39.94,
+        "mediana": 39.94,
+        "minimo": 8.54,
+        "buylist": 8.99
+      },
+      "mercado": {
+        "vendedoresGeral": 11,
+        "vendedoresEspecificos": 2,
+        "compradoresGeral": 1,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 2,
+        "buylistLida": 1
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 13,
+            "lidas": 13,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 1,
+            "lidas": 1,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 11,
+          "vendedoresEspecificos": 2,
+          "compradoresGeral": 1,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 54.99,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 39.94
+        }
+      },
+      "observacao": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%"
+    },
+    {
+      "nome": "Raichu TURBO",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 17.961,
+      "precos": {
+        "menor": 29.99,
+        "segundoMenor": 49.99,
+        "terceiroMenor": null,
+        "media": 39.99,
+        "mediana": 39.99,
+        "minimo": 15.0,
+        "buylist": 15.0
+      },
+      "mercado": {
+        "vendedoresGeral": 14,
+        "vendedoresEspecificos": 2,
+        "compradoresGeral": 2,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 2,
+        "buylistLida": 2
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "estado_melhor_mais_barato",
+            "mensagem": "Suspeita de carta mais bem conservada por preço menor",
+            "evidencia": {
+              "referencia": {
+                "loja": "Salvaiastore",
+                "preco": 29.99,
+                "idioma": "Português",
+                "estado": "HP",
+                "extra": "Foil",
+                "ofertaId": "26226694",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=145199&tcg=26226694"
+              },
+              "comparacao": {
+                "loja": "Brandao Card Game",
+                "preco": 29.9,
+                "idioma": "Português",
+                "estado": "MP",
+                "extra": "Foil",
+                "ofertaId": "30652506",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=207836&tcg=30652506"
+              },
+              "diferenca": 0.09
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 15,
+            "lidas": 15,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 2,
+            "lidas": 2,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 14,
+          "vendedoresEspecificos": 2,
+          "compradoresGeral": 2,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 49.99,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 39.99
+        }
+      },
+      "observacao": "buylist: estado desejado HP; estado encontrado M; estimativa -50.00%"
+    },
+    {
+      "nome": "Ampharos-EX",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 15.382,
+      "precos": {
+        "menor": 14.5,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 14.5,
+        "mediana": 14.5,
+        "minimo": 6.05,
+        "buylist": 6.37
+      },
+      "mercado": {
+        "vendedoresGeral": 6,
+        "vendedoresEspecificos": 1,
+        "compradoresGeral": 15,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 15
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 8,
+              "lidas": 8,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 8,
+            "lidas": 8,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 15,
+            "lidas": 15,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 6,
+          "vendedoresEspecificos": 1,
+          "compradoresGeral": 15,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 14.5
+        }
+      },
+      "observacao": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%"
+    },
+    {
+      "nome": "Pikachu-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 35.148,
+      "precos": {
+        "menor": 19.9,
+        "segundoMenor": 19.99,
+        "terceiroMenor": 19.99,
+        "media": 24.36,
+        "mediana": 19.99,
+        "minimo": 9.95,
+        "buylist": 31.92
+      },
+      "mercado": {
+        "vendedoresGeral": 24,
+        "vendedoresEspecificos": 5,
+        "compradoresGeral": 14,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 5,
+        "buylistLida": 13
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 29,
+            "lidas": 29,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 24,
+          "vendedoresEspecificos": 5,
+          "compradoresGeral": 14,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 19.99,
+          "terceiroMenorLiga": 19.99,
+          "medianaLiga": 19.99
+        }
+      },
+      "observacao": "buylist: estado desejado HP; estado encontrado M; estimativa -50.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Lugia TURBO",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 18.194,
+      "precos": {
+        "menor": 29.9,
+        "segundoMenor": 37.5,
+        "terceiroMenor": 69.5,
+        "media": 45.63,
+        "mediana": 37.5,
+        "minimo": 14.95,
+        "buylist": 35.78
+      },
+      "mercado": {
+        "vendedoresGeral": 10,
+        "vendedoresEspecificos": 3,
+        "compradoresGeral": 14,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 3,
+        "buylistLida": 14
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "buylist_acima_marketplace",
+            "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+            "evidencia": {
+              "comparacao": "mesmo_idioma_estado_ajustado",
+              "estadoReferencia": "SP",
+              "idiomaReferencia": "Português",
+              "venda": {
+                "loja": "XPlace",
+                "preco": 29.9,
+                "idioma": "Português",
+                "estado": "SP",
+                "extra": "Foil",
+                "ofertaId": "21949859",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=32035&tcg=21949859"
+              },
+              "buylist": {
+                "loja": "",
+                "preco": 32.2,
+                "idioma": "Português",
+                "estado": "M",
+                "extra": "Foil",
+                "ofertaId": "24422829",
+                "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24422829"
+              },
+              "diferenca": 2.3
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 11,
+            "lidas": 11,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 10,
+          "vendedoresEspecificos": 3,
+          "compradoresGeral": 14,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 37.5,
+          "terceiroMenorLiga": 69.5,
+          "medianaLiga": 37.5
+        }
+      },
+      "observacao": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Hoopa-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 20.131,
+      "precos": {
+        "menor": 9.4,
+        "segundoMenor": 10.5,
+        "terceiroMenor": 21.9,
+        "media": 13.93,
+        "mediana": 10.5,
+        "minimo": 4.27,
+        "buylist": 4.49
+      },
+      "mercado": {
+        "vendedoresGeral": 14,
+        "vendedoresEspecificos": 3,
+        "compradoresGeral": 11,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 3,
+        "buylistLida": 1
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 17,
+            "lidas": 17,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 11,
+            "lidas": 11,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 14,
+          "vendedoresEspecificos": 3,
+          "compradoresGeral": 11,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 10.5,
+          "terceiroMenorLiga": 21.9,
+          "medianaLiga": 10.5
+        }
+      },
+      "observacao": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Hawlucha-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 23.908,
+      "precos": {
+        "menor": 6.9,
+        "segundoMenor": 11.0,
+        "terceiroMenor": 12.9,
+        "media": 10.27,
+        "mediana": 11.0,
+        "minimo": 3.45,
+        "buylist": 7.43
+      },
+      "mercado": {
+        "vendedoresGeral": 15,
+        "vendedoresEspecificos": 3,
+        "compradoresGeral": 14,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 3,
+        "buylistLida": 14
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 15,
+            "lidas": 15,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 15,
+          "vendedoresEspecificos": 3,
+          "compradoresGeral": 14,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 11.0,
+          "terceiroMenorLiga": 12.9,
+          "medianaLiga": 11.0
+        }
+      },
+      "observacao": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Hoopa-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 21.848,
+      "precos": {
+        "menor": 69.9,
+        "segundoMenor": 69.9,
+        "terceiroMenor": 77.9,
+        "media": 72.57,
+        "mediana": 69.9,
+        "minimo": 34.95,
+        "buylist": 49.63
+      },
+      "mercado": {
+        "vendedoresGeral": 13,
+        "vendedoresEspecificos": 3,
+        "compradoresGeral": 13,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 3,
+        "buylistLida": 13
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 18,
+            "lidas": 18,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 13,
+            "lidas": 13,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 13,
+          "vendedoresEspecificos": 3,
+          "compradoresGeral": 13,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 69.9,
+          "terceiroMenorLiga": 77.9,
+          "medianaLiga": 69.9
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Beheeyem TURBO",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 36.25,
+      "precos": {
+        "menor": 12.0,
+        "segundoMenor": 15.0,
+        "terceiroMenor": 18.9,
+        "media": 18.88,
+        "mediana": 18.9,
+        "minimo": 6.0,
+        "buylist": 9.58
+      },
+      "mercado": {
+        "vendedoresGeral": 20,
+        "vendedoresEspecificos": 7,
+        "compradoresGeral": 13,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 7,
+        "buylistLida": 13
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 32,
+            "lidas": 32,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 13,
+            "lidas": 13,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 20,
+          "vendedoresEspecificos": 7,
+          "compradoresGeral": 13,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 15.0,
+          "terceiroMenorLiga": 18.9,
+          "medianaLiga": 18.9
+        }
+      },
+      "observacao": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%"
+    },
+    {
+      "nome": "Regirock-EX",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 71.205,
+      "precos": {
+        "menor": 4.98,
+        "segundoMenor": 12.99,
+        "terceiroMenor": 14.9,
+        "media": 16.27,
+        "mediana": 15.0,
+        "minimo": 2.49,
+        "buylist": 7.03
+      },
+      "mercado": {
+        "vendedoresGeral": 27,
+        "vendedoresEspecificos": 10,
+        "compradoresGeral": 24,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 10,
+        "buylistLida": 14
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "buylist_acima_marketplace",
+            "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+            "evidencia": {
+              "comparacao": "mesmo_idioma_estado_ajustado",
+              "estadoReferencia": "NM",
+              "idiomaReferencia": "Português",
+              "venda": {
+                "loja": "Capital Cards",
+                "preco": 4.98,
+                "idioma": "Português",
+                "estado": "NM",
+                "extra": "",
+                "ofertaId": "31339593",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=785365&tcg=31339593"
+              },
+              "buylist": {
+                "loja": "",
+                "preco": 7.03,
+                "idioma": "Português",
+                "estado": "M",
+                "extra": "Foil",
+                "ofertaId": "24422839",
+                "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24422839"
+              },
+              "diferenca": 2.05
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 38,
+            "lidas": 38,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 24,
+            "lidas": 24,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 27,
+          "vendedoresEspecificos": 10,
+          "compradoresGeral": 24,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 12.99,
+          "terceiroMenorLiga": 14.9,
+          "medianaLiga": 15.0
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%; buylist: buylist acima do marketplace: apenas ofertas com tag Foil consideradas"
+    },
+    {
+      "nome": "Lycanroc-GX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 38.162,
+      "precos": {
+        "menor": 7.0,
+        "segundoMenor": 8.0,
+        "terceiroMenor": 8.76,
+        "media": 12.28,
+        "mediana": 12.95,
+        "minimo": 3.5,
+        "buylist": 5.44
+      },
+      "mercado": {
+        "vendedoresGeral": 23,
+        "vendedoresEspecificos": 10,
+        "compradoresGeral": 14,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 10,
+        "buylistLida": 14
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 33,
+            "lidas": 33,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 14,
+            "lidas": 14,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 23,
+          "vendedoresEspecificos": 10,
+          "compradoresGeral": 14,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 8.0,
+          "terceiroMenorLiga": 8.76,
+          "medianaLiga": 12.95
+        }
+      },
+      "observacao": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%"
+    },
+    {
+      "nome": "Espeon-GX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 23.381,
+      "precos": {
+        "menor": 40.0,
+        "segundoMenor": 40.0,
+        "terceiroMenor": 44.9,
+        "media": 48.97,
+        "mediana": 44.95,
+        "minimo": 20.0,
+        "buylist": 28.4
+      },
+      "mercado": {
+        "vendedoresGeral": 19,
+        "vendedoresEspecificos": 6,
+        "compradoresGeral": 16,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 6,
+        "buylistLida": 16
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 21,
+            "lidas": 21,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 16,
+            "lidas": 16,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 19,
+          "vendedoresEspecificos": 6,
+          "compradoresGeral": 16,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 40.0,
+          "terceiroMenorLiga": 44.9,
+          "medianaLiga": 44.95
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "M Gardevoir-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 70.117,
+      "precos": {
+        "menor": 97.05,
+        "segundoMenor": 104.0,
+        "terceiroMenor": 105.0,
+        "media": 108.17,
+        "mediana": 105.0,
+        "minimo": 48.52,
+        "buylist": 70.15
+      },
+      "mercado": {
+        "vendedoresGeral": 27,
+        "vendedoresEspecificos": 5,
+        "compradoresGeral": 25,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 5,
+        "buylistLida": 25
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 38,
+            "lidas": 38,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 25,
+            "lidas": 25,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 27,
+          "vendedoresEspecificos": 5,
+          "compradoresGeral": 25,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 104.0,
+          "terceiroMenorLiga": 105.0,
+          "medianaLiga": 105.0
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Gengar-EX",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 31.84,
+      "precos": {
+        "menor": 119.9,
+        "segundoMenor": 120.0,
+        "terceiroMenor": 125.0,
+        "media": 121.63,
+        "mediana": 120.0,
+        "minimo": 59.95,
+        "buylist": 124.24
+      },
+      "mercado": {
+        "vendedoresGeral": 16,
+        "vendedoresEspecificos": 3,
+        "compradoresGeral": 16,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 3,
+        "buylistLida": 16
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "estado_melhor_mais_barato",
+            "mensagem": "Suspeita de carta mais bem conservada por preço menor",
+            "evidencia": {
+              "referencia": {
+                "loja": "Barão Geek House",
+                "preco": 119.9,
+                "idioma": "Português",
+                "estado": "HP",
+                "extra": "Foil",
+                "ofertaId": "29201473",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=27364&tcg=29201473"
+              },
+              "comparacao": {
+                "loja": "Zard Point",
+                "preco": 99.1,
+                "idioma": "Português",
+                "estado": "MP",
+                "extra": "Foil",
+                "ofertaId": "30889368",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=696686&tcg=30889368"
+              },
+              "diferenca": 20.8
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 23,
+            "lidas": 23,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 16,
+            "lidas": 16,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 16,
+          "vendedoresEspecificos": 3,
+          "compradoresGeral": 16,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 120.0,
+          "terceiroMenorLiga": 125.0,
+          "medianaLiga": 120.0
+        }
+      },
+      "observacao": "buylist: estado desejado HP; estado encontrado M; estimativa -50.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Lucario-GX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 11.116,
+      "precos": {
+        "menor": 27.5,
+        "segundoMenor": 29.59,
+        "terceiroMenor": null,
+        "media": 28.54,
+        "mediana": 28.54,
+        "minimo": 5.69,
+        "buylist": 5.99
+      },
+      "mercado": {
+        "vendedoresGeral": 7,
+        "vendedoresEspecificos": 0,
+        "compradoresGeral": 1,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 2,
+        "buylistLida": 1
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 9,
+            "lidas": 9,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 1,
+            "lidas": 1,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 7,
+          "vendedoresEspecificos": 0,
+          "compradoresGeral": 1,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 29.59,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 28.54
+        }
+      },
+      "observacao": "estado desejado NM; estado encontrado SP; estimativa +10.00%; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Togekiss-EX",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 17.864,
+      "precos": {
+        "menor": 18.4,
+        "segundoMenor": 21.74,
+        "terceiroMenor": 22.99,
+        "media": 21.04,
+        "mediana": 21.74,
+        "minimo": 9.2,
+        "buylist": 24.28
+      },
+      "mercado": {
+        "vendedoresGeral": 11,
+        "vendedoresEspecificos": 0,
+        "compradoresGeral": 15,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 3,
+        "buylistLida": 15
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "buylist_acima_marketplace",
+            "mensagem": "Suspeita: após ajustar os estados, uma buylist fica acima de uma oferta de venda equivalente",
+            "evidencia": {
+              "comparacao": "mesmo_idioma_estado_ajustado",
+              "estadoReferencia": "SP",
+              "idiomaReferencia": "Português",
+              "venda": {
+                "loja": "Ludo Quest",
+                "preco": 21.16,
+                "idioma": "Português",
+                "estado": "MP",
+                "extra": "Foil",
+                "ofertaId": "28969490",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=177650&tcg=28969490"
+              },
+              "buylist": {
+                "loja": "",
+                "preco": 21.85,
+                "idioma": "Português",
+                "estado": "M",
+                "extra": "Foil",
+                "ofertaId": "24422630",
+                "linkLoja": "https://www.ligapokemon.com.br/b/?bl=24422630"
+              },
+              "diferenca": 0.69
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 12,
+            "lidas": 12,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 15,
+            "lidas": 15,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 11,
+          "vendedoresEspecificos": 0,
+          "compradoresGeral": 15,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 21.74,
+          "terceiroMenorLiga": 22.99,
+          "medianaLiga": 21.74
+        }
+      },
+      "observacao": "estado desejado SP; estado encontrado MP; estimativa +15.00%; buylist: estado desejado SP; estado encontrado M; estimativa -10.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "M Diancie-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 21.593,
+      "precos": {
+        "menor": 49.99,
+        "segundoMenor": 50.0,
+        "terceiroMenor": 139.99,
+        "media": 79.99,
+        "mediana": 50.0,
+        "minimo": 14.24,
+        "buylist": 14.99
+      },
+      "mercado": {
+        "vendedoresGeral": 16,
+        "vendedoresEspecificos": 3,
+        "compradoresGeral": 2,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 3,
+        "buylistLida": 2
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 18,
+            "lidas": 18,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 2,
+            "lidas": 2,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 16,
+          "vendedoresEspecificos": 3,
+          "compradoresGeral": 2,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 50.0,
+          "terceiroMenorLiga": 139.99,
+          "medianaLiga": 50.0
+        }
+      },
+      "observacao": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%"
+    },
+    {
+      "nome": "Mewtwo-GX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 13.628,
+      "precos": {
+        "menor": 93.49,
+        "segundoMenor": 219.89,
+        "terceiroMenor": null,
+        "media": 156.69,
+        "mediana": 156.69,
+        "minimo": 14.24,
+        "buylist": 14.99
+      },
+      "mercado": {
+        "vendedoresGeral": 10,
+        "vendedoresEspecificos": 0,
+        "compradoresGeral": 1,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 2,
+        "buylistLida": 1
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 11,
+            "lidas": 11,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 1,
+            "lidas": 1,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 10,
+          "vendedoresEspecificos": 0,
+          "compradoresGeral": 1,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 219.89,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 156.69
+        }
+      },
+      "observacao": "estado desejado NM; estado encontrado SP; estimativa +10.00%; buylist: idioma equivalente: Inglês → Português; buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Gardevoir-EX",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 17.797,
+      "precos": {
+        "menor": 39.9,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 39.9,
+        "mediana": 39.9,
+        "minimo": 19.95,
+        "buylist": 37.28
+      },
+      "mercado": {
+        "vendedoresGeral": 9,
+        "vendedoresEspecificos": 1,
+        "compradoresGeral": 16,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 16
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 10,
+              "lidas": 10,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 10,
+            "lidas": 10,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 16,
+            "lidas": 16,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 9,
+          "vendedoresEspecificos": 1,
+          "compradoresGeral": 16,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 39.9
+        }
+      },
+      "observacao": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%"
+    },
+    {
+      "nome": "Gardevoir-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 17.35,
+      "precos": {
+        "menor": 24.9,
+        "segundoMenor": 28.0,
+        "terceiroMenor": 29.89,
+        "media": 27.6,
+        "mediana": 28.0,
+        "minimo": 12.45,
+        "buylist": 14.91
+      },
+      "mercado": {
+        "vendedoresGeral": 9,
+        "vendedoresEspecificos": 3,
+        "compradoresGeral": 16,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 3,
+        "buylistLida": 16
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 10,
+            "lidas": 10,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 16,
+            "lidas": 16,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 9,
+          "vendedoresEspecificos": 3,
+          "compradoresGeral": 16,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 28.0,
+          "terceiroMenorLiga": 29.89,
+          "medianaLiga": 28.0
+        }
+      },
+      "observacao": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%"
+    },
+    {
+      "nome": "Gardevoir-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 37.166,
+      "precos": {
+        "menor": 12.9,
+        "segundoMenor": 14.5,
+        "terceiroMenor": 14.9,
+        "media": 15.45,
+        "mediana": 14.7,
+        "minimo": 6.45,
+        "buylist": 12.76
+      },
+      "mercado": {
+        "vendedoresGeral": 19,
+        "vendedoresEspecificos": 4,
+        "compradoresGeral": 26,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 4,
+        "buylistLida": 26
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 23,
+            "lidas": 23,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 26,
+            "lidas": 26,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 19,
+          "vendedoresEspecificos": 4,
+          "compradoresGeral": 26,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 14.5,
+          "terceiroMenorLiga": 14.9,
+          "medianaLiga": 14.7
+        }
+      },
+      "observacao": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%"
+    },
+    {
+      "nome": "Gardevoir-EX",
+      "tipo": "carta",
+      "status": "OK",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 79.752,
+      "precos": {
+        "menor": 59.9,
+        "segundoMenor": 69.9,
+        "terceiroMenor": 75.0,
+        "media": 103.41,
+        "mediana": 94.99,
+        "minimo": 29.95,
+        "buylist": 95.63
+      },
+      "mercado": {
+        "vendedoresGeral": 33,
+        "vendedoresEspecificos": 12,
+        "compradoresGeral": 16,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 13,
+        "buylistLida": 16
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "OK",
+        "motivos": [],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 41,
+            "lidas": 41,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 16,
+            "lidas": 16,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 33,
+          "vendedoresEspecificos": 12,
+          "compradoresGeral": 16,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 69.9,
+          "terceiroMenorLiga": 75.0,
+          "medianaLiga": 94.99
+        }
+      },
+      "observacao": "buylist: estado desejado D; estado encontrado M; estimativa -70.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Groudon-EX",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 26.528,
+      "precos": {
+        "menor": 19.9,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 19.9,
+        "mediana": 19.9,
+        "minimo": 9.95,
+        "buylist": 15.91
+      },
+      "mercado": {
+        "vendedoresGeral": 19,
+        "vendedoresEspecificos": 1,
+        "compradoresGeral": 13,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 13
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "uma_oferta",
+            "mensagem": "Suspeita leve: apenas uma loja vende a carta compatível nessa cotação",
+            "evidencia": {
+              "ofertasCompativeis": 1,
+              "detectadas": 21,
+              "lidas": 21,
+              "falhas": 0,
+              "erros": []
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 21,
+            "lidas": 21,
+            "falhas": 0,
+            "erros": []
+          },
+          "buylist": {
+            "detectadas": 13,
+            "lidas": 13,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 19,
+          "vendedoresEspecificos": 1,
+          "compradoresGeral": 13,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 19.9
+        }
+      },
+      "observacao": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%"
+    },
+    {
+      "nome": "Marshadow e Machamp-GX",
+      "tipo": "carta",
+      "status": "ERRO",
+      "erro": "A página da Liga não ficou disponível. Verifique a janela do Chrome e conclua manualmente qualquer verificação de segurança.",
+      "worker": 2,
+      "duracaoSegundos": 547.58,
+      "precos": {
+        "menor": null,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": null,
+        "mediana": null,
+        "minimo": null,
+        "buylist": null
+      },
+      "mercado": {
+        "vendedoresGeral": 0,
+        "vendedoresEspecificos": 0,
+        "compradoresGeral": 0,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 0,
+        "buylistLida": 0
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {},
+      "observacao": ""
+    }
+  ],
+  "extras": {
+    "pendentes": 1
+  }
+}
