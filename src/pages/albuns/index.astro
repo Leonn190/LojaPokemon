@@ -10,7 +10,18 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   </section>
 
   <section class="shell albums-catalog" data-online-albums>
-    <div class="albums-catalog-toolbar"><label><span>⌕</span><input type="search" placeholder="Buscar álbum ou colecionador..." data-album-search /></label><strong data-album-count aria-live="polite">—</strong></div>
+    <div class="explore-search-stack" data-reveal>
+      <div class="explore-search-toolbar">
+        <div class="search-control explore-main-search"><label for="album-search">Pesquisar álbuns</label><div class="search-input-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg><input id="album-search" type="search" placeholder="Buscar álbum ou colecionador..." data-album-search /><kbd>/</kbd></div></div>
+        <button class="explore-toolbar-button" type="button" data-album-filter-toggle aria-expanded="false"><span aria-hidden="true">☷</span><strong>Filtros</strong><i data-album-filter-indicator hidden></i></button>
+        <div class="select-control explore-sort-control"><label>Ordenar</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">↕</span><select data-album-sort><option value="name">Nome A–Z</option><option value="name-desc">Nome Z–A</option><option value="filled-desc">Mais preenchidos</option><option value="filled-asc">Menos preenchidos</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+      </div>
+      <div class="explore-filter-drawer compact-explore-filters" data-album-filter-drawer hidden>
+        <div class="select-control" data-album-owner-wrap hidden><label>Colecionador</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◎</span><select data-album-owner><option value="">Todos</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+        <button class="clear-button explore-clear-filters" type="button" data-album-clear-filters>Limpar filtros</button>
+      </div>
+    </div>
+    <div class="albums-catalog-summary"><strong data-album-count aria-live="polite">—</strong></div>
     <div class="album-skeleton-grid" data-album-skeleton aria-hidden="true">
       {Array.from({ length: 6 }, () => <article class="album-skeleton-card"><div class="album-skeleton-cover skeleton-pulse"></div><div><i class="skeleton-pulse"></i><b class="skeleton-pulse"></b><span class="skeleton-pulse"></span><span class="skeleton-pulse short"></span></div></article>)}
     </div>
@@ -26,6 +37,13 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     if (root) {
       const input = root.querySelector<HTMLInputElement>('[data-album-search]');
       const grid = root.querySelector<HTMLElement>('[data-album-grid]');
+      const filterToggle = root.querySelector<HTMLButtonElement>('[data-album-filter-toggle]');
+      const filterDrawer = root.querySelector<HTMLElement>('[data-album-filter-drawer]');
+      const filterIndicator = root.querySelector<HTMLElement>('[data-album-filter-indicator]');
+      const ownerFilter = root.querySelector<HTMLSelectElement>('[data-album-owner]');
+      const ownerWrap = root.querySelector<HTMLElement>('[data-album-owner-wrap]');
+      const sort = root.querySelector<HTMLSelectElement>('[data-album-sort]');
+      const clearFilters = root.querySelector<HTMLButtonElement>('[data-album-clear-filters]');
       const skeleton = root.querySelector<HTMLElement>('[data-album-skeleton]');
       const sentinel = root.querySelector<HTMLElement>('[data-album-sentinel]');
       const count = root.querySelector<HTMLElement>('[data-album-count]');
@@ -41,6 +59,29 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       let completePromise: Promise<void> | null = null;
       let searchTimer = 0;
 
+      const escapeOption = (value: string) => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+      const hydrateFilters = () => {
+        if (!ownerFilter) return;
+        const ownerMap = new Map<string, string>();
+        albums.forEach((album) => {
+          const slug = String(album.ownerCollectionSlug || album.collectionSlug || album.ownerUid || '');
+          if (slug) ownerMap.set(slug, String(album.ownerName || album.ownerCollectionName || slug));
+        });
+        const owners = [...ownerMap.entries()].sort((a, b) => a[1].localeCompare(b[1], 'pt-BR'));
+        const current = ownerFilter.value;
+        ownerFilter.innerHTML = `<option value="">Todos</option>${owners.map(([slug, label]) => `<option value="${escapeOption(slug)}">${escapeOption(label)}</option>`).join('')}`;
+        if ([...ownerFilter.options].some((option) => option.value === current)) ownerFilter.value = current;
+        if (ownerWrap) ownerWrap.hidden = owners.length <= 1;
+      };
+
+      const hasFilterSelection = () => Boolean(ownerFilter?.value);
+      const hasActiveRefinement = () => Boolean(normalizeText(input?.value || '') || hasFilterSelection() || (sort?.value && sort.value !== 'name'));
+      const updateFilterState = () => {
+        const active = hasFilterSelection();
+        filterToggle?.classList.toggle('is-active', active);
+        if (filterIndicator) filterIndicator.hidden = !active;
+      };
+
       const mergeAlbums = (incoming: any[]) => {
         const known = new Set(albums.map((album) => String(album._docId || album.id || album.slug || '')));
         incoming.forEach((album) => {
@@ -50,21 +91,36 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       };
 
       const updateMetrics = () => {
-        if (total) total.textContent = `${albums.length}${hasMore ? '+' : ''}`;
-        if (cards) cards.textContent = `${albums.reduce((sum, album) => sum + Number(album.occupiedSlots || 0), 0)}${hasMore ? '+' : ''}`;
+        if (total) total.textContent = String(albums.length);
+        if (cards) cards.textContent = String(albums.reduce((sum, album) => sum + Number(album.occupiedSlots || 0), 0));
       };
 
       const render = () => {
         const q = normalizeText(input?.value || '');
-        const visible = albums.filter((album) => !q || normalizeText(`${album.searchText || ''} ${album.name || ''} ${album.ownerName || ''} ${album.ownerCollectionName || ''}`).includes(q));
+        const owner = ownerFilter?.value || '';
+        const sortValue = sort?.value || 'name';
+        const visible = albums
+          .filter((album) => {
+            if (q && !normalizeText(`${album.searchText || ''} ${album.name || ''} ${album.ownerName || ''} ${album.ownerCollectionName || ''}`).includes(q)) return false;
+            const ownerKey = String(album.ownerCollectionSlug || album.collectionSlug || album.ownerUid || '');
+            if (owner && ownerKey !== owner) return false;
+            return true;
+          })
+          .sort((a, b) => {
+            if (sortValue === 'name-desc') return String(b.name || '').localeCompare(String(a.name || ''), 'pt-BR');
+            if (sortValue === 'filled-desc') return Number(b.occupiedSlots || 0) - Number(a.occupiedSlots || 0);
+            if (sortValue === 'filled-asc') return Number(a.occupiedSlots || 0) - Number(b.occupiedSlots || 0);
+            return String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
+          });
         if (grid) {
           grid.innerHTML = visible.map((album) => albumMarkup(album)).join('');
           grid.hidden = false;
           initializeOnlineImages(grid);
         }
         if (skeleton) skeleton.hidden = true;
-        if (count) count.textContent = fullyLoaded ? `${visible.length} ${visible.length === 1 ? 'álbum' : 'álbuns'}` : `${visible.length}+ álbuns carregados`;
+        if (count) count.textContent = `${visible.length} ${visible.length === 1 ? 'álbum' : 'álbuns'}`;
         if (empty) empty.hidden = !(fullyLoaded && visible.length === 0);
+        updateFilterState();
         updateMetrics();
       };
 
@@ -79,6 +135,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
           cursor = page?.nextCursor || null;
           hasMore = Boolean(page?.hasMore && cursor);
           fullyLoaded = !hasMore;
+          hydrateFilters();
           if (renderAfter) render();
         })().finally(() => { pagePromise = null; });
         return pagePromise;
@@ -115,14 +172,41 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       input?.addEventListener('input', () => {
         window.clearTimeout(searchTimer);
         searchTimer = window.setTimeout(async () => {
-          if (normalizeText(input.value) && !fullyLoaded) await ensureComplete();
+          if (hasActiveRefinement() && !fullyLoaded) await ensureComplete();
           else render();
         }, 180);
       });
 
+      filterToggle?.addEventListener('click', () => {
+        if (!filterDrawer) return;
+        const opening = filterDrawer.hidden;
+        filterDrawer.hidden = !opening;
+        filterToggle.setAttribute('aria-expanded', opening ? 'true' : 'false');
+        filterToggle.classList.toggle('is-open', opening);
+        if (opening && !fullyLoaded) ensureComplete().catch(() => {});
+      });
+      ownerFilter?.addEventListener('change', async () => {
+        if (hasActiveRefinement() && !fullyLoaded) await ensureComplete();
+        else render();
+      });
+      sort?.addEventListener('change', async () => {
+        if (hasActiveRefinement() && !fullyLoaded) await ensureComplete();
+        else render();
+      });
+      clearFilters?.addEventListener('click', () => {
+        if (ownerFilter) ownerFilter.value = '';
+        render();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement as HTMLElement | null)?.tagName || '')) {
+          event.preventDefault();
+          input?.focus();
+        }
+      });
+
       if (sentinel && 'IntersectionObserver' in window) {
         const observer = new IntersectionObserver((entries) => {
-          if (entries.some((entry) => entry.isIntersecting) && !normalizeText(input?.value || '')) loadNextPage().catch(() => {});
+          if (entries.some((entry) => entry.isIntersecting) && !hasActiveRefinement()) loadNextPage().catch(() => {});
         }, { rootMargin: '700px 0px' });
         observer.observe(sentinel);
       }

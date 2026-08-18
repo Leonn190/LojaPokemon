@@ -16,9 +16,17 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
   </section>
 
   <section class="shell collections-browser" data-online-collections>
-    <div class="collections-toolbar" data-reveal>
-      <div class="search-control"><label for="collection-search">Pesquisar coleções</label><div class="search-input-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg><input id="collection-search" type="search" placeholder="Nome do colecionador ou da coleção..." data-collection-search /></div></div>
-      <a class="primary-cta" href={`${base}cadastro/`}><span>Entrar / criar conta</span><b>→</b></a>
+    <div class="explore-search-stack" data-reveal>
+      <div class="explore-search-toolbar">
+        <div class="search-control explore-main-search"><label for="collection-search">Pesquisar coleções</label><div class="search-input-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg><input id="collection-search" type="search" placeholder="Nome do colecionador ou da coleção..." data-collection-search /><kbd>/</kbd></div></div>
+        <button class="explore-toolbar-button" type="button" data-collection-filter-toggle aria-expanded="false"><span aria-hidden="true">☷</span><strong>Filtros</strong><i data-collection-filter-indicator hidden></i></button>
+        <div class="select-control explore-sort-control"><label>Ordenar</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">↕</span><select data-collection-sort><option value="name">Nome A–Z</option><option value="name-desc">Nome Z–A</option><option value="cards-desc">Mais cartas</option><option value="items-desc">Mais itens</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+      </div>
+      <div class="explore-filter-drawer compact-explore-filters" data-collection-filter-drawer hidden>
+        <div class="select-control"><label>Disponibilidade</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◇</span><select data-collection-availability><option value="">Todas</option><option value="selling">Com itens à venda</option><option value="showcase">Somente exposição</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+        <button class="clear-button explore-clear-filters" type="button" data-collection-clear-filters>Limpar filtros</button>
+        <a class="explore-account-link" href={`${base}cadastro/`}>Entrar / criar conta <b>→</b></a>
+      </div>
     </div>
     <div class="collections-summary"><strong data-collection-count>—</strong> <span data-collection-label>coleções</span> <small data-collection-status aria-live="polite"></small></div>
     <div class="collection-skeleton-grid" data-collection-skeleton aria-hidden="true">
@@ -36,6 +44,12 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
     if (root) {
       const search = root.querySelector<HTMLInputElement>('[data-collection-search]');
       const grid = root.querySelector<HTMLElement>('[data-collections-grid]');
+      const filterToggle = root.querySelector<HTMLButtonElement>('[data-collection-filter-toggle]');
+      const filterDrawer = root.querySelector<HTMLElement>('[data-collection-filter-drawer]');
+      const filterIndicator = root.querySelector<HTMLElement>('[data-collection-filter-indicator]');
+      const availability = root.querySelector<HTMLSelectElement>('[data-collection-availability]');
+      const sort = root.querySelector<HTMLSelectElement>('[data-collection-sort]');
+      const clearFilters = root.querySelector<HTMLButtonElement>('[data-collection-clear-filters]');
       const skeleton = root.querySelector<HTMLElement>('[data-collection-skeleton]');
       const sentinel = root.querySelector<HTMLElement>('[data-collection-sentinel]');
       const count = root.querySelector<HTMLElement>('[data-collection-count]');
@@ -72,18 +86,42 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         return added;
       };
 
+      const hasFilterSelection = () => Boolean(availability?.value);
+
+      const updateFilterState = () => {
+        const active = hasFilterSelection();
+        filterToggle?.classList.toggle('is-active', active);
+        if (filterIndicator) filterIndicator.hidden = !active;
+      };
+
+      const hasActiveRefinement = () => Boolean(normalizeText(search?.value || '') || hasFilterSelection() || (sort?.value && sort.value !== 'name'));
+
       const visibleCollections = () => {
         const query = normalizeText(search?.value || '');
+        const availabilityValue = availability?.value || '';
+        const sortValue = sort?.value || 'name';
         return collections
-          .filter((profile) => !query || normalizeText(`${profile.owner || ''} ${profile.title || ''} ${profile.description || ''} ${profile.slug || ''}`).includes(query))
-          .sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'pt-BR'));
+          .filter((profile) => {
+            if (query && !normalizeText(`${profile.owner || ''} ${profile.title || ''} ${profile.description || ''} ${profile.slug || ''}`).includes(query)) return false;
+            if (availabilityValue === 'selling' && profile.selling === false) return false;
+            if (availabilityValue === 'showcase' && profile.selling !== false) return false;
+            return true;
+          })
+          .sort((a, b) => {
+            if (sortValue === 'name-desc') return String(b.title || '').localeCompare(String(a.title || ''), 'pt-BR');
+            if (sortValue === 'cards-desc') return Number(b.stats?.cards || 0) - Number(a.stats?.cards || 0);
+            if (sortValue === 'items-desc') {
+              const total = (profile: any) => Number(profile.stats?.cards || 0) + Number(profile.stats?.boosters || 0) + Number(profile.stats?.kits || 0) + Number(profile.stats?.products || 0) + Number(profile.stats?.albums || 0);
+              return total(b) - total(a);
+            }
+            return String(a.title || '').localeCompare(String(b.title || ''), 'pt-BR');
+          });
       };
 
       const updateMetrics = () => {
-        const suffix = hasMore ? '+' : '';
-        if (totalElement) totalElement.textContent = `${collections.length}${suffix}`;
-        if (cardElement) cardElement.textContent = `${collections.reduce((sum, profile) => sum + Number(profile.stats?.cards || 0), 0)}${suffix}`;
-        if (boosterElement) boosterElement.textContent = `${collections.reduce((sum, profile) => sum + Number(profile.stats?.boosters || 0), 0)}${suffix}`;
+        if (totalElement) totalElement.textContent = String(collections.length);
+        if (cardElement) cardElement.textContent = String(collections.reduce((sum, profile) => sum + Number(profile.stats?.cards || 0), 0));
+        if (boosterElement) boosterElement.textContent = String(collections.reduce((sum, profile) => sum + Number(profile.stats?.boosters || 0), 0));
       };
 
       const render = () => {
@@ -94,12 +132,11 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
           initializeOnlineImages(grid);
         }
         if (skeleton) skeleton.hidden = true;
-        if (count) count.textContent = fullyLoaded ? String(visible.length) : `${visible.length}${hasMore ? '+' : ''}`;
-        if (label) label.textContent = fullyLoaded
-          ? (visible.length === 1 ? 'coleção encontrada' : 'coleções encontradas')
-          : 'coleções carregadas';
+        if (count) count.textContent = String(visible.length);
+        if (label) label.textContent = visible.length === 1 ? 'coleção' : 'coleções';
         if (empty) empty.hidden = !(fullyLoaded && visible.length === 0);
-        if (status) status.textContent = hasMore && !normalizeText(search?.value || '') ? '· role para carregar mais' : '';
+        if (status) status.textContent = hasMore && !hasActiveRefinement() ? '· role para ver mais' : '';
+        updateFilterState();
         updateMetrics();
       };
 
@@ -192,7 +229,7 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
       search?.addEventListener('input', () => {
         window.clearTimeout(searchTimer);
         searchTimer = window.setTimeout(async () => {
-          if (normalizeText(search.value) && !fullyLoaded) await ensureComplete();
+          if (hasActiveRefinement() && !fullyLoaded) await ensureComplete();
           else {
             render();
             hydratePreviews(visibleCollections()).catch(() => {});
@@ -200,9 +237,37 @@ const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
         }, 180);
       });
 
+      filterToggle?.addEventListener('click', () => {
+        if (!filterDrawer) return;
+        const opening = filterDrawer.hidden;
+        filterDrawer.hidden = !opening;
+        filterToggle.setAttribute('aria-expanded', opening ? 'true' : 'false');
+        filterToggle.classList.toggle('is-open', opening);
+      });
+
+      availability?.addEventListener('change', async () => {
+        if (hasActiveRefinement() && !fullyLoaded) await ensureComplete();
+        else render();
+      });
+      sort?.addEventListener('change', async () => {
+        if (hasActiveRefinement() && !fullyLoaded) await ensureComplete();
+        else render();
+      });
+      clearFilters?.addEventListener('click', () => {
+        if (availability) availability.value = '';
+        render();
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement as HTMLElement | null)?.tagName || '')) {
+          event.preventDefault();
+          search?.focus();
+        }
+      });
+
       if (sentinel && 'IntersectionObserver' in window) {
         const observer = new IntersectionObserver((entries) => {
-          if (entries.some((entry) => entry.isIntersecting) && !normalizeText(search?.value || '')) loadNextPage().catch(() => {});
+          if (entries.some((entry) => entry.isIntersecting) && !hasActiveRefinement()) loadNextPage().catch(() => {});
         }, { rootMargin: '700px 0px' });
         observer.observe(sentinel);
       }

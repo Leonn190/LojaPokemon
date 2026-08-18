@@ -1,0 +1,180 @@
+/* Explorar — barra padronizada, filtros expansíveis e modo livre. */
+.explore-search-stack {
+  position: sticky;
+  top: 92px;
+  z-index: 30;
+  margin-bottom: 26px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(8,17,29,.92);
+  backdrop-filter: blur(20px) saturate(125%);
+  box-shadow: 0 16px 45px rgba(0,0,0,.28);
+  overflow: hidden;
+}
+
+.explore-search-toolbar {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) auto minmax(175px, 210px) auto;
+  align-items: end;
+  gap: 10px;
+  padding: 14px;
+}
+
+.explore-main-search { min-width: 0; }
+.explore-sort-control { min-width: 175px; }
+
+.explore-toolbar-button {
+  min-width: 112px;
+  height: 47px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  color: var(--muted);
+  background: rgba(255,255,255,.03);
+  cursor: pointer;
+  transition: color .18s ease, border-color .18s ease, background .18s ease, transform .18s ease;
+}
+.explore-toolbar-button > span { color: var(--cyan); font-size: .9rem; }
+.explore-toolbar-button > strong { font-size: .72rem; font-weight: 850; white-space: nowrap; }
+.explore-toolbar-button > i {
+  width: 7px;
+  height: 7px;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(84,232,223,.1);
+}
+.explore-toolbar-button:hover,
+.explore-toolbar-button.is-open,
+.explore-toolbar-button.is-active,
+.explore-toolbar-button[aria-pressed="true"] {
+  color: var(--text);
+  border-color: rgba(84,232,223,.36);
+  background: rgba(84,232,223,.07);
+}
+.explore-toolbar-button:active { transform: translateY(1px); }
+.free-mode-toggle[aria-pressed="true"] > span { color: var(--gold); }
+.free-mode-toggle[aria-pressed="true"] { border-color: rgba(255,203,98,.32); background: rgba(255,203,98,.07); }
+
+.explore-filter-drawer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  align-items: end;
+  gap: 10px;
+  padding: 14px;
+  border-top: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255,255,255,.018), rgba(0,0,0,.08));
+}
+.explore-filter-drawer[hidden] { display: none !important; }
+.explore-filter-drawer .explore-clear-filters { align-self: end; }
+.compact-explore-filters { grid-template-columns: minmax(190px, 280px) auto minmax(0, 1fr); }
+.explore-account-link {
+  min-height: 47px;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 15px;
+  border-radius: 13px;
+  color: var(--cyan);
+  font-size: .72rem;
+  font-weight: 820;
+}
+.explore-account-link:hover { background: rgba(84,232,223,.055); }
+
+/* O contador mostra somente o que está na grade, sem "+ carregadas". */
+.catalog-results-heading { margin-top: 24px; }
+.albums-catalog-summary { display: flex; justify-content: flex-end; margin: -10px 2px 18px; }
+.albums-catalog-summary > strong {
+  padding: 8px 11px;
+  border-radius: 10px;
+  color: var(--muted);
+  background: rgba(255,255,255,.025);
+  font-size: .68rem;
+}
+.collections-browser > .explore-search-stack,
+.albums-catalog > .explore-search-stack { margin-bottom: 22px; }
+
+/* Modo Livre: mantém o mesmo item/click/modal, mas visualmente deixa apenas a arte. */
+.catalog-grid.free-catalog-grid {
+  grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+  gap: 15px 12px;
+  align-items: start;
+}
+.free-catalog-card {
+  overflow: visible;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: none;
+}
+.free-catalog-card:hover,
+.free-catalog-card[data-kind="booster"]:hover {
+  transform: translateY(-4px);
+  border-color: transparent;
+  box-shadow: none;
+}
+.free-catalog-card .product-open-button { width: 100%; display: block; border-radius: 12px; }
+.free-catalog-card .product-card-media {
+  min-height: 0;
+  padding: 6px;
+  overflow: visible;
+  border-radius: 12px;
+  background: transparent;
+}
+.free-catalog-card .product-card-media::after,
+.free-catalog-card .product-card-body,
+.free-catalog-card .collection-origin,
+.free-catalog-card .product-purchase-actions,
+.free-catalog-card .not-for-sale-label,
+.free-catalog-card .quantity-chip { display: none !important; }
+.free-catalog-card .collectible-visual {
+  width: 100%;
+  max-width: 180px;
+  margin: 0 auto;
+}
+.free-catalog-card .image-stage { box-shadow: 0 13px 28px rgba(0,0,0,.38); }
+.free-catalog-card .kit-composite-visual { max-width: 190px; }
+.free-catalog-card .product-open-button:focus-visible { outline-offset: 2px; }
+
+@media (min-width: 1450px) {
+  .catalog-grid.free-catalog-grid { grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); }
+}
+
+@media (max-width: 980px) {
+  .explore-search-toolbar { grid-template-columns: minmax(0, 1fr) auto minmax(165px, 200px); }
+  .explore-search-toolbar .free-mode-toggle { grid-column: 2 / 4; justify-self: end; }
+  .compact-explore-filters { grid-template-columns: minmax(190px, 1fr) auto; }
+  .explore-account-link { grid-column: 1 / -1; justify-self: start; }
+}
+
+@media (max-width: 720px) {
+  .explore-search-stack { position: relative; top: auto; }
+  .explore-search-toolbar { grid-template-columns: 1fr 1fr; }
+  .explore-main-search { grid-column: 1 / -1; }
+  .explore-sort-control { min-width: 0; }
+  .explore-search-toolbar .free-mode-toggle { grid-column: auto; justify-self: stretch; }
+  .explore-toolbar-button { width: 100%; }
+  .explore-filter-drawer,
+  .compact-explore-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .explore-account-link { grid-column: 1 / -1; }
+  .catalog-grid.free-catalog-grid { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 12px 8px; }
+  .free-catalog-card .product-card-media { padding: 3px; }
+}
+
+@media (max-width: 480px) {
+  .explore-search-toolbar { grid-template-columns: 1fr; }
+  .explore-main-search,
+  .explore-search-toolbar .free-mode-toggle { grid-column: auto; }
+  .explore-filter-drawer,
+  .compact-explore-filters { grid-template-columns: 1fr; }
+  .explore-account-link { grid-column: auto; }
+  .catalog-grid.free-catalog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 6px; }
+}

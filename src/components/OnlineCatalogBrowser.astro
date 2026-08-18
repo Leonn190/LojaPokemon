@@ -14,41 +14,72 @@ const placeholder = kind === 'card'
       ? 'Nome, descrição ou conteúdo do kit...'
       : 'Nome do produto lacrado...';
 const skeletonCount = kind === 'card' ? 8 : 6;
+const supportsFreeMode = kind === 'card' || kind === 'booster' || kind === 'kit';
+const hasEraFilters = kind === 'card' || kind === 'booster';
 ---
 <section class="shell catalog-section online-catalog-section" data-online-catalog data-kind={kind} data-owner-filter={showOwnerFilter ? 'true' : 'false'} data-tcg-config={JSON.stringify(TCG_CONFIG)}>
-  <div class:list={['filter-panel', kind !== 'card' && 'compact-filter-panel']} data-reveal>
-    <div class="search-control">
-      <label for={`${kind}-search`}>Pesquisar {noun}</label>
-      <div class="search-input-wrap">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg>
-        <input id={`${kind}-search`} type="search" placeholder={placeholder} autocomplete="off" data-online-search />
-        <kbd>/</kbd>
+  <div class="explore-search-stack" data-reveal>
+    <div class="explore-search-toolbar">
+      <div class="search-control explore-main-search">
+        <label for={`${kind}-search`}>Pesquisar {noun}</label>
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /></svg>
+          <input id={`${kind}-search`} type="search" placeholder={placeholder} autocomplete="off" data-online-search />
+          <kbd>/</kbd>
+        </div>
       </div>
+
+      <button class="explore-toolbar-button" type="button" data-online-filter-toggle aria-expanded="false">
+        <span aria-hidden="true">☷</span><strong>Filtros</strong><i data-online-filter-indicator hidden></i>
+      </button>
+
+      <div class="select-control explore-sort-control">
+        <label>Ordenar</label>
+        <div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">↕</span><select data-online-sort><option value="name">Nome A–Z</option><option value="name-desc">Nome Z–A</option><option value="price-asc">Menor preço</option><option value="price-desc">Maior preço</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div>
+      </div>
+
+      {supportsFreeMode && (
+        <button class="explore-toolbar-button free-mode-toggle" type="button" data-online-free-toggle aria-pressed="false">
+          <span aria-hidden="true">▦</span><strong>Modo livre</strong>
+        </button>
+      )}
     </div>
 
-    {kind === 'card' && (
-      <>
-        <div class="select-control"><label>Era</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◈</span><select data-online-era><option value="">Todas</option>{Object.values(TCG_CONFIG.eras).map((era) => <option value={era.id}>{era.label}</option>)}</select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
-        <div class="select-control"><label>Coleção</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">▦</span><select data-online-collection disabled><option value="">Todas</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
-        <div class="select-control"><label>Grupo</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◎</span><select data-online-group><option value="">Todos</option>{TCG_CONFIG.groups.map((group) => <option value={group.id}>{group.label}</option>)}</select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
-        <div class="select-control"><label>Classe</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◇</span><select data-online-class disabled><option value="">Todas</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
-        <div class="select-control"><label>Tipo</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◆</span><select data-online-type disabled><option value="">Todos</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+    <div class="explore-filter-drawer" data-online-filter-drawer hidden>
+      {hasEraFilters && (
+        <>
+          <div class="select-control"><label>Era</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◈</span><select data-online-era><option value="">Todas</option>{Object.values(TCG_CONFIG.eras).map((era) => <option value={era.id}>{era.label}</option>)}</select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+          <div class="select-control"><label>Coleção</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">▦</span><select data-online-collection disabled><option value="">Todas</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+        </>
+      )}
+
+      {kind === 'card' && (
+        <>
+          <div class="select-control"><label>Grupo</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◎</span><select data-online-group><option value="">Todos</option>{TCG_CONFIG.groups.map((group) => <option value={group.id}>{group.label}</option>)}</select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+          <div class="select-control"><label>Classe</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◇</span><select data-online-class disabled><option value="">Todas</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+          <div class="select-control"><label>Tipo</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◆</span><select data-online-type disabled><option value="">Todos</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+        </>
+      )}
+
+      {hasEraFilters && (
         <div class="select-control"><label>Idioma</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">A</span><select data-online-language><option value="">Todos</option>{TCG_CONFIG.languages.map((language) => <option value={language.id}>{language.label}</option>)}</select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
-        <div class="select-control"><label>Estado</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">✓</span><select data-online-condition><option value="">Todos</option>{Object.keys(TCG_CONFIG.conditions).map((condition) => <option value={condition}>{condition}</option>)}</select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
-        <div class="select-control"><label>Integridade</label><div class="search-input-wrap integrity-filter-wrap"><input type="number" min="1" max="100" step="1" placeholder="1–100" data-online-integrity /><b>%</b></div></div>
-      </>
-    )}
+      )}
 
-    {showOwnerFilter && (
-      <div class="select-control" data-online-owner-wrap hidden>
-        <label>Coleção Vault</label>
-        <div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◎</span><select data-online-owner><option value="">Todas</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div>
-      </div>
-    )}
+      {kind === 'card' && (
+        <>
+          <div class="select-control"><label>Estado</label><div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">✓</span><select data-online-condition><option value="">Todos</option>{Object.keys(TCG_CONFIG.conditions).map((condition) => <option value={condition}>{condition}</option>)}</select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div></div>
+          <div class="select-control"><label>Integridade</label><div class="search-input-wrap integrity-filter-wrap"><input type="number" min="1" max="100" step="1" placeholder="1–100" data-online-integrity /><b>%</b></div></div>
+        </>
+      )}
 
-    <div class="select-control">
-      <label>Ordenar</label>
-      <div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">↕</span><select data-online-sort><option value="name">Nome</option><option value="price-asc">Menor preço</option><option value="price-desc">Maior preço</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div>
+      {showOwnerFilter && (
+        <div class="select-control" data-online-owner-wrap hidden>
+          <label>Coleção Vault</label>
+          <div class="select-input-wrap"><span class="select-symbol" aria-hidden="true">◎</span><select data-online-owner><option value="">Todas</option></select><svg class="select-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5.5 7.5 4.5 4.5 4.5-4.5" /></svg></div>
+        </div>
+      )}
+
+      <button class="clear-button explore-clear-filters" type="button" data-online-clear-filters>Limpar filtros</button>
     </div>
   </div>
 
@@ -77,6 +108,7 @@ const skeletonCount = kind === 'card' ? 8 : 6;
 
     const kind = root.dataset.kind || 'card';
     const noun = kind === 'card' ? 'cartas' : kind === 'booster' ? 'boosters' : kind === 'kit' ? 'kits' : 'produtos';
+    const supportsFreeMode = kind === 'card' || kind === 'booster' || kind === 'kit';
     const pageSize = kind === 'card' ? 24 : 20;
     const grid = root.querySelector<HTMLElement>('[data-online-grid]');
     const skeleton = root.querySelector<HTMLElement>('[data-online-skeleton]');
@@ -86,6 +118,11 @@ const skeletonCount = kind === 'card' ? 8 : 6;
     const status = root.querySelector<HTMLElement>('[data-online-status]');
     const empty = root.querySelector<HTMLElement>('[data-online-empty]');
     const search = root.querySelector<HTMLInputElement>('[data-online-search]');
+    const filterToggle = root.querySelector<HTMLButtonElement>('[data-online-filter-toggle]');
+    const filterDrawer = root.querySelector<HTMLElement>('[data-online-filter-drawer]');
+    const filterIndicator = root.querySelector<HTMLElement>('[data-online-filter-indicator]');
+    const clearFilters = root.querySelector<HTMLButtonElement>('[data-online-clear-filters]');
+    const freeToggle = root.querySelector<HTMLButtonElement>('[data-online-free-toggle]');
     const eraFilter = root.querySelector<HTMLSelectElement>('[data-online-era]');
     const collectionFilter = root.querySelector<HTMLSelectElement>('[data-online-collection]');
     const groupFilter = root.querySelector<HTMLSelectElement>('[data-online-group]');
@@ -105,6 +142,7 @@ const skeletonCount = kind === 'card' ? 8 : 6;
     let fullyLoaded = false;
     let completePromise: Promise<void> | null = null;
     let searchTimer = 0;
+    let freeMode = false;
     let tcgConfig: any = { eras: {}, groups: [], languages: [], conditions: {} };
     try { tcgConfig = JSON.parse(root.dataset.tcgConfig || '{}'); } catch (_) {}
 
@@ -151,9 +189,8 @@ const skeletonCount = kind === 'card' ? 8 : 6;
       }
     };
 
-    const hasActiveRefinement = () => Boolean(
-      normalizeText(search?.value || '')
-      || eraFilter?.value
+    const hasFilterSelection = () => Boolean(
+      eraFilter?.value
       || collectionFilter?.value
       || groupFilter?.value
       || classFilter?.value
@@ -162,6 +199,17 @@ const skeletonCount = kind === 'card' ? 8 : 6;
       || conditionFilter?.value
       || integrityFilter?.value
       || ownerFilter?.value
+    );
+
+    const updateFilterState = () => {
+      const active = hasFilterSelection();
+      filterToggle?.classList.toggle('is-active', active);
+      if (filterIndicator) filterIndicator.hidden = !active;
+    };
+
+    const hasActiveRefinement = () => Boolean(
+      normalizeText(search?.value || '')
+      || hasFilterSelection()
       || (sort?.value && sort.value !== 'name')
     );
 
@@ -174,7 +222,7 @@ const skeletonCount = kind === 'card' ? 8 : 6;
         if (collectionFilter?.value && item.collectionId !== collectionFilter.value) return false;
         if (groupFilter?.value && item.group !== groupFilter.value) return false;
         if (classFilter?.value && item.cardClass !== classFilter.value) return false;
-        if (typeFilter?.value && item.type !== typeFilter.value) return false;
+        if (typeFilter?.value && item.type !== typeFilter.value && item.pokemonType !== typeFilter.value) return false;
         if (languageFilter?.value && item.language !== languageFilter.value) return false;
         if (conditionFilter?.value && item.condition !== conditionFilter.value) return false;
         if (integrityFilter?.value && Number(item.integrity) !== Number(integrityFilter.value)) return false;
@@ -187,20 +235,23 @@ const skeletonCount = kind === 'card' ? 8 : 6;
         const rightPrice = b.price === null || b.price === undefined ? null : Number(b.price);
         if (sortValue === 'price-asc') return (leftPrice ?? Infinity) - (rightPrice ?? Infinity);
         if (sortValue === 'price-desc') return (rightPrice ?? -Infinity) - (leftPrice ?? -Infinity);
+        if (sortValue === 'name-desc') return String(b.name || '').localeCompare(String(a.name || ''), 'pt-BR');
         return String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR');
       });
 
       if (grid) {
-        grid.innerHTML = visible.map((item) => productMarkup(item)).join('');
+        grid.classList.toggle('free-catalog-grid', freeMode && supportsFreeMode);
+        grid.innerHTML = visible.map((item) => productMarkup(item, { freeMode: freeMode && supportsFreeMode })).join('');
         grid.hidden = false;
         initializeOnlineImages(grid);
       }
       if (skeleton) skeleton.hidden = true;
-      if (count) count.textContent = fullyLoaded ? String(visible.length) : `${visible.length}${hasMore ? '+' : ''}`;
-      if (countLabel) countLabel.textContent = fullyLoaded ? `${noun} publicadas` : `${noun} carregadas`;
+      if (count) count.textContent = String(visible.length);
+      if (countLabel) countLabel.textContent = noun;
       const canBeEmpty = fullyLoaded || !hasMore;
       if (empty) empty.hidden = !(canBeEmpty && visible.length === 0);
-      if (status) status.textContent = hasMore && !hasActiveRefinement() ? 'Role para carregar mais' : '';
+      if (status) status.textContent = hasMore && !hasActiveRefinement() ? 'Role para ver mais' : '';
+      updateFilterState();
     };
 
     const loadNextPage = (renderAfter = true): Promise<void> => {
@@ -224,7 +275,7 @@ const skeletonCount = kind === 'card' ? 8 : 6;
       if (fullyLoaded) return Promise.resolve();
       if (completePromise) return completePromise;
       completePromise = (async () => {
-        if (status) status.textContent = 'Completando resultados…';
+        if (status) status.textContent = 'Atualizando resultados…';
         while (hasMore) await loadNextPage(false);
         fullyLoaded = true;
         hydrateFilters();
@@ -257,6 +308,32 @@ const skeletonCount = kind === 'card' ? 8 : 6;
       }
     };
 
+    filterToggle?.addEventListener('click', () => {
+      if (!filterDrawer) return;
+      const opening = filterDrawer.hidden;
+      filterDrawer.hidden = !opening;
+      filterToggle.setAttribute('aria-expanded', opening ? 'true' : 'false');
+      filterToggle.classList.toggle('is-open', opening);
+      if (opening && !fullyLoaded) ensureComplete().catch(() => {});
+    });
+
+    freeToggle?.addEventListener('click', () => {
+      freeMode = !freeMode;
+      freeToggle.setAttribute('aria-pressed', freeMode ? 'true' : 'false');
+      freeToggle.classList.toggle('is-active', freeMode);
+      root.classList.toggle('is-free-mode', freeMode);
+      apply();
+    });
+
+    clearFilters?.addEventListener('click', () => {
+      [eraFilter, collectionFilter, groupFilter, classFilter, typeFilter, languageFilter, conditionFilter, ownerFilter].forEach((element) => {
+        if (element) element.value = '';
+      });
+      if (integrityFilter) integrityFilter.value = '';
+      syncDependentFilters({ resetCollection: true, resetClass: true, resetType: true });
+      handleRefinement();
+    });
+
     search?.addEventListener('input', () => {
       window.clearTimeout(searchTimer);
       searchTimer = window.setTimeout(handleRefinement, 180);
@@ -265,10 +342,8 @@ const skeletonCount = kind === 'card' ? 8 : 6;
     groupFilter?.addEventListener('change', async () => { syncDependentFilters({ resetClass: true, resetType: true }); await handleRefinement(); });
     [collectionFilter, classFilter, typeFilter, languageFilter, conditionFilter, ownerFilter, sort].forEach((element) => element?.addEventListener('change', handleRefinement));
     integrityFilter?.addEventListener('input', () => { window.clearTimeout(searchTimer); searchTimer = window.setTimeout(handleRefinement, 150); });
-    [eraFilter, collectionFilter, groupFilter, classFilter, typeFilter, languageFilter, conditionFilter, integrityFilter, ownerFilter, sort].forEach((element) => {
-      element?.addEventListener('focus', () => { if (!fullyLoaded) ensureComplete(); }, { once: true });
-    });
     syncDependentFilters();
+    updateFilterState();
 
     document.addEventListener('keydown', (event) => {
       if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement as HTMLElement | null)?.tagName || '')) {
