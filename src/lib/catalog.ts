@@ -52,22 +52,6 @@ export interface PriceHistoryEntry {
 }
 
 
-export interface CollectionMovementEntry {
-  eventId: string;
-  updateId: string;
-  collectionId: string;
-  version: number;
-  date: string;
-  eventType: string;
-  itemType: string;
-  itemId: string;
-  name: string;
-  quantityBefore: number;
-  quantityDelta: number;
-  quantityAfter: number;
-  source: string;
-  note: string;
-}
 
 export interface CardItem extends OwnedItemBase {
   kind: 'card';
@@ -195,7 +179,6 @@ export interface CollectorCollection {
   slug: string;
   owner: string;
   title: string;
-  description: string;
   selling: boolean;
   featured: boolean;
   phone: string;
@@ -207,7 +190,6 @@ export interface CollectorCollection {
   kits: KitItem[];
   products: ProductItem[];
   albums: AlbumItem[];
-  movements: CollectionMovementEntry[];
   priceDisplayFallback: PublicPriceFallback;
   totalItems: number;
   totalUnits: number;
@@ -221,7 +203,6 @@ type InventoryRow = Record<string, any>;
 type ProfileData = {
   owner?: string;
   title?: string;
-  description?: string;
   selling?: boolean;
   featured?: boolean;
   showQuantity?: boolean;
@@ -695,7 +676,6 @@ export const getCollections = (): CollectorCollection[] => {
     const owner = profile.owner?.trim() || folderName;
     const collectionSlug = slugify(folderName);
     const title = profile.title?.trim() || `Coleção de ${owner}`;
-    const description = profile.description?.trim() || 'Coleção Pokémon organizada no Vault TCG.';
     const showQuantity = false;
     const proposalTerms = normalizeProposalTerms(profile);
     const ownerPhone = profile.phone?.trim() || '';
@@ -703,22 +683,6 @@ export const getCollections = (): CollectorCollection[] => {
     const palette = normalizePalette(profile);
     const profilePhoto = String(profile.profilePhoto ?? '').trim();
     const priceDisplayFallback = normalizePriceFallback(profile);
-    const movements: CollectionMovementEntry[] = readJsonLines(join(folder, 'historico', 'movimentacoes.jsonl')).map((entry) => ({
-      eventId: String(entry.eventId ?? ''),
-      updateId: String(entry.updateId ?? entry.sourceId ?? ''),
-      collectionId: String(entry.collectionId ?? folderName),
-      version: parseQuantity(entry.version),
-      date: String(entry.date ?? entry.data ?? ''),
-      eventType: String(entry.eventType ?? entry.tipo ?? 'ajuste'),
-      itemType: String(entry.itemType ?? entry.tipoItem ?? 'cartas'),
-      itemId: String(entry.itemId ?? entry.Id ?? ''),
-      name: String(entry.name ?? entry.nome ?? ''),
-      quantityBefore: parseQuantity(entry.quantityBefore),
-      quantityDelta: Number(entry.quantityDelta ?? entry.delta ?? 0) || 0,
-      quantityAfter: parseQuantity(entry.quantityAfter),
-      source: String(entry.source ?? ''),
-      note: String(entry.note ?? entry.observacao ?? ''),
-    })).filter((entry) => entry.itemId && entry.date).sort((left, right) => left.date.localeCompare(right.date));
     const rawCardHistory = readJsonLines(join(folder, 'historico', 'cartas.jsonl'));
     const cardHistory = new Map<string, PriceHistoryEntry[]>();
     rawCardHistory.forEach((entry) => {
@@ -1031,7 +995,6 @@ export const getCollections = (): CollectorCollection[] => {
       slug: collectionSlug,
       owner,
       title,
-      description,
       selling: profile.selling !== false,
       featured: profile.featured === true,
       phone: ownerPhone,
@@ -1043,13 +1006,12 @@ export const getCollections = (): CollectorCollection[] => {
       kits,
       products,
       albums,
-      movements,
       priceDisplayFallback,
       totalItems: allItems.length,
       totalUnits,
       estimatedValue,
       coverItems,
-      searchText: normalizeText(`${owner} ${title} ${description}`),
+      searchText: normalizeText(`${owner} ${title}`),
     };
   });
 
@@ -1058,46 +1020,6 @@ export const getCollections = (): CollectorCollection[] => {
 
 export const getCollection = (slug: string): CollectorCollection | undefined =>
   getCollections().find((collection) => collection.slug === slug);
-
-export const getEditableCollections = () => getCollections().map((collection) => {
-  const folderName = getCollectionFolders().find((folder) => slugify(folder) === collection.slug) || collection.slug;
-  const profile = readProfile(join(collectionsRoot, folderName));
-  return {
-    slug: collection.slug,
-    profile: {
-      owner: collection.owner,
-      title: collection.title,
-      description: collection.description,
-      email: profile.email || '',
-      phone: profile.phone || '',
-      password: profile.password || '',
-      selling: collection.selling,
-      showQuantity: false,
-      featured: collection.featured,
-      proposalTerms: collection.proposalTerms,
-      version: Number((profile as Record<string, unknown>).version || 1),
-      collectionId: folderName,
-      profilePhoto: collection.profilePhoto,
-      palette: collection.palette,
-      priceDisplayFallback: collection.priceDisplayFallback,
-    },
-    cards: collection.cards.map(({ id, name, number, collection: set, language, condition, year, type, quantity, finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, pricingSchemaVersion, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, favorite, priceHistory, advancedData, image, imageCandidates }) => ({
-      id, name, number, collection: set, language, condition, year, type, quantity, price: finalPrice, forSale, linkLiga, linkMyp, linkCardmarket, linkTcgplayer, linkPriceCharting, pricingSchemaVersion, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, favorite, priceHistory, advancedData, image, imageCandidates,
-    })),
-    boosters: collection.boosters.map(({ id, name, quantity, finalPrice, forSale, linkLiga, pricingSchemaVersion, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, priceHistory, advancedData, image, imageCandidates }) => ({ id, name, quantity, price: finalPrice, forSale, linkLiga, pricingSchemaVersion, minimumPrice, quickSalePrice, leaguePrice, secondLeaguePrice, thirdLeaguePrice, averageLeaguePrice, medianLeaguePrice, sellersGeneral, sellersSpecific, buyersGeneral, buyersSpecific, priceHistory, advancedData, image, imageCandidates })),
-    kits: collection.kits.map(({ id, name, description, contents, contentItems, sourceTotal, quantity, price, forSale, image, imageCandidates }) => ({ id, name, description, contents, contentItems, sourceTotal, quantity, price, forSale, image, imageCandidates })),
-    products: collection.products.map(({ id, name, description, quantity, price, forSale, linkLiga, image, imageCandidates }) => ({ id, name, description, quantity, price, forSale, linkLiga, image, imageCandidates })),
-    albums: collection.albums.map((album) => ({
-      albumId: album.id,
-      name: album.name,
-      description: album.description,
-      format: album.format,
-      pages: album.pages.map((page) => ({ slots: page.slots.map((slot) => slot ? { ...slot } : null) })),
-      imageCandidates: album.coverImageCandidates,
-    })),
-    movements: collection.movements.map((movement) => ({ ...movement })),
-  };
-});
 
 export const getCards = (collectionSlug?: string): CardItem[] => {
   const collections = collectionSlug ? getCollections().filter((item) => item.slug === collectionSlug) : getCollections();

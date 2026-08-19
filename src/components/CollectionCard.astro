@@ -23,7 +23,6 @@ const imageUrl = (path: string) => /^(?:https?:|data:|blob:)/i.test(path) ? path
       <b aria-hidden="true">↗</b>
     </div>
     <h3>{collection.title}</h3>
-    <p>{collection.description}</p>
     <div class="collection-card-stats">
       {collection.cards.length > 0 && <span><strong>{collection.cards.length}</strong> cartas</span>}
       {collection.boosters.length > 0 && <span><strong>{collection.boosters.length}</strong> boosters</span>}

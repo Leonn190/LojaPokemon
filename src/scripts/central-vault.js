@@ -1,0 +1,2002 @@
+(() => {
+      const root = document.querySelector('[data-editor-root]');
+      if (!root) return;
+
+      let tcgConfig = { eras: {}, groups: [], languages: [], conditions: {} };
+      try { tcgConfig = JSON.parse(document.querySelector('[data-tcg-config]')?.textContent || '{}'); } catch (_) {}
+
+      const base = root.dataset.base || '/';
+      const workspace = root.querySelector('[data-editor-workspace]');
+      const inventory = root.querySelector('[data-editor-inventory]');
+      const inventorySection = root.querySelector('[data-inventory-section]');
+      const inventorySearch = root.querySelector('[data-inventory-search]');
+      const inventoryMetadataFilters = root.querySelector('[data-inventory-metadata-filters]');
+      const saveStateBadge = root.querySelector('[data-cloud-save-state]');
+      const modalElements = [...root.querySelectorAll('[data-editor-modal]')];
+      const priceFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+
+      let state = null;
+      let activeTab = 'cards';
+      let inventoryQuery = '';
+      const inventoryFilters = { era: '', collectionId: '', group: '', cardClass: '', type: '', language: '', condition: '' };
+      let kitFilter = 'all';
+      let kitQuery = '';
+      let idSeed = 0;
+      let activeAlbumIndex = -1;
+      let activeAlbumPage = 0;
+      let albumCardQuery = '';
+      let selectedAlbumCardId = '';
+      let activeKitEditIndex = -1;
+      let activeCardEditIndex = -1;
+      let cardMypDraft = null;
+      let activeBoosterEditIndex = -1;
+      let boosterImagesDraft = [''];
+      let profileDirty = false;
+      let privacyDirty = false;
+      let mirrorDirty = false;
+      let cloudSaveTimer = 0;
+      let cloudSaving = false;
+      let cloudSaveQueued = false;
+
+      const setCloudSaveState = (label, mode = 'saved') => {
+        if (!saveStateBadge) return;
+        saveStateBadge.dataset.state = mode;
+        saveStateBadge.innerHTML = `<i></i> ${label}`;
+      };
+      const hasCloudChanges = () => {
+        if (!state) return false;
+        if (profileDirty || privacyDirty || mirrorDirty) return true;
+        if (Object.values(state.removed || {}).some((rows) => Array.isArray(rows) && rows.length)) return true;
+        return ['cards', 'boosters', 'kits', 'products', 'albums'].some((kind) => (state[kind] || []).some((item) => item._isNew || item._isDirty));
+      };
+      const flushCloudSave = async () => {
+        if (!state || !hasCloudChanges()) return;
+        if (cloudSaving) { cloudSaveQueued = true; return; }
+        cloudSaving = true;
+        clearTimeout(cloudSaveTimer);
+        setCloudSaveState('Salvando…', 'saving');
+        try {
+          await window.VaultCloud?.ready;
+          await window.VaultCloud.saveEditorState(state, { profileDirty, privacyDirty, mirrorDirty });
+          profileDirty = false;
+          privacyDirty = false;
+          mirrorDirty = false;
+          setCloudSaveState('Tudo salvo', 'saved');
+        } catch (error) {
+          setCloudSaveState('Erro ao salvar', 'error');
+          console.error('[Vault TCG] Falha ao salvar no Firebase:', error);
+        } finally {
+          cloudSaving = false;
+          if (cloudSaveQueued) { cloudSaveQueued = false; await flushCloudSave(); }
+        }
+      };
+      const scheduleCloudSave = (delay = 850) => {
+        if (!state || !hasCloudChanges()) return;
+        clearTimeout(cloudSaveTimer);
+        setCloudSaveState('Alterações pendentes', 'pending');
+        cloudSaveTimer = window.setTimeout(() => { flushCloudSave(); }, delay);
+      };
+
+      const clean = (value) => String(value ?? '').trim();
+      const toPrice = (value) => {
+        const raw = clean(value).replace(/R\$/gi, '').replace(/\s/g, '');
+        if (!raw || raw === '-') return null;
+        const normalized = raw.includes(',') ? raw.replace(/\./g, '').replace(',', '.') : raw;
+        const parsed = Number(normalized);
+        return Number.isFinite(parsed) ? parsed : null;
+      };
+      const toQuantity = (value, fallback = 1) => {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : fallback;
+      };
+      const prettyPrice = (value) => value === null || value === undefined ? '—' : priceFormatter.format(Number(value));
+      const safeSlug = (value) => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/gi, '-').replace(/(^-|-$)/g, '').toLowerCase() || 'colecao';
+      const escapeHtml = (value) => clean(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
+      const uid = (prefix) => `${prefix}-${Date.now().toString(36)}-${(idSeed += 1).toString(36)}`;
+      const normalizeText = (value) => clean(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const stableIdPart = (value) => clean(value).replace(/[^A-Za-z0-9]+/g, '-').replace(/(^-|-$)/g, '').toUpperCase() || 'SEM';
+      const tcgEras = () => Object.values(tcgConfig.eras || {});
+      const getEraConfig = (value) => {
+        const key = normalizeText(value).replace(/[^a-z0-9]+/g, '_').replace(/(^_|_$)/g, '');
+        if (tcgConfig.eras?.[value]) return tcgConfig.eras[value];
+        return tcgEras().find((era) => normalizeText(era.id) === normalizeText(value) || normalizeText(era.label) === normalizeText(value) || normalizeText(era.id).replace(/[^a-z0-9]/g, '') === key.replace(/[^a-z0-9]/g, '')) || null;
+      };
+      const findCollection = (eraValue, collectionValue) => {
+        const era = getEraConfig(eraValue); if (!era) return null;
+        const target = normalizeText(collectionValue);
+        const direct = (era.collections || []).find((entry) => [entry.id, entry.label].some((value) => normalizeText(value) === target));
+        if (direct) return direct;
+        const byCode = (era.collections || []).filter((entry) => normalizeText(entry.code) === target);
+        return byCode.length === 1 ? byCode[0] : null;
+      };
+      const inferEraFromCollection = (collectionValue) => {
+        const target = normalizeText(collectionValue); if (!target) return '';
+        const matches = tcgEras().filter((era) => (era.collections || []).some((entry) => [entry.id, entry.label, entry.code].some((value) => normalizeText(value) === target)));
+        return matches.length === 1 ? matches[0].id : '';
+      };
+      const normalizeGroupId = (value) => {
+        const key = normalizeText(value);
+        if (key === 'pokemon') return 'pokemon';
+        if (key === 'trainer' || key === 'treinador') return 'trainer';
+        if (key === 'energy' || key === 'energia') return 'energy';
+        return '';
+      };
+      const normalizeLanguageCode = (value) => {
+        const key = normalizeText(value);
+        const aliases = { ing: 'ING', en: 'ING', ingles: 'ING', br: 'BR', 'pt-br': 'BR', 'pt br': 'BR', portugues: 'POR', 'portugues pt br': 'BR', 'portugues pt-br': 'BR', japones: 'JAP', jap: 'JAP', chines: 'CH', ch: 'CH', alemao: 'ALE', ale: 'ALE', frances: 'FRA', fra: 'FRA', por: 'POR', espanhol: 'ESP', esp: 'ESP' };
+        if (aliases[key]) return aliases[key];
+        const option = (tcgConfig.languages || []).find((entry) => normalizeText(entry.id) === key || normalizeText(entry.label) === key);
+        return option?.id || clean(value).toUpperCase();
+      };
+      const languageDisplay = (value) => (tcgConfig.languages || []).find((entry) => entry.id === normalizeLanguageCode(value))?.label || clean(value);
+      const eraDisplay = (value) => getEraConfig(value)?.label || clean(value);
+      const groupDisplay = (value) => (tcgConfig.groups || []).find((entry) => entry.id === normalizeGroupId(value))?.label || clean(value);
+      const conditionRange = (condition) => tcgConfig.conditions?.[clean(condition).toUpperCase()] || null;
+      const integrityCondition = (value) => { const number = Number(value); if (!Number.isFinite(number) || number < 1 || number > 100) return ''; if (number <= 20) return 'D'; if (number <= 40) return 'HP'; if (number <= 60) return 'MP'; if (number <= 80) return 'SP'; return 'NM'; };
+      const inventoryFilter = (name) => inventoryMetadataFilters?.querySelector(`[data-inventory-filter="${name}"]`);
+      const syncInventoryFilters = ({ resetCollection = false, resetClass = false, resetType = false } = {}) => {
+        if (!inventoryMetadataFilters) return;
+        const era = getEraConfig(inventoryFilter('era')?.value);
+        const group = normalizeGroupId(inventoryFilter('group')?.value);
+        const collectionSelect = inventoryFilter('collectionId');
+        const classSelect = inventoryFilter('cardClass');
+        const typeSelect = inventoryFilter('type');
+        const oldCollection = resetCollection ? '' : clean(collectionSelect?.value);
+        const oldClass = resetClass ? '' : clean(classSelect?.value);
+        const oldType = resetType ? '' : clean(typeSelect?.value);
+        fillSelect(collectionSelect, era ? (era.collections || []).map((entry) => ({ value: entry.id, label: `${entry.label}${entry.code ? ` — ${entry.code}` : ''}` })) : [], 'Todas', oldCollection);
+        if (collectionSelect) collectionSelect.disabled = !era;
+        fillSelect(classSelect, era && group ? (era.classes?.[group] || []).map((value) => ({ value, label: value })) : [], 'Todas', oldClass);
+        if (classSelect) classSelect.disabled = !(era && group);
+        fillSelect(typeSelect, era && group === 'pokemon' ? (era.pokemonTypes || []).map((value) => ({ value, label: value })) : [], 'Todos', oldType);
+        if (typeSelect) typeSelect.disabled = !(era && group === 'pokemon');
+        inventoryMetadataFilters.querySelectorAll('[data-inventory-filter]').forEach((control) => { inventoryFilters[control.dataset.inventoryFilter] = clean(control.value); });
+      };
+      const matchesInventoryMetadata = (item, kind = 'cards') => {
+        if (inventoryFilters.era && clean(item.era) !== inventoryFilters.era) return false;
+        if (inventoryFilters.collectionId && clean(item.collectionId) !== inventoryFilters.collectionId) return false;
+        if (inventoryFilters.language && normalizeLanguageCode(item.language) !== inventoryFilters.language) return false;
+        if (kind !== 'cards') return true;
+        if (inventoryFilters.group && normalizeGroupId(item.group) !== inventoryFilters.group) return false;
+        if (inventoryFilters.cardClass && clean(item.cardClass) !== inventoryFilters.cardClass) return false;
+        if (inventoryFilters.type && clean(item.type) !== inventoryFilters.type) return false;
+        if (inventoryFilters.condition && clean(item.condition).toUpperCase() !== inventoryFilters.condition) return false;
+        return true;
+      };
+      const updateInventoryFilterVisibility = () => {
+        if (!inventoryMetadataFilters) return;
+        const isCard = activeTab === 'cards';
+        const isBooster = activeTab === 'boosters';
+        inventoryMetadataFilters.hidden = !(isCard || isBooster);
+        ['group', 'cardClass', 'type', 'condition'].forEach((name) => { const control = inventoryFilter(name); const label = control?.closest('label'); if (label) label.hidden = !isCard; });
+      };
+      const stableLanguage = (value) => normalizeLanguageCode(value) || 'BR';
+      const stableCardId = (item = {}) => `${stableIdPart(item.collectionId || item.collection || 'COLECAO')}-${stableIdPart(item.number || 'SEM-NUMERO')}-${stableLanguage(item.language || 'BR')}-${stableIdPart(item.condition || 'NM')}`;
+      const stableBoosterId = (item = {}) => `BOOSTER-${stableIdPart(item.collectionId || item.collection || item.name || 'BOOSTER')}-${stableLanguage(item.language || 'BR')}-${stableIdPart(item.year || 'ANO')}`;
+      const stableProductId = (item = {}) => `PRODUTO-${stableIdPart(item.name || 'PRODUTO')}`;
+      const getNameFromLink = (link, fallback) => {
+        try {
+          const url = new URL(link);
+          const card = url.searchParams.get('card');
+          if (card) return clean(card).replace(/\([^)]*\)/g, '').replace(/[-+]/g, ' ') || fallback;
+          const pathName = decodeURIComponent(url.pathname.split('/').filter(Boolean).pop() || '').replace(/[-_]+/g, ' ');
+          return pathName || fallback;
+        } catch (_) { return fallback; }
+      };
+      const imageUrls = (item) => {
+        const candidates = Array.isArray(item?.imageCandidates) ? item.imageCandidates : item?.image ? [item.image] : [];
+        return candidates.filter(Boolean).map((candidate) => /^(?:https?:|data:|blob:)/i.test(candidate) ? candidate : `${base}${String(candidate).replace(/^\/+/, '')}`);
+      };
+      const renderImage = (item, label = '') => {
+        const urls = imageUrls(item);
+        const name = item?.name || label || 'Item';
+        const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'TCG';
+        const imageKey = clean(item?._id || item?.itemId || item?.id || item?.albumId || '');
+        return `<div class="inventory-thumb"><span>${escapeHtml(initials)}</span>${urls[0] ? `<img src="${escapeHtml(urls[0])}" alt="${escapeHtml(name)}" loading="lazy" data-image-candidates="${escapeHtml(JSON.stringify(urls.slice(1)))}" data-image-index="0" data-image-item-id="${escapeHtml(imageKey)}" />` : ''}</div>`;
+      };
+      const itemPrice = (item) => item?.price ?? item?.averageGeneralPrice ?? item?.cheapestGeneralPrice ?? item?.leaguePrice ?? null;
+      const itemName = (item, kind) => item?.name || item?.collection || getNameFromLink(item?.linkLiga || '', kind === 'cards' ? 'Carta sem nome' : kind === 'products' ? 'Produto Pokémon' : 'Booster sem nome');
+      const normalizeCard = (item = {}, isNew = false) => {
+        const rawCollection = clean(item.collection || item['Coleção'] || '');
+        const era = getEraConfig(item.era || item.Era)?.id || inferEraFromCollection(rawCollection);
+        const collectionMatch = findCollection(era, item.collectionId || item['Coleção ID'] || rawCollection);
+        const group = normalizeGroupId(item.group || item.Grupo);
+        const explicitPokemonType = clean(item.pokemonType || item['Tipo Pokémon'] || item['Tipo Elemental']);
+        const explicitClass = clean(item.cardClass || item.classe || item.Classe || item.rarity || item.Raridade);
+        const legacyType = clean(item.Tipo || item.type);
+        const legacyClass = explicitClass || (!explicitPokemonType ? legacyType : '');
+        const pokemonType = explicitPokemonType || (explicitClass && group === 'pokemon' ? clean(item.type) : '');
+        const language = normalizeLanguageCode(item.language || item.Idioma || '') || '';
+        const integrityRaw = Number(item.integrity ?? item.Integridade);
+        const integrity = Number.isFinite(integrityRaw) && integrityRaw >= 1 && integrityRaw <= 100 ? Math.round(integrityRaw) : null;
+        const image = clean(item.image || item.Imagem || '');
+        const normalized = {
+          ...item,
+          name: item.name || item.Nome || getNameFromLink(item.linkLiga || '', 'Carta sem nome'),
+          number: clean(item.number || item.Número || item.Numeração || ''),
+          year: clean(item.year || item.Ano || ''),
+          era,
+          collectionId: collectionMatch?.id || clean(item.collectionId || item['Coleção ID'] || ''),
+          collection: collectionMatch?.label || rawCollection,
+          collectionCode: collectionMatch?.code || clean(item.collectionCode || item['Código da Coleção'] || ''),
+          group,
+          cardClass: legacyClass,
+          type: pokemonType,
+          language,
+          languageLabel: languageDisplay(language),
+          condition: clean(item.condition || item.Estado || '').toUpperCase(),
+          integrity,
+          quantity: toQuantity(item.quantity ?? item.Quantidade),
+          pricingSchemaVersion: Number(item.pricingSchemaVersion || 0), pricingSource: clean(item.pricingSource || item['Fonte de cotação'] || ''),
+          minimumPrice: toPrice(item.minimumPrice), cheapestCertifiedPrice: toPrice(item.cheapestCertifiedPrice ?? item.mypCheapestCertified), cheapestGeneralPrice: toPrice(item.cheapestGeneralPrice ?? item.mypCheapestGeneral), averageCertifiedPrice: toPrice(item.averageCertifiedPrice ?? item.mypAverageCertified), averageGeneralPrice: toPrice(item.averageGeneralPrice ?? item.mypAverageGeneral), price: toPrice(item.price ?? item.Preço),
+          certifiedOffers: Number(item.certifiedOffers ?? item.mypCertifiedOffers ?? 0), otherOffers: Number(item.otherOffers ?? item.mypOtherOffers ?? 0), totalOffers: Number(item.totalOffers ?? item.mypTotalOffers ?? 0),
+          leaguePrice: toPrice(item.leaguePrice), secondLeaguePrice: toPrice(item.secondLeaguePrice), thirdLeaguePrice: toPrice(item.thirdLeaguePrice), averageLeaguePrice: toPrice(item.averageLeaguePrice), medianLeaguePrice: toPrice(item.medianLeaguePrice), quickSalePrice: toPrice(item.quickSalePrice),
+          sellersGeneral: Number(item.sellersGeneral || 0), sellersSpecific: Number(item.sellersSpecific || 0), buyersGeneral: Number(item.buyersGeneral || 0), buyersSpecific: Number(item.buyersSpecific || 0),
+          linkLiga: item.linkLiga || item['Link Liga'] || '', linkMyp: item.linkMyp || item['Link MYP'] || '', linkCardmarket: item.linkCardmarket || item['Link Cardmarket'] || '', linkTcgplayer: item.linkTcgplayer || item['Link Tcgplayer'] || '', linkPriceCharting: item.linkPriceCharting || item['Link PriceCharting'] || '',
+          favorite: item.favorite === true || item.Favorita === true, priceHistory: Array.isArray(item.priceHistory) ? item.priceHistory : [], advancedData: item.advancedData && typeof item.advancedData === 'object' ? item.advancedData : {},
+          forSale: item.forSale !== false && item['À venda'] !== false, image, imageCandidates: Array.isArray(item.imageCandidates) && item.imageCandidates.length ? item.imageCandidates : image ? [image] : [],
+        };
+        const hasMypPricing = [normalized.cheapestCertifiedPrice, normalized.cheapestGeneralPrice, normalized.averageCertifiedPrice, normalized.averageGeneralPrice].some((value) => value !== null);
+        if (hasMypPricing || normalizeText(normalized.pricingSource) === 'myp') {
+          normalized.pricingSchemaVersion = Math.max(3, Number(normalized.pricingSchemaVersion || 0));
+          normalized.pricingSource = 'MYP';
+          normalized.minimumPrice = normalized.cheapestCertifiedPrice === null ? toPrice(item.minimumPrice) : Math.round(normalized.cheapestCertifiedPrice * 50) / 100;
+        } else {
+          // Compatibilidade de leitura com registros antigos. A interface e novas cotações usam somente MYP.
+          normalized.minimumPrice = toPrice(item.minimumPrice);
+        }
+        normalized.searchText = normalizeText(`${normalized.name} ${normalized.number} ${normalized.collection} ${normalized.collectionCode} ${eraDisplay(normalized.era)} ${groupDisplay(normalized.group)} ${normalized.cardClass} ${normalized.type} ${languageDisplay(normalized.language)} ${normalized.condition} ${normalized.integrity ?? ''} ${normalized.year}`);
+        normalized._id = item._id || item.id || item.Id || stableCardId(normalized);
+        normalized._isNew = item._isNew ?? isNew;
+        normalized._isDirty = item._isDirty ?? isNew;
+        return normalized;
+      };
+      const normalizeBooster = (item = {}, isNew = false) => {
+        const rawCollection = clean(item.collection || item['Coleção'] || item.name || item['Tipo de pacote'] || '');
+        const era = getEraConfig(item.era || item.Era)?.id || inferEraFromCollection(rawCollection);
+        const collectionMatch = findCollection(era, item.collectionId || item['Coleção ID'] || rawCollection);
+        const language = normalizeLanguageCode(item.language || item.Idioma || '') || '';
+        const legacyImage = clean(item.image || item.Imagem || '');
+        const explicitImages = Array.isArray(item.images || item.Imagens) ? (item.images || item.Imagens).map((value) => clean(value)).filter(Boolean).slice(0, 5) : [];
+        const images = [...new Set([...explicitImages, ...(legacyImage ? [legacyImage] : [])])].slice(0, 5);
+        const normalized = {
+          ...item,
+          name: item.name || item['Tipo de pacote'] || getNameFromLink(item.linkLiga || '', 'Booster sem nome'),
+          year: clean(item.year || item.Ano || ''),
+          era,
+          collectionId: collectionMatch?.id || clean(item.collectionId || item['Coleção ID'] || ''),
+          collection: collectionMatch?.label || rawCollection,
+          collectionCode: collectionMatch?.code || clean(item.collectionCode || item['Código da Coleção'] || ''),
+          language,
+          languageLabel: languageDisplay(language),
+          images,
+          quantity: toQuantity(item.quantity ?? item.Quantidade),
+          pricingSchemaVersion: 2, minimumPrice: null, quickSalePrice: null, leaguePrice: toPrice(item.leaguePrice), secondLeaguePrice: toPrice(item.secondLeaguePrice), thirdLeaguePrice: toPrice(item.thirdLeaguePrice), averageLeaguePrice: toPrice(item.averageLeaguePrice), medianLeaguePrice: toPrice(item.medianLeaguePrice), price: toPrice(item.price ?? item.Preço),
+          sellersGeneral: Number(item.sellersGeneral || 0), sellersSpecific: Number(item.sellersSpecific || 0), buyersGeneral: Number(item.buyersGeneral || 0), buyersSpecific: Number(item.buyersSpecific || 0),
+          linkLiga: item.linkLiga || item['Link Liga'] || '', priceHistory: Array.isArray(item.priceHistory) ? item.priceHistory : [], advancedData: item.advancedData && typeof item.advancedData === 'object' ? item.advancedData : {}, forSale: item.forSale !== false && item['À venda'] !== false,
+          image: images[0] || legacyImage, imageCandidates: images.length ? images : Array.isArray(item.imageCandidates) ? item.imageCandidates : legacyImage ? [legacyImage] : [],
+        };
+        const pricingV2 = Number(item.pricingSchemaVersion || 0) >= 2;
+        const legacyBuylist = toPrice(item.minimumPrice);
+        normalized.minimumPrice = normalized.leaguePrice === null ? (pricingV2 ? legacyBuylist : null) : Math.round(normalized.leaguePrice * 50) / 100;
+        normalized.quickSalePrice = pricingV2 ? toPrice(item.quickSalePrice) : (legacyBuylist ?? toPrice(item.quickSalePrice));
+        normalized.searchText = normalizeText(`${normalized.name} ${normalized.collection} ${normalized.collectionCode} ${eraDisplay(normalized.era)} ${languageDisplay(normalized.language)} ${normalized.year} booster pacote`);
+        normalized._id = item._id || item.id || item.Id || stableBoosterId(normalized);
+        normalized._isNew = item._isNew ?? isNew;
+        normalized._isDirty = item._isDirty ?? (!pricingV2 && !isNew);
+        return normalized;
+      };
+      const normalizeProduct = (item = {}, isNew = false) => {
+        const image = clean(item.image || item.Imagem || '');
+        const normalized = {
+          ...item,
+          name: item.name || item.Nome || getNameFromLink(item.linkLiga || item['Link Liga'] || '', 'Produto Pokémon'),
+          description: item.description || item['Descrição'] || '',
+          linkLiga: item.linkLiga || item['Link Liga'] || '',
+          price: toPrice(item.price ?? item['Preço']),
+          quantity: toQuantity(item.quantity ?? item['Quantidade'], 1),
+          forSale: item.forSale !== false && item['À venda'] !== false && item['À venda'] !== 'Não',
+          image,
+          imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : image ? [image] : [],
+        };
+        normalized._id = item._id || item.id || item.Id || stableProductId(normalized);
+        normalized._isNew = item._isNew ?? isNew;
+        normalized._isDirty = item._isDirty ?? false;
+        return normalized;
+      };
+      const legacyKitContents = (contents, cards, boosters) => clean(contents).split('|').map((part) => clean(part)).filter(Boolean).map((rawName) => {
+        const quantityMatch = rawName.match(/^(\d+)\s*[x×]\s*(.+)$/i);
+        const quantity = quantityMatch ? toQuantity(quantityMatch[1]) : 1;
+        const name = quantityMatch ? clean(quantityMatch[2]) : rawName;
+        const cardMatches = cards.filter((item) => normalizeText(item.name) === normalizeText(name));
+        const boosterMatches = boosters.filter((item) => normalizeText(item.name) === normalizeText(name));
+        const source = cardMatches.length === 1 ? cardMatches[0] : boosterMatches.length === 1 ? boosterMatches[0] : null;
+        return { kind: cardMatches.length ? 'cards' : 'boosters', itemId: source?._id || '', name, quantity, unitPrice: itemPrice(source), imageCandidates: source?.imageCandidates || [] };
+      });
+      const normalizeKit = (item = {}, cards = [], boosters = []) => {
+        const contentItems = Array.isArray(item.contentItems) && item.contentItems.length ? item.contentItems.map((entry) => {
+          const kind = entry.kind === 'boosters' ? 'boosters' : 'cards';
+          const sources = kind === 'boosters' ? boosters : cards;
+          const byId = sources.find((source) => source._id === (entry.itemId || entry.item_id));
+          const byName = !byId ? sources.filter((source) => normalizeText(source.name) === normalizeText(entry.name || '')) : [];
+          const source = byId || (byName.length === 1 ? byName[0] : null);
+          return { kind, itemId: source?._id || entry.itemId || entry.item_id || '', name: source?.name || entry.name || 'Item', quantity: toQuantity(entry.quantity), unitPrice: toPrice(entry.unitPrice) ?? itemPrice(source), imageCandidates: source?.imageCandidates || (Array.isArray(entry.imageCandidates) ? entry.imageCandidates : []) };
+        }) : legacyKitContents(item.contents, cards, boosters);
+        const sourceTotal = toPrice(item.sourceTotal) ?? contentItems.reduce((sum, entry) => sum + (entry.unitPrice || 0) * entry.quantity, 0);
+        return { ...item, _id: item._id || item.id || item.Id || uid('kit'), _isNew: item._isNew ?? false, name: item.name || 'Kit sem nome', description: item.description || '', contents: item.contents || contentItems.map((entry) => `${entry.quantity}x ${entry.name}`).join(' | '), contentItems, sourceTotal, quantity: toQuantity(item.quantity), price: toPrice(item.price), forSale: item.forSale !== false, image: item.image || '', imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : [] };
+      };
+
+      const fillSelect = (select, options, placeholder, selected = '') => {
+        if (!select) return;
+        select.innerHTML = `<option value="">${escapeHtml(placeholder)}</option>${options.map((entry) => `<option value="${escapeHtml(entry.value)}" ${entry.value === selected ? 'selected' : ''}>${escapeHtml(entry.label)}</option>`).join('')}`;
+      };
+      const setFieldVisible = (selector, visible) => {
+        const field = root.querySelector(selector); if (!field) return;
+        field.hidden = !visible;
+        const control = field.querySelector('select, input'); if (control) control.disabled = !visible;
+      };
+      const syncCardForm = ({ resetCollection = false, resetClass = false, resetType = false, resetIntegrity = false } = {}) => {
+        const form = root.querySelector('[data-card-form]'); if (!form) return;
+        const eraId = clean(form.elements.era?.value);
+        const groupId = clean(form.elements.group?.value);
+        const condition = clean(form.elements.condition?.value).toUpperCase();
+        const era = getEraConfig(eraId);
+        const collectionSelect = form.querySelector('[data-card-collection]');
+        const classSelect = form.querySelector('[data-card-class]');
+        const typeSelect = form.querySelector('[data-card-type]');
+        const integrity = form.querySelector('[data-card-integrity]');
+        const previousCollection = resetCollection ? '' : clean(collectionSelect?.value);
+        const previousClass = resetClass ? '' : clean(classSelect?.value);
+        const previousType = resetType ? '' : clean(typeSelect?.value);
+        if (era) {
+          setFieldVisible('[data-card-field="collection"]', true);
+          fillSelect(collectionSelect, (era.collections || []).map((entry) => ({ value: entry.id, label: `${entry.label}${entry.code ? ` — ${entry.code}` : ''}` })), 'Selecione a Coleção', previousCollection);
+          const selectedCollection = findCollection(era.id, collectionSelect?.value);
+          const code = root.querySelector('[data-card-collection-code]'); if (code) code.textContent = selectedCollection?.code ? `Código: ${selectedCollection.code}` : '';
+        } else {
+          setFieldVisible('[data-card-field="collection"]', false); if (collectionSelect) collectionSelect.innerHTML = '';
+          const code = root.querySelector('[data-card-collection-code]'); if (code) code.textContent = '';
+        }
+        if (era && groupId && era.classes?.[groupId]) {
+          setFieldVisible('[data-card-field="class"]', true);
+          fillSelect(classSelect, era.classes[groupId].map((value) => ({ value, label: value })), 'Selecione a Classe', previousClass);
+        } else {
+          setFieldVisible('[data-card-field="class"]', false); if (classSelect) classSelect.innerHTML = '';
+        }
+        if (era && groupId === 'pokemon') {
+          setFieldVisible('[data-card-field="type"]', true);
+          fillSelect(typeSelect, (era.pokemonTypes || []).map((value) => ({ value, label: value })), 'Selecione o Tipo', previousType);
+        } else {
+          setFieldVisible('[data-card-field="type"]', false); if (typeSelect) { typeSelect.innerHTML = ''; typeSelect.value = ''; }
+        }
+        const range = conditionRange(condition);
+        if (range) {
+          setFieldVisible('[data-card-field="integrity"]', true);
+          integrity.min = String(range.min); integrity.max = String(range.max);
+          const suggestedIntegrity = Math.round((Number(range.min) + Number(range.max)) / 2);
+          if (resetIntegrity || !integrity.value || Number(integrity.value) < range.min || Number(integrity.value) > range.max) integrity.value = String(suggestedIntegrity);
+          const hint = root.querySelector('[data-card-integrity-hint]'); if (hint) hint.textContent = `${range.min}% – ${range.max}% para ${condition} · sugestão automática: ${suggestedIntegrity}%`;
+        } else {
+          setFieldVisible('[data-card-field="integrity"]', false); if (integrity) integrity.value = '';
+          const hint = root.querySelector('[data-card-integrity-hint]'); if (hint) hint.textContent = '';
+        }
+      };
+      const syncBoosterForm = ({ resetCollection = false } = {}) => {
+        const form = root.querySelector('[data-booster-form]'); if (!form) return;
+        const era = getEraConfig(form.elements.era?.value);
+        const select = form.querySelector('[data-booster-collection]');
+        const previous = resetCollection ? '' : clean(select?.value);
+        if (era) {
+          setFieldVisible('[data-booster-field="collection"]', true);
+          fillSelect(select, (era.collections || []).map((entry) => ({ value: entry.id, label: `${entry.label}${entry.code ? ` — ${entry.code}` : ''}` })), 'Selecione a Coleção', previous);
+          const selected = findCollection(era.id, select?.value);
+          const code = root.querySelector('[data-booster-collection-code]'); if (code) code.textContent = selected?.code ? `Código: ${selected.code}` : '';
+        } else {
+          setFieldVisible('[data-booster-field="collection"]', false); if (select) select.innerHTML = '';
+          const code = root.querySelector('[data-booster-collection-code]'); if (code) code.textContent = '';
+        }
+      };
+      const boosterImageSrc = (value) => /^(?:https?:|data:|blob:)/i.test(clean(value)) ? clean(value) : clean(value) ? `${base}${clean(value).replace(/^\/+/, '')}` : '';
+      const renderBoosterImageEditor = () => {
+        const editor = root.querySelector('[data-booster-image-editor]'); if (!editor) return;
+        if (!boosterImagesDraft.length) boosterImagesDraft = [''];
+        editor.innerHTML = boosterImagesDraft.map((value, index) => {
+          const src = boosterImageSrc(value);
+          return `<div class="booster-image-row" data-booster-image-row="${index}"><div class="booster-image-preview">${src ? `<img src="${escapeHtml(src)}" alt="Prévia ${index + 1}" loading="lazy" />` : '<span>▱</span>'}${index === 0 ? '<b>Capa</b>' : ''}</div><label><span>Imagem ${index + 1}</span><input type="text" value="${escapeHtml(value)}" placeholder="URL ou caminho da imagem" data-booster-image-input="${index}" /></label><div class="booster-image-actions"><button type="button" data-booster-image-up="${index}" ${index === 0 ? 'disabled' : ''} aria-label="Mover imagem para cima">↑</button><button type="button" data-booster-image-down="${index}" ${index === boosterImagesDraft.length - 1 ? 'disabled' : ''} aria-label="Mover imagem para baixo">↓</button><button type="button" data-booster-image-remove="${index}" aria-label="Remover imagem">×</button></div></div>`;
+        }).join('');
+        const count = boosterImagesDraft.filter((value) => clean(value)).length;
+        const counter = root.querySelector('[data-booster-image-counter]'); if (counter) counter.textContent = `${count}/5 imagens`;
+        const add = root.querySelector('[data-add-booster-image]'); if (add) add.disabled = boosterImagesDraft.length >= 5;
+      };
+      const showFormFeedback = (selector, message = '') => {
+        const node = root.querySelector(selector); if (!node) return;
+        node.hidden = !message; node.textContent = message;
+      };
+      const validateCardPayload = (payload) => {
+        const era = getEraConfig(payload.era); if (!era) return 'Selecione uma Era válida.';
+        const collection = findCollection(era.id, payload.collectionId); if (!collection) return 'Selecione uma Coleção pertencente à Era escolhida.';
+        const group = normalizeGroupId(payload.group); if (!group) return 'Selecione um Grupo válido.';
+        if (!era.classes?.[group]?.includes(payload.cardClass)) return 'Selecione uma Classe compatível com Era + Grupo.';
+        if (group === 'pokemon' && !era.pokemonTypes?.includes(payload.type)) return 'Selecione um Tipo válido para esta Era.';
+        if (group !== 'pokemon' && payload.type) return 'Tipo só pode ser salvo em cartas do Grupo Pokémon.';
+        const languageValid = (tcgConfig.languages || []).some((entry) => entry.id === payload.language); if (!languageValid) return 'Selecione um Idioma válido.';
+        const range = conditionRange(payload.condition); if (!range) return 'Selecione um Estado válido.';
+        if (!Number.isFinite(payload.integrity) || payload.integrity < range.min || payload.integrity > range.max) return `Integridade deve ficar entre ${range.min}% e ${range.max}% para ${payload.condition}.`;
+        const year = Number(payload.year); if (!Number.isFinite(year) || year < 1996 || year > 2100) return 'Informe um Ano válido.';
+        if (!clean(payload.name)) return 'Informe o Nome da carta.';
+        if (!clean(payload.number) || clean(payload.number).length > 40) return 'Informe uma Numeração válida.';
+        return '';
+      };
+      const mypHistoryEntry = (result) => {
+        const prices = result?.prices || {};
+        return {
+          date: result?.fetchedAt || new Date().toISOString(),
+          pricingSchemaVersion: 3,
+          source: 'MYP',
+          minimum: toPrice(prices.minimum),
+          cheapestCertified: toPrice(prices.cheapestCertified),
+          cheapestGeneral: toPrice(prices.cheapestGeneral),
+          averageCertified: toPrice(prices.averageCertified),
+          averageGeneral: toPrice(prices.averageGeneral),
+        };
+      };
+      const mypCardPatch = (result, current = {}) => {
+        const prices = result?.prices || {};
+        const quote = mypHistoryEntry(result);
+        const history = Array.isArray(current.priceHistory) ? [...current.priceHistory] : [];
+        const last = history[history.length - 1];
+        const sameQuote = last && ['minimum', 'cheapestCertified', 'cheapestGeneral', 'averageCertified', 'averageGeneral'].every((field) => toPrice(last[field]) === toPrice(quote[field]));
+        if (!sameQuote || clean(last?.source).toUpperCase() !== 'MYP') history.push(quote);
+        return {
+          pricingSchemaVersion: 3,
+          pricingSource: 'MYP',
+          linkMyp: clean(result?.linkMyp || current.linkMyp || ''),
+          minimumPrice: toPrice(prices.minimum),
+          cheapestCertifiedPrice: toPrice(prices.cheapestCertified),
+          cheapestGeneralPrice: toPrice(prices.cheapestGeneral),
+          averageCertifiedPrice: toPrice(prices.averageCertified),
+          averageGeneralPrice: toPrice(prices.averageGeneral),
+          certifiedOffers: Number(prices.certifiedOffers || 0),
+          otherOffers: Number(prices.otherOffers || 0),
+          totalOffers: Number(prices.totalOffers || 0),
+          priceHistory: history.slice(-120),
+          advancedData: {
+            ...(current.advancedData || {}),
+            MYP: {
+              fonte: 'MYP Cards',
+              codigo: result?.metadata?.mypCode || '',
+              codigoEdicao: result?.mypEditionCode || '',
+              tipoCarta: result?.metadata?.cardType || '',
+              raridade: result?.metadata?.rarity || '',
+              lancamento: result?.metadata?.releaseDate || '',
+              hp: result?.metadata?.hp || '',
+              ilustrador: result?.metadata?.illustrator || '',
+              ofertasCertificadas: Number(prices.certifiedOffers || 0),
+              ofertasOutrosVendedores: Number(prices.otherOffers || 0),
+              ofertasTotais: Number(prices.totalOffers || 0),
+            },
+            'Última cotação': { data: quote.date, fonte: 'MYP' },
+          },
+        };
+      };
+      const setCardAutofillStatus = (message, mode = '') => {
+        const node = root.querySelector('[data-card-myp-status]');
+        if (!node) return;
+        node.textContent = message;
+        if (mode) node.dataset.state = mode; else delete node.dataset.state;
+      };
+      const applyMypResultToCardForm = (result) => {
+        const form = root.querySelector('[data-card-form]');
+        if (!form) throw new Error('Formulário de carta não encontrado.');
+        if (!result?.eraId || !getEraConfig(result.eraId)) throw new Error('A Era retornada pela MYP ainda não está mapeada no Vault.');
+        const groupId = normalizeGroupId(result.groupId || result.group);
+        if (!groupId) throw new Error('O Grupo retornado pela MYP ainda não está mapeado no Vault.');
+        form.elements.linkMyp.value = clean(result.linkMyp || form.elements.linkMyp.value);
+        form.elements.name.value = clean(result.name);
+        form.elements.number.value = clean(result.number);
+        form.elements.year.value = result.year || '';
+        form.elements.era.value = clean(result.eraId);
+        form.elements.group.value = groupId;
+        syncCardForm({ resetCollection: true, resetClass: true, resetType: true });
+        const collection = findCollection(result.eraId, result.collectionId || result.collection);
+        if (!collection) throw new Error(`A coleção "${result.collection || 'retornada pela MYP'}" ainda não está mapeada no Vault.`);
+        form.elements.collectionId.value = collection.id;
+        syncCardForm();
+        if (!getEraConfig(result.eraId)?.classes?.[groupId]?.includes(result.cardClass)) throw new Error(`A classe "${result.cardClass || 'desconhecida'}" retornada pela MYP ainda não está mapeada para esta Era.`);
+        form.elements.cardClass.value = result.cardClass;
+        if (groupId === 'pokemon') {
+          const era = getEraConfig(result.eraId);
+          if (!era?.pokemonTypes?.includes(result.type)) throw new Error(`O tipo "${result.type || 'desconhecido'}" retornado pela MYP ainda não está mapeado para esta Era.`);
+          form.elements.type.value = result.type;
+        }
+        form.elements.image.value = clean(result.image);
+        cardMypDraft = result;
+        const prices = result.prices || {};
+        setCardAutofillStatus(`Preenchido pela MYP · certificado ${prettyPrice(prices.cheapestCertified)} · geral ${prettyPrice(prices.cheapestGeneral)} · mínimo ${prettyPrice(prices.minimum)}`, 'success');
+      };
+      const refreshMypQuoteForCard = async (item) => {
+        if (!clean(item?.linkMyp)) throw new Error('Esta carta ainda não possui link da MYP.');
+        const result = await window.VaultCloud?.fetchMypCardInfo?.(item.linkMyp);
+        if (!result) throw new Error('A API MYP não retornou dados.');
+        const patched = normalizeCard({
+          ...item,
+          ...mypCardPatch(result, item),
+          image: item.image || result.image || '',
+          imageCandidates: item.imageCandidates?.length ? item.imageCandidates : (result.image ? [result.image] : []),
+        }, false);
+        patched._isNew = item._isNew;
+        patched._isDirty = true;
+        return patched;
+      };
+
+      const validateBoosterPayload = (payload) => {
+        const era = getEraConfig(payload.era); if (!era) return 'Selecione uma Era válida.';
+        const collection = findCollection(era.id, payload.collectionId); if (!collection) return 'Selecione uma Coleção pertencente à Era escolhida.';
+        if (!(tcgConfig.languages || []).some((entry) => entry.id === payload.language)) return 'Selecione um Idioma válido.';
+        const year = Number(payload.year); if (!Number.isFinite(year) || year < 1996 || year > 2100) return 'Informe um Ano válido.';
+        if (!clean(payload.name)) return 'Informe o Nome do booster.';
+        if ((payload.images || []).length > 5) return 'Um Booster pode possuir no máximo 5 imagens.';
+        return '';
+      };
+      const resetCardForm = () => {
+        activeCardEditIndex = -1;
+        cardMypDraft = null;
+        const form = root.querySelector('[data-card-form]'); if (!form) return;
+        form.reset(); form.dataset.editIndex = '';
+        form.elements.quantity.value = 1; form.elements.language.value = 'BR'; form.elements.forSale.checked = true;
+        showFormFeedback('[data-card-form-feedback]');
+        const mypStatus = root.querySelector('[data-card-myp-status]'); if (mypStatus) mypStatus.textContent = 'Você ainda poderá revisar qualquer campo antes de adicionar.';
+        const title = root.querySelector('#card-modal-title'); if (title) title.textContent = 'Adicionar carta';
+        const eyebrow = root.querySelector('[data-card-modal-eyebrow]'); if (eyebrow) eyebrow.textContent = 'Nova carta';
+        const submit = root.querySelector('[data-card-submit-label]'); if (submit) submit.textContent = 'Adicionar carta';
+        syncCardForm({ resetCollection: true, resetClass: true, resetType: true, resetIntegrity: true });
+      };
+      const openCardEditor = (index) => {
+        const item = state?.cards?.[index]; const form = root.querySelector('[data-card-form]'); if (!item || !form) return;
+        activeCardEditIndex = index; cardMypDraft = null; form.dataset.editIndex = String(index); form.reset();
+        form.elements.linkMyp.value = item.linkMyp || '';
+        form.elements.name.value = item.name || ''; form.elements.number.value = item.number || ''; form.elements.year.value = item.year || '';
+        form.elements.era.value = item.era || inferEraFromCollection(item.collection); form.elements.group.value = item.group || '';
+        form.elements.condition.value = item.condition || ''; form.elements.language.value = normalizeLanguageCode(item.language) || '';
+        form.elements.quantity.value = toQuantity(item.quantity, 1); form.elements.price.value = item.price ?? ''; form.elements.image.value = item.image || ''; form.elements.forSale.checked = item.forSale !== false;
+        syncCardForm();
+        form.elements.collectionId.value = item.collectionId || findCollection(form.elements.era.value, item.collection)?.id || ''; syncCardForm();
+        form.elements.cardClass.value = item.cardClass || ''; if (form.elements.type && item.group === 'pokemon') form.elements.type.value = item.type || '';
+        form.elements.integrity.value = item.integrity ?? '';
+        const title = root.querySelector('#card-modal-title'); if (title) title.textContent = `Editar ${item.name || 'carta'}`;
+        const eyebrow = root.querySelector('[data-card-modal-eyebrow]'); if (eyebrow) eyebrow.textContent = 'Editar carta';
+        const submit = root.querySelector('[data-card-submit-label]'); if (submit) submit.textContent = 'Salvar alterações';
+        const mypStatus = root.querySelector('[data-card-myp-status]');
+        if (mypStatus) mypStatus.textContent = item.pricingSource === 'MYP' ? `Cotação MYP carregada · ${formatQuoteDate(lastQuoteDate(item))}` : 'Cole um link MYP e clique em preencher para atualizar os dados e a cotação.';
+        showFormFeedback('[data-card-form-feedback]'); openModal('card');
+      };
+      const resetBoosterForm = () => {
+        activeBoosterEditIndex = -1; boosterImagesDraft = [''];
+        const form = root.querySelector('[data-booster-form]'); if (!form) return;
+        form.reset(); form.dataset.editIndex = ''; form.elements.quantity.value = 1; form.elements.language.value = 'BR'; form.elements.forSale.checked = true;
+        const title = root.querySelector('#booster-modal-title'); if (title) title.textContent = 'Adicionar booster';
+        const eyebrow = root.querySelector('[data-booster-modal-eyebrow]'); if (eyebrow) eyebrow.textContent = 'Novo booster';
+        const submit = root.querySelector('[data-booster-submit-label]'); if (submit) submit.textContent = 'Adicionar booster';
+        showFormFeedback('[data-booster-form-feedback]'); syncBoosterForm({ resetCollection: true }); renderBoosterImageEditor();
+      };
+      const openBoosterEditor = (index) => {
+        const item = state?.boosters?.[index]; const form = root.querySelector('[data-booster-form]'); if (!item || !form) return;
+        activeBoosterEditIndex = index; form.dataset.editIndex = String(index); form.reset();
+        form.elements.name.value = item.name || ''; form.elements.year.value = item.year || ''; form.elements.era.value = item.era || inferEraFromCollection(item.collection);
+        form.elements.language.value = normalizeLanguageCode(item.language) || ''; form.elements.quantity.value = toQuantity(item.quantity, 1); form.elements.price.value = item.price ?? ''; form.elements.forSale.checked = item.forSale !== false;
+        syncBoosterForm(); form.elements.collectionId.value = item.collectionId || findCollection(form.elements.era.value, item.collection)?.id || ''; syncBoosterForm();
+        boosterImagesDraft = (Array.isArray(item.images) && item.images.length ? item.images : item.image ? [item.image] : []).slice(0, 5); if (!boosterImagesDraft.length) boosterImagesDraft = ['']; renderBoosterImageEditor();
+        const title = root.querySelector('#booster-modal-title'); if (title) title.textContent = `Editar ${item.name || 'booster'}`;
+        const eyebrow = root.querySelector('[data-booster-modal-eyebrow]'); if (eyebrow) eyebrow.textContent = 'Editar booster';
+        const submit = root.querySelector('[data-booster-submit-label]'); if (submit) submit.textContent = 'Salvar alterações';
+        showFormFeedback('[data-booster-form-feedback]'); openModal('booster');
+      };
+
+      const parseAlbumFormat = (value = '3x3') => {
+        const match = clean(value).match(/([2-6])\s*(?:x|por)\s*([2-6])/i);
+        const columns = match ? Number(match[1]) : 3;
+        const rows = match ? Number(match[2]) : 3;
+        return { format: `${columns}x${rows}`, columns, rows, capacity: columns * rows };
+      };
+      const sameCardReference = (slot, card) => {
+        if (!slot || !card) return false;
+        const slotId = slot.itemId || slot.cardId || slot.Id || '';
+        if (slotId && slotId === card._id) return true;
+        if (slot.linkLiga && card.linkLiga && normalizeText(slot.linkLiga.replace(/([?&])show=\d+/i, '$1')) === normalizeText(card.linkLiga.replace(/([?&])show=\d+/i, '$1'))) return true;
+        return normalizeText(slot.name) === normalizeText(card.name) && (!slot.number || !card.number || normalizeText(slot.number) === normalizeText(card.number));
+      };
+      const normalizeAlbumSlot = (slot, cards = []) => {
+        if (!slot || typeof slot !== 'object') return null;
+        const card = cards.find((candidate) => sameCardReference(slot, candidate));
+        return {
+          itemId: card?._id || slot.itemId || slot.cardId || '',
+          linkLiga: card?.linkLiga || slot.linkLiga || '',
+          language: card?.language || slot.language || '',
+          condition: card?.condition || slot.condition || '',
+          name: card?.name || slot.name || 'Carta não localizada',
+          number: card?.number || slot.number || '',
+          collection: card?.collection || slot.collection || '',
+          imageCandidates: Array.isArray(card?.imageCandidates) ? [...card.imageCandidates] : Array.isArray(slot.imageCandidates) ? [...slot.imageCandidates] : [],
+        };
+      };
+      const normalizeAlbum = (item = {}, cards = []) => {
+        const layout = parseAlbumFormat(item.format || '3x3');
+        const sourcePages = Array.isArray(item.pages) ? item.pages : [];
+        const pages = (sourcePages.length ? sourcePages : [{ slots: [] }]).map((page) => {
+          const sourceSlots = Array.isArray(page) ? page : Array.isArray(page?.slots) ? page.slots : [];
+          return { slots: Array.from({ length: layout.capacity }, (_, index) => normalizeAlbumSlot(sourceSlots[index], cards)) };
+        });
+        const firstSlot = pages.flatMap((page) => page.slots).find(Boolean);
+        return {
+          _id: item._id || item.id || item.Id || uid('album'),
+          albumId: item.albumId || item.id || item.Id || item._id || uid('album-id'),
+          _isNew: item._isNew ?? false,
+          _isDirty: item._isDirty ?? false,
+          name: item.name || 'Álbum sem nome',
+          description: item.description || '',
+          format: layout.format,
+          columns: layout.columns,
+          rows: layout.rows,
+          pages,
+          coverStyle: ['vault', 'leather', 'holo', 'minimal'].includes(item.coverStyle) ? item.coverStyle : 'vault',
+          coverColor: clean(item.coverColor) || '#14253d',
+          coverImage: clean(item.coverImage || ''),
+          coverTitle: clean(item.coverTitle || item.name || ''),
+          imageCandidates: Array.isArray(item.imageCandidates) ? item.imageCandidates : firstSlot?.imageCandidates || [],
+        };
+      };
+
+      const proposalPolicies = ['flexible', 'none', 'fixed_price_multi_only', 'no_defined_price', 'multi_only'];
+      const normalizeProposalTerms = (terms = {}) => ({
+        policy: proposalPolicies.includes(terms.policy) ? terms.policy : 'flexible',
+        flexibleDiscounts: terms.flexibleDiscounts !== false,
+        discountTiers: (Array.isArray(terms.discountTiers) ? terms.discountTiers : [])
+          .map((tier) => ({ minValue: Math.max(0, toPrice(tier.minValue) || 0), maxDiscount: Math.min(100, Math.max(0, toPrice(tier.maxDiscount) || 0)) }))
+          .sort((left, right) => left.minValue - right.minValue),
+      });
+
+      const makeState = (profile, items = {}, source = 'new') => {
+        const cards = (items.cards || []).map((item) => normalizeCard(item, false));
+        const boosters = (items.boosters || []).map((item) => normalizeBooster(item, false));
+        const normalizedProfile = { owner: '', title: '', email: '', phone: '', password: '', public: false, selling: true, showQuantity: false, showCollectionValue: true, featured: false, version: 1, profilePhoto: '', profileBanner: '', palette: ['#54e8df', '#bc91ff', '#f4c25c'], priceDisplayFallback: 'league_average_then_lowest', scores: { security: 30, visibility: 30 }, emailVerified: false, ...profile };
+        if (!['league_average_then_lowest', 'league_lowest_then_average', 'consult'].includes(normalizedProfile.priceDisplayFallback)) normalizedProfile.priceDisplayFallback = 'league_average_then_lowest';
+        normalizedProfile.palette = Array.isArray(normalizedProfile.palette) && normalizedProfile.palette.length >= 3 ? normalizedProfile.palette.slice(0, 3) : ['#54e8df', '#bc91ff', '#f4c25c'];
+        normalizedProfile.profilePhoto = clean(normalizedProfile.profilePhoto);
+        normalizedProfile.profileBanner = clean(normalizedProfile.profileBanner);
+        normalizedProfile.showCollectionValue = normalizedProfile.showCollectionValue !== false;
+        normalizedProfile.scores = {
+          security: Number.isFinite(Number(normalizedProfile.scores?.security)) ? Math.min(100, Math.max(0, Number(normalizedProfile.scores.security))) : 30,
+          visibility: Number.isFinite(Number(normalizedProfile.scores?.visibility)) ? Math.min(100, Math.max(0, Number(normalizedProfile.scores.visibility))) : 30,
+        };
+        normalizedProfile.emailVerified = normalizedProfile.emailVerified === true;
+        normalizedProfile.proposalTerms = normalizeProposalTerms(profile?.proposalTerms);
+        return {
+          profile: normalizedProfile,
+          cards, boosters,
+          products: (items.products || []).map((item) => normalizeProduct(item, false)),
+          kits: (items.kits || []).map((item) => normalizeKit(item, cards, boosters)),
+          albums: (items.albums || []).map((item) => normalizeAlbum(item, cards)),
+          receivedProposals: Array.isArray(items.receivedProposals) ? items.receivedProposals : [],
+          proposalsLoaded: false, proposalsUnavailable: false,
+          removed: { cards: [], boosters: [], kits: [], products: [], albums: [] },
+          kitDraft: [], source,
+        };
+      };
+
+      const renderDiscountTiers = () => {
+        const list = root.querySelector('[data-discount-tier-list]');
+        if (!list || !state) return;
+        const tiers = state.profile.proposalTerms.discountTiers;
+        list.innerHTML = tiers.length ? tiers.map((tier, index) => `<div class="workspace-tier-row"><label><span>A partir de R$</span><input type="number" min="0" step="0.01" value="${tier.minValue}" data-tier-edit="${index}:minValue" /></label><label><span>Desconto máximo</span><div><input type="number" min="0" max="100" step="0.1" value="${tier.maxDiscount}" data-tier-edit="${index}:maxDiscount" /><b>%</b></div></label><button type="button" data-remove-discount-tier="${index}" aria-label="Remover marco">×</button></div>`).join('') : '<div class="workspace-tier-empty"><span>◇</span><p>Nenhum marco definido. Sem flexibilidade, o desconto máximo será 0%.</p></div>';
+      };
+
+      const renderPersonalization = () => {
+        if (!state) return;
+        const mediaUrl = (rawValue) => {
+          const raw = clean(rawValue);
+          return raw && !/^(?:https?:|data:|blob:|\/)/i.test(raw) ? `${base}${raw.replace(/^\/+/, '')}` : raw;
+        };
+        const initials = clean(state.profile.owner).split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'TC';
+        const rawPhoto = clean(state.profile.profilePhoto);
+        const photoUrl = mediaUrl(rawPhoto);
+        const preview = root.querySelector('[data-profile-photo-preview]');
+        if (preview) preview.innerHTML = photoUrl ? `<img src="${escapeHtml(photoUrl)}" alt="Foto de perfil" />` : `<span>${escapeHtml(initials)}</span>`;
+        const photoPath = root.querySelector('[data-profile-photo-path]'); if (photoPath) photoPath.value = rawPhoto;
+        const bannerPath = root.querySelector('[data-profile-banner-path]'); if (bannerPath) bannerPath.value = clean(state.profile.profileBanner);
+
+        root.querySelectorAll('[data-palette-color]').forEach((input) => {
+          const index = Number(input.dataset.paletteColor);
+          input.value = state.profile.palette[index] || ['#54e8df', '#bc91ff', '#f4c25c'][index];
+        });
+        const palettePreview = root.querySelector('[data-palette-preview]');
+        if (palettePreview) {
+          palettePreview.style.setProperty('--preview-primary', state.profile.palette[0] || '#54e8df');
+          palettePreview.style.setProperty('--preview-secondary', state.profile.palette[1] || '#bc91ff');
+          palettePreview.style.setProperty('--preview-accent', state.profile.palette[2] || '#f4c25c');
+        }
+
+        const live = root.querySelector('[data-public-profile-preview]');
+        if (live) {
+          live.style.setProperty('--preview-primary', state.profile.palette[0] || '#54e8df');
+          live.style.setProperty('--preview-secondary', state.profile.palette[1] || '#bc91ff');
+          live.style.setProperty('--preview-accent', state.profile.palette[2] || '#f4c25c');
+          const liveAvatar = live.querySelector('[data-live-preview-avatar]');
+          if (liveAvatar) liveAvatar.innerHTML = photoUrl ? `<img src="${escapeHtml(photoUrl)}" alt="" />` : escapeHtml(initials);
+          const banner = mediaUrl(state.profile.profileBanner);
+          const bannerNode = live.querySelector('[data-live-preview-banner]');
+          if (bannerNode) {
+            bannerNode.style.backgroundImage = banner ? `linear-gradient(90deg, rgba(3,8,15,.25), rgba(3,8,15,.7)), url("${banner.replace(/"/g, '\\"')}")` : '';
+            bannerNode.classList.toggle('has-image', Boolean(banner));
+          }
+          live.querySelector('[data-live-preview-title]').textContent = state.profile.title || 'Minha coleção';
+          live.querySelector('[data-live-preview-cards]').textContent = String(state.cards.length);
+          live.querySelector('[data-live-preview-albums]').textContent = String(state.albums.length);
+          const estimated = allPricedItems().reduce((sum, item) => sum + (itemPrice(item) || 0) * toQuantity(item.quantity, 0), 0);
+          live.querySelector('[data-live-preview-value]').textContent = prettyPrice(estimated);
+          const valueWrap = live.querySelector('[data-live-preview-value-wrap]');
+          if (valueWrap) valueWrap.hidden = state.profile.showCollectionValue === false;
+        }
+      };
+
+
+      const renderAccountScores = () => {
+        if (!state) return;
+        const scores = state.profile.scores || { security: 30, visibility: 30 };
+        ['security', 'visibility'].forEach((kind) => {
+          const parsedScore = Number(scores[kind]);
+          const score = Number.isFinite(parsedScore) ? Math.min(100, Math.max(0, parsedScore)) : 30;
+          const value = root.querySelector(`[data-score-value="${kind}"]`);
+          const path = root.querySelector(`[data-score-path="${kind}"]`);
+          if (value) value.textContent = String(Math.round(score));
+          if (path) {
+            path.style.strokeDasharray = `${score} 100`;
+            path.style.strokeDashoffset = '0';
+          }
+        });
+        const note = root.querySelector('[data-security-score-note]');
+        const delta = root.querySelector('[data-security-score-delta]');
+        if (note) note.textContent = state.profile.emailVerified ? 'Gmail verificado' : 'Gmail ainda não verificado';
+        if (delta) delta.textContent = state.profile.emailVerified ? 'Base 30 + 5 Gmail' : 'Base 30';
+      };
+
+      const renderAccountSecurity = () => {
+        if (!state) return;
+        const email = root.querySelector('[data-security-email]');
+        if (email) email.textContent = state.profile.email || '—';
+        const status = root.querySelector('[data-email-verification-status]');
+        const sendButton = root.querySelector('[data-send-email-verification]');
+        const checkButton = root.querySelector('[data-check-email-verification]');
+        const verified = state.profile.emailVerified === true;
+        if (status) {
+          status.textContent = verified ? 'Verificado' : 'Não verificado';
+          status.classList.toggle('verified', verified);
+          status.classList.toggle('pending', !verified);
+        }
+        if (sendButton) {
+          sendButton.disabled = verified;
+          const label = sendButton.querySelector('span');
+          if (label) label.textContent = verified ? 'Gmail verificado' : 'Enviar verificação';
+        }
+        if (checkButton) checkButton.disabled = verified;
+        renderAccountScores();
+      };
+
+      const syncEmailVerification = async (silent = false) => {
+        if (!state || !window.VaultCloud?.refreshAccountVerification) return false;
+        const feedback = root.querySelector('[data-email-verification-feedback]');
+        if (!silent && feedback) feedback.textContent = 'Conferindo a verificação no Google…';
+        try {
+          const result = await window.VaultCloud.refreshAccountVerification();
+          if (!state) return false;
+          if (result?.scores) state.profile.scores = { ...state.profile.scores, ...result.scores };
+          state.profile.emailVerified = result?.verified === true;
+          renderAccountSecurity();
+          if (!silent && feedback) {
+            feedback.textContent = result?.verified
+              ? (result?.awarded ? 'Gmail verificado. +5 pontos adicionados ao seu Score de segurança.' : 'Seu Gmail já está verificado.')
+              : 'A verificação ainda não foi concluída. Abra o e-mail recebido e clique no link.';
+            feedback.dataset.state = result?.verified ? 'success' : 'neutral';
+          }
+          return result?.verified === true;
+        } catch (error) {
+          if (!silent && feedback) {
+            feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível conferir a verificação agora.';
+            feedback.dataset.state = 'error';
+          }
+          return false;
+        }
+      };
+
+      const activate = (profile, items, source = 'new') => {
+        state = makeState(profile, items, source);
+        profileDirty = false; privacyDirty = false; mirrorDirty = false; clearTimeout(cloudSaveTimer); setCloudSaveState('Tudo salvo', 'saved');
+        root.querySelector('[data-editor-notice]').hidden = true;
+        root.classList.add('is-editing');
+        root.querySelectorAll('[data-admin-section]').forEach((panel) => { panel.hidden = panel.dataset.adminSection !== 'overview'; });
+        workspace.hidden = false;
+        root.querySelector('[data-workspace-title]').textContent = state.profile.title;
+        root.querySelectorAll('[data-open-public-profile]').forEach((publicProfileLink) => {
+          publicProfileLink.href = `${base}colecao/?slug=${encodeURIComponent(state.profile.collectionId || safeSlug(state.profile.title))}`;
+        });
+        root.querySelectorAll('[data-profile-field]').forEach((input) => { input.value = state.profile[input.dataset.profileField] || ''; });
+        state.profile.showQuantity = false;
+        root.querySelector('[data-show-collection-value]').checked = state.profile.showCollectionValue !== false;
+        root.querySelector('[data-collection-public]').checked = state.profile.public === true;
+        root.querySelector('[data-collection-selling]').checked = state.profile.selling !== false;
+        root.querySelector('[data-proposal-policy]').value = state.profile.proposalTerms.policy;
+        const fallbackSelect = root.querySelector('[data-price-display-fallback]'); if (fallbackSelect) fallbackSelect.value = state.profile.priceDisplayFallback;
+        root.querySelector('[data-flexible-discounts]').checked = state.profile.proposalTerms.flexibleDiscounts;
+        renderDiscountTiers();
+        renderPersonalization();
+        renderAccountSecurity();
+        const versionNode = root.querySelector('[data-version-number]'); if (versionNode) versionNode.textContent = String(state.profile.version);
+        activeTab = 'cards'; inventoryQuery = ''; if (inventorySearch) inventorySearch.value = '';
+        render();
+        window.setTimeout(() => navigateAdmin('overview'), 0);
+        if (source === 'cloud') window.setTimeout(() => syncEmailVerification(true), 120);
+        if (source === 'cloud' && window.VaultCloud?.listMyReceivedProposals) {
+          const proposalCollectionId = state.profile.collectionId;
+          window.VaultCloud.listMyReceivedProposals().then((rows) => { if (!state || state.profile.collectionId !== proposalCollectionId) return; state.receivedProposals = Array.isArray(rows) ? rows : []; state.proposalsLoaded = true; renderProposals(); }).catch(() => { if (!state || state.profile.collectionId !== proposalCollectionId) return; state.proposalsLoaded = true; state.proposalsUnavailable = true; renderProposals(); });
+        } else { state.proposalsLoaded = true; renderProposals(); }
+      };
+
+      const tabLabel = { cards: 'Cartas', boosters: 'Boosters', kits: 'Kits', products: 'Produtos', albums: 'Álbuns' };
+      const allPricedItems = () => state ? [...state.cards, ...state.boosters, ...state.kits, ...state.products] : [];
+      const renderProposals = () => {
+        if (!state) return;
+        const rows = Array.isArray(state.receivedProposals) ? state.receivedProposals : [];
+        const pending = rows.filter((proposal) => !proposal.status || proposal.status === 'pending');
+        const metric = root.querySelector('[data-dashboard-proposals]');
+        const note = root.querySelector('[data-dashboard-proposals-note]');
+        if (metric) metric.textContent = state.proposalsLoaded ? String(pending.length) : '—';
+        if (note) note.textContent = state.proposalsUnavailable ? 'consulta indisponível' : state.proposalsLoaded ? `${rows.length} recebida${rows.length === 1 ? '' : 's'} no total` : 'carregando recebidas';
+        const count = root.querySelector('[data-proposal-inbox-count]');
+        if (count) count.textContent = state.proposalsUnavailable ? 'Indisponível' : state.proposalsLoaded ? `${pending.length} pendente${pending.length === 1 ? '' : 's'}` : 'Carregando…';
+        const list = root.querySelector('[data-proposal-inbox]');
+        if (!list) return;
+        if (state.proposalsUnavailable) { list.innerHTML = '<div class="proposal-inbox-empty"><span>!</span><div><strong>Não foi possível consultar agora</strong><small>As configurações de proposta continuam funcionando normalmente.</small></div></div>'; return; }
+        if (!state.proposalsLoaded) { list.innerHTML = '<div class="proposal-inbox-loading">Buscando propostas…</div>'; return; }
+        if (!rows.length) { list.innerHTML = '<div class="proposal-inbox-empty"><span>◇</span><div><strong>Nenhuma proposta recebida</strong><small>Quando alguém enviar uma proposta, ela aparecerá aqui.</small></div></div>'; return; }
+        const statusLabel = { pending: 'Pendente', accepted: 'Aceita', rejected: 'Recusada', cancelled: 'Cancelada' };
+        list.innerHTML = rows.slice(0, 20).map((proposal) => {
+          const rawDate = proposal.createdAt?.toDate?.() || (proposal.createdAt?.seconds ? new Date(proposal.createdAt.seconds * 1000) : new Date(proposal.createdAt || 0));
+          const when = rawDate && !Number.isNaN(rawDate.getTime()) ? rawDate.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : 'Data não informada';
+          const itemCount = Array.isArray(proposal.items) ? proposal.items.reduce((sum, item) => sum + Math.max(1, Number(item.quantity || 1)), 0) : 0;
+          const buyer = proposal.buyerName || proposal.buyerAccountName || 'Comprador';
+          const value = Number(proposal.proposedTotal ?? proposal.publishedTotal ?? 0);
+          const status = proposal.status || 'pending';
+          return `<article class="proposal-inbox-item ${escapeHtml(status)}"><span>◇</span><div><strong>${escapeHtml(buyer)}</strong><small>${itemCount} ${itemCount === 1 ? 'item' : 'itens'} · ${escapeHtml(when)}</small></div><b>${escapeHtml(prettyPrice(value))}</b><em>${escapeHtml(statusLabel[status] || status)}</em></article>`;
+        }).join('');
+      };
+
+      const inventoryCount = (kind) => Array.isArray(state?.[kind]) ? state[kind].length : 0;
+      const setText = (selector, value) => {
+        const node = root.querySelector(selector);
+        if (node) node.textContent = String(value);
+      };
+      const updateOverview = () => {
+        if (!state) return;
+        const allItems = [...state.cards, ...state.boosters, ...state.kits, ...state.products];
+        const definedItems = allItems.filter((item) => toPrice(item.price) !== null);
+        const quotedValue = definedItems.reduce((sum, item) => sum + Number(toPrice(item.price) || 0) * toQuantity(item.quantity, 0), 0);
+        const cardMetricTotal = (field) => state.cards.reduce((sum, item) => {
+          const value = toPrice(item[field]);
+          return value === null ? sum : sum + value * toQuantity(item.quantity, 0);
+        }, 0);
+
+        setText('[data-dashboard-value]', prettyPrice(quotedValue));
+        setText('[data-dashboard-value-note]', `${definedItems.length}/${allItems.length} itens com Preço definido`);
+        setText('[data-dashboard-cards]', inventoryCount('cards'));
+        setText('[data-dashboard-boosters]', inventoryCount('boosters'));
+        setText('[data-dashboard-products]', inventoryCount('products'));
+        setText('[data-dashboard-kits]', inventoryCount('kits'));
+        setText('[data-dashboard-albums]', inventoryCount('albums'));
+
+        const dashboardMetric = (selector, field) => setText(selector, prettyPrice(cardMetricTotal(field)));
+        dashboardMetric('[data-dashboard-card-certified-low]', 'cheapestCertifiedPrice');
+        dashboardMetric('[data-dashboard-card-general-low]', 'cheapestGeneralPrice');
+        dashboardMetric('[data-dashboard-card-certified-average]', 'averageCertifiedPrice');
+        dashboardMetric('[data-dashboard-card-general-average]', 'averageGeneralPrice');
+        dashboardMetric('[data-dashboard-card-minimum]', 'minimumPrice');
+        renderAccountScores();
+        renderProposals();
+        renderPersonalization();
+      };
+      const updateTabs = () => {
+        if (!state) return;
+        root.querySelectorAll('[data-inventory-tab]').forEach((button) => button.classList.toggle('active', button.dataset.inventoryTab === activeTab));
+        Object.keys(tabLabel).forEach((kind) => setText(`[data-tab-count="${kind}"]`, inventoryCount(kind)));
+        const addLabel = root.querySelector('[data-add-current-label]');
+        if (addLabel) {
+          const singular = { cards: 'carta', boosters: 'booster', kits: 'kit', products: 'produto', albums: 'álbum' };
+          addLabel.textContent = `Adicionar ${singular[activeTab] || 'item'}`;
+        }
+        updateInventoryFilterVisibility();
+      };
+
+      const priceInput = (kind, index, field, label, value) => `<label class="inventory-price-field editable"><span>${label}</span><input type="number" min="0" step="0.01" value="${value ?? ''}" placeholder="—" data-item-edit="${kind}:${index}:${field}" /></label>`;
+      const priceReadout = (label, value) => `<div class="inventory-price-field read-only"><span>${label}</span><strong>${escapeHtml(prettyPrice(value))}</strong></div>`;
+      const quantityInput = (kind, index, value) => `<label class="inventory-quantity-field"><span>Quantidade</span><input type="number" min="0" step="1" value="${value}" data-item-edit="${kind}:${index}:quantity" /></label>`;
+      const saleToggle = (kind, index, checked) => `<label class="inventory-sale-toggle"><input type="checkbox" data-sale-edit="${kind}:${index}" ${checked ? 'checked' : ''} /><span><i></i><b>${checked ? 'À venda' : 'Exposição'}</b></span></label>`;
+      const soldButton = (kind, index, quantity) => `<button type="button" class="inventory-sold" data-mark-sold="${kind}:${index}" ${toQuantity(quantity, 0) <= 0 ? 'disabled' : ''}><span>✓</span>${toQuantity(quantity, 0) <= 0 ? 'Vendido' : 'Vendi 1'}</button>`;
+      const removeButton = (kind, index, name) => `<button type="button" class="inventory-remove" data-remove-item="${kind}:${index}" aria-label="Remover ${escapeHtml(name)}">×</button>`;
+      const linkButtons = (links) => {
+        const available = links.filter((entry) => entry.url);
+        if (!available.length) return '<span class="inventory-no-links">Nenhum link disponível</span>';
+        return available.map((entry) => `<a href="${escapeHtml(entry.url)}" target="_blank" rel="noreferrer">${escapeHtml(entry.label)} <span>↗</span></a>`).join('');
+      };
+      const matchesSearch = (item) => !inventoryQuery || normalizeText(JSON.stringify(item)).includes(inventoryQuery);
+      const emptyInventory = (kind) => `<div class="inventory-tab-empty"><span>${kind === 'cards' ? '◇' : kind === 'boosters' ? '▱' : kind === 'kits' ? '▦' : kind === 'products' ? '▣' : '▤'}</span><strong>Nenhum item nesta aba</strong><p>Use o botão Adicionar para incluir ${tabLabel[kind].toLowerCase()}.</p><button type="button" class="primary-cta" data-empty-add="${kind === 'cards' ? 'card' : kind === 'boosters' ? 'booster' : kind === 'kits' ? 'kit' : kind === 'products' ? 'product' : 'album'}"><span>Adicionar agora</span><b>＋</b></button></div>`;
+
+      const renderCards = () => {
+        const rows = state.cards.map((item, index) => ({ item, index })).filter(({ item }) => matchesSearch(item) && matchesInventoryMetadata(item, 'cards'));
+        if (!rows.length) return emptyInventory('cards');
+        return `<div class="inventory-sheet inventory-card-sheet"><div class="inventory-sheet-head"><span>Imagem e identificação</span><span>Classificação</span><span>Referências</span><span>Preços</span><span>Controle</span></div>${rows.map(({ item, index }) => {
+          const name = itemName(item, 'cards');
+          const collectionCode = item.collectionCode ? ` · ${item.collectionCode}` : '';
+          const integrityLabel = item.integrity ? `${item.integrity}%` : 'Integridade —';
+          return `<article class="inventory-record card-inventory-record" data-card-details-row="${index}">
+            <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>${escapeHtml(item.number || 'Sem numeração')}</small><em>${escapeHtml(`${item.collection || 'Coleção a consultar'}${collectionCode}`)}</em></div></div>
+            <div class="inventory-info-cell"><span>${escapeHtml(eraDisplay(item.era) || 'Era —')}</span><span>${escapeHtml(groupDisplay(item.group) || 'Grupo —')}</span><span>${escapeHtml(item.cardClass || 'Classe —')}</span>${item.group === 'pokemon' && item.type ? `<span>${escapeHtml(item.type)}</span>` : ''}<span>${escapeHtml(languageDisplay(item.language) || 'Idioma —')}</span><span>${escapeHtml(`${item.condition || 'Estado —'} · ${integrityLabel}`)}</span><span>${escapeHtml(item.year || 'Ano —')}</span></div>
+            <div class="inventory-links-cell">${linkButtons([{ label: 'MYP', url: item.linkMyp }, { label: 'Cardmarket', url: item.linkCardmarket }, { label: 'TCGplayer', url: item.linkTcgplayer }, { label: 'PriceCharting', url: item.linkPriceCharting }])}</div>
+            <div class="inventory-prices-cell">${priceReadout('Mais barato certificado', item.cheapestCertifiedPrice)}${priceReadout('Mais barato geral', item.cheapestGeneralPrice)}${priceReadout('Média certificada', item.averageCertifiedPrice)}${priceReadout('Média geral', item.averageGeneralPrice)}${priceReadout('Mínimo', item.minimumPrice)}${priceInput('cards', index, 'price', 'Preço', item.price)}${quoteSummaryMarkup(item, 'cards')}</div>
+            <div class="inventory-control-cell"><button type="button" class="inventory-favorite ${item.favorite ? 'active' : ''}" data-favorite-card="${index}" title="Favoritar carta"><span>${item.favorite ? '★' : '☆'}</span>${item.favorite ? 'Favorita' : 'Favoritar'}</button><button type="button" class="inventory-edit-button" data-edit-card="${index}"><span>✎</span> Editar cadastro</button><button type="button" class="inventory-details-button" data-card-details="${index}"><span>↗</span> Análise</button>${quantityInput('cards', index, item.quantity)}${soldButton('cards', index, item.quantity)}${saleToggle('cards', index, item.forSale)}${removeButton('cards', index, name)}</div>
+          </article>`;
+        }).join('')}</div>`;
+      };
+
+      const cardMetrics = [
+        { key: 'cheapestCertified', field: 'cheapestCertifiedPrice', label: 'Mais Barato Certificado', color: '#77a9ff' },
+        { key: 'cheapestGeneral', field: 'cheapestGeneralPrice', label: 'Mais Barato Geral', color: '#7ce5a4' },
+        { key: 'averageCertified', field: 'averageCertifiedPrice', label: 'Média Certificada', color: '#bc91ff' },
+        { key: 'averageGeneral', field: 'averageGeneralPrice', label: 'Média Geral', color: '#f59bcf' },
+        { key: 'minimum', field: 'minimumPrice', label: 'Mínimo', color: '#f4c25c' },
+      ];
+      const boosterMetrics = [
+        { key: 'minimum', field: 'minimumPrice', label: 'Mínimo', color: '#f4c25c' },
+        { key: 'leagueLowest', field: 'leaguePrice', label: 'Menor Liga', color: '#77a9ff' },
+        { key: 'leagueAverage', field: 'averageLeaguePrice', label: 'Média Liga', color: '#bc91ff' },
+        { key: 'leagueMedian', field: 'medianLeaguePrice', label: 'Mediana Liga', color: '#f59bcf' },
+        { key: 'quickSale', field: 'quickSalePrice', label: 'Venda Rápida', color: '#7ce5a4' },
+      ];
+      const normalizedHistory = (item, kind = 'cards') => {
+        const metrics = kind === 'cards' ? cardMetrics : boosterMetrics;
+        const points = (Array.isArray(item.priceHistory) ? item.priceHistory : []).map((entry) => kind === 'cards'
+          ? {
+              date: entry.date || '',
+              cheapestCertified: toPrice(entry.cheapestCertified ?? entry['Mais Barato Certificado']),
+              cheapestGeneral: toPrice(entry.cheapestGeneral ?? entry['Mais Barato Geral']),
+              averageCertified: toPrice(entry.averageCertified ?? entry['Media Certificada'] ?? entry['Média Certificada']),
+              averageGeneral: toPrice(entry.averageGeneral ?? entry['Media Geral'] ?? entry['Média Geral']),
+              minimum: toPrice(entry.minimum ?? entry.Minimo ?? entry['Mínimo']),
+            }
+          : {
+              date: entry.date || '',
+              minimum: Number(entry.pricingSchemaVersion || 0) >= 2
+                ? toPrice(entry.minimum ?? entry.Minimo)
+                : (() => { const lowest = toPrice(entry.leagueLowest ?? entry['Menor Liga']); return lowest === null ? null : Math.round(lowest * 50) / 100; })(),
+              leagueLowest: toPrice(entry.leagueLowest ?? entry['Menor Liga']),
+              leagueAverage: toPrice(entry.leagueAverage ?? entry['Media Liga'] ?? entry['Preço Médio Liga']),
+              leagueMedian: toPrice(entry.leagueMedian ?? entry['Mediana Liga']),
+              quickSale: Number(entry.pricingSchemaVersion || 0) >= 2
+                ? toPrice(entry.quickSale ?? entry['Venda Rapida'])
+                : (toPrice(entry['minimumBuylist'] ?? entry.Minimo) ?? toPrice(entry.quickSale ?? entry['Venda Rapida'])),
+            });
+        const currentDate = lastQuoteDate(item) || new Date().toISOString();
+        const current = kind === 'cards'
+          ? { date: currentDate, pricingSchemaVersion: 3, cheapestCertified: item.cheapestCertifiedPrice, cheapestGeneral: item.cheapestGeneralPrice, averageCertified: item.averageCertifiedPrice, averageGeneral: item.averageGeneralPrice, minimum: item.minimumPrice }
+          : { date: currentDate, pricingSchemaVersion: 2, minimum: item.minimumPrice, leagueLowest: item.leaguePrice, leagueAverage: item.averageLeaguePrice, leagueMedian: item.medianLeaguePrice, quickSale: item.quickSalePrice };
+        const last = points[points.length - 1];
+        const same = last && metrics.every((metric) => toPrice(last[metric.key]) === toPrice(current[metric.key]));
+        const hasCurrentMarketValue = metrics.some((metric) => toPrice(current[metric.key]) !== null);
+        if (hasCurrentMarketValue && !same) points.push(current);
+        return points;
+      };
+      const lastQuoteDate = (item) => {
+        const history = Array.isArray(item.priceHistory) ? item.priceHistory : [];
+        const fromAdvanced = item.lastQuoteAt || item.advancedData?.['Última cotação']?.data || item.advancedData?.['Ultima cotacao']?.data || '';
+        return fromAdvanced || history[history.length - 1]?.date || '';
+      };
+      const formatQuoteDate = (value) => {
+        if (!value) return 'Sem cotização';
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+      };
+      const marketEvolution = (item, kind = 'cards') => {
+        const field = kind === 'cards' ? 'cheapestCertified' : 'leagueLowest';
+        const points = normalizedHistory(item, kind).filter((point) => toPrice(point[field]) !== null);
+        const latest = points[points.length - 1];
+        const previous = points.length > 1 ? points[points.length - 2] : null;
+        const first = points.length > 1 ? points[0] : null;
+        const calc = (basePoint) => {
+          const current = toPrice(latest?.[field]); const baseValue = toPrice(basePoint?.[field]);
+          if (current === null || baseValue === null) return null;
+          const delta = current - baseValue;
+          const pct = baseValue ? delta / baseValue * 100 : null;
+          return { delta, pct, direction: delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat' };
+        };
+        return { previous: calc(previous), first: calc(first) };
+      };
+      const variationMini = (label, variation) => {
+        if (!variation) return `<div><span>${label}</span><strong class="flat">—</strong><small>sem histórico</small></div>`;
+        const sign = variation.delta > 0 ? '+' : '';
+        const pct = variation.pct === null ? '—' : `${variation.pct > 0 ? '+' : ''}${variation.pct.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`;
+        return `<div><span>${label}</span><strong class="${variation.direction}">${sign}${escapeHtml(prettyPrice(variation.delta))}</strong><small class="${variation.direction}">${escapeHtml(pct)}</small></div>`;
+      };
+      const quoteSummaryMarkup = (item, kind = 'cards') => {
+        const evolution = marketEvolution(item, kind);
+        const basis = kind === 'cards' ? 'Mais barato certificado MYP' : 'Menor Liga';
+        return `<div class="inventory-quote-summary"><div class="quote-date"><span>Última cotização</span><strong>${escapeHtml(formatQuoteDate(lastQuoteDate(item)))}</strong><small>base: ${basis}</small></div>${variationMini('Desde a última', evolution.previous)}${variationMini('Desde a primeira', evolution.first)}</div>`;
+      };
+      const marketDepthMarkup = (item, kind) => {
+        if (kind === 'cards') {
+          return [
+            ['Ofertas certificadas', String(item.certifiedOffers || 0), 'Lojistas e Certificados'],
+            ['Outros vendedores', String(item.otherOffers || 0), 'Demais vendedores'],
+            ['Ofertas totais', String(item.totalOffers || 0), 'ofertas MYP lidas'],
+            ['Fonte', item.pricingSource || '—', 'cotação atual'],
+          ].map(([label, value, note]) => `<article><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></article>`).join('');
+        }
+        return [
+          ['2º menor Liga', prettyPrice(item.secondLeaguePrice), 'profundidade'],
+          ['3º menor Liga', prettyPrice(item.thirdLeaguePrice), 'profundidade'],
+          ['Vendendo · geral', String(item.sellersGeneral || 0), 'participantes'],
+          ['Vendendo · específico', String(item.sellersSpecific || 0), 'mesmo produto'],
+          ['Comprando · geral', String(item.buyersGeneral || 0), 'participantes'],
+          ['Comprando · específico', String(item.buyersSpecific || 0), 'mesmo produto'],
+        ].map(([label, value, note]) => `<article><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></article>`).join('');
+      };
+
+      const chartMarkup = (points, metrics = cardMetrics) => {
+        const width = 760; const height = 280; const left = 54; const right = 18; const top = 22; const bottom = 38;
+        const values = points.flatMap((point) => metrics.map((metric) => toPrice(point[metric.key])).filter((value) => value !== null));
+        if (!values.length) return '<div class="card-chart-empty"><span>⌁</span><strong>Sem histórico suficiente</strong><p>A próxima cotização adicionará pontos ao gráfico.</p></div>';
+        const minValue = Math.min(...values); const maxValue = Math.max(...values); const spread = Math.max(1, maxValue - minValue);
+        const low = Math.max(0, minValue - spread * .12); const high = maxValue + spread * .12;
+        const x = (index) => left + (points.length <= 1 ? (width - left - right) / 2 : index * (width - left - right) / (points.length - 1));
+        const y = (value) => top + (high - value) / Math.max(.01, high - low) * (height - top - bottom);
+        const grid = Array.from({ length: 5 }, (_, index) => { const value = high - index * (high - low) / 4; const py = y(value); return `<g><line x1="${left}" x2="${width-right}" y1="${py}" y2="${py}" class="chart-grid-line"/><text x="${left-8}" y="${py+4}" text-anchor="end">${escapeHtml(prettyPrice(value).replace('R$ ', ''))}</text></g>`; }).join('');
+        const lines = metrics.map((metric) => {
+          const chunks = []; let current = [];
+          points.forEach((point, index) => { const value = toPrice(point[metric.key]); if (value === null) { if (current.length) chunks.push(current); current = []; } else current.push(`${x(index)},${y(value)}`); });
+          if (current.length) chunks.push(current);
+          return chunks.filter((chunk) => chunk.length > 1).map((chunk) => `<polyline points="${chunk.join(' ')}" fill="none" stroke="${metric.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
+        }).join('');
+        const dots = metrics.map((metric) => points.map((point, index) => {
+          const value = toPrice(point[metric.key]);
+          if (value === null) return '';
+          return `<circle cx="${x(index)}" cy="${y(value)}" r="${points.length === 1 ? 5.2 : 3.6}" fill="${metric.color}" stroke="rgba(4,12,22,.9)" stroke-width="2"><title>${escapeHtml(metric.label)}: ${escapeHtml(prettyPrice(value))}</title></circle>`;
+        }).join('')).join('');
+        const firstDate = points[0]?.date ? new Date(points[0].date).toLocaleDateString('pt-BR') : 'Início';
+        const lastDate = points[points.length - 1]?.date ? new Date(points[points.length - 1].date).toLocaleDateString('pt-BR') : 'Atual';
+        return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Histórico das referências de preço">${grid}${lines}${dots}<text x="${left}" y="${height-9}" text-anchor="start">${escapeHtml(firstDate)}</text><text x="${width-right}" y="${height-9}" text-anchor="end">${escapeHtml(lastDate)}</text></svg>`;
+      };
+      const renderJsonBlocks = (data) => {
+        const groups = [
+          ['Identificação', ['Id', 'Nome', 'Numeração', 'Ano', 'Era', 'Coleção', 'Código da Coleção', 'Grupo', 'Classe', 'Tipo', 'Idioma', 'Estado', 'Integridade', 'Favorita', 'À venda']],
+          ['Mercado', ['Mais Barato Certificado', 'Mais Barato Geral', 'Média Certificada', 'Média Geral', 'Mínimo', 'Fonte de cotação', 'Ofertas Certificadas', 'Outros Vendedores', 'Ofertas Totais', 'Minimo', 'Menor Liga', 'Segundo Menor Liga', 'Terceiro Menor Liga', 'Media Liga', 'Mediana Liga', 'Venda Rapida', 'Vendedores Geral', 'Vendedores Específicos', 'Compradores Geral', 'Compradores Específicos', 'Última cotação', 'Preço']],
+          ['Referências', ['Link MYP', 'Link Cardmarket', 'Link Tcgplayer', 'Link PriceCharting', 'Imagem', 'Imagens']],
+        ];
+        const used = new Set(groups.flatMap(([, keys]) => keys));
+        const extras = Object.keys(data).filter((key) => !used.has(key));
+        if (extras.length) groups.push(['Dados adicionais', extras]);
+        const valueMarkup = (key, value) => {
+          if (value === null || value === undefined || value === '') return '<span class="json-empty">—</span>';
+          const text = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
+          if (/^Link /i.test(key) && /^https?:\/\//i.test(text)) return `<a href="${escapeHtml(text)}" target="_blank" rel="noreferrer">Abrir referência <span>↗</span></a>`;
+          if (typeof value === 'object') return `<pre>${escapeHtml(text)}</pre>`;
+          return `<span>${escapeHtml(text)}</span>`;
+        };
+        return groups.map(([title, keys]) => {
+          const entries = keys.filter((key) => Object.prototype.hasOwnProperty.call(data, key));
+          if (!entries.length) return '';
+          return `<section class="card-json-group"><header><strong>${escapeHtml(title)}</strong><small>${entries.length} ${entries.length === 1 ? 'campo' : 'campos'}</small></header><div>${entries.map((key) => `<article><span>${escapeHtml(key)}</span>${valueMarkup(key, data[key])}</article>`).join('')}</div></section>`;
+        }).join('');
+      };
+      const openAssetDetails = (kind, index) => {
+        const item = kind === 'boosters' ? state?.boosters?.[index] : state?.cards?.[index];
+        if (!item) return;
+        const modal = root.querySelector('[data-editor-modal="card-details"]'); if (!modal) return;
+        const isCard = kind === 'cards';
+        const metrics = isCard ? cardMetrics : boosterMetrics;
+        modal.querySelector('[data-card-details-title]').textContent = `${itemName(item, kind)} — análise`;
+        modal.querySelector('[data-card-details-name]').textContent = itemName(item, kind);
+        modal.querySelector('[data-card-details-number]').textContent = isCard ? (item.number || 'Sem numeração') : 'Booster lacrado';
+        modal.querySelector('[data-card-details-meta]').textContent = isCard ? [eraDisplay(item.era), item.collection, groupDisplay(item.group), item.cardClass, item.type, languageDisplay(item.language), item.condition ? `${item.condition}${item.integrity ? ` · ${item.integrity}%` : ''}` : '', item.year].filter(Boolean).join(' · ') : [eraDisplay(item.era), item.collection, languageDisplay(item.language), item.year].filter(Boolean).join(' · ');
+        modal.querySelector('[data-card-details-image]').innerHTML = renderImage(item, item.name);
+        const status = item.advancedData?.Status || item.status || {};
+        const statusNode = modal.querySelector('[data-card-details-status]');
+        statusNode.innerHTML = `<span>${escapeHtml(status['nível'] || 'OK')}</span><p>${escapeHtml(Array.isArray(status.motivos) && status.motivos.length ? status.motivos.map((entry) => entry.mensagem || entry).join(' · ') : isCard && item.pricingSource === 'MYP' ? 'Cotação MYP ativa.' : 'Nenhuma suspeita registrada.')}</p>`;
+        modal.querySelector('[data-card-market-metrics]').innerHTML = metrics.map((metric) => `<article><span>${escapeHtml(metric.label)}</span><strong>${escapeHtml(prettyPrice(item[metric.field]))}</strong><i style="--metric-color:${metric.color}"></i></article>`).join('');
+        const points = normalizedHistory(item, kind);
+        modal.querySelector('[data-card-price-chart]').innerHTML = chartMarkup(points, metrics);
+        modal.querySelector('[data-card-chart-legend]').innerHTML = metrics.map((metric) => `<span><i style="--metric-color:${metric.color}"></i>${escapeHtml(metric.label)}</span>`).join('');
+        modal.querySelector('[data-card-chart-period]').textContent = points.length > 1 ? `${points.length} pontos` : 'valor atual';
+        modal.querySelector('[data-card-variations]').innerHTML = metrics.map((metric) => {
+          const values = points.map((point) => toPrice(point[metric.key])).filter((value) => value !== null);
+          if (values.length < 2) return `<article><span>${escapeHtml(metric.label)}</span><strong>Sem comparação</strong><small>aguardando histórico</small></article>`;
+          const first = values[0]; const last = values[values.length - 1]; const delta = last - first; const pct = first ? delta / first * 100 : null;
+          const direction = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
+          return `<article class="${direction}"><span>${escapeHtml(metric.label)}</span><strong>${delta > 0 ? '+' : ''}${escapeHtml(prettyPrice(delta))}</strong><small>${pct === null ? '—' : `${pct > 0 ? '+' : ''}${pct.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`}</small></article>`;
+        }).join('');
+        modal.querySelector('[data-card-market-depth]').innerHTML = marketDepthMarkup(item, kind);
+        const advancedData = { ...(item.advancedData || {}) };
+        Object.keys(advancedData).forEach((key) => {
+          const trimmed = key.trim();
+          if (/^(?:quantidade|quantity|qtd\.?)(?:\s|$)/i.test(trimmed) || /^(?:link\s+liga|liga|ligaurl|linkliga|urlliga)$/i.test(trimmed)) delete advancedData[key];
+          if (isCard && /^(?:Minimo|Menor Liga|Segundo Menor Liga|Terceiro Menor Liga|Media Liga|Mediana Liga|Venda Rapida|Vendedores Geral|Vendedores Específicos|Compradores Geral|Compradores Específicos)$/i.test(trimmed)) delete advancedData[key];
+        });
+        const marketFields = isCard ? {
+          'Mais Barato Certificado': item.cheapestCertifiedPrice,
+          'Mais Barato Geral': item.cheapestGeneralPrice,
+          'Média Certificada': item.averageCertifiedPrice,
+          'Média Geral': item.averageGeneralPrice,
+          'Mínimo': item.minimumPrice,
+          'Fonte de cotação': item.pricingSource || null,
+          'Ofertas Certificadas': item.certifiedOffers,
+          'Outros Vendedores': item.otherOffers,
+          'Ofertas Totais': item.totalOffers,
+          Preço: item.price,
+          'Última cotação': advancedData['Última cotação'] || (lastQuoteDate(item) ? { data: lastQuoteDate(item), fonte: 'MYP' } : null),
+        } : {
+          Minimo: item.minimumPrice, 'Menor Liga': item.leaguePrice, 'Segundo Menor Liga': item.secondLeaguePrice, 'Terceiro Menor Liga': item.thirdLeaguePrice, 'Media Liga': item.averageLeaguePrice, 'Mediana Liga': item.medianLeaguePrice, 'Venda Rapida': item.quickSalePrice,
+          'Vendedores Geral': item.sellersGeneral, 'Vendedores Específicos': item.sellersSpecific, 'Compradores Geral': item.buyersGeneral, 'Compradores Específicos': item.buyersSpecific, Preço: item.price, 'Última cotação': advancedData['Última cotação'] || (lastQuoteDate(item) ? { data: lastQuoteDate(item) } : null),
+        };
+        const jsonData = isCard
+          ? { ...advancedData, Id: item._id, Nome: item.name, 'Numeração': item.number, Ano: item.year, Era: eraDisplay(item.era), Coleção: item.collection, 'Código da Coleção': item.collectionCode, Grupo: groupDisplay(item.group), Classe: item.cardClass, Tipo: item.group === 'pokemon' ? item.type : null, Idioma: languageDisplay(item.language), Estado: item.condition, Integridade: item.integrity ? `${item.integrity}%` : null, ...marketFields, Favorita: item.favorite, 'À venda': item.forSale, 'Link MYP': item.linkMyp, 'Link Cardmarket': item.linkCardmarket, 'Link Tcgplayer': item.linkTcgplayer, 'Link PriceCharting': item.linkPriceCharting, Imagem: item.image }
+          : { ...advancedData, Id: item._id, Nome: item.name, Ano: item.year, Era: eraDisplay(item.era), Coleção: item.collection, 'Código da Coleção': item.collectionCode, Idioma: languageDisplay(item.language), Imagens: item.images || (item.image ? [item.image] : []), ...marketFields, 'À venda': item.forSale };
+        modal.querySelector('[data-card-json]').innerHTML = renderJsonBlocks(jsonData);
+        openModal('card-details');
+      };
+      const openCardDetails = (index) => openAssetDetails('cards', index);
+      const openBoosterDetails = (index) => openAssetDetails('boosters', index);
+
+
+      const renderBoosters = () => {
+        const rows = state.boosters.map((item, index) => ({ item, index })).filter(({ item }) => matchesSearch(item) && matchesInventoryMetadata(item, 'boosters'));
+        if (!rows.length) return emptyInventory('boosters');
+        return `<div class="inventory-sheet booster-inventory-sheet"><div class="inventory-sheet-head"><span>Imagem e booster</span><span>Metadados</span><span>Preços</span><span>Controle</span></div>${rows.map(({ item, index }) => {
+          const name = itemName(item, 'boosters');
+          const code = item.collectionCode ? ` · ${item.collectionCode}` : '';
+          return `<article class="inventory-record booster-inventory-record" data-booster-details-row="${index}">
+            <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>Pacote lacrado</small><em>${escapeHtml(`${item.collection || 'Coleção —'}${code}`)}</em></div></div>
+            <div class="inventory-info-cell"><span>${escapeHtml(eraDisplay(item.era) || 'Era —')}</span><span>${escapeHtml(item.collection || 'Coleção —')}</span><span>${escapeHtml(languageDisplay(item.language) || 'Idioma —')}</span><span>${escapeHtml(item.year || 'Ano —')}</span><span>${(item.images || []).length || (item.image ? 1 : 0)} imagem(ns)</span></div>
+            <div class="inventory-prices-cell">${priceReadout('Mínimo', item.minimumPrice)}${priceReadout('Menor Liga', item.leaguePrice)}${priceReadout('Média Liga', item.averageLeaguePrice)}${priceReadout('Mediana Liga', item.medianLeaguePrice)}${priceReadout('Venda rápida', item.quickSalePrice)}${priceInput('boosters', index, 'price', 'Preço', item.price)}${quoteSummaryMarkup(item, 'boosters')}</div>
+            <div class="inventory-control-cell"><button type="button" class="inventory-edit-button" data-edit-booster="${index}"><span>✎</span> Editar cadastro</button><button type="button" class="inventory-details-button" data-booster-details="${index}"><span>↗</span> Análise</button>${quantityInput('boosters', index, item.quantity)}${soldButton('boosters', index, item.quantity)}${saleToggle('boosters', index, item.forSale)}${removeButton('boosters', index, name)}</div>
+          </article>`;
+        }).join('')}</div>`;
+      };
+
+      const renderKitContents = (item) => {
+        const entries = Array.isArray(item.contentItems) ? item.contentItems : [];
+        if (!entries.length) return `<div class="kit-content-text">${escapeHtml(item.contents || 'Conteúdo não estruturado')}</div>`;
+        return `<div class="kit-content-grid">${entries.map((entry) => `<div class="kit-content-item">${renderImage(entry, entry.name)}<span><strong>${entry.quantity}×</strong><small>${escapeHtml(entry.name)}</small></span></div>`).join('')}</div>`;
+      };
+      const renderKits = () => {
+        const rows = state.kits.map((item, index) => ({ item, index })).filter(({ item }) => matchesSearch(item));
+        if (!rows.length) return emptyInventory('kits');
+        return `<div class="kit-inventory-list">${rows.map(({ item, index }) => {
+          const gross = toPrice(item.sourceTotal) ?? (item.contentItems || []).reduce((sum, entry) => sum + (entry.unitPrice || 0) * entry.quantity, 0);
+          const discountValue = gross > 0 && item.price !== null ? Math.max(0, gross - item.price) : 0;
+          const discountPercent = gross > 0 && item.price !== null ? Math.max(0, Math.round((gross - item.price) / gross * 100)) : 0;
+          return `<article class="kit-inventory-record">
+            <header><div><span class="kit-record-icon">▦</span><div><strong>${escapeHtml(item.name)}</strong><p>${escapeHtml(item.description || 'Kit personalizado')}</p></div></div><div class="kit-record-actions"><button type="button" class="inventory-edit-button" data-edit-kit="${index}"><span>✎</span> Editar kit</button>${removeButton('kits', index, item.name)}</div></header>
+            <div class="kit-record-body"><section><span class="inventory-cell-label">Conteúdo</span>${renderKitContents(item)}</section><aside><div><span>Preço bruto</span><strong>${prettyPrice(gross)}</strong></div><label><span>Preço final</span><input type="number" min="0" step="0.01" value="${item.price ?? ''}" data-item-edit="kits:${index}:price" /></label><div class="kit-discount-card"><span>Desconto</span><strong>${prettyPrice(discountValue)}</strong><small>${discountPercent}% abaixo do bruto</small></div>${quantityInput('kits', index, item.quantity)}${soldButton('kits', index, item.quantity)}${saleToggle('kits', index, item.forSale)}</aside></div>
+          </article>`;
+        }).join('')}</div>`;
+      };
+
+      const renderProducts = () => {
+        const rows = state.products.map((item, index) => ({ item, index })).filter(({ item }) => matchesSearch(item));
+        if (!rows.length) return emptyInventory('products');
+        return `<div class="inventory-sheet product-inventory-sheet"><div class="inventory-sheet-head"><span>Imagem e produto</span><span>Referência</span><span>Preço</span><span>Controle</span></div>${rows.map(({ item, index }) => {
+          const name = itemName(item, 'products');
+          return `<article class="inventory-record product-inventory-record">
+            <div class="inventory-product-cell">${renderImage(item)}<div><strong>${escapeHtml(name)}</strong><small>${escapeHtml(item.description || 'Produto Pokémon lacrado')}</small></div></div>
+            <div class="inventory-links-cell"><span class="legacy-reference-note">ID interno</span></div>
+            <div class="inventory-prices-cell product-price-cell">${priceInput('products', index, 'price', 'Preço', item.price)}</div>
+            <div class="inventory-control-cell">${quantityInput('products', index, item.quantity)}${soldButton('products', index, item.quantity)}${saleToggle('products', index, item.forSale)}${removeButton('products', index, name)}</div>
+          </article>`;
+        }).join('')}</div>`;
+      };
+
+      const albumOccupied = (album) => (album?.pages || []).reduce((total, page) => total + (page.slots || []).filter(Boolean).length, 0);
+      const albumCapacity = (album) => (album?.pages?.length || 1) * (album?.columns || 3) * (album?.rows || 3);
+      const renderAlbums = () => {
+        const rows = state.albums.map((item, index) => ({ item, index })).filter(({ item }) => matchesSearch(item));
+        if (!rows.length) return `<div class="inventory-tab-empty album-empty"><span>▤</span><strong>Nenhum álbum criado</strong><p>Crie um álbum, escolha o formato das páginas e posicione cada carta visualmente.</p><button type="button" class="primary-cta" data-empty-add="album"><span>Criar álbum</span><b>＋</b></button></div>`;
+        return `<div class="album-inventory-grid">${rows.map(({ item, index }) => {
+          const firstCard = item.pages.flatMap((page) => page.slots).find(Boolean);
+          const coverItem = item.coverImage ? { name: item.coverTitle || item.name, imageCandidates: [item.coverImage] } : firstCard ? { name: firstCard.name, imageCandidates: firstCard.imageCandidates } : { name: item.name, imageCandidates: item.imageCandidates || [] };
+          const occupied = albumOccupied(item);
+          const capacity = albumCapacity(item);
+          return `<article class="album-inventory-card">${renderImage(coverItem)}<div class="album-inventory-copy"><span class="inventory-cell-label">Álbum ${escapeHtml(item.format.replace('x', ' por '))}</span><h4>${escapeHtml(item.name)}</h4><p>${escapeHtml(item.description || 'Álbum virtual da coleção')}</p><div class="album-progress"><span>Organização</span><strong>${occupied} / ${capacity} espaços</strong><i style="--album-editor-progress:${capacity ? Math.round(occupied / capacity * 100) : 0}%"></i></div><button type="button" class="album-organize-button" data-organize-album="${index}"><span>▤</span> Organizar páginas <b>→</b></button></div>${removeButton('albums', index, item.name)}</article>`;
+        }).join('')}</div>`;
+      };
+
+      const currentAlbum = () => state?.albums?.[activeAlbumIndex] || null;
+      const albumSlotFromCard = (card) => ({
+        itemId: card._id,
+        linkLiga: card.linkLiga || '',
+        language: card.language || '',
+        condition: card.condition || '',
+        name: itemName(card, 'cards'),
+        number: card.number || '',
+        collection: card.collection || '',
+        imageCandidates: [...(card.imageCandidates || [])],
+      });
+      const markAlbumDirty = (album) => { if (album) album._isDirty = true; };
+      const renderAlbumOrganizer = (direction = 0) => {
+        const album = currentAlbum();
+        if (!album) return;
+        const page = album.pages[activeAlbumPage] || album.pages[0];
+        const pageElement = root.querySelector('[data-album-editor-page]');
+        const pageWrap = root.querySelector('[data-album-editor-page-wrap]');
+        const library = root.querySelector('[data-album-card-library]');
+        root.querySelector('[data-album-organizer-title]').textContent = album.name;
+        root.querySelector('[data-album-format-label]').textContent = `Formato ${album.format.replace('x', ' por ')}`;
+        root.querySelectorAll('[data-album-cover-edit]').forEach((input) => { input.value = album[input.dataset.albumCoverEdit] || (input.dataset.albumCoverEdit === 'coverColor' ? '#14253d' : ''); });
+        const layoutSelect = root.querySelector('[data-album-layout-edit]'); if (layoutSelect) layoutSelect.value = album.format;
+        const coverMini = root.querySelector('[data-album-cover-mini]');
+        if (coverMini) {
+          coverMini.dataset.style = album.coverStyle || 'vault';
+          coverMini.style.setProperty('--mini-cover', album.coverColor || '#14253d');
+          const coverUrl = clean(album.coverImage);
+          const resolvedCover = coverUrl && !/^(?:https?:|data:|blob:|\/)/i.test(coverUrl) ? `${base}${coverUrl.replace(/^\/+/, '')}` : coverUrl;
+          coverMini.style.backgroundImage = resolvedCover ? `linear-gradient(135deg, rgba(2,7,13,.22), rgba(2,7,13,.72)), url("${resolvedCover.replace(/"/g, '\\"')}")` : '';
+          root.querySelector('[data-album-cover-mini-title]').textContent = album.coverTitle || album.name;
+        }
+        root.querySelector('[data-album-page-counter]').textContent = `Página ${activeAlbumPage + 1} de ${album.pages.length}`;
+        const occupied = albumOccupied(album);
+        const capacity = albumCapacity(album);
+        root.querySelector('[data-album-progress-label]').textContent = `${occupied} / ${capacity} espaços`;
+        root.querySelector('[data-album-organizer-summary]').textContent = `${occupied} ${occupied === 1 ? 'carta organizada' : 'cartas organizadas'}`;
+        root.querySelector('[data-album-page-previous]').disabled = activeAlbumPage === 0;
+        root.querySelector('[data-album-page-next]').disabled = activeAlbumPage >= album.pages.length - 1;
+        root.querySelector('[data-album-remove-page]').disabled = album.pages.length === 1;
+        if (pageElement) {
+          pageElement.style.setProperty('--album-columns', String(album.columns));
+          pageElement.style.setProperty('--album-rows', String(album.rows));
+          pageElement.innerHTML = page.slots.map((slot, slotIndex) => slot ? `<button type="button" draggable="true" class="album-editor-slot occupied" data-album-slot="${slotIndex}" data-album-slot-drag="${activeAlbumPage}:${slotIndex}" title="Arraste para trocar de posição ou clique no × para remover">${renderImage(slot)}<span><strong>${escapeHtml(slot.name)}</strong><small>${escapeHtml(slot.number || slot.collection || 'Carta')}</small></span><b data-remove-album-slot="${slotIndex}">×</b></button>` : `<button type="button" class="album-editor-slot empty ${selectedAlbumCardId ? 'ready' : ''}" data-album-slot="${slotIndex}"><span>${slotIndex + 1}</span><small>${selectedAlbumCardId ? 'Colocar aqui' : 'Espaço vazio'}</small></button>`).join('');
+        }
+        if (direction && pageWrap) {
+          pageWrap.classList.remove('turn-forward', 'turn-backward');
+          void pageWrap.offsetWidth;
+          pageWrap.classList.add(direction > 0 ? 'turn-forward' : 'turn-backward');
+        }
+        const strip = root.querySelector('[data-album-page-strip]');
+        if (strip) {
+          strip.innerHTML = album.pages.map((albumPage, pageIndex) => {
+            const used = (albumPage.slots || []).filter(Boolean).length;
+            return `<button type="button" draggable="true" class="album-page-thumb ${pageIndex === activeAlbumPage ? 'active' : ''}" data-album-page-thumb="${pageIndex}" data-album-page-drag="${pageIndex}"><span>Página ${pageIndex + 1}</span><small>${used}/${album.columns * album.rows}</small><i></i></button>`;
+          }).join('') + '<button type="button" class="album-page-add-thumb add" data-album-add-page-strip><span>＋</span><small>Nova página</small></button>';
+        }
+        const cards = state.cards.filter((card) => !albumCardQuery || normalizeText(`${itemName(card, 'cards')} ${card.number} ${card.collection}`).includes(albumCardQuery));
+        root.querySelector('[data-album-library-count]').textContent = `${cards.length} ${cards.length === 1 ? 'carta' : 'cartas'}`;
+        if (library) library.innerHTML = cards.length ? cards.map((card) => `<button type="button" draggable="true" class="album-library-card ${selectedAlbumCardId === card._id ? 'selected' : ''}" data-album-library-card="${card._id}">${renderImage(card)}<span><strong>${escapeHtml(itemName(card, 'cards'))}</strong><small>${escapeHtml(card.number || card.collection || 'Carta da coleção')}</small></span><b>${selectedAlbumCardId === card._id ? '✓' : '＋'}</b></button>`).join('') : '<div class="album-library-empty"><span>◇</span><strong>Nenhuma carta encontrada</strong><p>Adicione cartas à coleção ou ajuste a busca.</p></div>';
+      };
+      const openAlbumOrganizer = (index) => {
+        if (!state?.albums?.[index]) return;
+        activeAlbumIndex = index;
+        activeAlbumPage = 0;
+        albumCardQuery = '';
+        selectedAlbumCardId = '';
+        const search = root.querySelector('[data-album-card-search]');
+        if (search) search.value = '';
+        openModal('album-organizer');
+        renderAlbumOrganizer();
+      };
+      const placeAlbumCard = (slotIndex, cardId) => {
+        const album = currentAlbum();
+        const card = state?.cards?.find((item) => item._id === cardId);
+        const page = album?.pages?.[activeAlbumPage];
+        if (!album || !card || !page || slotIndex < 0 || slotIndex >= page.slots.length) return;
+        page.slots[slotIndex] = albumSlotFromCard(card);
+        markAlbumDirty(album);
+        renderAlbumOrganizer();
+        renderInventory();
+      };
+
+      const renderInventory = () => {
+        if (!state) return;
+        inventory.innerHTML = activeTab === 'cards' ? renderCards() : activeTab === 'boosters' ? renderBoosters() : activeTab === 'kits' ? renderKits() : activeTab === 'products' ? renderProducts() : renderAlbums();
+      };
+
+      const sourceProducts = () => state ? [
+        ...state.cards.map((item) => ({ kind: 'cards', item })),
+        ...state.boosters.map((item) => ({ kind: 'boosters', item })),
+      ] : [];
+      const addDraftProduct = (kind, itemId) => {
+        if (!state) return;
+        const source = state[kind]?.find((item) => item._id === itemId);
+        if (!source) return;
+        const existing = state.kitDraft.find((entry) => entry.kind === kind && entry.itemId === itemId);
+        if (existing) existing.quantity += 1;
+        else state.kitDraft.push({ kind, itemId, name: itemName(source, kind), quantity: 1, unitPrice: itemPrice(source), imageCandidates: [...(source.imageCandidates || [])] });
+        renderKitBuilder();
+      };
+      const kitGross = () => state ? state.kitDraft.reduce((sum, entry) => sum + (entry.unitPrice || 0) * entry.quantity, 0) : 0;
+      const renderKitBuilder = () => {
+        if (!state) return;
+        const bank = root.querySelector('[data-kit-product-bank]');
+        const selected = root.querySelector('[data-kit-selected-items]');
+        if (!bank || !selected) return;
+        const products = sourceProducts().filter(({ kind, item }) => (kitFilter === 'all' || kitFilter === kind) && (!kitQuery || normalizeText(itemName(item, kind)).includes(kitQuery)));
+        bank.innerHTML = products.length ? products.map(({ kind, item }) => `<button type="button" draggable="true" class="kit-library-item" data-kit-product="${kind}:${item._id}">${renderImage(item)}<span><small>${kind === 'cards' ? 'Carta' : 'Booster'}</small><strong>${escapeHtml(itemName(item, kind))}</strong><em>${prettyPrice(itemPrice(item))}</em></span><b>＋</b></button>`).join('') : '<div class="kit-library-empty">Nenhum produto encontrado.</div>';
+        selected.innerHTML = state.kitDraft.length ? state.kitDraft.map((entry, index) => `<article class="kit-selected-item">${renderImage(entry, entry.name)}<div><strong>${escapeHtml(entry.name)}</strong><small>${prettyPrice(entry.unitPrice)} cada</small></div><label><span>Qtd.</span><input type="number" min="1" value="${entry.quantity}" data-kit-quantity="${index}" /></label><strong class="kit-line-total">${prettyPrice((entry.unitPrice || 0) * entry.quantity)}</strong><button type="button" data-remove-kit-item="${index}">×</button></article>`).join('') : '<div class="kit-selection-empty"><span>▦</span><p>O conteúdo escolhido aparecerá aqui.</p></div>';
+        const count = root.querySelector('[data-kit-drop-count]');
+        const gross = kitGross();
+        const finalPrice = toPrice(root.querySelector('[data-kit-price]')?.value) || 0;
+        const discount = gross > 0 ? Math.max(0, Math.round((gross - finalPrice) / gross * 100)) : 0;
+        if (count) count.textContent = state.kitDraft.length ? `${state.kitDraft.reduce((sum, entry) => sum + entry.quantity, 0)} unidade(s) em ${state.kitDraft.length} produto(s)` : 'Nenhum produto selecionado';
+        root.querySelector('[data-kit-gross]').textContent = prettyPrice(gross);
+        root.querySelector('[data-kit-final]').textContent = prettyPrice(finalPrice);
+        root.querySelector('[data-kit-discount]').textContent = `${discount}%`;
+        root.querySelectorAll('[data-kit-filter]').forEach((button) => button.classList.toggle('active', button.dataset.kitFilter === kitFilter));
+      };
+
+      const resetKitComposer = () => {
+        if (!state) return;
+        activeKitEditIndex = -1;
+        state.kitDraft = [];
+        const form = root.querySelector('[data-kit-form]');
+        if (form) {
+          form.reset();
+          form.querySelector('[name="quantity"]').value = 1;
+          form.querySelector('[name="forSale"]').checked = true;
+        }
+        const title = root.querySelector('#kit-modal-title'); if (title) title.textContent = 'Monte o kit por drag and drop';
+        const submit = root.querySelector('[data-kit-form] .primary-cta span'); if (submit) submit.textContent = 'Salvar kit';
+        renderKitBuilder();
+      };
+      const openKitEditor = (index) => {
+        const kit = state?.kits?.[index];
+        if (!kit) return;
+        activeKitEditIndex = index;
+        state.kitDraft = (kit.contentItems || []).map((entry) => ({ ...entry, imageCandidates: [...(entry.imageCandidates || [])] }));
+        const form = root.querySelector('[data-kit-form]');
+        if (!form) return;
+        form.querySelector('[name="name"]').value = kit.name || '';
+        form.querySelector('[name="description"]').value = kit.description || '';
+        form.querySelector('[name="quantity"]').value = toQuantity(kit.quantity, 1);
+        form.querySelector('[name="price"]').value = kit.price ?? '';
+        form.querySelector('[name="forSale"]').checked = kit.forSale !== false;
+        const title = root.querySelector('#kit-modal-title'); if (title) title.textContent = `Editar ${kit.name || 'kit'}`;
+        const submit = root.querySelector('[data-kit-form] .primary-cta span'); if (submit) submit.textContent = 'Salvar alterações';
+        openModal('kit');
+      };
+
+      const render = () => { updateTabs(); updateOverview(); renderInventory(); renderKitBuilder(); };
+
+      const openModal = (kind) => {
+        const modal = root.querySelector(`[data-editor-modal="${kind}"]`);
+        if (!modal) return;
+        modalElements.forEach((element) => { element.hidden = element !== modal; });
+        if (kind === 'kit') renderKitBuilder();
+        if (kind === 'album-organizer') renderAlbumOrganizer();
+        modal.hidden = false;
+        document.body.classList.add('editor-modal-open');
+        setTimeout(() => modal.querySelector('input:not([type="checkbox"]), textarea, select')?.focus(), 20);
+      };
+      const closeModals = () => { modalElements.forEach((modal) => { modal.hidden = true; }); document.body.classList.remove('editor-modal-open'); };
+      const modalKindByTab = { cards: 'card', boosters: 'booster', kits: 'kit', products: 'product', albums: 'album' };
+      const openPreparedModal = (kind) => {
+        if (kind === 'kit') resetKitComposer();
+        if (kind === 'card') resetCardForm();
+        if (kind === 'booster') resetBoosterForm();
+        openModal(kind);
+      };
+      root.querySelectorAll('[data-open-modal]').forEach((button) => button.addEventListener('click', () => openPreparedModal(button.dataset.openModal)));
+      root.querySelector('[data-add-current]')?.addEventListener('click', () => openPreparedModal(modalKindByTab[activeTab] || 'card'));
+      root.addEventListener('click', (event) => { const close = event.target.closest('[data-close-modal]'); if (close) closeModals(); });
+      document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeModals(); });
+
+      root.querySelectorAll('[data-inventory-tab]').forEach((button) => button.addEventListener('click', () => { activeTab = button.dataset.inventoryTab; inventoryQuery = ''; if (inventorySearch) inventorySearch.value = ''; render(); }));
+      inventoryMetadataFilters?.addEventListener('change', (event) => {
+        const target = event.target.closest('[data-inventory-filter]'); if (!target) return;
+        const name = target.dataset.inventoryFilter;
+        inventoryFilters[name] = clean(target.value);
+        if (name === 'era') syncInventoryFilters({ resetCollection: true, resetClass: true, resetType: true });
+        else if (name === 'group') syncInventoryFilters({ resetClass: true, resetType: true });
+        else syncInventoryFilters();
+        renderInventory();
+      });
+      root.querySelector('[data-clear-inventory-filters]')?.addEventListener('click', () => {
+        Object.keys(inventoryFilters).forEach((key) => { inventoryFilters[key] = ''; const control = inventoryFilter(key); if (control) control.value = ''; });
+        syncInventoryFilters({ resetCollection: true, resetClass: true, resetType: true }); renderInventory();
+      });
+      syncInventoryFilters();
+      inventorySearch?.addEventListener('input', (event) => { inventoryQuery = normalizeText(event.target.value); renderInventory(); });
+
+      root.querySelector('[data-card-era]')?.addEventListener('change', () => syncCardForm({ resetCollection: true, resetClass: true, resetType: true }));
+      root.querySelector('[data-card-group]')?.addEventListener('change', () => syncCardForm({ resetClass: true, resetType: true }));
+      root.querySelector('[data-card-condition]')?.addEventListener('change', () => syncCardForm({ resetIntegrity: true }));
+      root.querySelector('[data-card-collection]')?.addEventListener('change', () => syncCardForm());
+      root.querySelector('[data-card-integrity]')?.addEventListener('change', (event) => {
+        const form = root.querySelector('[data-card-form]'); const value = Number(event.target.value); if (!form || !Number.isFinite(value)) return;
+        const matchingCondition = integrityCondition(value);
+        if (matchingCondition && form.elements.condition.value !== matchingCondition) { form.elements.condition.value = matchingCondition; syncCardForm(); form.elements.integrity.value = String(value); }
+      });
+      root.querySelector('[data-card-myp-link]')?.addEventListener('input', (event) => {
+        if (cardMypDraft && clean(cardMypDraft.linkMyp) !== clean(event.target.value)) cardMypDraft = null;
+      });
+      root.querySelector('[data-card-myp-fill]')?.addEventListener('click', async (event) => {
+        const form = root.querySelector('[data-card-form]');
+        const button = event.currentTarget;
+        const link = clean(form?.elements?.linkMyp?.value);
+        if (!form || !link) { setCardAutofillStatus('Cole primeiro o link da carta na MYP.', 'error'); form?.elements?.linkMyp?.focus(); return; }
+        button.disabled = true;
+        setCardAutofillStatus('Consultando a MYP pelo backend do Vault…', 'loading');
+        try {
+          await window.VaultCloud?.ready;
+          if (!window.VaultCloud?.fetchMypCardInfo) throw new Error('A versão atual do frontend não encontrou a API MYP.');
+          const result = await window.VaultCloud.fetchMypCardInfo(link);
+          applyMypResultToCardForm(result);
+        } catch (error) {
+          cardMypDraft = null;
+          setCardAutofillStatus(error?.message || 'Não foi possível preencher esta carta pela MYP.', 'error');
+        } finally {
+          button.disabled = false;
+        }
+      });
+      root.querySelector('[data-booster-era]')?.addEventListener('change', () => syncBoosterForm({ resetCollection: true }));
+      root.querySelector('[data-booster-collection]')?.addEventListener('change', () => syncBoosterForm());
+      root.querySelector('[data-add-booster-image]')?.addEventListener('click', () => { if (boosterImagesDraft.length >= 5) return; boosterImagesDraft.push(''); renderBoosterImageEditor(); });
+      root.querySelector('[data-booster-image-editor]')?.addEventListener('input', (event) => {
+        const input = event.target.closest('[data-booster-image-input]'); if (!input) return;
+        const index = Number(input.dataset.boosterImageInput); if (!Number.isInteger(index) || index < 0 || index >= boosterImagesDraft.length) return;
+        boosterImagesDraft[index] = clean(input.value);
+        const counter = root.querySelector('[data-booster-image-counter]'); if (counter) counter.textContent = `${boosterImagesDraft.filter((value) => clean(value)).length}/5 imagens`;
+      });
+      root.querySelector('[data-booster-image-editor]')?.addEventListener('change', (event) => { if (event.target.closest('[data-booster-image-input]')) renderBoosterImageEditor(); });
+      root.querySelector('[data-booster-image-editor]')?.addEventListener('click', (event) => {
+        const remove = event.target.closest('[data-booster-image-remove]');
+        const up = event.target.closest('[data-booster-image-up]');
+        const down = event.target.closest('[data-booster-image-down]');
+        if (remove) { const index = Number(remove.dataset.boosterImageRemove); boosterImagesDraft.splice(index, 1); if (!boosterImagesDraft.length) boosterImagesDraft = ['']; renderBoosterImageEditor(); return; }
+        if (up) { const index = Number(up.dataset.boosterImageUp); if (index > 0) [boosterImagesDraft[index - 1], boosterImagesDraft[index]] = [boosterImagesDraft[index], boosterImagesDraft[index - 1]]; renderBoosterImageEditor(); return; }
+        if (down) { const index = Number(down.dataset.boosterImageDown); if (index >= 0 && index < boosterImagesDraft.length - 1) [boosterImagesDraft[index + 1], boosterImagesDraft[index]] = [boosterImagesDraft[index], boosterImagesDraft[index + 1]]; renderBoosterImageEditor(); }
+      });
+
+      root.querySelector('[data-card-form]')?.addEventListener('submit', (event) => {
+        event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
+        const data = new FormData(form); const era = clean(data.get('era')); const collection = findCollection(era, clean(data.get('collectionId'))); const group = normalizeGroupId(data.get('group')); const image = clean(data.get('image')); const linkMyp = clean(data.get('linkMyp'));
+        const payload = {
+          name: clean(data.get('name')), number: clean(data.get('number')), year: clean(data.get('year')), era,
+          collectionId: collection?.id || clean(data.get('collectionId')), collection: collection?.label || '', collectionCode: collection?.code || '',
+          group, cardClass: clean(data.get('cardClass')), type: group === 'pokemon' ? clean(data.get('type')) : '', language: normalizeLanguageCode(data.get('language')),
+          condition: clean(data.get('condition')).toUpperCase(), integrity: Number(data.get('integrity')), quantity: data.get('quantity'), price: data.get('price'), linkMyp, image, imageCandidates: image ? [image] : [], forSale: data.get('forSale') === 'on',
+        };
+        const error = validateCardPayload(payload); if (error) { showFormFeedback('[data-card-form-feedback]', error); return; }
+        const draftMatches = cardMypDraft && clean(cardMypDraft.linkMyp) === linkMyp;
+        if (activeCardEditIndex >= 0 && state.cards[activeCardEditIndex]) {
+          const current = state.cards[activeCardEditIndex];
+          const pricingPatch = draftMatches ? mypCardPatch(cardMypDraft, current) : {};
+          const edited = normalizeCard({ ...current, ...payload, ...pricingPatch, _id: current._id, _isNew: current._isNew }, false);
+          edited._isDirty = true;
+          state.cards[activeCardEditIndex] = edited;
+        } else {
+          const pricingPatch = draftMatches ? mypCardPatch(cardMypDraft, {}) : {};
+          state.cards.push(normalizeCard({ ...payload, ...pricingPatch, _id: uid('card') }, true));
+        }
+        resetCardForm(); activeTab = 'cards'; closeModals(); render();
+      });
+      root.querySelector('[data-booster-form]')?.addEventListener('submit', (event) => {
+        event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
+        const data = new FormData(form); const era = clean(data.get('era')); const collection = findCollection(era, clean(data.get('collectionId'))); const images = boosterImagesDraft.map((value) => clean(value)).filter(Boolean).slice(0, 5);
+        const payload = {
+          name: clean(data.get('name')), year: clean(data.get('year')), era, collectionId: collection?.id || clean(data.get('collectionId')), collection: collection?.label || '', collectionCode: collection?.code || '',
+          language: normalizeLanguageCode(data.get('language')), quantity: data.get('quantity'), price: data.get('price'), images, image: images[0] || '', imageCandidates: [...images], forSale: data.get('forSale') === 'on',
+        };
+        const error = validateBoosterPayload(payload); if (error) { showFormFeedback('[data-booster-form-feedback]', error); return; }
+        if (activeBoosterEditIndex >= 0 && state.boosters[activeBoosterEditIndex]) {
+          const current = state.boosters[activeBoosterEditIndex]; const edited = normalizeBooster({ ...current, ...payload, _id: current._id, _isNew: current._isNew }, false); edited._isDirty = current._isNew ? current._isDirty : true; state.boosters[activeBoosterEditIndex] = edited;
+        } else {
+          state.boosters.push(normalizeBooster({ ...payload, _id: uid('booster') }, true));
+        }
+        resetBoosterForm(); activeTab = 'boosters'; closeModals(); render();
+      });
+      root.querySelector('[data-product-form]')?.addEventListener('submit', (event) => {
+        event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
+        const data = new FormData(form);
+        state.products.push(normalizeProduct({ name: clean(data.get('name')), quantity: data.get('quantity'), price: data.get('price'), image: clean(data.get('image')), forSale: data.get('forSale') === 'on' }, true));
+        form.reset(); form.querySelector('[name="quantity"]').value = 1; form.querySelector('[name="forSale"]').checked = true;
+        activeTab = 'products'; closeModals(); render();
+      });
+      root.querySelector('[data-album-form]')?.addEventListener('submit', (event) => {
+        event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
+        const data = new FormData(form);
+        const album = normalizeAlbum({ name: clean(data.get('name')), description: clean(data.get('description')), format: clean(data.get('format')), coverStyle: clean(data.get('coverStyle')), coverColor: clean(data.get('coverColor')), coverImage: clean(data.get('coverImage')), coverTitle: clean(data.get('coverTitle')), _isNew: true, _isDirty: true }, state.cards);
+        state.albums.push(album);
+        form.reset(); form.querySelector('[name="format"]').value = '3x3'; activeTab = 'albums'; render();
+        openAlbumOrganizer(state.albums.length - 1);
+      });
+      root.querySelector('[data-kit-form]')?.addEventListener('submit', (event) => {
+        event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state) return;
+        if (!state.kitDraft.length) { root.querySelector('[data-kit-drop-zone]')?.classList.add('needs-items'); setTimeout(() => root.querySelector('[data-kit-drop-zone]')?.classList.remove('needs-items'), 900); return; }
+        const data = new FormData(form); const contentItems = state.kitDraft.map((entry) => ({ kind: entry.kind, itemId: entry.itemId, name: entry.name, quantity: entry.quantity, unitPrice: entry.unitPrice, imageCandidates: entry.imageCandidates })); const sourceTotal = kitGross();
+        const payload = { name: clean(data.get('name')), description: clean(data.get('description')), quantity: data.get('quantity'), price: data.get('price'), forSale: data.get('forSale') === 'on', contentItems, sourceTotal, contents: contentItems.map((entry) => `${entry.quantity}x ${entry.name}`).join(' | ') };
+        if (activeKitEditIndex >= 0 && state.kits[activeKitEditIndex]) {
+          const current = state.kits[activeKitEditIndex];
+          const edited = normalizeKit({ ...current, ...payload, _id: current._id, _isNew: current._isNew }, state.cards, state.boosters);
+          edited._isDirty = current._isNew ? current._isDirty : true;
+          state.kits[activeKitEditIndex] = edited;
+        } else {
+          state.kits.push(normalizeKit({ ...payload, _isNew: true }, state.cards, state.boosters));
+        }
+        activeKitEditIndex = -1; state.kitDraft = []; form.reset(); form.querySelector('[name="quantity"]').value = 1; form.querySelector('[name="forSale"]').checked = true; activeTab = 'kits'; closeModals(); render();
+      });
+
+      root.querySelector('[data-kit-product-bank]')?.addEventListener('dragstart', (event) => { const product = event.target.closest('[data-kit-product]'); if (product) event.dataTransfer.setData('text/plain', product.dataset.kitProduct); });
+      root.querySelector('[data-kit-product-bank]')?.addEventListener('click', (event) => { const product = event.target.closest('[data-kit-product]'); if (!product) return; const [kind, itemId] = product.dataset.kitProduct.split(':'); addDraftProduct(kind, itemId); });
+      const kitDrop = root.querySelector('[data-kit-drop-zone]');
+      kitDrop?.addEventListener('dragover', (event) => { event.preventDefault(); kitDrop.classList.add('dragging'); });
+      kitDrop?.addEventListener('dragleave', () => kitDrop.classList.remove('dragging'));
+      kitDrop?.addEventListener('drop', (event) => { event.preventDefault(); kitDrop.classList.remove('dragging'); const [kind, itemId] = event.dataTransfer.getData('text/plain').split(':'); if (kind && itemId) addDraftProduct(kind, itemId); });
+      root.querySelector('[data-kit-selected-items]')?.addEventListener('click', (event) => { const button = event.target.closest('[data-remove-kit-item]'); if (!button || !state) return; state.kitDraft.splice(Number(button.dataset.removeKitItem), 1); renderKitBuilder(); });
+      root.querySelector('[data-kit-selected-items]')?.addEventListener('input', (event) => { const input = event.target.closest('[data-kit-quantity]'); if (!input || !state) return; const entry = state.kitDraft[Number(input.dataset.kitQuantity)]; if (entry) entry.quantity = toQuantity(input.value); renderKitBuilder(); });
+      root.querySelector('[data-kit-price]')?.addEventListener('input', renderKitBuilder);
+      root.querySelector('[data-kit-search]')?.addEventListener('input', (event) => { kitQuery = normalizeText(event.target.value); renderKitBuilder(); });
+      root.querySelectorAll('[data-kit-filter]').forEach((button) => button.addEventListener('click', () => { kitFilter = button.dataset.kitFilter; renderKitBuilder(); }));
+
+      const albumLibrary = root.querySelector('[data-album-card-library]');
+      albumLibrary?.addEventListener('click', (event) => {
+        const card = event.target.closest('[data-album-library-card]');
+        if (!card) return;
+        selectedAlbumCardId = selectedAlbumCardId === card.dataset.albumLibraryCard ? '' : card.dataset.albumLibraryCard;
+        renderAlbumOrganizer();
+      });
+      albumLibrary?.addEventListener('dragstart', (event) => {
+        const card = event.target.closest('[data-album-library-card]');
+        if (!card) return;
+        selectedAlbumCardId = card.dataset.albumLibraryCard;
+        event.dataTransfer.setData('text/plain', selectedAlbumCardId);
+        event.dataTransfer.effectAllowed = 'copy';
+        renderAlbumOrganizer();
+      });
+      const albumPageElement = root.querySelector('[data-album-editor-page]');
+      albumPageElement?.addEventListener('click', (event) => {
+        const slotButton = event.target.closest('[data-album-slot]');
+        const album = currentAlbum();
+        const page = album?.pages?.[activeAlbumPage];
+        if (!slotButton || !page) return;
+        const slotIndex = Number(slotButton.dataset.albumSlot);
+        if (page.slots[slotIndex]) {
+          if (event.target.closest('[data-remove-album-slot]')) {
+            page.slots[slotIndex] = null;
+            markAlbumDirty(album);
+            renderAlbumOrganizer();
+            renderInventory();
+          }
+          return;
+        }
+        if (selectedAlbumCardId) placeAlbumCard(slotIndex, selectedAlbumCardId);
+      });
+      albumPageElement?.addEventListener('dragstart', (event) => {
+        const slot = event.target.closest('[data-album-slot-drag]');
+        if (!slot) return;
+        event.dataTransfer.setData('text/plain', `album-slot:${slot.dataset.albumSlotDrag}`);
+        event.dataTransfer.effectAllowed = 'move';
+      });
+      albumPageElement?.addEventListener('dragover', (event) => {
+        const slot = event.target.closest('[data-album-slot]');
+        if (!slot) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'copy';
+        slot.classList.add('dragging');
+      });
+      albumPageElement?.addEventListener('dragleave', (event) => event.target.closest('[data-album-slot]')?.classList.remove('dragging'));
+      albumPageElement?.addEventListener('drop', (event) => {
+        const slot = event.target.closest('[data-album-slot]');
+        if (!slot) return;
+        event.preventDefault();
+        slot.classList.remove('dragging');
+        const payload = event.dataTransfer.getData('text/plain') || selectedAlbumCardId;
+        if (!payload) return;
+        if (payload.startsWith('album-slot:')) {
+          const album = currentAlbum();
+          const targetPage = album?.pages?.[activeAlbumPage];
+          const [, sourcePageRaw, sourceSlotRaw] = payload.split(':');
+          const sourcePageIndex = Number(sourcePageRaw);
+          const sourceSlotIndex = Number(sourceSlotRaw);
+          const targetSlotIndex = Number(slot.dataset.albumSlot);
+          const sourcePage = album?.pages?.[sourcePageIndex];
+          if (!album || !sourcePage || !targetPage || !sourcePage.slots[sourceSlotIndex]) return;
+          const moving = sourcePage.slots[sourceSlotIndex];
+          sourcePage.slots[sourceSlotIndex] = targetPage.slots[targetSlotIndex] || null;
+          targetPage.slots[targetSlotIndex] = moving;
+          markAlbumDirty(album);
+          renderAlbumOrganizer();
+          renderInventory();
+          return;
+        }
+        placeAlbumCard(Number(slot.dataset.albumSlot), payload);
+      });
+      root.querySelector('[data-album-page-previous]')?.addEventListener('click', () => {
+        if (activeAlbumPage <= 0) return;
+        activeAlbumPage -= 1;
+        renderAlbumOrganizer(-1);
+      });
+      root.querySelector('[data-album-page-next]')?.addEventListener('click', () => {
+        const album = currentAlbum();
+        if (!album || activeAlbumPage >= album.pages.length - 1) return;
+        activeAlbumPage += 1;
+        renderAlbumOrganizer(1);
+      });
+      root.querySelector('[data-album-add-page]')?.addEventListener('click', () => {
+        const album = currentAlbum();
+        if (!album) return;
+        album.pages.push({ slots: Array.from({ length: album.columns * album.rows }, () => null) });
+        activeAlbumPage = album.pages.length - 1;
+        markAlbumDirty(album);
+        renderAlbumOrganizer(1);
+        renderInventory();
+      });
+      root.querySelector('[data-album-remove-page]')?.addEventListener('click', () => {
+        const album = currentAlbum();
+        if (!album || album.pages.length <= 1) return;
+        const occupied = album.pages[activeAlbumPage].slots.some(Boolean);
+        if (occupied && !window.confirm('Esta página possui cartas. Excluir a página mesmo assim?')) return;
+        album.pages.splice(activeAlbumPage, 1);
+        activeAlbumPage = Math.min(activeAlbumPage, album.pages.length - 1);
+        markAlbumDirty(album);
+        renderAlbumOrganizer(-1);
+        renderInventory();
+      });
+      root.querySelector('[data-album-card-search]')?.addEventListener('input', (event) => {
+        albumCardQuery = normalizeText(event.target.value);
+        renderAlbumOrganizer();
+      });
+      const albumPageStrip = root.querySelector('[data-album-page-strip]');
+      albumPageStrip?.addEventListener('click', (event) => {
+        const thumb = event.target.closest('[data-album-page-thumb]');
+        if (thumb) {
+          const nextPage = Number(thumb.dataset.albumPageThumb);
+          const direction = nextPage > activeAlbumPage ? 1 : -1;
+          activeAlbumPage = nextPage;
+          renderAlbumOrganizer(direction);
+          return;
+        }
+        if (event.target.closest('[data-album-add-page-strip]')) root.querySelector('[data-album-add-page]')?.click();
+      });
+      albumPageStrip?.addEventListener('dragstart', (event) => {
+        const thumb = event.target.closest('[data-album-page-drag]');
+        if (!thumb) return;
+        event.dataTransfer.setData('text/plain', `album-page:${thumb.dataset.albumPageDrag}`);
+        event.dataTransfer.effectAllowed = 'move';
+      });
+      albumPageStrip?.addEventListener('dragover', (event) => {
+        if (event.target.closest('[data-album-page-thumb]')) event.preventDefault();
+      });
+      albumPageStrip?.addEventListener('drop', (event) => {
+        const target = event.target.closest('[data-album-page-thumb]');
+        const payload = event.dataTransfer.getData('text/plain');
+        if (!target || !payload.startsWith('album-page:')) return;
+        event.preventDefault();
+        const album = currentAlbum();
+        const from = Number(payload.split(':')[1]);
+        const to = Number(target.dataset.albumPageThumb);
+        if (!album || from === to || !album.pages[from] || !album.pages[to]) return;
+        const [moving] = album.pages.splice(from, 1);
+        album.pages.splice(to, 0, moving);
+        activeAlbumPage = to;
+        markAlbumDirty(album);
+        renderAlbumOrganizer(to > from ? 1 : -1);
+        renderInventory();
+      });
+
+      root.querySelector('[data-album-layout-edit]')?.addEventListener('change', (event) => {
+        const album = currentAlbum();
+        if (!album) return;
+        const nextLayout = parseAlbumFormat(event.target.value || album.format);
+        const previousCapacity = album.columns * album.rows;
+        if (nextLayout.capacity === previousCapacity && nextLayout.format === album.format) return;
+        if (nextLayout.capacity < previousCapacity) {
+          const wouldLose = album.pages.some((page) => (page.slots || []).slice(nextLayout.capacity).some(Boolean));
+          if (wouldLose && !window.confirm('O novo formato possui menos espaços e algumas cartas ficariam fora da página. Deseja continuar?')) { event.target.value = album.format; return; }
+        }
+        album.format = nextLayout.format;
+        album.columns = nextLayout.columns;
+        album.rows = nextLayout.rows;
+        album.pages = album.pages.map((page) => ({ slots: Array.from({ length: nextLayout.capacity }, (_, index) => page.slots?.[index] || null) }));
+        markAlbumDirty(album);
+        renderAlbumOrganizer();
+        renderInventory();
+      });
+
+      root.querySelectorAll('[data-album-cover-edit]').forEach((input) => input.addEventListener('input', () => {
+        const album = currentAlbum();
+        if (!album) return;
+        const field = input.dataset.albumCoverEdit;
+        album[field] = clean(input.value);
+        markAlbumDirty(album);
+        renderAlbumOrganizer();
+        renderInventory();
+      }));
+
+      inventory.addEventListener('input', (event) => {
+        const target = event.target;
+        const [kind, rawIndex, field] = (target.dataset.itemEdit || '').split(':');
+        if (!kind || !field || !state?.[kind]?.[Number(rawIndex)]) return;
+        const editedItem = state[kind][Number(rawIndex)];
+        editedItem[field] = field === 'quantity' ? toQuantity(target.value) : toPrice(target.value);
+        if (field === 'quantity' && editedItem.quantity === 0) editedItem.forSale = false;
+        if (!editedItem._isNew) editedItem._isDirty = true;
+        updateOverview();
+        if (kind === 'kits' || field === 'price' || field === 'leaguePrice') renderKitBuilder();
+      });
+      inventory.addEventListener('change', (event) => {
+        const target = event.target;
+        const [saleKind, saleIndex] = (target.dataset.saleEdit || '').split(':');
+        if (saleKind && state?.[saleKind]?.[Number(saleIndex)]) {
+          state[saleKind][Number(saleIndex)].forSale = target.checked;
+          if (!state[saleKind][Number(saleIndex)]._isNew) state[saleKind][Number(saleIndex)]._isDirty = true;
+          renderInventory();
+          return;
+        }
+        if (target.dataset.itemEdit) {
+          renderInventory();
+          updateOverview();
+        }
+      });
+      inventory.addEventListener('click', (event) => {
+        const add = event.target.closest('[data-empty-add]'); if (add) { openModal(add.dataset.emptyAdd); return; }
+        const organize = event.target.closest('[data-organize-album]'); if (organize) { openAlbumOrganizer(Number(organize.dataset.organizeAlbum)); return; }
+        const favorite = event.target.closest('[data-favorite-card]');
+        if (favorite && state) { const item = state.cards[Number(favorite.dataset.favoriteCard)]; if (item) { item.favorite = !item.favorite; if (!item._isNew) item._isDirty = true; renderInventory(); } return; }
+        const editKit = event.target.closest('[data-edit-kit]'); if (editKit) { openKitEditor(Number(editKit.dataset.editKit)); return; }
+        const editCard = event.target.closest('[data-edit-card]'); if (editCard) { openCardEditor(Number(editCard.dataset.editCard)); return; }
+        const editBooster = event.target.closest('[data-edit-booster]'); if (editBooster) { openBoosterEditor(Number(editBooster.dataset.editBooster)); return; }
+        const details = event.target.closest('[data-card-details]'); if (details) { openCardDetails(Number(details.dataset.cardDetails)); return; }
+        const boosterDetails = event.target.closest('[data-booster-details]'); if (boosterDetails) { openBoosterDetails(Number(boosterDetails.dataset.boosterDetails)); return; }
+        const row = event.target.closest('[data-card-details-row]');
+        if (row && !event.target.closest('a, button, input, label, select, textarea')) { openCardDetails(Number(row.dataset.cardDetailsRow)); return; }
+        const boosterRow = event.target.closest('[data-booster-details-row]');
+        if (boosterRow && !event.target.closest('a, button, input, label, select, textarea')) { openBoosterDetails(Number(boosterRow.dataset.boosterDetailsRow)); return; }
+        const sold = event.target.closest('[data-mark-sold]');
+        if (sold && state) {
+          const [kind, rawIndex] = sold.dataset.markSold.split(':');
+          const item = state?.[kind]?.[Number(rawIndex)];
+          if (!item) return;
+          const current = toQuantity(item.quantity, 0);
+          if (current <= 0) return;
+          const next = Math.max(0, current - 1);
+          item.quantity = next;
+          if (item.quantity === 0) item.forSale = false;
+          if (!item._isNew) item._isDirty = true;
+          render();
+          return;
+        }
+        const button = event.target.closest('[data-remove-item]'); if (!button || !state) return;
+        const [kind, rawIndex] = button.dataset.removeItem.split(':');
+        const index = Number(rawIndex);
+        const item = state?.[kind]?.[index];
+        if (!item) return;
+        if (!item._isNew) {
+          const id = item._id || item.albumId || item.id || '';
+          state.removed[kind].push({ Id: id, operation: 'remove' });
+        }
+        state[kind].splice(index, 1); render();
+      });
+
+      const navigateAdmin = (section, inventoryKind = '') => {
+        if (!state) return;
+        const allowed = new Set(['overview', 'inventory', 'negotiations', 'profile', 'account']);
+        const targetSection = allowed.has(section) ? section : 'overview';
+        root.querySelectorAll('[data-admin-nav]').forEach((button) => button.classList.toggle('active', button.dataset.adminNav === targetSection));
+        root.querySelectorAll('[data-admin-section]').forEach((panel) => {
+          panel.hidden = panel.dataset.adminSection !== targetSection;
+        });
+        if (targetSection === 'inventory') {
+          if (inventoryKind) activeTab = inventoryKind;
+          inventoryQuery = '';
+          if (inventorySearch) inventorySearch.value = '';
+          renderInventory();
+          updateTabs();
+        }
+      };
+      root.querySelectorAll('[data-admin-nav]').forEach((button) => button.addEventListener('click', () => navigateAdmin(button.dataset.adminNav, button.dataset.adminInventory || '')));
+      root.addEventListener('click', (event) => {
+        const jump = event.target.closest?.('[data-admin-jump]');
+        if (jump) { navigateAdmin(jump.dataset.adminJump); return; }
+      });
+      root.querySelector('[data-refresh-myp-quotes]')?.addEventListener('click', async (event) => {
+        if (!state) return;
+        const button = event.currentTarget;
+        const feedback = root.querySelector('[data-myp-refresh-feedback]');
+        const targets = state.cards.map((item, index) => ({ item, index })).filter(({ item }) => clean(item.linkMyp));
+        if (!targets.length) {
+          if (feedback) { feedback.textContent = 'Nenhuma carta possui link MYP ainda.'; feedback.dataset.state = 'error'; }
+          return;
+        }
+        button.disabled = true;
+        let updated = 0;
+        let failed = 0;
+        try {
+          await window.VaultCloud?.ready;
+          for (let position = 0; position < targets.length; position += 1) {
+            const { item, index } = targets[position];
+            if (feedback) { feedback.textContent = `Atualizando ${position + 1}/${targets.length}: ${item.name || 'carta'}…`; feedback.dataset.state = 'loading'; }
+            try {
+              state.cards[index] = await refreshMypQuoteForCard(state.cards[index]);
+              updated += 1;
+            } catch (error) {
+              failed += 1;
+              console.warn('[Vault TCG] Falha ao atualizar MYP:', item.name, error);
+            }
+          }
+          render();
+          scheduleCloudSave(150);
+          if (feedback) {
+            feedback.textContent = failed ? `${updated} cotação(ões) atualizada(s) · ${failed} falha(s).` : `${updated} cotação(ões) MYP atualizada(s) com sucesso.`;
+            feedback.dataset.state = failed ? 'warning' : 'success';
+          }
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      root.addEventListener('load', (event) => {
+        const image = event.target;
+        if (!image.matches?.('.inventory-thumb img')) return;
+        image.parentElement.classList.add('has-image');
+      }, true);
+      root.addEventListener('error', (event) => {
+        const image = event.target;
+        if (!image.matches?.('.inventory-thumb img')) return;
+        let candidates = [];
+        try { candidates = JSON.parse(image.dataset.imageCandidates || '[]'); } catch (_) {}
+        const next = candidates.shift();
+        if (next) { image.dataset.imageCandidates = JSON.stringify(candidates); image.src = next; }
+        else { image.remove(); }
+      }, true);
+
+      root.querySelector('[data-send-email-verification]')?.addEventListener('click', async (event) => {
+        if (!state || state.profile.emailVerified) return;
+        const button = event.currentTarget;
+        const feedback = root.querySelector('[data-email-verification-feedback]');
+        button.disabled = true;
+        if (feedback) { feedback.textContent = 'Enviando o e-mail de verificação…'; feedback.dataset.state = 'neutral'; }
+        try {
+          const result = await window.VaultCloud?.sendAccountVerificationEmail?.();
+          if (result?.alreadyVerified) {
+            await syncEmailVerification(false);
+          } else if (feedback) {
+            feedback.textContent = `E-mail enviado para ${result?.email || state.profile.email}. Abra a mensagem e clique no botão de verificação.`;
+            feedback.dataset.state = 'success';
+          }
+        } catch (error) {
+          if (feedback) {
+            feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível enviar a verificação.';
+            feedback.dataset.state = 'error';
+          }
+        } finally {
+          if (!state?.profile?.emailVerified) button.disabled = false;
+        }
+      });
+
+      root.querySelector('[data-check-email-verification]')?.addEventListener('click', () => syncEmailVerification(false));
+
+      root.querySelector('[data-password-change-form]')?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const feedback = root.querySelector('[data-password-change-feedback]');
+        const data = new FormData(form);
+        const currentPassword = String(data.get('currentPassword') || '');
+        const newPassword = String(data.get('newPassword') || '');
+        const confirmPassword = String(data.get('confirmPassword') || '');
+        if (feedback) { feedback.textContent = ''; feedback.dataset.state = 'neutral'; }
+        if (newPassword.length < 6) {
+          if (feedback) { feedback.textContent = 'A nova senha precisa ter pelo menos 6 caracteres.'; feedback.dataset.state = 'error'; }
+          return;
+        }
+        if (newPassword !== confirmPassword) {
+          if (feedback) { feedback.textContent = 'A confirmação não corresponde à nova senha.'; feedback.dataset.state = 'error'; }
+          return;
+        }
+        const submit = form.querySelector('button[type="submit"]');
+        if (submit) submit.disabled = true;
+        if (feedback) feedback.textContent = 'Atualizando sua senha…';
+        try {
+          await window.VaultCloud?.changeAccountPassword?.(currentPassword, newPassword);
+          form.reset();
+          if (feedback) { feedback.textContent = 'Senha alterada com sucesso.'; feedback.dataset.state = 'success'; }
+        } catch (error) {
+          if (feedback) {
+            feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível alterar a senha.';
+            feedback.dataset.state = 'error';
+          }
+        } finally {
+          if (submit) submit.disabled = false;
+        }
+      });
+
+      root.querySelectorAll('[data-profile-field]').forEach((input) => input.addEventListener('input', () => {
+        if (!state) return;
+        const field = input.dataset.profileField;
+        if (!field) return;
+        state.profile[field] = input.value;
+        profileDirty = true;
+        if (['owner', 'title', 'phone'].includes(field)) mirrorDirty = true;
+        if (field === 'title') root.querySelector('[data-workspace-title]').textContent = input.value || 'Minha coleção';
+        renderPersonalization();
+        scheduleCloudSave();
+      }));
+
+      root.querySelector('[data-profile-photo-path]')?.addEventListener('input', (event) => { if (!state) return; state.profile.profilePhoto = clean(event.target.value); profileDirty = true; renderPersonalization(); scheduleCloudSave(); });
+      root.querySelector('[data-profile-banner-path]')?.addEventListener('input', (event) => { if (!state) return; state.profile.profileBanner = clean(event.target.value); profileDirty = true; renderPersonalization(); scheduleCloudSave(); });
+      root.querySelector('[data-remove-profile-photo]')?.addEventListener('click', () => { if (!state) return; state.profile.profilePhoto = ''; profileDirty = true; const input = root.querySelector('[data-profile-photo-path]'); if (input) input.value = ''; renderPersonalization(); scheduleCloudSave(); });
+      root.querySelectorAll('[data-palette-color]').forEach((input) => input.addEventListener('input', () => { if (!state) return; state.profile.palette[Number(input.dataset.paletteColor)] = input.value; profileDirty = true; renderPersonalization(); scheduleCloudSave(); }));
+
+      root.querySelector('[data-show-collection-value]')?.addEventListener('change', (event) => { if (state) { state.profile.showCollectionValue = event.target.checked; profileDirty = true; renderPersonalization(); scheduleCloudSave(); } });
+      root.querySelector('[data-collection-public]')?.addEventListener('change', (event) => { if (state) { state.profile.public = event.target.checked; profileDirty = true; privacyDirty = true; scheduleCloudSave(); } });
+      root.querySelector('[data-collection-selling]')?.addEventListener('change', (event) => { if (state) { state.profile.selling = event.target.checked; profileDirty = true; mirrorDirty = true; scheduleCloudSave(); } });
+      root.querySelector('[data-proposal-policy]')?.addEventListener('change', (event) => { if (state) { state.profile.proposalTerms.policy = event.target.value; profileDirty = true; mirrorDirty = true; scheduleCloudSave(); } });
+      root.querySelector('[data-price-display-fallback]')?.addEventListener('change', (event) => { if (state) { state.profile.priceDisplayFallback = event.target.value; profileDirty = true; scheduleCloudSave(); } });
+      root.querySelector('[data-flexible-discounts]')?.addEventListener('change', (event) => { if (state) { state.profile.proposalTerms.flexibleDiscounts = event.target.checked; profileDirty = true; mirrorDirty = true; scheduleCloudSave(); } });
+      root.querySelector('[data-add-discount-tier]')?.addEventListener('click', () => { if (!state) return; state.profile.proposalTerms.discountTiers.push({ minValue: 0, maxDiscount: 0 }); profileDirty = true; mirrorDirty = true; renderDiscountTiers(); scheduleCloudSave(); });
+      root.querySelector('[data-discount-tier-list]')?.addEventListener('input', (event) => {
+        const [rawIndex, field] = (event.target.dataset.tierEdit || '').split(':');
+        const tier = state?.profile?.proposalTerms?.discountTiers?.[Number(rawIndex)];
+        if (!tier || !field) return;
+        tier[field] = field === 'maxDiscount' ? Math.min(100, Math.max(0, Number(event.target.value || 0))) : Math.max(0, Number(event.target.value || 0)); profileDirty = true; mirrorDirty = true; scheduleCloudSave();
+      });
+      root.querySelector('[data-discount-tier-list]')?.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-remove-discount-tier]');
+        if (!button || !state) return;
+        state.profile.proposalTerms.discountTiers.splice(Number(button.dataset.removeDiscountTier), 1);
+        profileDirty = true; mirrorDirty = true; renderDiscountTiers(); scheduleCloudSave();
+      });
+      root.querySelector('[data-reset-editor]')?.addEventListener('click', async () => {
+        try { await flushCloudSave(); await window.VaultCloud?.signOut?.(); } catch (_) {}
+        closeModals(); state = null; workspace.hidden = true; root.classList.remove('is-editing'); window.location.replace(`${base}cadastro/`);
+      });
+
+      root.querySelectorAll('[data-save-now]').forEach((button) => button.addEventListener('click', () => flushCloudSave()));
+
+      ['input', 'change', 'click', 'submit'].forEach((eventName) => root.addEventListener(eventName, (event) => {
+        if (!state || workspace.hidden) return;
+        if (event.target.closest?.('[data-save-now], [data-reset-editor]')) return;
+        window.setTimeout(() => { if (hasCloudChanges()) scheduleCloudSave(); }, 0);
+      }));
+
+      const showLoggedOut = () => {
+        if (state) return;
+        workspace.hidden = true;
+        root.classList.remove('is-editing');
+        const gate = root.querySelector('[data-editor-notice]');
+        if (gate) gate.hidden = false;
+        const next = `${base}central/`;
+        window.location.replace(`${base}cadastro/?next=${encodeURIComponent(next)}`);
+      };
+      const loadSignedUser = async (user) => {
+        if (!user) return;
+        try {
+          setCloudSaveState('Carregando…', 'saving');
+          const cloud = await window.VaultCloud.loadMyCollection(user);
+          if (cloud) activate(cloud.profile, cloud, 'cloud');
+        } catch (error) {
+          const feedback = root.querySelector('[data-login-feedback]');
+          if (feedback) feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível carregar sua coleção.';
+        }
+      };
+      window.addEventListener('vault:auth-changed', (event) => {
+        const user = event.detail?.user || null;
+        if (user) loadSignedUser(user);
+        else showLoggedOut();
+      });
+      window.addEventListener('focus', () => {
+        if (state && !state.profile.emailVerified) syncEmailVerification(true);
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && state && !state.profile.emailVerified) syncEmailVerification(true);
+      });
+
+      window.addEventListener('vault:cloud-error', (event) => {
+        const feedback = root.querySelector('[data-login-feedback]');
+        if (feedback) feedback.textContent = event.detail?.message || 'Não foi possível conectar ao serviço. Tente novamente.';
+      });
+
+    })();

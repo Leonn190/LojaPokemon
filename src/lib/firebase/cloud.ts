@@ -272,7 +272,6 @@ const profileForFirestore = (profile: any, uid: string) => stripUndefined({
   slug: profile.collectionId || profile.slug || 'colecao',
   owner: profile.owner || '',
   title: profile.title || 'Minha coleção',
-  description: profile.description || '',
   phone: profile.phone || '',
   public: profile.public === true,
   selling: profile.selling !== false,
@@ -349,7 +348,6 @@ export async function createAccountWithCollection(input: {
   password: string;
   owner: string;
   title: string;
-  description?: string;
   phone?: string;
   isPublic?: boolean;
   selling?: boolean;
@@ -366,7 +364,6 @@ export async function createAccountWithCollection(input: {
       slug,
       owner: input.owner.trim(),
       title: input.title.trim() || 'Minha coleção',
-      description: input.description?.trim() || '',
       email: input.email.trim().toLowerCase(),
       phone: input.phone?.trim() || '',
       public: input.isPublic === true,
@@ -553,14 +550,13 @@ export async function loadMyCollection(user?: User | null) {
   }
   const data = snapshot.data() || {};
   const accountRef = doc(db, 'users', uid);
-  const [accountSnapshot, cards, boosters, kits, products, albums, movements] = await Promise.all([
+  const [accountSnapshot, cards, boosters, kits, products, albums] = await Promise.all([
     getDoc(accountRef),
     readSubcollection(db, uid, 'cards'),
     readSubcollection(db, uid, 'boosters'),
     readSubcollection(db, uid, 'kits'),
     readSubcollection(db, uid, 'products'),
     readSubcollection(db, uid, 'albums'),
-    readSubcollection(db, uid, 'movements'),
   ]);
   const accountData = accountSnapshot.data() || {};
   const scores = normalizeAccountScores(accountData.scores);
@@ -584,7 +580,7 @@ export async function loadMyCollection(user?: User | null) {
     scores,
     emailVerified: active.emailVerified === true || accountData.emailVerified === true,
   };
-  return { profile, cards, boosters, kits, products, albums, movements };
+  return { profile, cards, boosters, kits, products, albums };
 }
 
 const commitOperations = async (db: Firestore, operations: Array<(batch: ReturnType<typeof writeBatch>) => void>) => {
@@ -660,17 +656,9 @@ export async function saveEditorState(state: any, options: { profileDirty?: bool
     }
   }
 
-  for (const movement of state.pendingMovements || []) {
-    const id = String(movement.eventId || movement._id || crypto.randomUUID());
-    movement.eventId = id;
-    operations.push((batch) => batch.set(doc(db, 'collections', uid, 'movements', id), toStoredItem(movement), { merge: true }));
-  }
-
   await commitOperations(db, operations);
   clearPublicCache();
   for (const kind of kinds) (state[kind] || []).forEach((item: any) => { item._isNew = false; item._isDirty = false; });
-  state.movements = [...(state.movements || []), ...(state.pendingMovements || [])];
-  state.pendingMovements = [];
   state.removed = { cards: [], boosters: [], kits: [], products: [], albums: [] };
   return state;
 }

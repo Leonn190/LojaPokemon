@@ -34,7 +34,6 @@ collections/{uid}/boosters
 collections/{uid}/kits
 collections/{uid}/products
 collections/{uid}/albums
-collections/{uid}/movements
 ```
 
 Não existe mais fluxo de baixar ZIP/update para salvar alterações do site. O editor grava diretamente no Firestore.
