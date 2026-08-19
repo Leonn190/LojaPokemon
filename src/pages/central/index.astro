@@ -13,8 +13,8 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
 ---
 
 <BaseLayout
-  title="Central de Coleções"
-  description="Gerencie sua coleção, inventário, propostas, histórico, aparência e configurações no Vault TCG."
+  title="Meu Vault"
+  description="Gerencie sua coleção, inventário, negociações, perfil e conta no Vault TCG."
   active="central"
   bodyClass="central-page"
 >
@@ -29,57 +29,69 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
     </div>
 
     <section class="editor-workspace" data-editor-workspace hidden>
-      <header class="editor-workspace-header">
-        <div>
-          <span class="section-eyebrow">Editor da coleção</span>
-          <h2 data-workspace-title>Sua coleção</h2>
+      <header class="editor-workspace-header vault-workspace-header">
+        <div class="vault-workspace-title">
+          <h2>Meu Vault</h2>
+          <div class="vault-collection-identity"><span>Coleção ativa</span><strong data-workspace-title>Sua coleção</strong></div>
         </div>
         <div class="workspace-header-actions">
           <span class="workspace-save-state" data-cloud-save-state><i></i> Tudo salvo</span>
-          <button type="button" class="secondary-cta" data-save-now><span>Salvar agora</span><b>✓</b></button>
-          <button type="button" class="secondary-cta" data-reset-editor><span>Sair da conta</span><b>×</b></button>
+          <a class="secondary-cta vault-profile-link" data-open-public-profile href="#" target="_blank" rel="noreferrer"><span>Ver perfil</span><b>↗</b></a>
+          <button type="button" class="secondary-cta" data-save-now><span>Salvar</span><b>✓</b></button>
         </div>
       </header>
 
-      <nav class="editor-admin-tabs" aria-label="Seções da Central de Coleções">
+      <nav class="editor-admin-tabs" aria-label="Seções do Meu Vault">
         <button type="button" class="active" data-admin-nav="overview"><span>⌂</span><strong>Visão geral</strong></button>
-        <button type="button" data-admin-nav="appearance"><span>✦</span><strong>Aparência</strong></button>
         <button type="button" data-admin-nav="inventory"><span>▦</span><strong>Inventário</strong></button>
-        <button type="button" data-admin-nav="proposals"><span>◇</span><strong>Propostas</strong></button>
-        <button type="button" data-admin-nav="history"><span>↕</span><strong>Histórico</strong></button>
-        <button type="button" data-admin-nav="settings"><span>⚙</span><strong>Configurações</strong></button>
+        <button type="button" data-admin-nav="negotiations"><span>◇</span><strong>Negociações</strong></button>
+        <button type="button" data-admin-nav="profile"><span>✦</span><strong>Perfil</strong></button>
+        <button type="button" data-admin-nav="account"><span>⚙</span><strong>Conta</strong></button>
       </nav>
 
       <div class="editor-admin-layout">
         <div class="editor-admin-main">
-          <section class="editor-dashboard" id="editor-overview" data-admin-section="overview">
-            <header class="editor-dashboard-heading">
-              <div><span class="section-eyebrow">Visão geral</span><h3>Painel da coleção</h3><p>O que importa agora: tamanho, valor e os scores da sua conta no Vault TCG.</p></div>
+          <section class="editor-dashboard vault-overview" id="editor-overview" data-admin-section="overview">
+            <header class="editor-dashboard-heading vault-overview-heading">
+              <div><h3>Visão geral</h3><p>Valor, tamanho da coleção e reputação da sua conta.</p></div>
               <a class="editor-public-preview-link" data-open-public-profile href="#" target="_blank" rel="noreferrer"><span>Ver perfil público</span><b>↗</b></a>
             </header>
-            <div class="editor-dashboard-metrics editor-dashboard-metrics-primary">
-              <article class="metric-wide"><span>R$</span><small>Valor cotado</small><strong data-dashboard-value>R$ 0,00</strong><em data-dashboard-value-note>somente itens com Preço definido</em></article>
-              <article><span>◇</span><small>Cartas</small><strong data-dashboard-cards>0</strong><em>unidades na coleção</em></article>
-              <article><span>▱</span><small>Boosters</small><strong data-dashboard-boosters>0</strong><em>unidades na coleção</em></article>
-              <article><span>▣</span><small>Produtos</small><strong data-dashboard-products>0</strong><em>unidades na coleção</em></article>
-              <article><span>▤</span><small>Álbuns</small><strong data-dashboard-albums>0</strong><em>álbuns criados</em></article>
-              <article><span>▦</span><small>Kits</small><strong data-dashboard-kits>0</strong><em>unidades na coleção</em></article>
+
+            <div class="vault-overview-summary">
+              <article class="vault-value-card">
+                <div><small>Valor da coleção</small><strong data-dashboard-value>R$ 0,00</strong><em data-dashboard-value-note>somente itens com Preço definido</em></div>
+                <details class="vault-valuation-details">
+                  <summary>Ver cotação detalhada <b>⌄</b></summary>
+                  <div class="editor-card-valuation" aria-label="Cotação das cartas pela MYP">
+                    <header><div><h4>Cotação MYP das cartas</h4><small>Detalhes da cotação ponderados pela quantidade.</small></div><button type="button" class="secondary-cta compact" data-refresh-myp-quotes><span>Atualizar cotações</span><b>↻</b></button></header>
+                    <div class="editor-card-valuation-grid">
+                      <article><small>Mais barato certificado</small><strong data-dashboard-card-certified-low>R$ 0,00</strong></article>
+                      <article><small>Mais barato geral</small><strong data-dashboard-card-general-low>R$ 0,00</strong></article>
+                      <article><small>Média certificada</small><strong data-dashboard-card-certified-average>R$ 0,00</strong></article>
+                      <article><small>Média geral</small><strong data-dashboard-card-general-average>R$ 0,00</strong></article>
+                      <article><small>Mínimo</small><strong data-dashboard-card-minimum>R$ 0,00</strong><em>50% do mais barato certificado</em></article>
+                    </div>
+                    <p class="security-feedback" data-myp-refresh-feedback></p>
+                  </div>
+                </details>
+              </article>
+
+              <section class="vault-collection-stats" aria-label="Itens da coleção">
+                <header><h4>Sua coleção</h4><button type="button" data-admin-jump="inventory">Abrir inventário →</button></header>
+                <div class="editor-dashboard-metrics editor-dashboard-metrics-primary">
+                  <article><span>◇</span><small>Cartas</small><strong data-dashboard-cards>0</strong></article>
+                  <article><span>▱</span><small>Boosters</small><strong data-dashboard-boosters>0</strong></article>
+                  <article><span>▣</span><small>Produtos</small><strong data-dashboard-products>0</strong></article>
+                  <article><span>▦</span><small>Kits</small><strong data-dashboard-kits>0</strong></article>
+                  <article><span>▤</span><small>Álbuns</small><strong data-dashboard-albums>0</strong></article>
+                </div>
+              </section>
             </div>
-            <section class="editor-card-valuation" aria-label="Cotação das cartas pela MYP">
-              <header><div><span class="section-eyebrow">Somente cartas</span><h4>Cotação MYP da coleção</h4><small>Totais ponderados pela quantidade. As cartas antigas passam a usar a MYP quando forem recotizadas.</small></div><button type="button" class="secondary-cta compact" data-refresh-myp-quotes><span>Atualizar cotações MYP</span><b>↻</b></button></header>
-              <div class="editor-card-valuation-grid">
-                <article><small>Mais barato certificado</small><strong data-dashboard-card-certified-low>R$ 0,00</strong></article>
-                <article><small>Mais barato geral</small><strong data-dashboard-card-general-low>R$ 0,00</strong></article>
-                <article><small>Média certificada</small><strong data-dashboard-card-certified-average>R$ 0,00</strong></article>
-                <article><small>Média geral</small><strong data-dashboard-card-general-average>R$ 0,00</strong></article>
-                <article><small>Mínimo</small><strong data-dashboard-card-minimum>R$ 0,00</strong><em>50% do mais barato certificado</em></article>
-              </div>
-              <p class="security-feedback" data-myp-refresh-feedback></p>
-            </section>
+
             <section class="account-score-section" aria-label="Scores da conta">
               <header class="account-score-heading">
-                <div><span class="section-eyebrow">Reputação da conta</span><h4>Seus scores</h4></div>
-                <small>Os dois scores começam em 30. Novas regras poderão aumentar ou reduzir esses valores futuramente.</small>
+                <div><h4>Reputação</h4><small>Seus scores no Vault TCG</small></div>
+                <small>Segurança representa verificações da conta; visibilidade representa o potencial de descoberta da coleção.</small>
               </header>
               <div class="account-score-grid">
                 <article class="account-score-card security-score-card">
@@ -109,36 +121,30 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
                     </svg>
                     <div class="score-gauge-number"><strong data-score-value="visibility">30</strong><span>/100</span></div>
                   </div>
-                  <footer><span>Mecânica preparada</span><b>Base 30</b></footer>
+                  <footer><span>Descoberta da coleção</span><b>Base 30</b></footer>
                 </article>
               </div>
             </section>
           </section>
 
-      {legacyCollections.length > 0 && (
-        <details class="editor-legacy-migration" data-legacy-migration data-admin-section="settings">
-          <summary><span>↥</span><div><strong>Migrar uma coleção antiga</strong><small>Uso único: transfere os dados da versão anterior para esta conta.</small></div><b>+</b></summary>
-          <div class="legacy-migration-body">
-            <label class="form-field"><span>Coleção antiga</span><select data-legacy-select><option value="">Selecione…</option>{legacyCollections.map((collection) => <option value={collection.profile.collectionId || collection.slug}>{collection.profile.title} · {collection.profile.owner}</option>)}</select></label>
-            <label class="form-field"><span>Senha antiga dessa coleção</span><input type="password" autocomplete="off" data-legacy-password placeholder="A senha usada no sistema antigo" /><small>Sua senha antiga é usada apenas para confirmar a migração.</small></label>
-            <button type="button" class="secondary-cta" data-legacy-import><span>Migrar dados para esta conta</span><b>↥</b></button>
-            <p class="import-feedback" data-legacy-feedback></p>
-          </div>
-        </details>
-      )}
-
-      <section class="editor-profile-settings settings-profile-card" data-profile-settings id="editor-settings" data-admin-section="settings">
-        <header class="settings-section-heading"><span>✎</span><div><strong>Dados da conta e coleção</strong><small>Nome, telefone, Gmail/e-mail e informações públicas da sua coleção.</small></div></header>
+      <section class="editor-profile-settings settings-profile-card vault-profile-basics" data-profile-settings id="editor-profile" data-admin-section="profile">
+        <header class="settings-section-heading"><span>✎</span><div><strong>Perfil público</strong><small>As informações que identificam sua coleção para outros usuários.</small></div></header>
         <div class="legacy-migration-body profile-settings-body">
-          <label class="form-field"><span>Seu nome</span><input data-profile-field="owner" /></label>
           <label class="form-field"><span>Nome da coleção</span><input data-profile-field="title" /></label>
-          <label class="form-field"><span>Telefone para propostas</span><input data-profile-field="phone" placeholder="(00) 00000-0000" /></label>
-          <label class="form-field"><span>Gmail / e-mail da conta</span><input type="email" data-profile-field="email" readonly aria-readonly="true" /></label>
-          <label class="form-field profile-description-field"><span>Descrição</span><textarea rows="3" data-profile-field="description"></textarea></label>
+          <label class="form-field profile-description-field"><span>Descrição</span><textarea rows="4" data-profile-field="description"></textarea></label>
         </div>
       </section>
 
-      <section class="account-security-settings" data-admin-section="settings" aria-label="Segurança da conta">
+      <section class="editor-profile-settings settings-profile-card vault-account-basics" id="editor-account" data-admin-section="account">
+        <header class="settings-section-heading"><span>◎</span><div><strong>Dados da conta</strong><small>Informações pessoais e de contato usadas no Vault.</small></div></header>
+        <div class="legacy-migration-body profile-settings-body">
+          <label class="form-field"><span>Seu nome</span><input data-profile-field="owner" /></label>
+          <label class="form-field"><span>Telefone para propostas</span><input data-profile-field="phone" placeholder="(00) 00000-0000" /></label>
+          <label class="form-field profile-description-field"><span>Gmail / e-mail da conta</span><input type="email" data-profile-field="email" readonly aria-readonly="true" /></label>
+        </div>
+      </section>
+
+      <section class="account-security-settings" data-admin-section="account" aria-label="Segurança da conta">
         <header class="settings-section-heading"><span>⌾</span><div><strong>Segurança da conta</strong><small>Verifique seu Gmail e mantenha sua senha atualizada.</small></div></header>
         <div class="account-security-grid">
           <article class="account-security-card email-verification-card" data-email-verification-card>
@@ -178,30 +184,29 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         </div>
       </section>
 
-      <section class="editor-control-center" aria-label="Configurações gerais da coleção" data-admin-section="settings">
+      <section class="editor-control-center vault-profile-controls" aria-label="Visibilidade da coleção" data-admin-section="profile">
         <label class="editor-setting-card">
           <span class="setting-icon">◎</span>
-          <span><strong>Coleção pública</strong><small>Quando desligado, sua conta continua ativa, mas a coleção não aparece para outras pessoas.</small></span>
+          <span><strong>Coleção pública</strong><small>Define se sua coleção pode ser encontrada e visitada por outras pessoas.</small></span>
           <span class="switch"><input type="checkbox" data-collection-public /><i></i></span>
         </label>
         <label class="editor-setting-card">
-          <span class="setting-icon">$</span>
-          <span><strong>Liberar vendas</strong><small>Permite que itens marcados sejam incluídos em propostas.</small></span>
-          <span class="switch"><input type="checkbox" data-collection-selling checked /><i></i></span>
-        </label>
-        <label class="editor-setting-card">
           <span class="setting-icon">◉</span>
-          <span><strong>Mostrar valor total publicamente</strong><small>Desligue para ocultar completamente o valor estimado no perfil público.</small></span>
+          <span><strong>Mostrar valor total</strong><small>Exibe ou oculta o valor estimado no seu perfil público.</small></span>
           <span class="switch"><input type="checkbox" data-show-collection-value checked /><i></i></span>
         </label>
-        <div class="editor-overview-card">
-          <span class="setting-icon">Σ</span>
-          <span><strong data-overview-units>0 unidades</strong><small data-overview-value>R$ 0,00 em preços definidos</small></span>
-        </div>
       </section>
 
-      <section class="collector-personalization" aria-label="Personalização da página do colecionador" id="editor-appearance" data-admin-section="appearance">
-        <header><div><span class="section-eyebrow">Identidade visual</span><h3>Personalize sua página</h3><p>As três cores controlam gradientes, glow, partículas, botões e a iluminação da coleção. As cartas favoritadas aparecem no fundo; se houver menos de 10, o Vault completa com as cartas mais valiosas.</p></div><span class="personalization-note">Tema vivo + favoritos</span></header>
+      <section class="editor-control-center vault-negotiation-controls" aria-label="Disponibilidade para vendas" data-admin-section="negotiations">
+        <label class="editor-setting-card">
+          <span class="setting-icon">$</span>
+          <span><strong>Liberar vendas</strong><small>Permite que itens marcados para venda sejam incluídos em propostas.</small></span>
+          <span class="switch"><input type="checkbox" data-collection-selling checked /><i></i></span>
+        </label>
+      </section>
+
+      <section class="collector-personalization" aria-label="Personalização da página do colecionador" id="editor-appearance" data-admin-section="profile">
+        <header><div><h3>Aparência</h3><p>Foto, banner e cores do seu perfil público.</p></div><span class="personalization-note">Prévia ao vivo</span></header>
         <div class="collector-personalization-grid">
           <div class="profile-photo-editor">
             <div class="profile-photo-preview" data-profile-photo-preview><span>TC</span></div>
@@ -234,8 +239,8 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         </section>
       </section>
 
-      <section class="workspace-proposal-settings" aria-label="Termos de propostas" id="editor-proposals" data-admin-section="proposals">
-        <header><div><span class="section-eyebrow">Negociação</span><h3>Termos de propostas da coleção</h3><p>Essas regras são exibidas publicamente e usadas pelo site para bloquear propostas incompatíveis.</p></div><span class="proposal-settings-badge">Pix após aceite</span></header>
+      <section class="workspace-proposal-settings" aria-label="Termos de propostas" id="editor-proposals" data-admin-section="negotiations">
+        <header><div><h3>Negociações</h3><p>Propostas recebidas e regras comerciais da sua coleção.</p></div><span class="proposal-settings-badge">Pix após aceite</span></header>
         <div class="workspace-proposal-grid">
           <label><span>Regra principal</span><select data-proposal-policy><option value="flexible">Sou flexível quanto às regras</option><option value="none">Não aceito nenhuma proposta</option><option value="fixed_price_multi_only">Sem proposta para cartas precificadas e somente com mais de um produto</option><option value="no_defined_price">Sem proposta para cartas com preço definido</option><option value="multi_only">Propostas apenas com mais de um produto</option></select></label>
           <label><span>Preço exibido quando “Preço” estiver vazio</span><select data-price-display-fallback><option value="league_average_then_lowest">Média de mercado; se faltar, menor preço</option><option value="league_lowest_then_average">Menor preço; se faltar, média de mercado</option><option value="consult">Mostrar “Consultar”</option></select></label>
@@ -249,19 +254,27 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         </section>
       </section>
 
-      <section class="editor-command-section editor-command-section-compact" aria-label="Adicionar itens à coleção" data-admin-section="inventory">
-        <div class="editor-command-grid">
-          <button type="button" class="editor-command-card" data-open-modal="card"><span>◇</span><strong>Adicionar carta</strong><small>Cadastre com metadados próprios, sem depender da Liga.</small><b>＋</b></button>
-          <button type="button" class="editor-command-card" data-open-modal="booster"><span>▱</span><strong>Adicionar booster</strong><small>Inclua pacotes lacrados no estoque.</small><b>＋</b></button>
-          <button type="button" class="editor-command-card is-kit" data-open-modal="kit"><span>▦</span><strong>Adicionar kit</strong><small>Monte visualmente com drag and drop.</small><b>＋</b></button>
-          <button type="button" class="editor-command-card is-product" data-open-modal="product"><span>▣</span><strong>Adicionar produto</strong><small>Cadastre um produto Pokémon fechado.</small><b>＋</b></button>
-          <button type="button" class="editor-command-card is-album" data-open-modal="album"><span>▤</span><strong>Adicionar álbum</strong><small>Escolha o formato e organize carta por carta.</small><b>＋</b></button>
-        </div>
+      <nav class="vault-inventory-view-tabs" data-admin-section="inventory" aria-label="Seções do inventário">
+        <button type="button" class="active" data-inventory-view-nav="items">Itens</button>
+        <button type="button" data-inventory-view-nav="movements">Movimentações</button>
+      </nav>
+
+      <section class="editor-command-section editor-command-section-compact vault-add-section" aria-label="Adicionar itens à coleção" data-admin-section="inventory" data-inventory-view-panel="items">
+        <details class="vault-add-menu">
+          <summary><span>＋</span><strong>Adicionar item</strong><small>Carta, booster, produto, kit ou álbum</small><b>⌄</b></summary>
+          <div class="vault-add-menu-options">
+            <button type="button" data-open-modal="card"><span>◇</span><strong>Carta</strong></button>
+            <button type="button" data-open-modal="booster"><span>▱</span><strong>Booster</strong></button>
+            <button type="button" data-open-modal="product"><span>▣</span><strong>Produto</strong></button>
+            <button type="button" data-open-modal="kit"><span>▦</span><strong>Kit</strong></button>
+            <button type="button" data-open-modal="album"><span>▤</span><strong>Álbum</strong></button>
+          </div>
+        </details>
       </section>
 
-      <section class="editor-inventory-shell" data-inventory-section id="editor-inventory" data-admin-section="inventory">
+      <section class="editor-inventory-shell" data-inventory-section id="editor-inventory" data-admin-section="inventory" data-inventory-view-panel="items">
         <header class="inventory-shell-header">
-          <div><span class="section-eyebrow">Inventário</span><h3>Todos os itens da coleção</h3><p>Uma visão de planilha, com espaço suficiente para imagens, preços e ações.</p></div>
+          <div><h3>Inventário</h3><p>Gerencie todos os itens da sua coleção.</p></div>
           <label class="inventory-search"><span>⌕</span><input type="search" placeholder="Buscar nesta aba..." data-inventory-search /></label>
         </header>
 
@@ -288,8 +301,8 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         <div class="editor-inventory" data-editor-inventory></div>
       </section>
 
-      <section class="collection-movement-log" aria-label="Linha do tempo da coleção" id="editor-history" data-admin-section="history">
-        <header><div><span class="section-eyebrow">Histórico da coleção</span><h3>Entradas e vendas</h3><p>Acompanhe quando cartas e outros itens foram adicionados, vendidos, removidos ou tiveram a quantidade ajustada.</p></div><span class="movement-log-count" data-movement-log-count>0 eventos</span></header>
+      <section class="collection-movement-log" aria-label="Movimentações da coleção" id="editor-history" data-admin-section="inventory" data-inventory-view-panel="movements" hidden>
+        <header><div><h3>Movimentações</h3><p>Entradas, vendas, remoções e ajustes de quantidade.</p></div><span class="movement-log-count" data-movement-log-count>0 eventos</span></header>
         <nav class="movement-filter-tabs" aria-label="Filtrar histórico">
           <button type="button" class="active" data-movement-filter="all">Tudo</button>
           <button type="button" data-movement-filter="cards">Cartas</button>
@@ -298,14 +311,14 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         <div data-collection-movements></div>
       </section>
 
-      <section class="editor-sales-panel" id="editor-sales" data-admin-section="history">
-        <header><div><span class="section-eyebrow">Vendas</span><h3>Vendas registradas</h3><p>Resumo das saídas marcadas como venda no histórico da coleção.</p></div><strong data-sales-total>0 vendas</strong></header>
+      <section class="editor-sales-panel" id="editor-sales" data-admin-section="negotiations">
+        <header><div><h3>Vendas registradas</h3><p>Saídas marcadas como venda no inventário.</p></div><strong data-sales-total>0 vendas</strong></header>
         <div class="editor-sales-list" data-sales-list></div>
       </section>
 
-      <div class="editor-export-panel cloud-save-panel" data-admin-section="settings">
-        <div><span class="section-eyebrow">Editor</span><h3>Alterações salvas automaticamente</h3><p>Edite sua coleção e continue de onde parou em qualquer acesso à sua conta.</p></div>
-        <div class="editor-export-actions"><button type="button" class="primary-cta" data-save-now><span>Salvar agora</span><b>☁</b></button></div>
+      <div class="editor-export-panel cloud-save-panel vault-account-actions" data-admin-section="account">
+        <div><h3>Sessão e salvamento</h3><p>Suas alterações são salvas automaticamente na conta.</p></div>
+        <div class="editor-export-actions"><button type="button" class="primary-cta" data-save-now><span>Salvar agora</span><b>☁</b></button><button type="button" class="secondary-cta danger-cta" data-reset-editor><span>Sair da conta</span><b>×</b></button></div>
       </div>
         </div>
       </div>
@@ -1426,8 +1439,9 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         workspace.hidden = false;
         if (editorHero) editorHero.hidden = true;
         root.querySelector('[data-workspace-title]').textContent = state.profile.title;
-        const publicProfileLink = root.querySelector('[data-open-public-profile]');
-        if (publicProfileLink) publicProfileLink.href = `${base}colecao/?slug=${encodeURIComponent(state.profile.collectionId || safeSlug(state.profile.title))}`;
+        root.querySelectorAll('[data-open-public-profile]').forEach((publicProfileLink) => {
+          publicProfileLink.href = `${base}colecao/?slug=${encodeURIComponent(state.profile.collectionId || safeSlug(state.profile.title))}`;
+        });
         root.querySelectorAll('[data-profile-field]').forEach((input) => { input.value = state.profile[input.dataset.profileField] || ''; });
         state.profile.showQuantity = false;
         root.querySelector('[data-show-collection-value]').checked = state.profile.showCollectionValue !== false;
@@ -2543,9 +2557,19 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         state[kind].splice(index, 1); render();
       });
 
+      let activeInventoryView = 'items';
+      const setInventoryView = (view = 'items') => {
+        activeInventoryView = view === 'movements' ? 'movements' : 'items';
+        root.querySelectorAll('[data-inventory-view-nav]').forEach((button) => button.classList.toggle('active', button.dataset.inventoryViewNav === activeInventoryView));
+        root.querySelectorAll('[data-inventory-view-panel]').forEach((panel) => {
+          panel.hidden = panel.dataset.inventoryViewPanel !== activeInventoryView;
+        });
+      };
+      root.querySelectorAll('[data-inventory-view-nav]').forEach((button) => button.addEventListener('click', () => setInventoryView(button.dataset.inventoryViewNav)));
+
       const navigateAdmin = (section, inventoryKind = '') => {
         if (!state) return;
-        const allowed = new Set(['overview', 'appearance', 'inventory', 'proposals', 'history', 'settings']);
+        const allowed = new Set(['overview', 'inventory', 'negotiations', 'profile', 'account']);
         const targetSection = allowed.has(section) ? section : 'overview';
         root.querySelectorAll('[data-admin-nav]').forEach((button) => button.classList.toggle('active', button.dataset.adminNav === targetSection));
         root.querySelectorAll('[data-admin-section]').forEach((panel) => {
@@ -2555,6 +2579,7 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
           if (inventoryKind) activeTab = inventoryKind;
           inventoryQuery = '';
           if (inventorySearch) inventorySearch.value = '';
+          setInventoryView('items');
           renderInventory();
           updateTabs();
         }

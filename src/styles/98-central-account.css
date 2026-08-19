@@ -1,0 +1,495 @@
+/* Meu Vault — Central de conta, perfil e inventário. */
+
+/* ========================================================================== 
+   Meu Vault — reorganização de hierarquia e escala (2026-08)
+   Mantém a lógica existente e amplia a legibilidade da Central.
+   ========================================================================== */
+.central-page .central-collection-editor {
+  width: min(1360px, calc(100% - 40px));
+  max-width: none;
+  padding-top: 28px;
+}
+.central-collection-editor .editor-admin-main { gap: 22px; }
+
+.central-collection-editor .vault-workspace-header {
+  min-height: 126px;
+  margin-bottom: 18px;
+  padding: 26px clamp(28px, 4vw, 46px);
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 84% 0, rgba(84,232,223,.105), transparent 30rem),
+    linear-gradient(145deg, rgba(255,255,255,.035), rgba(255,255,255,.012));
+}
+.central-collection-editor .vault-workspace-title h2 {
+  margin: 0;
+  font-size: clamp(2.15rem, 4vw, 3.35rem);
+  line-height: .95;
+  letter-spacing: -.055em;
+}
+.vault-collection-identity {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin-top: 12px;
+}
+.vault-collection-identity span {
+  color: var(--muted-2);
+  font-size: .68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.vault-collection-identity strong { color: var(--muted); font-size: .86rem; }
+.central-collection-editor .workspace-header-actions { gap: 10px; }
+.central-collection-editor .workspace-save-state { font-size: .72rem; }
+.central-collection-editor .vault-workspace-header .secondary-cta {
+  min-height: 44px;
+  padding: 11px 15px;
+  font-size: .72rem;
+}
+
+.editor-admin-tabs {
+  grid-template-columns: repeat(5, minmax(0,1fr));
+  gap: 8px;
+  padding: 8px;
+  border-radius: 20px;
+}
+.editor-admin-tabs button {
+  min-height: 48px;
+  padding: 13px 14px;
+  border-radius: 14px;
+  font-size: .78rem;
+}
+.editor-admin-tabs button span { font-size: 1rem; }
+
+.central-collection-editor .vault-overview {
+  padding: clamp(24px, 3.4vw, 38px);
+  border-radius: 26px;
+}
+.vault-overview-heading { margin-bottom: 22px; }
+.vault-overview-heading h3 {
+  margin: 0;
+  font-size: clamp(1.65rem, 2.7vw, 2.25rem);
+  letter-spacing: -.04em;
+}
+.vault-overview-heading p { margin: 7px 0 0; color: var(--muted); font-size: .82rem; }
+.editor-public-preview-link { min-height: 44px; padding: 11px 15px; font-size: .7rem; }
+
+.vault-overview-summary {
+  display: grid;
+  grid-template-columns: minmax(300px,.8fr) minmax(0,1.45fr);
+  gap: 16px;
+  align-items: stretch;
+}
+.vault-value-card,
+.vault-collection-stats {
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(255,255,255,.035), rgba(0,0,0,.12));
+}
+.vault-value-card {
+  min-height: 254px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.vault-value-card > div { display: grid; gap: 7px; }
+.vault-value-card > div > small {
+  color: var(--muted);
+  font-size: .73rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+}
+.vault-value-card > div > strong {
+  margin-top: 7px;
+  font-size: clamp(2.15rem, 4.2vw, 3.35rem);
+  line-height: 1;
+  letter-spacing: -.065em;
+}
+.vault-value-card > div > em { color: var(--muted-2); font-size: .7rem; font-style: normal; }
+.vault-valuation-details { position: relative; margin-top: 24px; }
+.vault-valuation-details > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 13px;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 12px;
+  color: var(--text);
+  background: rgba(255,255,255,.028);
+  font-size: .7rem;
+  font-weight: 850;
+  cursor: pointer;
+  list-style: none;
+}
+.vault-valuation-details > summary::-webkit-details-marker { display: none; }
+.vault-valuation-details > summary b { color: var(--accent); transition: transform .18s ease; }
+.vault-valuation-details[open] > summary b { transform: rotate(180deg); }
+.vault-valuation-details .editor-card-valuation {
+  position: absolute;
+  z-index: 15;
+  left: 0;
+  top: calc(100% + 8px);
+  width: min(760px, calc(100vw - 70px));
+  margin: 0;
+  padding: 18px;
+  border-color: rgba(255,255,255,.1);
+  background: #0b1726;
+  box-shadow: 0 24px 70px rgba(0,0,0,.42);
+}
+.vault-valuation-details .editor-card-valuation h4 { font-size: 1rem; }
+.vault-valuation-details .editor-card-valuation header small { color: var(--muted); font-size: .65rem; }
+.editor-card-valuation-grid { grid-template-columns: repeat(5,minmax(0,1fr)); }
+.editor-card-valuation-grid article { min-height: 96px; padding: 15px; }
+.editor-card-valuation-grid small { font-size: .58rem; }
+.editor-card-valuation-grid strong { font-size: 1rem; }
+.editor-card-valuation-grid em { font-size: .56rem; }
+
+.vault-collection-stats { padding: 22px; }
+.vault-collection-stats > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.vault-collection-stats > header h4 { margin: 0; font-size: 1.05rem; }
+.vault-collection-stats > header button {
+  border: 0;
+  color: var(--accent);
+  background: transparent;
+  font: inherit;
+  font-size: .68rem;
+  font-weight: 850;
+}
+.central-collection-editor .editor-dashboard-metrics-primary {
+  grid-template-columns: repeat(5,minmax(0,1fr));
+  gap: 10px;
+}
+.central-collection-editor .editor-dashboard-metrics-primary article {
+  min-height: 156px;
+  padding: 18px 16px;
+  border-radius: 16px;
+  align-content: end;
+}
+.central-collection-editor .editor-dashboard-metrics-primary article > span {
+  right: 14px;
+  top: 13px;
+  font-size: 1.25rem;
+}
+.central-collection-editor .editor-dashboard-metrics-primary small {
+  font-size: .64rem;
+  letter-spacing: .08em;
+}
+.central-collection-editor .editor-dashboard-metrics-primary strong {
+  margin-top: 8px;
+  font-size: clamp(1.55rem,2.5vw,2.15rem);
+}
+
+.account-score-section { margin-top: 18px; padding: 24px; border-radius: 20px; }
+.account-score-heading { margin-bottom: 18px; }
+.account-score-heading > div { display: grid; gap: 5px; }
+.account-score-heading h4 { margin: 0; font-size: 1.12rem; }
+.account-score-heading > div > small { color: var(--muted); font-size: .68rem; }
+.account-score-heading > small { max-width: 560px; font-size: .65rem; line-height: 1.6; }
+.account-score-grid { gap: 16px; }
+.account-score-card { min-height: 292px; padding: 20px 21px 17px; border-radius: 18px; }
+.score-card-copy { gap: 12px; }
+.score-card-copy strong { font-size: .85rem; }
+.score-card-copy small { font-size: .62rem; }
+.score-card-icon { width: 42px; height: 42px; border-radius: 13px; font-size: .9rem; }
+.score-gauge { width: min(350px, 90%); margin-top: 18px; }
+.score-gauge-number strong { font-size: clamp(2rem,3.5vw,2.8rem); }
+.score-gauge-number span { font-size: .66rem; }
+.account-score-card footer { padding-top: 10px; font-size: .61rem; }
+.account-score-card footer b { font-size: .6rem; }
+
+/* Seções secundárias maiores, com menos microtexto. */
+.settings-profile-card,
+.account-security-settings,
+.central-collection-editor .editor-control-center,
+.central-collection-editor .collector-personalization,
+.central-collection-editor .workspace-proposal-settings,
+.central-collection-editor .editor-inventory-shell,
+.central-collection-editor .collection-movement-log,
+.central-collection-editor .editor-sales-panel,
+.central-collection-editor .editor-export-panel {
+  border-radius: 22px;
+}
+.settings-section-heading { gap: 14px; padding: 22px 24px; }
+.settings-section-heading > span { width: 42px; height: 42px; border-radius: 12px; font-size: .9rem; }
+.settings-section-heading strong { font-size: .86rem; }
+.settings-section-heading small { font-size: .65rem; line-height: 1.45; }
+.settings-profile-card .profile-settings-body { gap: 16px; padding: 22px 24px 24px; }
+.central-collection-editor .form-field { gap: 7px; }
+.central-collection-editor .form-field > span { font-size: .64rem; }
+.central-collection-editor .form-field input,
+.central-collection-editor .form-field textarea,
+.central-collection-editor .form-field select {
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: .72rem;
+}
+.central-collection-editor .form-field textarea { min-height: 112px; }
+
+.central-collection-editor .editor-control-center.vault-profile-controls {
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 12px;
+  padding: 0;
+  background: transparent;
+}
+.central-collection-editor .editor-control-center.vault-negotiation-controls {
+  grid-template-columns: minmax(0,1fr);
+  padding: 0;
+  background: transparent;
+}
+.central-collection-editor .editor-setting-card { min-height: 92px; padding: 18px 20px; }
+.central-collection-editor .editor-setting-card strong { font-size: .78rem; }
+.central-collection-editor .editor-setting-card small { font-size: .62rem; line-height: 1.5; }
+
+.central-collection-editor .collector-personalization,
+.central-collection-editor .workspace-proposal-settings,
+.central-collection-editor .collection-movement-log,
+.central-collection-editor .editor-sales-panel,
+.central-collection-editor .editor-export-panel { margin-top: 0; }
+.collector-personalization { padding: 24px; }
+.collector-personalization > header { margin-bottom: 22px; }
+.collector-personalization h3,
+.workspace-proposal-settings h3,
+.inventory-shell-header h3,
+.collection-movement-log > header h3,
+.editor-sales-panel h3,
+.editor-export-panel h3 {
+  margin: 0 0 6px;
+  font-size: 1.32rem;
+  letter-spacing: -.025em;
+}
+.collector-personalization header p,
+.workspace-proposal-settings header p,
+.inventory-shell-header p,
+.collection-movement-log > header p,
+.editor-sales-panel header p,
+.editor-export-panel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .7rem;
+  line-height: 1.55;
+}
+.personalization-note,
+.proposal-settings-badge { font-size: .6rem; }
+
+/* Inventário: subnavegação + um único botão de adicionar. */
+.vault-inventory-view-tabs {
+  display: flex;
+  gap: 7px;
+  width: fit-content;
+  padding: 6px;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 14px;
+  background: rgba(255,255,255,.02);
+}
+.vault-inventory-view-tabs button {
+  min-height: 40px;
+  padding: 9px 15px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--muted);
+  background: transparent;
+  font: inherit;
+  font-size: .7rem;
+  font-weight: 850;
+}
+.vault-inventory-view-tabs button.active {
+  border-color: color-mix(in srgb,var(--accent) 30%,transparent);
+  color: var(--text);
+  background: color-mix(in srgb,var(--accent) 10%,transparent);
+}
+.central-collection-editor .vault-add-section {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.vault-add-menu { position: relative; width: min(390px,100%); }
+.vault-add-menu > summary {
+  display: grid;
+  grid-template-columns: 38px minmax(0,1fr) auto;
+  grid-template-areas: "icon title arrow" "icon note arrow";
+  column-gap: 11px;
+  align-items: center;
+  min-height: 64px;
+  padding: 11px 14px;
+  border: 1px solid color-mix(in srgb,var(--accent) 22%,var(--line));
+  border-radius: 15px;
+  background: linear-gradient(135deg, color-mix(in srgb,var(--accent) 7%,rgba(255,255,255,.025)), rgba(255,255,255,.018));
+  cursor: pointer;
+  list-style: none;
+}
+.vault-add-menu > summary::-webkit-details-marker { display: none; }
+.vault-add-menu > summary > span { grid-area: icon; display:grid; place-items:center; width:38px; height:38px; border-radius:11px; color:var(--accent); background:rgba(84,232,223,.08); font-size:1rem; }
+.vault-add-menu > summary > strong { grid-area: title; font-size: .82rem; }
+.vault-add-menu > summary > small { grid-area: note; color:var(--muted-2); font-size:.59rem; }
+.vault-add-menu > summary > b { grid-area: arrow; color:var(--accent); transition:transform .18s ease; }
+.vault-add-menu[open] > summary > b { transform: rotate(180deg); }
+.vault-add-menu-options {
+  position: absolute;
+  z-index: 16;
+  top: calc(100% + 8px);
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 8px;
+  width: min(460px, calc(100vw - 60px));
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 15px;
+  background: #0b1726;
+  box-shadow: 0 22px 60px rgba(0,0,0,.4);
+}
+.vault-add-menu-options button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,.065);
+  border-radius: 11px;
+  color: var(--text);
+  background: rgba(255,255,255,.025);
+  font: inherit;
+  font-size: .68rem;
+}
+.vault-add-menu-options button:hover { border-color: color-mix(in srgb,var(--accent) 35%,transparent); background: rgba(255,255,255,.045); }
+.vault-add-menu-options button > span { color:var(--accent); font-size:.9rem; }
+
+.editor-inventory-shell { margin-inline: 0; }
+.inventory-shell-header { padding: 22px 24px; }
+.inventory-search { min-width: min(390px,42vw); min-height: 44px; }
+.inventory-search input { font-size: .7rem; }
+.inventory-tabs button { min-height: 46px; font-size: .7rem; }
+.inventory-tabs button b { font-size: .58rem; }
+.inventory-metadata-filters { gap: 11px; padding: 16px 18px; }
+.inventory-metadata-filters > label { font-size: .6rem; }
+.inventory-metadata-filters select,
+.inventory-metadata-filters input { min-height: 40px; font-size: .67rem; }
+.inventory-metadata-filters > button { min-height: 40px; font-size: .64rem; }
+
+.collection-movement-log > header,
+.editor-sales-panel > header { padding: 22px 24px; }
+.movement-filter-tabs { padding: 0 24px 14px; }
+.movement-filter-tabs button { min-height: 38px; padding: 8px 13px; font-size: .65rem; }
+.collection-movement-row { padding: 14px 24px; }
+.collection-movement-row strong { font-size: .7rem; }
+.collection-movement-row small,
+.collection-movement-row time { font-size: .61rem; }
+
+/* Conta: cards maiores e ações mais claras. */
+.account-security-grid { gap: 16px; padding: 20px 22px 22px; }
+.account-security-card { padding: 19px; border-radius: 17px; }
+.account-security-card-top { grid-template-columns: 42px minmax(0,1fr) auto; gap: 12px; }
+.account-security-icon { width: 42px; height: 42px; border-radius: 12px; font-size: .85rem; }
+.account-security-card-top strong { font-size: .78rem; }
+.account-security-card-top small { font-size: .61rem; }
+.verification-status { padding: 7px 10px; font-size: .54rem; }
+.verification-email-display { padding: 13px 14px; }
+.verification-email-display span { font-size: .54rem; }
+.verification-email-display strong { font-size: .7rem; }
+.verification-benefit strong { font-size: .65rem; }
+.verification-benefit small { font-size: .55rem; }
+.primary-cta.compact, .secondary-cta.compact { min-height: 42px; padding: 10px 13px; font-size: .64rem; }
+.security-feedback { font-size: .59rem; }
+.password-change-form { gap: 12px; }
+.vault-account-actions { padding: 22px 24px; }
+.danger-cta { border-color: rgba(255,111,125,.18) !important; color: #ff9aa5 !important; }
+
+/* Propostas/negociações com tipografia de leitura normal. */
+.workspace-proposal-settings { padding: 24px; }
+.workspace-proposal-grid label > span,
+.workspace-tier-heading strong,
+.proposal-inbox-panel strong { font-size: .68rem; }
+.workspace-proposal-grid select { min-height: 42px; font-size: .67rem; }
+.workspace-proposal-grid small,
+.workspace-tier-heading small,
+.proposal-inbox-panel small { font-size: .58rem; }
+.proposal-inbox-item { min-height: 62px; }
+
+@media (max-width: 1120px) {
+  .vault-overview-summary { grid-template-columns: 1fr; }
+  .vault-value-card { min-height: 220px; }
+  .central-collection-editor .editor-dashboard-metrics-primary { grid-template-columns: repeat(5,minmax(105px,1fr)); overflow-x:auto; }
+  .editor-card-valuation-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
+@media (max-width: 820px) {
+  .central-page .central-collection-editor { width: min(100% - 24px, 1360px); }
+  .central-collection-editor .vault-workspace-header { align-items:flex-start; flex-direction:column; min-height:0; padding:22px; }
+  .central-collection-editor .workspace-header-actions { width:100%; flex-wrap:wrap; }
+  .editor-admin-tabs { display:flex; overflow-x:auto; }
+  .editor-admin-tabs button { flex:0 0 auto; min-width:132px; }
+  .central-collection-editor .editor-dashboard-metrics-primary { grid-template-columns: repeat(3,minmax(125px,1fr)); }
+  .central-collection-editor .editor-control-center.vault-profile-controls { grid-template-columns:1fr; }
+  .vault-valuation-details .editor-card-valuation { position:fixed; left:12px; right:12px; top:auto; bottom:12px; width:auto; max-height:70vh; overflow:auto; }
+}
+@media (max-width: 560px) {
+  .central-page .central-collection-editor { width: min(100% - 18px, 1360px); padding-top:14px; }
+  .vault-collection-identity { align-items:flex-start; flex-direction:column; gap:3px; }
+  .central-collection-editor .vault-overview { padding:18px 14px; }
+  .vault-overview-heading { align-items:flex-start; flex-direction:column; }
+  .vault-value-card, .vault-collection-stats { padding:18px; }
+  .central-collection-editor .editor-dashboard-metrics-primary { grid-template-columns:1fr 1fr; overflow:visible; }
+  .central-collection-editor .editor-dashboard-metrics-primary article { min-height:125px; }
+  .account-score-section { padding:16px 13px; }
+  .account-score-card { min-height:250px; padding:16px; }
+  .settings-profile-card .profile-settings-body { grid-template-columns:1fr; padding:17px; }
+  .settings-section-heading { padding:18px 17px; }
+  .vault-add-menu { width:100%; }
+  .vault-add-menu-options { grid-template-columns:1fr; width:100%; }
+  .inventory-shell-header { padding:18px 16px; align-items:stretch; flex-direction:column; }
+  .inventory-search { min-width:0; width:100%; }
+  .editor-card-valuation-grid { grid-template-columns:1fr; }
+  .account-security-grid { padding:14px; }
+  .workspace-proposal-settings, .collector-personalization { padding:18px 14px; }
+}
+
+/* Ajustes finos de legibilidade nos controles internos da Central. */
+.central-collection-editor .profile-photo-editor strong,
+.central-collection-editor .profile-banner-editor strong,
+.central-collection-editor .palette-editor strong { font-size: .76rem; }
+.central-collection-editor .profile-photo-editor small,
+.central-collection-editor .profile-banner-editor small,
+.central-collection-editor .palette-editor small { font-size: .61rem; line-height: 1.5; }
+.central-collection-editor .profile-photo-actions input,
+.central-collection-editor .profile-banner-editor input { min-height: 42px; font-size: .68rem; }
+.central-collection-editor .profile-photo-actions span,
+.central-collection-editor .profile-banner-editor label span,
+.central-collection-editor .palette-inputs label span { font-size: .58rem; }
+.central-collection-editor .profile-photo-actions button { min-height: 40px; font-size: .62rem; }
+.central-collection-editor .palette-inputs input[type="color"] { min-height: 42px; }
+
+.central-collection-editor .inventory-sheet-head { font-size: .64rem; }
+.central-collection-editor .inventory-product-cell strong { font-size: .84rem; }
+.central-collection-editor .inventory-product-cell small { font-size: .69rem; }
+.central-collection-editor .inventory-product-cell em,
+.central-collection-editor .inventory-info-cell span,
+.central-collection-editor .inventory-links-cell a,
+.central-collection-editor .inventory-no-links { font-size: .65rem; }
+.central-collection-editor .inventory-price-field,
+.central-collection-editor .inventory-quantity-field { font-size: .62rem; }
+.central-collection-editor .inventory-price-field input,
+.central-collection-editor .inventory-quantity-field input { min-height: 38px; font-size: .7rem; }
+.central-collection-editor .inventory-sale-toggle > span,
+.central-collection-editor .inventory-sale-toggle b { font-size: .66rem; }
+.central-collection-editor .inventory-edit-button { min-height: 37px; font-size: .64rem; }
+.central-collection-editor .inventory-quote-summary span { font-size: .56rem; }
+.central-collection-editor .inventory-quote-summary strong { font-size: .67rem; }
+.central-collection-editor .inventory-quote-summary small { font-size: .54rem; }
+
+.central-collection-editor .workspace-tier-heading button,
+.central-collection-editor [data-add-discount-tier] { min-height: 40px; font-size: .64rem; }
+.central-collection-editor .proposal-inbox-item strong { font-size: .64rem; }
+.central-collection-editor .proposal-inbox-item small { font-size: .56rem; }
+.central-collection-editor .proposal-inbox-item > em { font-size: .5rem; }
