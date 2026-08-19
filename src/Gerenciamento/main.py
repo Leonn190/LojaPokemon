@@ -59,6 +59,7 @@ def escolher_velocidade_liga() -> int:
 
 
 def executar_formatacao() -> None:
+    garantir_dependencias()
     from configuracao import ARQUIVO_PERFIL
     from gerenciamento import formatar_nova_colecao, listar_pacotes
     pacote = escolher("Coleções não formatadas disponíveis", listar_pacotes(ARQUIVO_PERFIL), lambda item: item.name)
@@ -75,6 +76,7 @@ def executar_formatacao() -> None:
 
 
 def executar_atualizacao() -> None:
+    garantir_dependencias()
     from configuracao import ARQUIVO_ATUALIZACAO
     from gerenciamento import atualizar_colecao, listar_pacotes
     pacote = escolher("Atualizações disponíveis", listar_pacotes(ARQUIVO_ATUALIZACAO), lambda item: item.name)
@@ -108,6 +110,7 @@ def escolher_escopo() -> tuple[str, int | None]:
 
 
 def executar_cotizacao() -> None:
+    garantir_dependencias()
     from gerenciamento import cotizacao_pendente, cotizar_colecao, listar_colecoes
     colecao = escolher("Coleções disponíveis para cotização", listar_colecoes(), lambda item: item.name)
     workers = escolher_velocidade_liga()
@@ -136,9 +139,13 @@ def executar_cotizacao() -> None:
         print(f"Relatórios detalhados: {destino / 'relatorios'}")
 
 
+
+def executar_teste_api() -> None:
+    from api_tester import main as testar_api
+    testar_api()
+
 def main() -> None:
-    garantir_dependencias()
-    acoes = {"1": executar_formatacao, "2": executar_atualizacao, "3": executar_cotizacao}
+    acoes = {"1": executar_formatacao, "2": executar_atualizacao, "3": executar_cotizacao, "4": executar_teste_api}
     while True:
         print("\n" + "=" * 62)
         print("VAULT TCG — GERENCIAMENTO DE COLEÇÕES")
@@ -146,6 +153,7 @@ def main() -> None:
         print("  1. Formatar nova coleção")
         print("  2. Atualizar coleção com novidades")
         print("  3. Fazer a cotização de uma coleção")
+        print("  4. Testar API do Vault / Render / MYP")
         print("  0. Sair")
         escolha = input("Escolha uma opção: ").strip()
         if escolha == "0":

@@ -190,3 +190,17 @@ Principais proteções:
 - cotizações parciais produzidas pelo leitor antigo (OCR v1) são recusadas na retomada. Inicie uma nova cotização para não misturar dados antigos possivelmente corrompidos.
 
 O modo Conservador (1 worker) reduz a chance de bloqueio/verificação da Liga, mas não é necessário para corrigir o defeito dos valores `1,11`: esse defeito era do leitor OCR e foi tratado diretamente. Nos modos paralelos, o jitter entre acessos foi aumentado para reduzir requisições sincronizadas.
+
+
+## TESTADOR DA API
+
+No `main.py`, escolha **4. Testar API do Vault / Render / MYP**. O testador:
+
+- acorda o Render gratuito pelo `/health` com até 3 tentativas;
+- testa raiz, CORS e consulta individual da MYP;
+- opcionalmente faz login no Firebase sem salvar a senha e testa `/api/auth/check`, Vault+ e propostas;
+- oferece testes manuais para Gmail, criar/responder proposta e cotização Vault+;
+- avisa antes de qualquer teste que altere dados ou consuma uma cotização;
+- salva `api_test_report.json` com status HTTP, códigos e tempos, removendo token/senha do relatório.
+
+Se aparecer `FIREBASE_ADMIN_NOT_CONFIGURED`, configure `FIREBASE_SERVICE_ACCOUNT_JSON` no Render. Se aparecer `FIREBASE_PROJECT_MISMATCH`, confirme que frontend e backend usam `nexustcg-ad9d3`. Para MYP, os códigos `MYP_ACCESS_DENIED` e `MYP_FALLBACK_*` mostram em qual etapa a consulta falhou.

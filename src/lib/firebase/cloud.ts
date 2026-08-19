@@ -55,7 +55,11 @@ const friendlyApiMessage = (error: any, fallback = 'Não foi possível concluir 
     MYP_PARSE_FAILED: 'A MYP respondeu, mas não foi possível identificar os dados desta carta.',
     MYP_NOT_FOUND: 'Esta carta não foi encontrada na MYP.',
     MYP_RATE_LIMIT: 'A MYP limitou temporariamente as consultas. Tente novamente em alguns segundos.',
-    MYP_ACCESS_DENIED: 'A MYP recusou temporariamente a consulta do servidor. Tente novamente em alguns segundos.',
+    MYP_ACCESS_DENIED: 'A MYP recusou temporariamente a consulta direta do servidor. Tente novamente em alguns segundos.',
+    MYP_FALLBACK_RATE_LIMIT: 'A rota alternativa da MYP atingiu o limite temporário. Aguarde alguns segundos e tente novamente.',
+    MYP_FALLBACK_FAILED: 'A rota alternativa da MYP também não respondeu. Tente novamente em alguns segundos.',
+    MYP_FALLBACK_INCOMPLETE: 'A rota alternativa da MYP retornou uma página incompleta.',
+    MYP_FALLBACK_PARSE_FAILED: 'A rota alternativa recebeu a MYP, mas não conseguiu identificar esta carta.',
     MYP_NO_PRICE: 'A MYP identificou a carta, mas não trouxe nenhum preço disponível agora.',
     MYP_INVALID_URL: 'Cole um link válido de produto da MYP.',
     EMAIL_NOT_VERIFIED: 'Verifique seu Gmail antes de solicitar a alteração de senha.',
@@ -79,6 +83,10 @@ const friendlyApiMessage = (error: any, fallback = 'Não foi possível concluir 
     PROPOSAL_ALREADY_FINISHED: 'Esta negociação já foi finalizada.',
     PROPOSAL_NOT_YOUR_TURN: 'Aguardando a resposta da outra pessoa.',
     PROPOSAL_AMOUNT_INVALID: 'Informe um valor válido para a proposta.',
+    FIREBASE_ADMIN_NOT_CONFIGURED: 'O Firebase Admin do servidor não está configurado no Render.',
+    FIREBASE_SERVICE_ACCOUNT_INVALID: 'A conta de serviço Firebase configurada no Render é inválida.',
+    FIREBASE_SERVICE_ACCOUNT_INCOMPLETE: 'As credenciais Firebase do Render estão incompletas.',
+    FIREBASE_PROJECT_MISMATCH: 'O frontend e o backend estão usando projetos Firebase diferentes.',
   };
   if (map[code]) return map[code];
   if (status === 401) return 'Sua sessão expirou. Entre novamente.';
@@ -159,16 +167,30 @@ const vaultApiFetch = async (path: string, init: VaultApiInit = {}) => {
 
 const authorizedVaultApiFetch = async (path: string, init: VaultApiInit = {}) => {
   const { auth } = await getCloud();
+  await auth.authStateReady?.();
   const user = auth.currentUser;
   if (!user) throw new Error('Sua sessão expirou. Entre novamente.');
-  const idToken = await user.getIdToken(true);
-  return vaultApiFetch(path, {
-    ...init,
-    headers: {
-      ...(init.headers || {}),
-      Authorization: `Bearer ${idToken}`,
-    },
-  });
+
+  const execute = async (forceRefresh = false) => {
+    const idToken = await user.getIdToken(forceRefresh);
+    return vaultApiFetch(path, {
+      ...init,
+      headers: {
+        ...(init.headers || {}),
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+  };
+
+  try {
+    // O SDK já renova tokens automaticamente quando necessário. Forçar refresh em
+    // toda chamada criava mais uma dependência de rede justamente após o Render
+    // acordar. Agora só forçamos uma renovação se o backend realmente responder 401.
+    return await execute(false);
+  } catch (error: any) {
+    if (Number(error?.status || 0) !== 401) throw error;
+    return execute(true);
+  }
 };
 
 export const fetchMypCardInfo = async (url: string) => {
