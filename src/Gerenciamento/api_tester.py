@@ -16,6 +16,19 @@ FIREBASE_WEB_API_KEY = "AIzaSyAH2-yNZl048tTL57BCq7gdh82YBZH7GmU"
 DEFAULT_MYP_URL = "https://mypcards.com/pokemon/produto/236529/greninja-ex"
 REPORT_PATH = Path(__file__).with_name("api_test_report.json")
 
+MYP_DIRECT_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
+    "DNT": "1",
+    "Upgrade-Insecure-Requests": "1",
+}
+
 
 def garantir_requests() -> None:
     if importlib.util.find_spec("requests") is not None:
@@ -140,6 +153,13 @@ class VaultApiTester:
                 firebase = result.resposta.get("firebase", {}) if isinstance(result.resposta, dict) else {}
                 print(f"         Firebase project: {firebase.get('projectId', '—')}")
                 print(f"         Credencial Admin: {firebase.get('adminCredentialConfigured', '—')} ({firebase.get('credentialSource', '—')})")
+                if isinstance(result.resposta, dict):
+                    print(f"         E-mails de conta: {result.resposta.get('accountEmailDelivery', '—')}")
+                    print(f"         Gmail personalizado: {result.resposta.get('gmailConfigured', '—')}")
+                    if firebase.get('adminCredentialConfigured') is False:
+                        print("         Admin ausente: propostas/Vault+/cotização em massa continuarão indisponíveis até configurar a credencial.")
+                    if result.resposta.get('gmailConfigured') is False:
+                        print("         Gmail customizado ausente: e-mails de conta usam Firebase; notificações de negociação por Gmail não serão enviadas.")
                 return True
             if tentativa < 3:
                 print("         Esperando 4 segundos antes de tentar novamente...")
@@ -175,6 +195,32 @@ class VaultApiTester:
             self.registrar(Resultado("Login Firebase para teste", False, None, time.perf_counter() - started, None, str(error)))
             return False
 
+    def teste_myp_local(self, myp_url: str) -> Resultado:
+        """Compara o mesmo link a partir do computador que executa o testador."""
+        started = time.perf_counter()
+        try:
+            response = self.requests.get(
+                myp_url,
+                headers=MYP_DIRECT_HEADERS,
+                timeout=30,
+                allow_redirects=True,
+            )
+            elapsed = time.perf_counter() - started
+            body = response.text or ""
+            # Não guardamos o HTML inteiro no relatório; basta saber se o mesmo link
+            # funciona localmente e se a página tem tamanho plausível.
+            ok = response.status_code == 200 and len(body) >= 3000
+            payload = {
+                "finalUrl": response.url,
+                "htmlBytes": len(body.encode("utf-8", errors="ignore")),
+                "looksLikeProduct": "/pokemon/produto/" in response.url.lower(),
+            }
+            error = "" if ok else f"HTTP {response.status_code}; HTML {len(body)} caracteres"
+            return self.registrar(Resultado("MYP direto deste computador", ok, response.status_code, elapsed, payload, error))
+        except Exception as error:
+            elapsed = time.perf_counter() - started
+            return self.registrar(Resultado("MYP direto deste computador", False, None, elapsed, None, f"{type(error).__name__}: {error}"))
+
     def teste_publico(self, myp_url: str) -> None:
         print("\nTESTES PÚBLICOS / SEM LOGIN")
         print("-" * 72)
@@ -202,8 +248,18 @@ class VaultApiTester:
             data = myp.resposta.get("data") or {}
             print(f"         Carta: {data.get('name', '—')} {data.get('number', '')}")
             print(f"         Transporte MYP: {data.get('transport', '—')}")
+            if data.get("readerFormat"):
+                print(f"         Formato Reader: {data.get('readerFormat')}")
             prices = data.get("prices") or {}
             print(f"         Menor certificado: {prices.get('cheapestCertified', '—')}")
+        else:
+            print("\nComparando com a mesma consulta MYP feita diretamente deste computador...")
+            local = self.teste_myp_local(myp_url)
+            if local.ok:
+                remote_code = myp.resposta.get("code") if isinstance(myp.resposta, dict) else ""
+                print("         O link está acessível localmente. A diferença está no caminho Render -> MYP/fallback, não no link digitado.")
+                if remote_code == "MYP_FALLBACK_PARSE_FAILED":
+                    print("         O Render chegou ao fallback, mas o parser do fallback não reconheceu a página.")
 
     def teste_autenticado_leitura(self) -> None:
         print("\nTESTES AUTENTICADOS / SEM ALTERAR DADOS")
@@ -214,24 +270,28 @@ class VaultApiTester:
             self.request(f"Propostas / {scope}", "GET", f"/api/proposals?scope={scope}&limit=10", authenticated=True, timeout=45)
 
     def teste_envio_verificacao(self) -> None:
-        self.request(
-            "Enviar Gmail de verificação",
+        result = self.request(
+            "Enviar e-mail de verificação",
             "POST",
             "/api/email/verification",
             authenticated=True,
             json={"returnUrl": "https://leonn190.github.io/LojaPokemon/central/"},
             timeout=70,
         )
+        if result.ok and isinstance(result.resposta, dict):
+            print(f"         Método de envio: {result.resposta.get('delivery', '—')}")
 
     def teste_reset_senha(self) -> None:
-        self.request(
-            "Enviar Gmail de troca de senha",
+        result = self.request(
+            "Enviar e-mail de troca de senha",
             "POST",
             "/api/email/password-reset",
             authenticated=True,
             json={"returnUrl": "https://leonn190.github.io/LojaPokemon/central/"},
             timeout=70,
         )
+        if result.ok and isinstance(result.resposta, dict):
+            print(f"         Método de envio: {result.resposta.get('delivery', '—')}")
 
     def teste_criar_proposta(self) -> None:
         print("Este teste GRAVA uma proposta real no Firestore e pode enviar Gmail ao vendedor.")
@@ -345,13 +405,14 @@ def mostrar_diagnostico(tester: VaultApiTester) -> None:
         if isinstance(result.resposta, dict):
             codes.append(str(result.resposta.get("code") or ""))
     if "FIREBASE_ADMIN_NOT_CONFIGURED" in codes:
-        print("• O Render está online, mas falta FIREBASE_SERVICE_ACCOUNT_JSON no serviço.")
+        print("• O Render está online, mas falta a credencial Firebase Admin. Propostas/Vault+/cotização em massa dependem dela.")
+        print("  Verificação e troca de senha podem usar o fallback oficial do Firebase Auth sem Admin.")
     if "FIREBASE_PROJECT_MISMATCH" in codes:
         print("• Frontend e backend estão apontando para projetos Firebase diferentes.")
     if "AUTH_EXPIRED" in codes:
         print("• O token foi recusado de verdade. Refaça o login no testador e confira o log [Vault API][AUTH] no Render.")
     if any(code.startswith("MYP_") for code in codes):
-        print("• A falha está na consulta MYP. Veja se o código é ACCESS_DENIED, FALLBACK_* ou PARSE_FAILED.")
+        print("• A falha está na consulta MYP. Compare o resultado do Render com o teste direto deste computador logo acima.")
     if any(result.status is None for result in falhas):
         print("• Houve falha de rede/DNS antes de chegar ao Render.")
     print("• O relatório JSON guarda status HTTP, código de erro e tempo de cada rota sem salvar senha/token.")
@@ -372,6 +433,16 @@ def main() -> None:
     myp_url = input(f"Link MYP para teste [{DEFAULT_MYP_URL}]: ").strip() or DEFAULT_MYP_URL
     tester.teste_publico(myp_url)
 
+    health_payload = next((r.resposta for r in reversed(tester.resultados) if r.nome.startswith("Health") and r.ok), {})
+    firebase_health = health_payload.get("firebase", {}) if isinstance(health_payload, dict) else {}
+    admin_missing = firebase_health.get("adminCredentialConfigured") is False
+    if admin_missing:
+        print("\nATENÇÃO: detalhes de negociação, propostas, Vault+ e cotização em massa precisam de Firebase Admin.")
+        print("O código não pode inventar essa chave privada; ela precisa ser criada no seu projeto Firebase e colocada no Render uma vez.")
+        if confirmar("Deseja abrir agora o preparador da credencial Firebase Admin para o Render?"):
+            from firebase_admin_setup import preparar_firebase_admin_render
+            preparar_firebase_admin_render()
+
     if confirmar("Deseja testar as rotas que exigem login?"):
         email = input("E-mail da conta Vault: ").strip()
         senha = getpass.getpass("Senha (não será salva nem exibida): ")
@@ -380,8 +451,8 @@ def main() -> None:
 
             while True:
                 print("\nTESTES COM EFEITO REAL — só execute o que quiser")
-                print("  1. Enviar Gmail de verificação")
-                print("  2. Enviar Gmail de troca de senha")
+                print("  1. Enviar e-mail de verificação (Gmail customizado ou Firebase fallback)")
+                print("  2. Enviar e-mail de troca de senha (Gmail customizado ou Firebase fallback)")
                 print("  3. Criar proposta real")
                 print("  4. Aceitar/recusar/contrapropor")
                 print("  5. Iniciar cotização Vault+ (consome uso semanal)")

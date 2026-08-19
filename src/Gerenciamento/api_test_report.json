@@ -1,0 +1,83 @@
+{
+  "generatedAt": "2026-08-19T20:28:54.636143+00:00",
+  "apiUrl": "https://vaulttcgsiteapi.onrender.com",
+  "loggedUser": {
+    "uid": null,
+    "email": null
+  },
+  "health": {
+    "ok": true,
+    "service": "vault-tcg-backend",
+    "myp": true,
+    "gmailConfigured": false,
+    "firebase": {
+      "projectId": "nexustcg-ad9d3",
+      "adminCredentialConfigured": false,
+      "credentialSource": "project-id-only",
+      "serviceAccountProjectId": null
+    },
+    "allowedOrigins": [
+      "https://leonn190.github.io",
+      "http://localhost:4321",
+      "http://127.0.0.1:4321"
+    ]
+  },
+  "results": [
+    {
+      "nome": "Health / tentativa 1",
+      "ok": true,
+      "status": 200,
+      "segundos": 0.207,
+      "resposta": {
+        "ok": true,
+        "service": "vault-tcg-backend",
+        "myp": true,
+        "gmailConfigured": false,
+        "firebase": {
+          "projectId": "nexustcg-ad9d3",
+          "adminCredentialConfigured": false,
+          "credentialSource": "project-id-only",
+          "serviceAccountProjectId": null
+        },
+        "allowedOrigins": [
+          "https://leonn190.github.io",
+          "http://localhost:4321",
+          "http://127.0.0.1:4321"
+        ]
+      },
+      "erro": ""
+    },
+    {
+      "nome": "Raiz da API",
+      "ok": true,
+      "status": 200,
+      "segundos": 0.404,
+      "resposta": {
+        "ok": true,
+        "service": "vault-tcg-backend",
+        "health": "/health"
+      },
+      "erro": ""
+    },
+    {
+      "nome": "CORS preflight GitHub Pages",
+      "ok": true,
+      "status": 204,
+      "segundos": 0.159,
+      "resposta": "",
+      "erro": ""
+    },
+    {
+      "nome": "MYP individual",
+      "ok": false,
+      "status": 502,
+      "segundos": 2.829,
+      "resposta": {
+        "ok": false,
+        "error": "O fallback recebeu a página da MYP, mas não conseguiu identificar a carta.",
+        "code": "MYP_FALLBACK_PARSE_FAILED"
+      },
+      "erro": "MYP_FALLBACK_PARSE_FAILED: O fallback recebeu a página da MYP, mas não conseguiu identificar a carta."
+    }
+  ]
+}

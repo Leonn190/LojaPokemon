@@ -27,7 +27,7 @@
   ],
   "precos_resumo_exibidos_myp": [
     35.9,
-    57.96,
+    57.34,
     13.9,
     40.0
   ],
@@ -36,20 +36,20 @@
     "menor": 10.0,
     "segundo_menor": 19.9,
     "terceiro_menor": 35.0,
-    "media": 52.29,
+    "media": 51.59,
     "mediana": 50.0,
     "por_estado": {
       "NM": {
-        "quantidade_de_anuncios": 34,
+        "quantidade_de_anuncios": 33,
         "menor": 10.0,
-        "media": 50.71,
+        "media": 50.28,
         "mediana": 50.0
       },
       "SP": {
-        "quantidade_de_anuncios": 3,
-        "menor": 48.0,
-        "media": 70.16,
-        "mediana": 79.99
+        "quantidade_de_anuncios": 4,
+        "menor": 38.99,
+        "media": 62.37,
+        "mediana": 63.99
       }
     }
   },
@@ -97,6 +97,13 @@
       "preco": 55.0
     },
     {
+      "vendedor": "RPGeek",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 60.0
+    },
+    {
       "vendedor": "GonjiTCG",
       "acabamento": "",
       "estado": "NM",
@@ -105,13 +112,6 @@
     },
     {
       "vendedor": "TatudoTCG",
-      "acabamento": "",
-      "estado": "NM",
-      "quantidade": 1,
-      "preco": 60.0
-    },
-    {
-      "vendedor": "RPGeek",
       "acabamento": "",
       "estado": "NM",
       "quantidade": 1,
@@ -216,38 +216,17 @@
       "preco": 38.99
     },
     {
-      "vendedor": "whyLace",
-      "acabamento": "",
-      "estado": "NM",
-      "quantidade": 1,
-      "preco": 40.0
+      "vendedor": "ApoliTCG",
+      "acabamento": "Foil",
+      "estado": "SP",
+      "quantidade": 2,
+      "preco": 38.99
     },
     {
       "vendedor": "K00up",
       "acabamento": "Foil",
       "estado": "NM",
       "quantidade": 6,
-      "preco": 40.0
-    },
-    {
-      "vendedor": "viktorgd",
-      "acabamento": "",
-      "estado": "NM",
-      "quantidade": 1,
-      "preco": 40.0
-    },
-    {
-      "vendedor": "Marksluscas",
-      "acabamento": "",
-      "estado": "NM",
-      "quantidade": 1,
-      "preco": 40.0
-    },
-    {
-      "vendedor": "14Andrew44",
-      "acabamento": "Foil",
-      "estado": "NM",
-      "quantidade": 2,
       "preco": 40.0
     },
     {
@@ -258,6 +237,34 @@
       "preco": 40.0
     },
     {
+      "vendedor": "14Andrew44",
+      "acabamento": "Foil",
+      "estado": "NM",
+      "quantidade": 2,
+      "preco": 40.0
+    },
+    {
+      "vendedor": "Marksluscas",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 40.0
+    },
+    {
+      "vendedor": "viktorgd",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 40.0
+    },
+    {
+      "vendedor": "Luminor",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 40.0
+    },
+    {
       "vendedor": "matt0S0",
       "acabamento": "",
       "estado": "NM",
@@ -265,15 +272,22 @@
       "preco": 44.9
     },
     {
-      "vendedor": "brunonasc",
-      "acabamento": "Foil",
+      "vendedor": "whyLace",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 45.0
+    },
+    {
+      "vendedor": "Zini",
+      "acabamento": "",
       "estado": "NM",
       "quantidade": 1,
       "preco": 50.0
     },
     {
-      "vendedor": "Zini",
-      "acabamento": "",
+      "vendedor": "brunonasc",
+      "acabamento": "Foil",
       "estado": "NM",
       "quantidade": 1,
       "preco": 50.0
@@ -293,24 +307,10 @@
       "preco": 53.0
     },
     {
-      "vendedor": "DallysonArc",
-      "acabamento": "",
-      "estado": "NM",
-      "quantidade": 2,
-      "preco": 55.0
-    },
-    {
       "vendedor": "KratosTCG",
       "acabamento": "",
       "estado": "NM",
       "quantidade": 1,
-      "preco": 55.0
-    },
-    {
-      "vendedor": "NagaPoint",
-      "acabamento": "",
-      "estado": "NM",
-      "quantidade": 2,
       "preco": 55.0
     }
   ]

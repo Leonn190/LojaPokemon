@@ -64,7 +64,11 @@ const friendlyApiMessage = (error: any, fallback = 'Não foi possível concluir 
     MYP_INVALID_URL: 'Cole um link válido de produto da MYP.',
     EMAIL_NOT_VERIFIED: 'Verifique seu Gmail antes de solicitar a alteração de senha.',
     EMAIL_COOLDOWN: 'Aguarde um pouco antes de solicitar outro e-mail.',
-    GMAIL_NOT_CONFIGURED: 'O envio de e-mails do Vault ainda não está configurado no servidor.',
+    GMAIL_NOT_CONFIGURED: 'O Gmail personalizado do Vault não está configurado no servidor.',
+    FIREBASE_AUTH_EMAIL_FAILED: 'O Firebase não conseguiu enviar este e-mail agora. Tente novamente em alguns instantes.',
+    FIREBASE_EMAIL_RATE_LIMIT: 'O Firebase limitou temporariamente os envios de e-mail. Aguarde um pouco e tente novamente.',
+    FIREBASE_EMAIL_NOT_ENABLED: 'O envio de e-mails por senha não está habilitado no Firebase Authentication.',
+    FIREBASE_CONTINUE_URL_INVALID: 'O domínio de retorno do e-mail não está autorizado no Firebase.',
     VAULT_PLUS_REQUIRED: 'A cotização geral da coleção é um recurso do Vault+.',
     VAULT_PLUS_INACTIVE: 'Seu Vault+ não está ativo no momento.',
     VAULT_PLUS_EXPIRED: 'Seu Vault+ expirou.',
@@ -83,7 +87,7 @@ const friendlyApiMessage = (error: any, fallback = 'Não foi possível concluir 
     PROPOSAL_ALREADY_FINISHED: 'Esta negociação já foi finalizada.',
     PROPOSAL_NOT_YOUR_TURN: 'Aguardando a resposta da outra pessoa.',
     PROPOSAL_AMOUNT_INVALID: 'Informe um valor válido para a proposta.',
-    FIREBASE_ADMIN_NOT_CONFIGURED: 'O Firebase Admin do servidor não está configurado no Render.',
+    FIREBASE_ADMIN_NOT_CONFIGURED: 'As funções administrativas do servidor ainda não estão configuradas no Render. Propostas e Vault+ precisam da credencial Firebase Admin.',
     FIREBASE_SERVICE_ACCOUNT_INVALID: 'A conta de serviço Firebase configurada no Render é inválida.',
     FIREBASE_SERVICE_ACCOUNT_INCOMPLETE: 'As credenciais Firebase do Render estão incompletas.',
     FIREBASE_PROJECT_MISMATCH: 'O frontend e o backend estão usando projetos Firebase diferentes.',
@@ -568,7 +572,7 @@ export async function sendAccountVerificationEmail() {
   return {
     alreadyVerified: Boolean(payload?.alreadyVerified),
     email: payload?.email || user.email || '',
-    delivery: payload?.delivery || 'gmail-render',
+    delivery: payload?.delivery || 'firebase-auth',
   };
 }
 

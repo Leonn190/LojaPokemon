@@ -197,10 +197,10 @@ O modo Conservador (1 worker) reduz a chance de bloqueio/verificação da Liga, 
 No `main.py`, escolha **4. Testar API do Vault / Render / MYP**. O testador:
 
 - acorda o Render gratuito pelo `/health` com até 3 tentativas;
-- testa raiz, CORS e consulta individual da MYP;
+- testa raiz, CORS e consulta individual da MYP; se o Render falhar, compara automaticamente o mesmo link direto deste computador;
 - opcionalmente faz login no Firebase sem salvar a senha e testa `/api/auth/check`, Vault+ e propostas;
-- oferece testes manuais para Gmail, criar/responder proposta e cotização Vault+;
+- oferece testes manuais para e-mails de conta, criar/responder proposta e cotização Vault+;
 - avisa antes de qualquer teste que altere dados ou consuma uma cotização;
 - salva `api_test_report.json` com status HTTP, códigos e tempos, removendo token/senha do relatório.
 
-Se aparecer `FIREBASE_ADMIN_NOT_CONFIGURED`, configure `FIREBASE_SERVICE_ACCOUNT_JSON` no Render. Se aparecer `FIREBASE_PROJECT_MISMATCH`, confirme que frontend e backend usam `nexustcg-ad9d3`. Para MYP, os códigos `MYP_ACCESS_DENIED` e `MYP_FALLBACK_*` mostram em qual etapa a consulta falhou.
+Se aparecer `FIREBASE_ADMIN_NOT_CONFIGURED`, o próprio testador pode abrir `firebase_admin_setup.py`: ele valida o JSON de conta de serviço e copia para a área de transferência o valor Base64 que deve ser colocado em `FIREBASE_SERVICE_ACCOUNT_JSON_B64` no Render, sem gravar a chave no relatório. Propostas, Vault+ e cotização em massa exigem essa credencial. Verificação e troca de senha podem usar o fallback oficial do Firebase Auth. Se aparecer `FIREBASE_PROJECT_MISMATCH`, confirme que frontend e backend usam `nexustcg-ad9d3`. Para MYP, o testador separa falha do Render de falha do link fazendo a comparação local automática.
