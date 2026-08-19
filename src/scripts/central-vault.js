@@ -1,3 +1,5 @@
+import { createBulkQuoteController } from './central/quote-modal.js';
+
 (() => {
       const root = document.querySelector('[data-editor-root]');
       if (!root) return;
@@ -38,6 +40,7 @@
       let cloudSaveTimer = 0;
       let cloudSaving = false;
       let cloudSaveQueued = false;
+      let bulkQuoteController = null;
 
       const setCloudSaveState = (label, mode = 'saved') => {
         if (!saveStateBadge) return;
@@ -460,6 +463,11 @@
           certifiedOffers: Number(prices.certifiedOffers || 0),
           otherOffers: Number(prices.otherOffers || 0),
           totalOffers: Number(prices.totalOffers || 0),
+          lastQuotedAt: quote.date,
+          lastQuoteAttemptAt: quote.date,
+          lastQuoteSource: 'MYP',
+          lastQuoteStatus: 'success',
+          lastQuoteError: '',
           priceHistory: history.slice(-120),
           advancedData: {
             ...(current.advancedData || {}),
@@ -515,21 +523,6 @@
         const prices = result.prices || {};
         setCardAutofillStatus(`Preenchido pela MYP · certificado ${prettyPrice(prices.cheapestCertified)} · geral ${prettyPrice(prices.cheapestGeneral)} · mínimo ${prettyPrice(prices.minimum)}`, 'success');
       };
-      const refreshMypQuoteForCard = async (item) => {
-        if (!clean(item?.linkMyp)) throw new Error('Esta carta ainda não possui link da MYP.');
-        const result = await window.VaultCloud?.fetchMypCardInfo?.(item.linkMyp);
-        if (!result) throw new Error('A API MYP não retornou dados.');
-        const patched = normalizeCard({
-          ...item,
-          ...mypCardPatch(result, item),
-          image: item.image || result.image || '',
-          imageCandidates: item.imageCandidates?.length ? item.imageCandidates : (result.image ? [result.image] : []),
-        }, false);
-        patched._isNew = item._isNew;
-        patched._isDirty = true;
-        return patched;
-      };
-
       const validateBoosterPayload = (payload) => {
         const era = getEraConfig(payload.era); if (!era) return 'Selecione uma Era válida.';
         const collection = findCollection(era.id, payload.collectionId); if (!collection) return 'Selecione uma Coleção pertencente à Era escolhida.';
@@ -659,7 +652,7 @@
       const makeState = (profile, items = {}, source = 'new') => {
         const cards = (items.cards || []).map((item) => normalizeCard(item, false));
         const boosters = (items.boosters || []).map((item) => normalizeBooster(item, false));
-        const normalizedProfile = { owner: '', title: '', email: '', phone: '', password: '', public: false, selling: true, showQuantity: false, showCollectionValue: true, featured: false, version: 1, profilePhoto: '', profileBanner: '', palette: ['#54e8df', '#bc91ff', '#f4c25c'], priceDisplayFallback: 'league_average_then_lowest', scores: { security: 30, visibility: 30 }, emailVerified: false, ...profile };
+        const normalizedProfile = { owner: '', title: '', email: '', phone: '', password: '', public: false, selling: true, showQuantity: false, showCollectionValue: true, featured: false, version: 1, profilePhoto: '', profileBanner: '', palette: ['#54e8df', '#bc91ff', '#f4c25c'], priceDisplayFallback: 'league_average_then_lowest', scores: { security: 30, visibility: 30 }, emailVerified: false, vaultPlus: { active: false, status: 'inactive', weeklyQuotesUsed: 0, weeklyLimit: 2, remaining: 0, visibilityBonus: 0, quoteWeekKey: '', nextResetDate: '', quoteEstimate: { secondsPerCard: 2.5, concurrency: 1 } }, ...profile };
         if (!['league_average_then_lowest', 'league_lowest_then_average', 'consult'].includes(normalizedProfile.priceDisplayFallback)) normalizedProfile.priceDisplayFallback = 'league_average_then_lowest';
         normalizedProfile.palette = Array.isArray(normalizedProfile.palette) && normalizedProfile.palette.length >= 3 ? normalizedProfile.palette.slice(0, 3) : ['#54e8df', '#bc91ff', '#f4c25c'];
         normalizedProfile.profilePhoto = clean(normalizedProfile.profilePhoto);
@@ -670,6 +663,19 @@
           visibility: Number.isFinite(Number(normalizedProfile.scores?.visibility)) ? Math.min(100, Math.max(0, Number(normalizedProfile.scores.visibility))) : 30,
         };
         normalizedProfile.emailVerified = normalizedProfile.emailVerified === true;
+        normalizedProfile.vaultPlus = {
+          active: normalizedProfile.vaultPlus?.active === true,
+          status: clean(normalizedProfile.vaultPlus?.status || 'inactive'),
+          startedAt: normalizedProfile.vaultPlus?.startedAt || null,
+          expiresAt: normalizedProfile.vaultPlus?.expiresAt || null,
+          weeklyQuotesUsed: Math.max(0, Number(normalizedProfile.vaultPlus?.weeklyQuotesUsed || 0)),
+          weeklyLimit: Math.max(1, Number(normalizedProfile.vaultPlus?.weeklyLimit || 2)),
+          remaining: Math.max(0, Number(normalizedProfile.vaultPlus?.remaining || 0)),
+          visibilityBonus: normalizedProfile.vaultPlus?.active === true ? Math.min(10, Math.max(0, Number(normalizedProfile.vaultPlus?.visibilityBonus || 0))) : 0,
+          quoteWeekKey: clean(normalizedProfile.vaultPlus?.quoteWeekKey || ''),
+          nextResetDate: normalizedProfile.vaultPlus?.nextResetDate || '',
+          quoteEstimate: normalizedProfile.vaultPlus?.quoteEstimate || { secondsPerCard: 2.5, concurrency: 1 },
+        };
         normalizedProfile.proposalTerms = normalizeProposalTerms(profile?.proposalTerms);
         return {
           profile: normalizedProfile,
@@ -743,9 +749,11 @@
       const renderAccountScores = () => {
         if (!state) return;
         const scores = state.profile.scores || { security: 30, visibility: 30 };
+        const vaultPlusBonus = state.profile.vaultPlus?.active === true ? Math.min(10, Math.max(0, Number(state.profile.vaultPlus?.visibilityBonus || 0))) : 0;
         ['security', 'visibility'].forEach((kind) => {
           const parsedScore = Number(scores[kind]);
-          const score = Number.isFinite(parsedScore) ? Math.min(100, Math.max(0, parsedScore)) : 30;
+          const baseScore = Number.isFinite(parsedScore) ? Math.min(100, Math.max(0, parsedScore)) : 30;
+          const score = kind === 'visibility' ? Math.min(100, baseScore + vaultPlusBonus) : baseScore;
           const value = root.querySelector(`[data-score-value="${kind}"]`);
           const path = root.querySelector(`[data-score-path="${kind}"]`);
           if (value) value.textContent = String(Math.round(score));
@@ -754,10 +762,46 @@
             path.style.strokeDashoffset = '0';
           }
         });
-        const note = root.querySelector('[data-security-score-note]');
-        const delta = root.querySelector('[data-security-score-delta]');
-        if (note) note.textContent = state.profile.emailVerified ? 'Gmail verificado' : 'Gmail ainda não verificado';
-        if (delta) delta.textContent = state.profile.emailVerified ? 'Base 30 + 5 Gmail' : 'Base 30';
+        const securityNote = root.querySelector('[data-security-score-note]');
+        const securityDelta = root.querySelector('[data-security-score-delta]');
+        if (securityNote) securityNote.textContent = state.profile.emailVerified ? 'Gmail verificado' : 'Gmail ainda não verificado';
+        if (securityDelta) securityDelta.textContent = state.profile.emailVerified ? 'Base 30 + 5 Gmail' : 'Base 30';
+        const visibilityNote = root.querySelector('[data-visibility-score-note]');
+        const visibilityDelta = root.querySelector('[data-visibility-score-delta]');
+        if (visibilityNote) visibilityNote.textContent = vaultPlusBonus ? 'Descoberta da coleção · bônus ativo' : 'Descoberta da coleção';
+        if (visibilityDelta) visibilityDelta.textContent = vaultPlusBonus ? 'Vault+ +10' : `Base ${Math.round(Number(scores.visibility) || 30)}`;
+      };
+
+      const renderVaultPlus = () => {
+        if (!state) return;
+        const plus = state.profile.vaultPlus || {};
+        const active = plus.active === true;
+        const remaining = active ? Math.max(0, Number(plus.remaining || 0)) : 0;
+        const limit = Math.max(1, Number(plus.weeklyLimit || 2));
+        const summary = root.querySelector('[data-vaultplus-quote-summary]');
+        if (summary) {
+          if (!active) summary.textContent = 'Disponível para assinantes Vault+';
+          else if (remaining <= 0) summary.textContent = 'Limite semanal utilizado';
+          else summary.textContent = `${remaining}/${limit} cotizaç${remaining === 1 ? 'ão disponível' : 'ões disponíveis'} nesta semana`;
+        }
+        const status = root.querySelector('[data-vaultplus-account-status]');
+        if (status) { status.textContent = active ? 'Vault+ ativo' : 'Plano não ativo'; status.dataset.state = active ? 'active' : 'inactive'; }
+        const title = root.querySelector('[data-vaultplus-account-title]');
+        const copy = root.querySelector('[data-vaultplus-account-copy]');
+        if (title) title.textContent = active ? 'Seu Vault+ está ativo.' : 'Mais ferramentas para quem leva sua coleção a sério.';
+        if (copy) copy.textContent = active
+          ? 'Você tem +10 no Score de Visibilidade e acesso às cotizações gerais semanais.'
+          : 'Tenha 2 cotizações gerais por semana, +10 no Score de Visibilidade e taxas reduzidas quando a cobrança de transações for lançada.';
+        const quota = root.querySelector('[data-vaultplus-account-quota]');
+        if (quota) {
+          quota.hidden = !active;
+          const value = quota.querySelector('strong'); if (value) value.textContent = `${remaining}/${limit}`;
+          const note = quota.querySelector('small'); if (note) note.textContent = remaining === 1 ? 'disponível' : 'disponíveis';
+        }
+        const accountLink = root.querySelector('[data-vaultplus-account-link] span');
+        if (accountLink) accountLink.textContent = active ? 'Ver benefícios' : 'Conhecer Vault+';
+        renderAccountScores();
+        bulkQuoteController?.refresh?.();
       };
 
       const renderAccountSecurity = () => {
@@ -767,6 +811,8 @@
         const status = root.querySelector('[data-email-verification-status]');
         const sendButton = root.querySelector('[data-send-email-verification]');
         const checkButton = root.querySelector('[data-check-email-verification]');
+        const resetButton = root.querySelector('[data-send-password-reset]');
+        const resetCopy = root.querySelector('[data-password-reset-copy]');
         const verified = state.profile.emailVerified === true;
         if (status) {
           status.textContent = verified ? 'Verificado' : 'Não verificado';
@@ -776,9 +822,11 @@
         if (sendButton) {
           sendButton.disabled = verified;
           const label = sendButton.querySelector('span');
-          if (label) label.textContent = verified ? 'Gmail verificado' : 'Enviar verificação';
+          if (label) label.textContent = verified ? 'Gmail verificado' : 'Verificar Gmail';
         }
         if (checkButton) checkButton.disabled = verified;
+        if (resetButton) resetButton.disabled = !verified;
+        if (resetCopy) resetCopy.textContent = verified ? 'Enviaremos um link seguro para seu Gmail.' : 'Disponível após verificar seu Gmail.';
         renderAccountScores();
       };
 
@@ -808,6 +856,26 @@
         }
       };
 
+      const syncVaultPlusStatus = async () => {
+        if (!state || !window.VaultCloud?.getVaultPlusStatus) return null;
+        try {
+          const payload = await window.VaultCloud.getVaultPlusStatus();
+          if (!state) return null;
+          state.profile.vaultPlus = {
+            ...state.profile.vaultPlus,
+            ...(payload?.vaultPlus || {}),
+            quoteEstimate: payload?.quoteEstimate || state.profile.vaultPlus?.quoteEstimate || { secondsPerCard: 2.5, concurrency: 1 },
+          };
+          renderVaultPlus();
+          return state.profile.vaultPlus;
+        } catch (error) {
+          console.warn('[Vault TCG] Não foi possível consultar o Vault+ agora:', error);
+          const summary = root.querySelector('[data-vaultplus-quote-summary]');
+          if (summary) summary.textContent = 'Status do Vault+ indisponível no momento';
+          return null;
+        }
+      };
+
       const activate = (profile, items, source = 'new') => {
         state = makeState(profile, items, source);
         profileDirty = false; privacyDirty = false; mirrorDirty = false; clearTimeout(cloudSaveTimer); setCloudSaveState('Tudo salvo', 'saved');
@@ -830,11 +898,12 @@
         renderDiscountTiers();
         renderPersonalization();
         renderAccountSecurity();
+        renderVaultPlus();
         const versionNode = root.querySelector('[data-version-number]'); if (versionNode) versionNode.textContent = String(state.profile.version);
         activeTab = 'cards'; inventoryQuery = ''; if (inventorySearch) inventorySearch.value = '';
         render();
         window.setTimeout(() => navigateAdmin('overview'), 0);
-        if (source === 'cloud') window.setTimeout(() => syncEmailVerification(true), 120);
+        if (source === 'cloud') { window.setTimeout(() => syncEmailVerification(true), 120); window.setTimeout(() => syncVaultPlusStatus(), 180); }
         if (source === 'cloud' && window.VaultCloud?.listMyReceivedProposals) {
           const proposalCollectionId = state.profile.collectionId;
           window.VaultCloud.listMyReceivedProposals().then((rows) => { if (!state || state.profile.collectionId !== proposalCollectionId) return; state.receivedProposals = Array.isArray(rows) ? rows : []; state.proposalsLoaded = true; renderProposals(); }).catch(() => { if (!state || state.profile.collectionId !== proposalCollectionId) return; state.proposalsLoaded = true; state.proposalsUnavailable = true; renderProposals(); });
@@ -995,7 +1064,7 @@
       };
       const lastQuoteDate = (item) => {
         const history = Array.isArray(item.priceHistory) ? item.priceHistory : [];
-        const fromAdvanced = item.lastQuoteAt || item.advancedData?.['Última cotação']?.data || item.advancedData?.['Ultima cotacao']?.data || '';
+        const fromAdvanced = item.lastQuotedAt || item.lastQuoteAt || item.advancedData?.['Última cotação']?.data || item.advancedData?.['Ultima cotacao']?.data || '';
         return fromAdvanced || history[history.length - 1]?.date || '';
       };
       const formatQuoteDate = (value) => {
@@ -1368,6 +1437,27 @@
       };
 
       const render = () => { updateTabs(); updateOverview(); renderInventory(); renderKitBuilder(); };
+
+      bulkQuoteController = createBulkQuoteController({
+        root,
+        getCards: () => state?.cards || [],
+        getVaultPlus: () => state?.profile?.vaultPlus || {},
+        setVaultPlus: (vaultPlus) => { if (!state) return; state.profile.vaultPlus = { ...state.profile.vaultPlus, ...vaultPlus }; renderVaultPlus(); },
+        onQuoteEntry: (entry) => {
+          if (!state || !entry?.cardId || !entry?.quote) return;
+          const card = state.cards.find((item) => String(item._id || item.id || '') === String(entry.cardId));
+          if (!card) return;
+          Object.assign(card, entry.quote);
+          updateOverview();
+        },
+        onCompleted: async () => {
+          if (!state || !window.VaultCloud?.loadMyCollection) return;
+          const loaded = await window.VaultCloud.loadMyCollection();
+          if (loaded?.cards && state) state.cards = loaded.cards.map((item) => normalizeCard(item, false));
+          render();
+          await syncVaultPlusStatus();
+        },
+      });
 
       const openModal = (kind) => {
         const modal = root.querySelector(`[data-editor-modal="${kind}"]`);
@@ -1801,42 +1891,6 @@
         const jump = event.target.closest?.('[data-admin-jump]');
         if (jump) { navigateAdmin(jump.dataset.adminJump); return; }
       });
-      root.querySelector('[data-refresh-myp-quotes]')?.addEventListener('click', async (event) => {
-        if (!state) return;
-        const button = event.currentTarget;
-        const feedback = root.querySelector('[data-myp-refresh-feedback]');
-        const targets = state.cards.map((item, index) => ({ item, index })).filter(({ item }) => clean(item.linkMyp));
-        if (!targets.length) {
-          if (feedback) { feedback.textContent = 'Nenhuma carta possui link MYP ainda.'; feedback.dataset.state = 'error'; }
-          return;
-        }
-        button.disabled = true;
-        let updated = 0;
-        let failed = 0;
-        try {
-          await window.VaultCloud?.ready;
-          for (let position = 0; position < targets.length; position += 1) {
-            const { item, index } = targets[position];
-            if (feedback) { feedback.textContent = `Atualizando ${position + 1}/${targets.length}: ${item.name || 'carta'}…`; feedback.dataset.state = 'loading'; }
-            try {
-              state.cards[index] = await refreshMypQuoteForCard(state.cards[index]);
-              updated += 1;
-            } catch (error) {
-              failed += 1;
-              console.warn('[Vault TCG] Falha ao atualizar MYP:', item.name, error);
-            }
-          }
-          render();
-          scheduleCloudSave(150);
-          if (feedback) {
-            feedback.textContent = failed ? `${updated} cotação(ões) atualizada(s) · ${failed} falha(s).` : `${updated} cotação(ões) MYP atualizada(s) com sucesso.`;
-            feedback.dataset.state = failed ? 'warning' : 'success';
-          }
-        } finally {
-          button.disabled = false;
-        }
-      });
-
       root.addEventListener('load', (event) => {
         const image = event.target;
         if (!image.matches?.('.inventory-thumb img')) return;
@@ -1878,37 +1932,22 @@
 
       root.querySelector('[data-check-email-verification]')?.addEventListener('click', () => syncEmailVerification(false));
 
-      root.querySelector('[data-password-change-form]')?.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const form = event.currentTarget;
-        const feedback = root.querySelector('[data-password-change-feedback]');
-        const data = new FormData(form);
-        const currentPassword = String(data.get('currentPassword') || '');
-        const newPassword = String(data.get('newPassword') || '');
-        const confirmPassword = String(data.get('confirmPassword') || '');
-        if (feedback) { feedback.textContent = ''; feedback.dataset.state = 'neutral'; }
-        if (newPassword.length < 6) {
-          if (feedback) { feedback.textContent = 'A nova senha precisa ter pelo menos 6 caracteres.'; feedback.dataset.state = 'error'; }
-          return;
-        }
-        if (newPassword !== confirmPassword) {
-          if (feedback) { feedback.textContent = 'A confirmação não corresponde à nova senha.'; feedback.dataset.state = 'error'; }
-          return;
-        }
-        const submit = form.querySelector('button[type="submit"]');
-        if (submit) submit.disabled = true;
-        if (feedback) feedback.textContent = 'Atualizando sua senha…';
+      root.querySelector('[data-send-password-reset]')?.addEventListener('click', async (event) => {
+        if (!state?.profile?.emailVerified) return;
+        const button = event.currentTarget;
+        const feedback = root.querySelector('[data-password-reset-feedback]');
+        button.disabled = true;
+        if (feedback) { feedback.textContent = 'Enviando um link seguro para seu Gmail…'; feedback.dataset.state = 'neutral'; }
         try {
-          await window.VaultCloud?.changeAccountPassword?.(currentPassword, newPassword);
-          form.reset();
-          if (feedback) { feedback.textContent = 'Senha alterada com sucesso.'; feedback.dataset.state = 'success'; }
+          const result = await window.VaultCloud?.requestAccountPasswordResetEmail?.();
+          if (feedback) { feedback.textContent = `Link enviado para ${result?.email || state.profile.email}. Abra o Gmail para criar uma nova senha.`; feedback.dataset.state = 'success'; }
         } catch (error) {
           if (feedback) {
-            feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível alterar a senha.';
+            feedback.textContent = window.VaultCloud?.friendlyFirebaseError?.(error) || error?.message || 'Não foi possível enviar o link de alteração de senha.';
             feedback.dataset.state = 'error';
           }
         } finally {
-          if (submit) submit.disabled = false;
+          if (state?.profile?.emailVerified) button.disabled = false;
         }
       });
 

@@ -2,15 +2,12 @@ import { initializeApp, getApps, type FirebaseApp, type FirebaseOptions } from '
 import {
   createUserWithEmailAndPassword,
   deleteUser,
-  EmailAuthProvider,
   getAuth,
   onAuthStateChanged,
-  reauthenticateWithCredential,
   reload,
-  sendEmailVerification,
+  sendPasswordResetEmail as firebaseSendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
-  updatePassword,
   updateProfile,
   type User,
 } from 'firebase/auth';
@@ -39,28 +36,140 @@ const VAULT_API_URL = String(
   import.meta.env.PUBLIC_VAULT_API_URL || 'https://vault-tcg-myp-api-leonn190.onrender.com',
 ).replace(/\/+$/, '');
 
-const vaultApiFetch = async (path: string, init: RequestInit = {}) => {
-  const response = await fetch(`${VAULT_API_URL}${path}`, {
+type VaultApiInit = RequestInit & {
+  timeoutMs?: number;
+  retries?: number;
+};
+
+const friendlyApiMessage = (error: any, fallback = 'Não foi possível concluir a operação agora.') => {
+  const code = String(error?.code || '');
+  const status = Number(error?.status || 0);
+  const map: Record<string, string> = {
+    AUTH_REQUIRED: 'Sua sessão expirou. Entre novamente.',
+    AUTH_EXPIRED: 'Sua sessão expirou. Entre novamente.',
+    MYP_TIMEOUT: 'A MYP demorou demais para responder. Tente novamente em alguns segundos.',
+    MYP_NETWORK_ERROR: 'Não foi possível consultar a MYP agora. Tente novamente em alguns segundos.',
+    MYP_PARSE_FAILED: 'A MYP respondeu, mas não foi possível identificar os dados desta carta.',
+    MYP_NOT_FOUND: 'Esta carta não foi encontrada na MYP.',
+    MYP_RATE_LIMIT: 'A MYP limitou temporariamente as consultas. Tente novamente em alguns segundos.',
+    MYP_ACCESS_DENIED: 'A MYP recusou temporariamente a consulta do servidor. Tente novamente em alguns segundos.',
+    MYP_NO_PRICE: 'A MYP identificou a carta, mas não trouxe nenhum preço disponível agora.',
+    MYP_INVALID_URL: 'Cole um link válido de produto da MYP.',
+    EMAIL_NOT_VERIFIED: 'Verifique seu Gmail antes de solicitar a alteração de senha.',
+    EMAIL_COOLDOWN: 'Aguarde um pouco antes de solicitar outro e-mail.',
+    GMAIL_NOT_CONFIGURED: 'O envio de e-mails do Vault ainda não está configurado no servidor.',
+    VAULT_PLUS_REQUIRED: 'A cotização geral da coleção é um recurso do Vault+.',
+    VAULT_PLUS_INACTIVE: 'Seu Vault+ não está ativo no momento.',
+    VAULT_PLUS_EXPIRED: 'Seu Vault+ expirou.',
+    VAULT_PLUS_LIMIT_REACHED: 'Você utilizou suas 2 cotizações desta semana.',
+    VAULT_PLUS_WEEKLY_LIMIT: 'Você utilizou suas 2 cotizações desta semana.',
+    BULK_QUOTE_EMPTY: 'Nenhuma carta da sua coleção corresponde aos filtros escolhidos.',
+    NO_MATCHING_CARDS: 'Nenhuma carta da sua coleção corresponde aos filtros escolhidos.',
+    JOB_NOT_FOUND: 'Esta cotização não foi encontrada ou já não está disponível.',
+    QUOTE_NOT_FOUND: 'Esta cotização não foi encontrada ou já não está disponível.',
+    QUOTE_FORBIDDEN: 'Esta cotização pertence a outra conta.',
+    TOO_MANY_CARDS: 'Há cartas demais selecionadas para uma única cotização. Ajuste os filtros e tente novamente.',
+  };
+  if (map[code]) return map[code];
+  if (status === 401) return 'Sua sessão expirou. Entre novamente.';
+  if (status === 429) return 'Muitas solicitações em sequência. Aguarde um pouco e tente novamente.';
+  if (status >= 500) return 'Não foi possível conectar ao servidor de cotação. Tente novamente em alguns segundos.';
+  const message = String(error?.message || '').trim();
+  if (!message || /failed to fetch/i.test(message) || /networkerror/i.test(message)) {
+    return 'Não foi possível conectar ao servidor de cotação. Tente novamente em alguns segundos.';
+  }
+  return message || fallback;
+};
+
+const vaultApiFetch = async (path: string, init: VaultApiInit = {}) => {
+  const { timeoutMs = 30000, retries = 0, ...fetchInit } = init;
+  let lastError: any = null;
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), Math.max(1000, timeoutMs));
+    const externalSignal = fetchInit.signal;
+    const forwardAbort = () => controller.abort();
+    if (externalSignal) {
+      if (externalSignal.aborted) controller.abort();
+      else externalSignal.addEventListener('abort', forwardAbort, { once: true });
+    }
+
+    try {
+      const response = await fetch(`${VAULT_API_URL}${path}`, {
+        ...fetchInit,
+        signal: controller.signal,
+        headers: {
+          Accept: 'application/json',
+          ...(fetchInit.body ? { 'Content-Type': 'application/json' } : {}),
+          ...(fetchInit.headers || {}),
+        },
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || payload?.ok === false) {
+        const error: any = new Error(payload?.error || `A API do Vault respondeu HTTP ${response.status}.`);
+        error.status = response.status;
+        error.code = payload?.code || '';
+        error.retryAfter = payload?.retryAfter;
+        error.nextResetDate = payload?.nextResetDate;
+        const retryable = [502, 503, 504].includes(response.status);
+        if (retryable && attempt < retries) {
+          lastError = error;
+          await new Promise((resolve) => window.setTimeout(resolve, 900 + attempt * 700));
+          continue;
+        }
+        error.message = friendlyApiMessage(error);
+        throw error;
+      }
+      return payload;
+    } catch (caught: any) {
+      const aborted = caught?.name === 'AbortError' || controller.signal.aborted;
+      const error: any = caught instanceof Error ? caught : new Error(String(caught || 'Falha de rede.'));
+      if (aborted && !externalSignal?.aborted) {
+        error.code = 'VAULT_API_TIMEOUT';
+        error.message = path.includes('/api/myp/')
+          ? 'A MYP demorou demais para responder. Tente novamente em alguns segundos.'
+          : 'O servidor do Vault demorou demais para responder. Tente novamente.';
+      } else if (!error.status) {
+        error.code = error.code || 'VAULT_API_NETWORK';
+        error.message = 'Não foi possível conectar ao servidor de cotação. Tente novamente em alguns segundos.';
+      }
+      lastError = error;
+      const canRetry = attempt < retries && !externalSignal?.aborted && (!error.status || [502, 503, 504].includes(Number(error.status)));
+      if (!canRetry) throw error;
+      await new Promise((resolve) => window.setTimeout(resolve, 900 + attempt * 700));
+    } finally {
+      window.clearTimeout(timeout);
+      externalSignal?.removeEventListener?.('abort', forwardAbort);
+    }
+  }
+
+  throw lastError || new Error('Não foi possível conectar ao servidor de cotação. Tente novamente em alguns segundos.');
+};
+
+const authorizedVaultApiFetch = async (path: string, init: VaultApiInit = {}) => {
+  const { auth } = await getCloud();
+  const user = auth.currentUser;
+  if (!user) throw new Error('Sua sessão expirou. Entre novamente.');
+  const idToken = await user.getIdToken(true);
+  return vaultApiFetch(path, {
     ...init,
     headers: {
-      Accept: 'application/json',
-      ...(init.body ? { 'Content-Type': 'application/json' } : {}),
       ...(init.headers || {}),
+      Authorization: `Bearer ${idToken}`,
     },
   });
-  const payload = await response.json().catch(() => null);
-  if (!response.ok || payload?.ok === false) {
-    const error = new Error(payload?.error || `A API do Vault respondeu HTTP ${response.status}.`);
-    (error as any).status = response.status;
-    throw error;
-  }
-  return payload;
 };
 
 export const fetchMypCardInfo = async (url: string) => {
   const link = String(url || '').trim();
   if (!link) throw new Error('Cole o link da carta na MYP.');
-  const payload = await vaultApiFetch(`/api/myp/card?url=${encodeURIComponent(link)}`);
+  const payload = await vaultApiFetch('/api/myp/card', {
+    method: 'POST',
+    body: JSON.stringify({ url: link }),
+    timeoutMs: 65000,
+    retries: 1,
+  });
   if (!payload?.data) throw new Error('A MYP não retornou dados para esta carta.');
   return payload.data;
 };
@@ -417,27 +526,18 @@ export async function sendAccountVerificationEmail() {
   if (!user) throw new Error('Sua sessão expirou. Entre novamente.');
   if (user.emailVerified) return { alreadyVerified: true, email: user.email || '', delivery: 'already-verified' };
 
-  // O Gmail customizado agora roda no backend do Render. O token Firebase prova
-  // para o servidor quem é o usuário sem expor a senha de app do Gmail no site.
-  try {
-    const idToken = await user.getIdToken(true);
-    const payload = await vaultApiFetch('/api/email/verification', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${idToken}` },
-      body: JSON.stringify({
-        returnUrl: typeof window !== 'undefined' ? window.location.href.split('#')[0] : '',
-      }),
-    });
-    return {
-      alreadyVerified: Boolean(payload?.alreadyVerified),
-      email: payload?.email || user.email || '',
-      delivery: payload?.delivery || 'gmail-render',
-    };
-  } catch (error) {
-    console.warn('[Vault TCG] Backend do Render indisponível; usando verificação padrão do Firebase.', error);
-    await sendEmailVerification(user);
-    return { alreadyVerified: false, email: user.email || '', delivery: 'firebase-fallback' };
-  }
+  const payload = await authorizedVaultApiFetch('/api/email/verification', {
+    method: 'POST',
+    body: JSON.stringify({
+      returnUrl: typeof window !== 'undefined' ? window.location.href.split('#')[0] : '',
+    }),
+    timeoutMs: 65000,
+  });
+  return {
+    alreadyVerified: Boolean(payload?.alreadyVerified),
+    email: payload?.email || user.email || '',
+    delivery: payload?.delivery || 'gmail-render',
+  };
 }
 
 export async function refreshAccountVerification() {
@@ -476,15 +576,45 @@ export async function refreshAccountVerification() {
   return result;
 }
 
-export async function changeAccountPassword(currentPassword: string, nextPassword: string) {
+export async function requestForgotPassword(email: string) {
+  const { auth } = await getCloud();
+  const address = String(email || '').trim();
+  if (!address) throw new Error('Informe seu e-mail para recuperar a senha.');
+  await firebaseSendPasswordResetEmail(auth, address);
+  return { ok: true, email: address };
+}
+
+export async function requestAccountPasswordResetEmail() {
   const { auth } = await getCloud();
   const user = auth.currentUser;
   if (!user?.email) throw new Error('Sua sessão expirou. Entre novamente.');
-  if (String(nextPassword || '').length < 6) throw new Error('A nova senha precisa ter pelo menos 6 caracteres.');
-  const credential = EmailAuthProvider.credential(user.email, currentPassword);
-  await reauthenticateWithCredential(user, credential);
-  await updatePassword(user, nextPassword);
-  return true;
+  await reload(user);
+  if (!user.emailVerified) throw new Error('Verifique seu Gmail antes de solicitar a alteração de senha.');
+  return authorizedVaultApiFetch('/api/email/password-reset', {
+    method: 'POST',
+    body: JSON.stringify({
+      returnUrl: typeof window !== 'undefined' ? window.location.href.split('#')[0] : '',
+    }),
+    timeoutMs: 65000,
+  });
+}
+
+export async function getVaultPlusStatus() {
+  return authorizedVaultApiFetch('/api/vault-plus/status', { timeoutMs: 25000, retries: 1 });
+}
+
+export async function startBulkQuote(filters: { minValue?: number | null; staleDays?: number | null } = {}) {
+  return authorizedVaultApiFetch('/api/quotes/bulk/start', {
+    method: 'POST',
+    body: JSON.stringify({ filters }),
+    timeoutMs: 70000,
+  });
+}
+
+export async function getBulkQuoteStatus(jobId: string) {
+  const id = encodeURIComponent(String(jobId || '').trim());
+  if (!id) throw new Error('Cotização inválida.');
+  return authorizedVaultApiFetch(`/api/quotes/bulk/${id}/status`, { timeoutMs: 25000, retries: 1 });
 }
 
 export async function currentUser(): Promise<User | null> {
@@ -570,8 +700,11 @@ export async function loadMyCollection(user?: User | null) {
       updatedAt: serverTimestamp(),
     }, { merge: true });
   }
+  // Vault+ é autoritativo apenas no backend (`vaultPlusSubscriptions/{uid}`).
+  // Ignora qualquer flag legada/spoofável que eventualmente exista no documento público da coleção.
+  const { vaultPlus: _ignoredVaultPlus, ...collectionProfile } = data as any;
   const profile = {
-    ...data,
+    ...collectionProfile,
     ownerUid: uid,
     collectionId: data.slug || data.collectionId || uid,
     email: active.email || data.email || '',

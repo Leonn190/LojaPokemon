@@ -52,11 +52,17 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
 
             <div class="vault-overview-summary">
               <article class="vault-value-card">
-                <div><small>Valor da coleção</small><strong data-dashboard-value>R$ 0,00</strong><em data-dashboard-value-note>somente itens com Preço definido</em></div>
+                <div class="vault-value-copy">
+                  <small>Valor da coleção</small><strong data-dashboard-value>R$ 0,00</strong><em data-dashboard-value-note>somente itens com Preço definido</em>
+                  <div class="vault-plus-quote-action">
+                    <div><span>Vault+ · cotização geral</span><strong data-vaultplus-quote-summary>Disponível para assinantes Vault+</strong></div>
+                    <button type="button" class="primary-cta compact" data-open-bulk-quote><span>Cotizar coleção</span><b>↯</b></button>
+                  </div>
+                </div>
                 <details class="vault-valuation-details">
                   <summary>Ver cotação detalhada <b>⌄</b></summary>
                   <div class="editor-card-valuation" aria-label="Cotação das cartas pela MYP">
-                    <header><div><h4>Cotação MYP das cartas</h4><small>Detalhes da cotação ponderados pela quantidade.</small></div><button type="button" class="secondary-cta compact" data-refresh-myp-quotes><span>Atualizar cotações</span><b>↻</b></button></header>
+                    <header><div><h4>Cotação MYP das cartas</h4><small>Detalhes da cotação ponderados pela quantidade.</small></div></header>
                     <div class="editor-card-valuation-grid">
                       <article><small>Mais barato certificado</small><strong data-dashboard-card-certified-low>R$ 0,00</strong></article>
                       <article><small>Mais barato geral</small><strong data-dashboard-card-general-low>R$ 0,00</strong></article>
@@ -64,7 +70,6 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
                       <article><small>Média geral</small><strong data-dashboard-card-general-average>R$ 0,00</strong></article>
                       <article><small>Mínimo</small><strong data-dashboard-card-minimum>R$ 0,00</strong><em>50% do mais barato certificado</em></article>
                     </div>
-                    <p class="security-feedback" data-myp-refresh-feedback></p>
                   </div>
                 </details>
               </article>
@@ -113,7 +118,7 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
                     </svg>
                     <div class="score-gauge-number"><strong data-score-value="visibility">30</strong><span>/100</span></div>
                   </div>
-                  <footer><span>Descoberta da coleção</span><b>Base 30</b></footer>
+                  <footer><span data-visibility-score-note>Descoberta da coleção</span><b data-visibility-score-delta>Base 30</b></footer>
                 </article>
               </div>
             </section>
@@ -132,6 +137,18 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
           <label class="form-field"><span>Seu nome</span><input data-profile-field="owner" /></label>
           <label class="form-field"><span>Telefone para propostas</span><input data-profile-field="phone" placeholder="(00) 00000-0000" /></label>
           <label class="form-field"><span>Gmail / e-mail da conta</span><input type="email" data-profile-field="email" readonly aria-readonly="true" /></label>
+        </div>
+      </section>
+
+      <section class="vault-plus-account-panel" data-admin-section="account" data-vaultplus-account>
+        <header class="settings-section-heading"><span>✦</span><div><strong>Vault+</strong><small>Ferramentas premium para cotização e visibilidade da sua coleção.</small></div><em data-vaultplus-account-status>Plano não ativo</em></header>
+        <div class="vault-plus-account-body">
+          <div class="vault-plus-account-copy">
+            <strong data-vaultplus-account-title>Mais ferramentas para quem leva sua coleção a sério.</strong>
+            <small data-vaultplus-account-copy>Tenha 2 cotizações gerais por semana, +10 no Score de Visibilidade e taxas reduzidas quando a cobrança de transações for lançada.</small>
+          </div>
+          <div class="vault-plus-account-quota" data-vaultplus-account-quota hidden><span>Cotizações desta semana</span><strong>0/2</strong><small>disponíveis</small></div>
+          <a class="primary-cta compact" data-vaultplus-account-link href={`${base}vault-plus/`}><span>Conhecer Vault+</span><b>→</b></a>
         </div>
       </section>
 
@@ -160,15 +177,13 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
           <article class="account-security-card password-change-card">
             <div class="account-security-card-top">
               <span class="account-security-icon">⌁</span>
-              <div><strong>Alterar senha</strong><small>Confirme sua senha atual antes de criar uma nova.</small></div>
+              <div><strong>Alterar senha</strong><small data-password-reset-copy>Disponível após verificar seu Gmail.</small></div>
             </div>
-            <form class="password-change-form" data-password-change-form>
-              <label class="form-field"><span>Senha atual</span><input name="currentPassword" type="password" autocomplete="current-password" required /></label>
-              <label class="form-field"><span>Nova senha</span><input name="newPassword" type="password" autocomplete="new-password" minlength="6" required /></label>
-              <label class="form-field"><span>Confirmar nova senha</span><input name="confirmPassword" type="password" autocomplete="new-password" minlength="6" required /></label>
-              <button type="submit" class="secondary-cta compact"><span>Atualizar senha</span><b>✓</b></button>
-              <p class="security-feedback" data-password-change-feedback></p>
-            </form>
+            <div class="password-reset-email-flow">
+              <div class="password-reset-route"><span>Gmail verificado</span><b>→</b><span>Link seguro</span><b>→</b><span>Firebase</span></div>
+              <button type="button" class="secondary-cta compact" data-send-password-reset disabled><span>Enviar link para alterar senha</span><b>✉</b></button>
+              <p class="security-feedback" data-password-reset-feedback></p>
+            </div>
           </article>
         </div>
       </section>
@@ -281,6 +296,89 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         </div>
       </div>
     </section>
+
+    <div class="bulk-quote-modal" data-bulk-quote-modal hidden>
+      <button type="button" class="bulk-quote-backdrop" data-bulk-quote-close aria-label="Fechar cotização"></button>
+      <section class="bulk-quote-dialog" role="dialog" aria-modal="true" aria-labelledby="bulk-quote-title">
+        <header class="bulk-quote-header">
+          <div><span class="section-eyebrow">Vault+ · ferramenta de coleção</span><h2 id="bulk-quote-title">Cotizar coleção</h2><p data-bulk-quote-subtitle>Atualize os preços das cartas selecionadas usando a MYP.</p></div>
+          <button type="button" data-bulk-quote-close aria-label="Fechar">×</button>
+        </header>
+
+        <div class="bulk-quote-state bulk-quote-locked" data-bulk-quote-state="locked" hidden>
+          <div class="bulk-quote-locked-icon">✦</div>
+          <h3 data-bulk-quote-locked-title>Recurso Vault+</h3>
+          <p data-bulk-quote-locked-copy>A cotização geral da coleção está disponível para assinantes Vault+.</p>
+          <a class="primary-cta" href={`${base}vault-plus/`}><span>Conhecer Vault+</span><b>→</b></a>
+        </div>
+
+        <div class="bulk-quote-state bulk-quote-prep" data-bulk-quote-state="prep">
+          <div class="bulk-quote-options">
+            <section class="bulk-quote-filter-card">
+              <header><span>01</span><div><strong>Escopo</strong><small>Escolha quais valores entram nesta execução.</small></div></header>
+              <label class="bulk-choice"><input type="radio" name="quote-scope" value="all" checked data-bulk-scope /><span><b>Todas as cartas</b><small>Considera todo o seu inventário de cartas.</small></span></label>
+              <label class="bulk-choice"><input type="radio" name="quote-scope" value="min" data-bulk-scope /><span><b>Somente cartas acima de um valor</b><small>Usa a cotação atual salva como referência.</small></span></label>
+              <label class="bulk-inline-field" data-bulk-min-wrap hidden><span>Valor mínimo</span><div>R$ <input type="number" min="0" step="1" value="100" data-bulk-min-value /></div></label>
+            </section>
+
+            <section class="bulk-quote-filter-card">
+              <header><span>02</span><div><strong>Última cotização</strong><small>Evite atualizar cartas que acabaram de ser consultadas.</small></div></header>
+              <label class="bulk-choice"><input type="radio" name="quote-stale" value="any" checked data-bulk-stale /><span><b>Qualquer data</b><small>Não filtra pela última atualização.</small></span></label>
+              <label class="bulk-choice"><input type="radio" name="quote-stale" value="days" data-bulk-stale /><span><b>Não cotizadas há mais de</b><small>Inclui cartas nunca cotizadas.</small></span></label>
+              <label class="bulk-inline-field" data-bulk-days-wrap hidden><span>Tempo mínimo</span><div><input type="number" min="1" step="1" value="30" data-bulk-stale-days /> dias</div></label>
+            </section>
+          </div>
+
+          <section class="bulk-quote-live-count">
+            <article><small>Cartas encontradas</small><strong data-bulk-match-count>0</strong><span>cartas</span></article>
+            <article><small>Tempo estimado</small><strong data-bulk-estimate>≈ 0s</strong><span data-bulk-estimate-note>estimativa do backend</span></article>
+            <article><small>Sem link MYP</small><strong data-bulk-missing-count>0</strong><span>serão marcadas, sem interromper</span></article>
+          </section>
+
+          <section class="bulk-quote-summary">
+            <header><strong>Resumo</strong><small>Revise antes de consumir uma cotização Vault+.</small></header>
+            <dl>
+              <div><dt>Cartas selecionadas</dt><dd data-bulk-summary-cards>0</dd></div>
+              <div><dt>Última cotização</dt><dd data-bulk-summary-stale>Qualquer data</dd></div>
+              <div><dt>Valor mínimo</dt><dd data-bulk-summary-min>Sem mínimo</dd></div>
+              <div><dt>Tempo estimado</dt><dd data-bulk-summary-time>≈ 0s</dd></div>
+              <div><dt>Cotizações restantes depois</dt><dd data-bulk-summary-remaining>—</dd></div>
+            </dl>
+            <p class="security-feedback" data-bulk-prep-feedback></p>
+            <button type="button" class="primary-cta bulk-quote-start" data-bulk-quote-start><span>Iniciar cotização</span><b>↯</b></button>
+          </section>
+        </div>
+
+        <div class="bulk-quote-state bulk-quote-progress" data-bulk-quote-state="progress" hidden>
+          <section class="bulk-progress-hero">
+            <div><span>Cotizando sua coleção</span><strong><b data-bulk-progress-processed>0</b> / <b data-bulk-progress-total>0</b> cartas</strong></div>
+            <em data-bulk-progress-percent>0%</em>
+          </section>
+          <div class="bulk-progress-track"><i data-bulk-progress-bar></i></div>
+          <section class="bulk-current-card">
+            <small>Carta atual</small><h3 data-bulk-current-name>Preparando…</h3><p data-bulk-current-number></p>
+            <div><span>Antes <strong data-bulk-current-before>—</strong></span><b>→</b><span>Depois <strong data-bulk-current-after>consultando…</strong></span><em data-bulk-current-delta></em></div>
+          </section>
+          <section class="bulk-recent-list"><header><strong>Últimas processadas</strong><small>Somente as entradas mais recentes ficam visíveis.</small></header><div data-bulk-recent-list></div></section>
+          <p class="security-feedback" data-bulk-progress-feedback></p>
+        </div>
+
+        <div class="bulk-quote-state bulk-quote-done" data-bulk-quote-state="done" hidden>
+          <div class="bulk-done-mark" data-bulk-done-mark>✓</div>
+          <h3 data-bulk-done-title>Cotização concluída</h3>
+          <p class="security-feedback bulk-done-error" data-bulk-done-error hidden></p>
+          <div class="bulk-done-stats">
+            <article><small>Atualizadas</small><strong data-bulk-done-success>0</strong></article>
+            <article><small>Com erro</small><strong data-bulk-done-failed>0</strong></article>
+            <article><small>Valor antes</small><strong data-bulk-done-before>R$ 0,00</strong></article>
+            <article><small>Valor depois</small><strong data-bulk-done-after>R$ 0,00</strong></article>
+            <article><small>Variação</small><strong data-bulk-done-delta>R$ 0,00</strong><span data-bulk-done-percent>0%</span></article>
+          </div>
+          <details class="bulk-failures" data-bulk-failures-wrap hidden><summary>Ver cartas com erro <b data-bulk-failure-count>0</b></summary><div data-bulk-failures></div></details>
+          <div class="bulk-done-actions"><button type="button" class="secondary-cta" data-bulk-quote-close><span>Fechar</span><b>×</b></button><button type="button" class="primary-cta" data-bulk-quote-again><span>Nova cotização</span><b>↻</b></button></div>
+        </div>
+      </section>
+    </div>
 
     <div class="editor-modal" data-editor-modal="card" hidden>
       <button class="editor-modal-backdrop" type="button" data-close-modal aria-label="Fechar"></button>

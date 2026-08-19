@@ -13,6 +13,7 @@
 - `80-premium-effects.css` — efeitos visuais premium de cartas/boosters/kits.
 - `90-home-experience.css` — hero da home, explorar e ajustes da vitrine.
 - `95-management.css` — tabela do gerenciamento, cotização e análise avançada.
+- `99-vault-plus.css` — Vault+, segurança por e-mail e modal de cotização geral.
 
 ## Regra de manutenção
 

@@ -1,0 +1,100 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const rawBase = import.meta.env.BASE_URL || '/';
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+---
+
+<BaseLayout
+  title="Vault+"
+  description="Vault+: cotizações completas da coleção, mais visibilidade e benefícios para colecionadores no Vault TCG."
+  active="central"
+  bodyClass="vault-plus-page"
+>
+  <section class="shell vault-plus-shell" data-vault-plus-page data-base={base}>
+    <nav class="vault-plus-breadcrumb" aria-label="Navegação do Vault+">
+      <a href={`${base}central/`}>← Meu Vault</a><span>/</span><strong>Vault+</strong>
+    </nav>
+
+    <header class="vault-plus-hero">
+      <div class="vault-plus-hero-copy">
+        <span class="section-eyebrow">Plano do Vault TCG</span>
+        <div class="vault-plus-title"><span class="vault-plus-mark">✦</span><h1>Vault+</h1></div>
+        <p>Mais ferramentas para quem leva sua coleção a sério.</p>
+        <small>Cotizações completas, vantagem de visibilidade e uma estrutura de taxas melhor quando as transações do Vault forem lançadas.</small>
+        <div class="vault-plus-hero-actions">
+          <a class="primary-cta" href={`${base}central/`}><span>Abrir Meu Vault</span><b>→</b></a>
+          <a class="secondary-cta" href="#beneficios"><span>Ver benefícios</span><b>↓</b></a>
+        </div>
+      </div>
+
+      <aside class="vault-plus-status-card" data-vault-plus-status-card>
+        <span class="vault-plus-status-pill" data-vault-plus-status-pill>Consultando sua conta…</span>
+        <div class="vault-plus-status-main">
+          <small>Seu plano</small>
+          <strong data-vault-plus-status-title>Vault+</strong>
+          <p data-vault-plus-status-copy>Entre na sua conta para consultar o status do plano.</p>
+        </div>
+        <div class="vault-plus-status-quota" data-vault-plus-status-quota hidden>
+          <div><small>Cotizações disponíveis</small><strong data-vault-plus-remaining>0/2</strong></div>
+          <span data-vault-plus-reset>Renovação semanal</span>
+        </div>
+        <div class="vault-plus-payment-state" data-vault-plus-payment-state>
+          <span>Pagamento</span>
+          <strong>Integração em preparação</strong>
+          <small>Nenhum gateway de pagamento foi conectado nesta versão. O site não fará cobranças fictícias nem ativará o plano automaticamente.</small>
+          <button type="button" class="vault-plus-purchase-button" disabled aria-disabled="true">Assinar Vault+ · em breve</button>
+        </div>
+      </aside>
+    </header>
+
+    <section class="vault-plus-benefits" id="beneficios" aria-label="Benefícios do Vault+">
+      <article class="vault-plus-benefit featured">
+        <header><span>01</span><div><small>Ferramenta principal</small><strong>2 cotizações gerais por semana</strong></div></header>
+        <p>Atualize em uma única execução os valores das cartas escolhidas da sua coleção usando a MYP, com filtros, progresso e tolerância a falhas individuais.</p>
+        <div class="vault-plus-quote-compare">
+          <div><span>Cadastro individual</span><strong>Link MYP → Preencher pela MYP</strong><small>Grátis · ilimitado · disponível para todos</small></div>
+          <b>≠</b>
+          <div><span>Cotização geral</span><strong>Meu Vault → Cotizar coleção</strong><small>Vault+ · até 2 execuções por semana</small></div>
+        </div>
+      </article>
+
+      <article class="vault-plus-benefit">
+        <header><span>02</span><div><small>Benefício planejado</small><strong>Taxas reduzidas</strong></div></header>
+        <p>Quando o sistema real de taxas for lançado, o Vault+ terá uma estrutura menor para compras e vendas.</p>
+        <div class="vault-plus-fee-grid">
+          <div><small>Normal</small><strong>3,5%</strong></div>
+          <div><small>Com Vault+</small><strong>2%</strong></div>
+          <div><small>Vault+ ↔ Vault+</small><strong>1,5%</strong></div>
+        </div>
+        <em class="vault-plus-notice">A cobrança de taxas ainda não foi implementada. Valores de propostas, vendas e pagamentos atuais não são alterados.</em>
+      </article>
+
+      <article class="vault-plus-benefit">
+        <header><span>03</span><div><small>Descoberta</small><strong>+10 no Score de Visibilidade</strong></div></header>
+        <p>O bônus entra no cálculo real de visibilidade enquanto o Vault+ estiver ativo e o resultado continua limitado a 100 pontos.</p>
+        <div class="vault-plus-score-demo"><span>Score base <b>42</b></span><i>+</i><span>Vault+ <b>10</b></span><i>=</i><strong>52</strong></div>
+        <em class="vault-plus-notice">O Vault+ não aumenta o Score de Segurança. Assinatura não representa maior confiabilidade da conta.</em>
+      </article>
+    </section>
+
+    <section class="vault-plus-how-it-works">
+      <header><span class="section-eyebrow">Cotização completa</span><h2>Do filtro ao resultado, sem disparar centenas de consultas do navegador.</h2></header>
+      <div class="vault-plus-flow">
+        <article><span>1</span><strong>Escolha o escopo</strong><small>Todas as cartas, valor mínimo e tempo desde a última cotização.</small></article>
+        <article><span>2</span><strong>Revise a estimativa</strong><small>Contagem e tempo são recalculados antes de iniciar.</small></article>
+        <article><span>3</span><strong>Acompanhe o progresso</strong><small>O backend processa uma fila conservadora e mostra cada avanço.</small></article>
+        <article><span>4</span><strong>Veja o resultado</strong><small>Sucessos continuam mesmo quando algumas cartas falham.</small></article>
+      </div>
+    </section>
+
+    <section class="vault-plus-footer-cta">
+      <div><span>✦ Vault+</span><h2>Pronto para a próxima cotização?</h2><p>Se seu plano já estiver ativo, a ação fica disponível na Visão Geral do Meu Vault.</p></div>
+      <a class="primary-cta" href={`${base}central/`}><span>Ir para Visão Geral</span><b>→</b></a>
+    </section>
+  </section>
+
+  <script>
+    import '../../scripts/pages/vault-plus-page';
+  </script>
+</BaseLayout>

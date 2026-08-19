@@ -52,6 +52,33 @@
     }
   });
 
+  root.querySelector('[data-forgot-password]')?.addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    const form = root.querySelector('[data-login-form]');
+    const feedback = root.querySelector('[data-login-feedback]');
+    const email = clean(form?.elements?.login?.value);
+    if (!email) {
+      feedback.textContent = 'Informe seu e-mail acima para recuperar a senha.';
+      form?.elements?.login?.focus();
+      return;
+    }
+    button.disabled = true;
+    feedback.textContent = 'Enviando link de recuperação…';
+    try {
+      await window.VaultCloud?.ready;
+      await window.VaultCloud.requestForgotPassword(email);
+      feedback.textContent = 'Se existir uma conta com esse e-mail, o Firebase enviará um link de recuperação.';
+    } catch (error) {
+      const message = friendly(error);
+      // Evita confirmar ou negar a existência de contas pelo texto da interface.
+      feedback.textContent = /user-not-found|usu[aá]rio.*n[aã]o/i.test(String(message))
+        ? 'Se existir uma conta com esse e-mail, o Firebase enviará um link de recuperação.'
+        : message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+
   root.querySelector('[data-signup-form]')?.addEventListener('submit', async (event) => {
     event.preventDefault();
     const form = event.currentTarget;

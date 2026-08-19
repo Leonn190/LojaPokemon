@@ -1,12 +1,7 @@
-# Backend de e-mail · Vault TCG
+# Firebase Functions legado · Vault TCG
 
-A função `sendVaultVerificationEmail` gera um link oficial de verificação do Firebase Admin e envia esse link pelo Gmail com o template visual do Vault TCG.
+Este diretório foi mantido porque fazia parte do ZIP recebido. Ele contém a Cloud Function antiga `sendVaultVerificationEmail`.
 
-## Estrutura
+Na atualização atual, o **backend ativo para MYP, Gmail, alteração de senha e Vault+ é a API do Render** entregue no ZIP `VaultTCG-backend-render-atualizado.zip`. O frontend não faz mais fallback para o e-mail padrão do Firebase e não depende desta função para os novos fluxos.
 
-- `src/index.ts` — Cloud Function callable autenticada.
-- `src/email/config.ts` — SMTP e URL de retorno.
-- `src/email/template.ts` — HTML do e-mail.
-- `.env.example` — campos que precisam existir no ambiente.
-
-O frontend tenta essa função primeiro. Se ela ainda não estiver publicada/configurada, cai automaticamente no e-mail padrão do Firebase Authentication para não quebrar a verificação.
+Não remova este diretório automaticamente se ele ainda fizer parte do seu deploy Firebase, mas evite manter duas implementações concorrentes do mesmo envio.
