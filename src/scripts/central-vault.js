@@ -41,6 +41,8 @@ import { createBulkQuoteController } from './central/quote-modal.js';
       let cloudSaving = false;
       let cloudSaveQueued = false;
       let bulkQuoteController = null;
+      let activeNegotiationTab = 'terms';
+      let negotiationBusy = false;
 
       const setCloudSaveState = (label, mode = 'saved') => {
         if (!saveStateBadge) return;
@@ -683,7 +685,7 @@ import { createBulkQuoteController } from './central/quote-modal.js';
           products: (items.products || []).map((item) => normalizeProduct(item, false)),
           kits: (items.kits || []).map((item) => normalizeKit(item, cards, boosters)),
           albums: (items.albums || []).map((item) => normalizeAlbum(item, cards)),
-          receivedProposals: Array.isArray(items.receivedProposals) ? items.receivedProposals : [],
+          proposals: Array.isArray(items.proposals) ? items.proposals : (Array.isArray(items.receivedProposals) ? items.receivedProposals : []),
           proposalsLoaded: false, proposalsUnavailable: false,
           removed: { cards: [], boosters: [], kits: [], products: [], albums: [] },
           kitDraft: [], source,
@@ -902,41 +904,190 @@ import { createBulkQuoteController } from './central/quote-modal.js';
         const versionNode = root.querySelector('[data-version-number]'); if (versionNode) versionNode.textContent = String(state.profile.version);
         activeTab = 'cards'; inventoryQuery = ''; if (inventorySearch) inventorySearch.value = '';
         render();
-        window.setTimeout(() => navigateAdmin('overview'), 0);
+        const requestedSection = new URLSearchParams(window.location.search).get('section');
+        window.setTimeout(() => navigateAdmin(requestedSection === 'negotiations' ? 'negotiations' : 'overview'), 0);
         if (source === 'cloud') { window.setTimeout(() => syncEmailVerification(true), 120); window.setTimeout(() => syncVaultPlusStatus(), 180); }
-        if (source === 'cloud' && window.VaultCloud?.listMyReceivedProposals) {
-          const proposalCollectionId = state.profile.collectionId;
-          window.VaultCloud.listMyReceivedProposals().then((rows) => { if (!state || state.profile.collectionId !== proposalCollectionId) return; state.receivedProposals = Array.isArray(rows) ? rows : []; state.proposalsLoaded = true; renderProposals(); }).catch(() => { if (!state || state.profile.collectionId !== proposalCollectionId) return; state.proposalsLoaded = true; state.proposalsUnavailable = true; renderProposals(); });
-        } else { state.proposalsLoaded = true; renderProposals(); }
+        if (source === 'cloud' && window.VaultCloud?.listMyProposals) {
+          refreshNegotiations();
+        } else { state.proposalsLoaded = true; renderNegotiations(); }
       };
 
       const tabLabel = { cards: 'Cartas', boosters: 'Boosters', kits: 'Kits', products: 'Produtos', albums: 'Álbuns' };
       const allPricedItems = () => state ? [...state.cards, ...state.boosters, ...state.kits, ...state.products] : [];
-      const renderProposals = () => {
-        if (!state) return;
-        const rows = Array.isArray(state.receivedProposals) ? state.receivedProposals : [];
-        const pending = rows.filter((proposal) => !proposal.status || proposal.status === 'pending');
-        const metric = root.querySelector('[data-dashboard-proposals]');
-        const note = root.querySelector('[data-dashboard-proposals-note]');
-        if (metric) metric.textContent = state.proposalsLoaded ? String(pending.length) : '—';
-        if (note) note.textContent = state.proposalsUnavailable ? 'consulta indisponível' : state.proposalsLoaded ? `${rows.length} recebida${rows.length === 1 ? '' : 's'} no total` : 'carregando recebidas';
-        const count = root.querySelector('[data-proposal-inbox-count]');
-        if (count) count.textContent = state.proposalsUnavailable ? 'Indisponível' : state.proposalsLoaded ? `${pending.length} pendente${pending.length === 1 ? '' : 's'}` : 'Carregando…';
-        const list = root.querySelector('[data-proposal-inbox]');
-        if (!list) return;
-        if (state.proposalsUnavailable) { list.innerHTML = '<div class="proposal-inbox-empty"><span>!</span><div><strong>Não foi possível consultar agora</strong><small>As configurações de proposta continuam funcionando normalmente.</small></div></div>'; return; }
-        if (!state.proposalsLoaded) { list.innerHTML = '<div class="proposal-inbox-loading">Buscando propostas…</div>'; return; }
-        if (!rows.length) { list.innerHTML = '<div class="proposal-inbox-empty"><span>◇</span><div><strong>Nenhuma proposta recebida</strong><small>Quando alguém enviar uma proposta, ela aparecerá aqui.</small></div></div>'; return; }
-        const statusLabel = { pending: 'Pendente', accepted: 'Aceita', rejected: 'Recusada', cancelled: 'Cancelada' };
-        list.innerHTML = rows.slice(0, 20).map((proposal) => {
-          const rawDate = proposal.createdAt?.toDate?.() || (proposal.createdAt?.seconds ? new Date(proposal.createdAt.seconds * 1000) : new Date(proposal.createdAt || 0));
-          const when = rawDate && !Number.isNaN(rawDate.getTime()) ? rawDate.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : 'Data não informada';
-          const itemCount = Array.isArray(proposal.items) ? proposal.items.reduce((sum, item) => sum + Math.max(1, Number(item.quantity || 1)), 0) : 0;
-          const buyer = proposal.buyerName || proposal.buyerAccountName || 'Comprador';
-          const value = Number(proposal.proposedTotal ?? proposal.publishedTotal ?? 0);
-          const status = proposal.status || 'pending';
-          return `<article class="proposal-inbox-item ${escapeHtml(status)}"><span>◇</span><div><strong>${escapeHtml(buyer)}</strong><small>${itemCount} ${itemCount === 1 ? 'item' : 'itens'} · ${escapeHtml(when)}</small></div><b>${escapeHtml(prettyPrice(value))}</b><em>${escapeHtml(statusLabel[status] || status)}</em></article>`;
+      const proposalTime = (value) => {
+        if (!value) return 'Data não informada';
+        const date = value?.toDate?.() || (value?.seconds ? new Date(value.seconds * 1000) : new Date(value));
+        return date && !Number.isNaN(date.getTime())
+          ? date.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+          : 'Data não informada';
+      };
+
+      const proposalAmount = (proposal) => Number(proposal?.currentOffer ?? proposal?.proposedTotal ?? proposal?.publishedTotal ?? 0);
+      const proposalStatusLabel = (status) => ({ pending: 'Em negociação', accepted: 'Aceita', rejected: 'Recusada' }[status] || status || 'Em negociação');
+      const proposalActionLabel = (action) => ({ created: 'Proposta enviada', counter: 'Contraproposta', accepted: 'Aceita', rejected: 'Recusada' }[action] || action || 'Atualização');
+
+      const rowsForNegotiationTab = (tab) => {
+        if (!state) return [];
+        const uid = state.profile.ownerUid || '';
+        const rows = Array.isArray(state.proposals) ? state.proposals : [];
+        if (tab === 'sent') return rows.filter((proposal) => proposal.status === 'pending' && proposal.buyerUid === uid);
+        if (tab === 'received') return rows.filter((proposal) => proposal.status === 'pending' && proposal.sellerUid === uid);
+        if (tab === 'completed') return rows.filter((proposal) => proposal.status === 'accepted' || proposal.status === 'rejected');
+        return [];
+      };
+
+      const proposalCardMarkup = (proposal) => {
+        const uid = state?.profile?.ownerUid || '';
+        const buyerSide = proposal.buyerUid === uid;
+        const counterpart = buyerSide
+          ? (proposal.sellerName || proposal.sellerCollectionName || 'Vendedor')
+          : (proposal.buyerName || proposal.buyerAccountName || 'Comprador');
+        const itemCount = Array.isArray(proposal.items) ? proposal.items.reduce((sum, item) => sum + Math.max(1, Number(item.quantity || 1)), 0) : 0;
+        const isMyTurn = proposal.status === 'pending' && proposal.pendingWithUid === uid;
+        const waitingCopy = buyerSide ? 'Aguardando resposta do vendedor' : 'Aguardando resposta do comprador';
+        const items = (Array.isArray(proposal.items) ? proposal.items : []).map((item) => {
+          const unit = Number.isFinite(Number(item.price)) ? prettyPrice(Number(item.price)) : 'Consultar';
+          return `<li><strong>${escapeHtml(item.name || 'Item')}</strong><span>${escapeHtml(item.number || '')}${item.number ? ' · ' : ''}${Math.max(1, Number(item.quantity || 1))}x · ${escapeHtml(unit)}</span></li>`;
         }).join('');
+        const history = (Array.isArray(proposal.history) ? proposal.history : []).slice().reverse().slice(0, 8).map((event) => {
+          const byMe = event.byUid === uid;
+          const amount = toPrice(event.amount);
+          return `<li><span>${escapeHtml(proposalActionLabel(event.action))}${byMe ? ' · você' : ''}</span><strong>${amount === null ? '—' : escapeHtml(prettyPrice(amount))}</strong><small>${escapeHtml(proposalTime(event.at))}${event.message ? ` · ${escapeHtml(event.message)}` : ''}</small></li>`;
+        }).join('');
+        const actionArea = proposal.status !== 'pending'
+          ? `<div class="negotiation-finished ${escapeHtml(proposal.status)}"><strong>${escapeHtml(proposalStatusLabel(proposal.status))}</strong><small>Finalizada em ${escapeHtml(proposalTime(proposal.completedAt || proposal.updatedAt))}</small></div>`
+          : isMyTurn
+            ? `<div class="negotiation-actions">
+                <div class="negotiation-action-row">
+                  <button type="button" class="proposal-accept" data-proposal-response="accept">Aceitar</button>
+                  <button type="button" class="proposal-reject" data-proposal-response="reject">Recusar</button>
+                </div>
+                <div class="negotiation-counter-box">
+                  <label><span>Contraproposta</span><div><b>R$</b><input type="number" min="0.01" step="0.01" value="${Number(proposalAmount(proposal)).toFixed(2)}" data-counter-amount /></div></label>
+                  <label><span>Mensagem opcional</span><textarea rows="2" maxlength="1200" placeholder="Ex.: consigo fechar neste valor" data-counter-message></textarea></label>
+                  <button type="button" data-proposal-response="counter">Enviar contraproposta</button>
+                </div>
+              </div>`
+            : `<div class="negotiation-waiting"><span>◷</span><div><strong>${escapeHtml(waitingCopy)}</strong><small>Você será notificado por Gmail quando houver uma resposta.</small></div></div>`;
+        return `<article class="negotiation-card ${escapeHtml(proposal.status || 'pending')}" data-proposal-id="${escapeHtml(proposal.id || '')}">
+          <header>
+            <div class="negotiation-party"><span>${escapeHtml(String(counterpart).slice(0, 2).toUpperCase())}</span><div><small>${buyerSide ? 'Proposta enviada para' : 'Proposta recebida de'}</small><strong>${escapeHtml(counterpart)}</strong></div></div>
+            <div class="negotiation-current-offer"><small>Valor atual</small><strong>${escapeHtml(prettyPrice(proposalAmount(proposal)))}</strong><em>${escapeHtml(proposalStatusLabel(proposal.status))}</em></div>
+          </header>
+          <div class="negotiation-meta"><span>${itemCount} ${itemCount === 1 ? 'item' : 'itens'}</span><span>${escapeHtml(proposal.sellerCollectionName || 'Coleção')}</span><span>Atualizada ${escapeHtml(proposalTime(proposal.updatedAt || proposal.createdAt))}</span></div>
+          ${proposal.reason ? `<p class="negotiation-reason"><strong>Motivo inicial:</strong> ${escapeHtml(proposal.reason)}</p>` : ''}
+          <details class="negotiation-details"><summary>Ver itens e histórico <b>⌄</b></summary><div class="negotiation-details-grid"><section><strong>Itens</strong><ul>${items || '<li><span>Nenhum item informado.</span></li>'}</ul></section><section><strong>Histórico</strong><ul class="negotiation-history">${history || '<li><span>Sem histórico.</span></li>'}</ul></section></div></details>
+          ${actionArea}
+        </article>`;
+      };
+
+      const renderNegotiationTab = () => {
+        root.querySelectorAll('[data-negotiation-tab]').forEach((button) => button.classList.toggle('active', button.dataset.negotiationTab === activeNegotiationTab));
+        root.querySelectorAll('[data-negotiation-panel]').forEach((panel) => {
+          const active = panel.dataset.negotiationPanel === activeNegotiationTab;
+          panel.hidden = !active;
+          panel.classList.toggle('active', active);
+        });
+      };
+
+      const renderNegotiations = () => {
+        if (!state) return;
+        const sent = rowsForNegotiationTab('sent');
+        const received = rowsForNegotiationTab('received');
+        const completed = rowsForNegotiationTab('completed');
+        const buckets = { sent, received, completed };
+        Object.entries(buckets).forEach(([tab, rows]) => {
+          const count = root.querySelector(`[data-negotiation-count="${tab}"]`);
+          if (count) count.textContent = state.proposalsLoaded && !state.proposalsUnavailable ? String(rows.length) : '—';
+          const status = root.querySelector(`[data-negotiation-state="${tab}"]`);
+          if (status) status.textContent = state.proposalsUnavailable ? 'Indisponível' : state.proposalsLoaded ? `${rows.length} ${rows.length === 1 ? 'negociação' : 'negociações'}` : 'Carregando…';
+          const list = root.querySelector(`[data-negotiation-list="${tab}"]`);
+          if (!list) return;
+          if (state.proposalsUnavailable) {
+            list.innerHTML = '<div class="proposal-inbox-empty"><span>!</span><div><strong>Não foi possível consultar agora</strong><small>Tente atualizar em alguns segundos.</small></div></div>';
+          } else if (!state.proposalsLoaded) {
+            list.innerHTML = '<div class="proposal-inbox-loading">Buscando negociações…</div>';
+          } else if (!rows.length) {
+            const emptyCopy = tab === 'sent' ? 'Você ainda não possui propostas abertas.' : tab === 'received' ? 'Nenhuma proposta aberta foi recebida.' : 'Nenhuma negociação foi finalizada ainda.';
+            list.innerHTML = `<div class="proposal-inbox-empty"><span>◇</span><div><strong>Nada por aqui</strong><small>${escapeHtml(emptyCopy)}</small></div></div>`;
+          } else {
+            list.innerHTML = rows.map(proposalCardMarkup).join('');
+          }
+        });
+        renderNegotiationTab();
+      };
+
+      const setNegotiationFeedback = (message = '', mode = 'neutral') => {
+        const node = root.querySelector('[data-negotiation-feedback]');
+        if (!node) return;
+        node.hidden = !message;
+        node.textContent = message;
+        node.dataset.state = mode;
+      };
+
+      const refreshNegotiations = async () => {
+        if (!state || negotiationBusy || !window.VaultCloud?.listMyProposals) return;
+        state.proposalsLoaded = false;
+        state.proposalsUnavailable = false;
+        renderNegotiations();
+        const collectionId = state.profile.collectionId;
+        try {
+          await window.VaultCloud.ready;
+          const rows = await window.VaultCloud.listMyProposals('all', 100);
+          if (!state || state.profile.collectionId !== collectionId) return;
+          state.proposals = Array.isArray(rows) ? rows : [];
+          state.proposalsLoaded = true;
+          state.proposalsUnavailable = false;
+          const requestedProposalId = new URLSearchParams(window.location.search).get('proposal');
+          const requestedProposal = requestedProposalId ? state.proposals.find((proposal) => proposal.id === requestedProposalId) : null;
+          if (requestedProposal) {
+            activeNegotiationTab = requestedProposal.status === 'pending'
+              ? (requestedProposal.sellerUid === state.profile.ownerUid ? 'received' : 'sent')
+              : 'completed';
+          }
+          renderNegotiations();
+        } catch (error) {
+          if (!state || state.profile.collectionId !== collectionId) return;
+          state.proposalsLoaded = true;
+          state.proposalsUnavailable = true;
+          renderNegotiations();
+          setNegotiationFeedback(error?.message || 'Não foi possível carregar as negociações agora.', 'error');
+        }
+      };
+
+      const respondToProposal = async (card, action) => {
+        if (!state || negotiationBusy || !card?.dataset?.proposalId) return;
+        const proposalId = card.dataset.proposalId;
+        const amountInput = card.querySelector('[data-counter-amount]');
+        const messageInput = card.querySelector('[data-counter-message]');
+        const options = { message: clean(messageInput?.value || '') };
+        if (action === 'counter') {
+          const amount = Number(amountInput?.value || 0);
+          if (!Number.isFinite(amount) || amount <= 0) { setNegotiationFeedback('Informe um valor válido para a contraproposta.', 'error'); return; }
+          options.amount = amount;
+        }
+        if ((action === 'accept' || action === 'reject') && !window.confirm(action === 'accept' ? 'Aceitar esta proposta e finalizar a negociação?' : 'Recusar esta proposta e encerrar a negociação?')) return;
+        negotiationBusy = true;
+        setNegotiationFeedback(action === 'counter' ? 'Enviando contraproposta…' : action === 'accept' ? 'Aceitando proposta…' : 'Recusando proposta…', 'neutral');
+        root.querySelectorAll('[data-proposal-response]').forEach((button) => { button.disabled = true; });
+        try {
+          const payload = await window.VaultCloud.actOnProposal(proposalId, action, options);
+          const updated = payload?.proposal;
+          if (updated) {
+            const index = state.proposals.findIndex((proposal) => proposal.id === updated.id);
+            if (index >= 0) state.proposals[index] = updated;
+            else state.proposals.unshift(updated);
+          }
+          const emailSent = payload?.notification?.sent === true;
+          setNegotiationFeedback(emailSent ? 'Resposta registrada e Gmail enviado para a outra pessoa.' : 'Resposta registrada. O Gmail não pôde ser enviado agora.', emailSent ? 'success' : 'warning');
+          renderNegotiations();
+          window.setTimeout(() => refreshNegotiations(), 500);
+        } catch (error) {
+          setNegotiationFeedback(error?.message || 'Não foi possível responder esta proposta.', 'error');
+        } finally {
+          negotiationBusy = false;
+          root.querySelectorAll('[data-proposal-response]').forEach((button) => { button.disabled = false; });
+        }
       };
 
       const inventoryCount = (kind) => Array.isArray(state?.[kind]) ? state[kind].length : 0;
@@ -969,7 +1120,7 @@ import { createBulkQuoteController } from './central/quote-modal.js';
         dashboardMetric('[data-dashboard-card-general-average]', 'averageGeneralPrice');
         dashboardMetric('[data-dashboard-card-minimum]', 'minimumPrice');
         renderAccountScores();
-        renderProposals();
+        renderNegotiations();
         renderPersonalization();
       };
       const updateTabs = () => {
@@ -1885,6 +2036,10 @@ import { createBulkQuoteController } from './central/quote-modal.js';
           renderInventory();
           updateTabs();
         }
+        if (targetSection === 'negotiations') {
+          renderNegotiationTab();
+          if (!state.proposalsLoaded && !state.proposalsUnavailable) refreshNegotiations();
+        }
       };
       root.querySelectorAll('[data-admin-nav]').forEach((button) => button.addEventListener('click', () => navigateAdmin(button.dataset.adminNav, button.dataset.adminInventory || '')));
       root.addEventListener('click', (event) => {
@@ -1971,6 +2126,19 @@ import { createBulkQuoteController } from './central/quote-modal.js';
       root.querySelector('[data-show-collection-value]')?.addEventListener('change', (event) => { if (state) { state.profile.showCollectionValue = event.target.checked; profileDirty = true; renderPersonalization(); scheduleCloudSave(); } });
       root.querySelector('[data-collection-public]')?.addEventListener('change', (event) => { if (state) { state.profile.public = event.target.checked; profileDirty = true; privacyDirty = true; scheduleCloudSave(); } });
       root.querySelector('[data-collection-selling]')?.addEventListener('change', (event) => { if (state) { state.profile.selling = event.target.checked; profileDirty = true; mirrorDirty = true; scheduleCloudSave(); } });
+      root.querySelectorAll('[data-negotiation-tab]').forEach((button) => button.addEventListener('click', () => {
+        activeNegotiationTab = button.dataset.negotiationTab || 'terms';
+        renderNegotiationTab();
+      }));
+      root.querySelector('[data-refresh-negotiations]')?.addEventListener('click', () => refreshNegotiations());
+      root.querySelector('.negotiation-center')?.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-proposal-response]');
+        if (!button) return;
+        const card = button.closest('[data-proposal-id]');
+        if (!card) return;
+        respondToProposal(card, button.dataset.proposalResponse);
+      });
+
       root.querySelector('[data-proposal-policy]')?.addEventListener('change', (event) => { if (state) { state.profile.proposalTerms.policy = event.target.value; profileDirty = true; mirrorDirty = true; scheduleCloudSave(); } });
       root.querySelector('[data-price-display-fallback]')?.addEventListener('change', (event) => { if (state) { state.profile.priceDisplayFallback = event.target.value; profileDirty = true; scheduleCloudSave(); } });
       root.querySelector('[data-flexible-discounts]')?.addEventListener('change', (event) => { if (state) { state.profile.proposalTerms.flexibleDiscounts = event.target.checked; profileDirty = true; mirrorDirty = true; scheduleCloudSave(); } });

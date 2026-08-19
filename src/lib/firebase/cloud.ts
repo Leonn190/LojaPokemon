@@ -32,8 +32,11 @@ import {
 } from 'firebase/firestore';
 
 
+const configuredVaultApiUrl = String(import.meta.env.PUBLIC_VAULT_API_URL || '').trim();
 const VAULT_API_URL = String(
-  import.meta.env.PUBLIC_VAULT_API_URL || 'https://vault-tcg-myp-api-leonn190.onrender.com',
+  configuredVaultApiUrl && !/vault-tcg-myp-api-leonn190\.onrender\.com/i.test(configuredVaultApiUrl)
+    ? configuredVaultApiUrl
+    : 'https://vaulttcgsiteapi.onrender.com',
 ).replace(/\/+$/, '');
 
 type VaultApiInit = RequestInit & {
@@ -69,14 +72,21 @@ const friendlyApiMessage = (error: any, fallback = 'Não foi possível concluir 
     QUOTE_NOT_FOUND: 'Esta cotização não foi encontrada ou já não está disponível.',
     QUOTE_FORBIDDEN: 'Esta cotização pertence a outra conta.',
     TOO_MANY_CARDS: 'Há cartas demais selecionadas para uma única cotização. Ajuste os filtros e tente novamente.',
+    PROPOSALS_DISABLED: 'Esta coleção não está aceitando propostas no momento.',
+    PROPOSAL_REQUIRES_MULTIPLE: 'Os termos desta coleção exigem pelo menos dois produtos diferentes.',
+    PROPOSAL_NOT_FOUND: 'Esta proposta não foi encontrada.',
+    PROPOSAL_FORBIDDEN: 'Você não participa desta proposta.',
+    PROPOSAL_ALREADY_FINISHED: 'Esta negociação já foi finalizada.',
+    PROPOSAL_NOT_YOUR_TURN: 'Aguardando a resposta da outra pessoa.',
+    PROPOSAL_AMOUNT_INVALID: 'Informe um valor válido para a proposta.',
   };
   if (map[code]) return map[code];
   if (status === 401) return 'Sua sessão expirou. Entre novamente.';
   if (status === 429) return 'Muitas solicitações em sequência. Aguarde um pouco e tente novamente.';
-  if (status >= 500) return 'Não foi possível conectar ao servidor de cotação. Tente novamente em alguns segundos.';
+  if (status >= 500) return 'Não foi possível conectar ao servidor do Vault. Tente novamente em alguns segundos.';
   const message = String(error?.message || '').trim();
   if (!message || /failed to fetch/i.test(message) || /networkerror/i.test(message)) {
-    return 'Não foi possível conectar ao servidor de cotação. Tente novamente em alguns segundos.';
+    return 'Não foi possível conectar ao servidor do Vault. Tente novamente em alguns segundos.';
   }
   return message || fallback;
 };
@@ -132,7 +142,7 @@ const vaultApiFetch = async (path: string, init: VaultApiInit = {}) => {
           : 'O servidor do Vault demorou demais para responder. Tente novamente.';
       } else if (!error.status) {
         error.code = error.code || 'VAULT_API_NETWORK';
-        error.message = 'Não foi possível conectar ao servidor de cotação. Tente novamente em alguns segundos.';
+        error.message = 'Não foi possível conectar ao servidor do Vault. Tente novamente em alguns segundos.';
       }
       lastError = error;
       const canRetry = attempt < retries && !externalSignal?.aborted && (!error.status || [502, 503, 504].includes(Number(error.status)));
@@ -144,7 +154,7 @@ const vaultApiFetch = async (path: string, init: VaultApiInit = {}) => {
     }
   }
 
-  throw lastError || new Error('Não foi possível conectar ao servidor de cotação. Tente novamente em alguns segundos.');
+  throw lastError || new Error('Não foi possível conectar ao servidor do Vault. Tente novamente em alguns segundos.');
 };
 
 const authorizedVaultApiFetch = async (path: string, init: VaultApiInit = {}) => {
@@ -955,50 +965,56 @@ export async function loadCollectionBySlug(slug: string) {
   };
 }
 
+export async function listMyProposals(scope: 'all' | 'sent' | 'received' | 'completed' = 'all', maxResults = 100) {
+  const normalized = ['all', 'sent', 'received', 'completed'].includes(scope) ? scope : 'all';
+  const size = Math.min(100, Math.max(1, Math.floor(Number(maxResults) || 100)));
+  const payload = await authorizedVaultApiFetch(`/api/proposals?scope=${encodeURIComponent(normalized)}&limit=${size}`, {
+    timeoutMs: 30000,
+    retries: 1,
+  });
+  return Array.isArray(payload?.proposals) ? payload.proposals : [];
+}
+
 export async function listMyReceivedProposals(maxResults = 60) {
-  const { auth, db } = await getCloud();
-  const user = auth.currentUser;
-  if (!user) return [];
-  const size = Math.min(100, Math.max(1, Math.floor(Number(maxResults) || 60)));
-  const snapshot = await getDocs(query(collection(db, 'proposals'), where('sellerUid', '==', user.uid), firestoreLimit(size)));
-  return snapshot.docs.map((entry) => ({ id: entry.id, ...entry.data() })).sort((left: any, right: any) => {
-    const time = (value: any) => Number(value?.toMillis?.() || value?.seconds * 1000 || new Date(value || 0).getTime() || 0);
-    return time(right.createdAt) - time(left.createdAt);
+  return listMyProposals('received', maxResults);
+}
+
+export async function actOnProposal(proposalId: string, action: 'accept' | 'reject' | 'counter', options: { amount?: number; message?: string } = {}) {
+  const id = encodeURIComponent(String(proposalId || '').trim());
+  if (!id) throw new Error('Proposta inválida.');
+  return authorizedVaultApiFetch(`/api/proposals/${id}/action`, {
+    method: 'POST',
+    body: JSON.stringify({ action, ...options }),
+    timeoutMs: 45000,
   });
 }
 
 export async function submitProposal(group: any) {
-  const { auth, db } = await getCloud();
-  const user = auth.currentUser;
-  if (!user) throw new Error('Entre na sua conta para enviar propostas.');
-  const sellerUid = String(group?.ownerUid || '');
-  if (!sellerUid) throw new Error('Esta coleção não está disponível para propostas no momento.');
-  if (sellerUid === user.uid) throw new Error('Você não pode enviar proposta para a própria coleção.');
-  const buyerSnapshot = await getDoc(doc(db, 'users', user.uid));
-  const buyer = buyerSnapshot.exists() ? buyerSnapshot.data() : {};
-  const proposalRef = doc(collection(db, 'proposals'));
-  await setDoc(proposalRef, stripUndefined({
-    buyerUid: user.uid,
-    buyerEmail: user.email || '',
-    buyerAccountName: buyer.displayName || user.displayName || '',
-    sellerUid,
-    sellerCollectionSlug: group.ownerSlug || '',
-    sellerCollectionName: group.ownerCollection || '',
-    sellerName: group.owner || '',
-    items: (group.items || []).map((item: any) => ({
-      id: item.id || '', kind: item.kind || '', name: item.name || '', number: item.number || '', quantity: Number(item.quantity || 1), price: Number.isFinite(item.price) ? item.price : null,
-    })),
-    publishedTotal: Number(group.publishedTotal || 0),
-    discount: Number(group.discount || 0),
-    proposedTotal: Number(group.proposedTotal || 0),
-    reason: group.reason || '',
-    buyerName: group.buyerName || '',
-    address: group.address || '',
-    status: 'pending',
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  }));
-  return proposalRef.id;
+  const payload = await authorizedVaultApiFetch('/api/proposals', {
+    method: 'POST',
+    body: JSON.stringify({
+      ownerUid: group?.ownerUid || '',
+      ownerSlug: group?.ownerSlug || '',
+      ownerCollection: group?.ownerCollection || '',
+      owner: group?.owner || '',
+      items: (group?.items || []).map((item: any) => ({
+        id: item?.id || '',
+        kind: item?.kind || '',
+        name: item?.name || '',
+        number: item?.number || '',
+        quantity: Number(item?.quantity || 1),
+        price: Number.isFinite(Number(item?.price)) ? Number(item.price) : null,
+      })),
+      publishedTotal: Number(group?.publishedTotal || 0),
+      discount: Number(group?.discount || 0),
+      proposedTotal: Number(group?.proposedTotal || 0),
+      reason: group?.reason || '',
+      buyerName: group?.buyerName || '',
+      address: group?.address || '',
+    }),
+    timeoutMs: 45000,
+  });
+  return payload;
 }
 
 export function friendlyFirebaseError(error: any) {

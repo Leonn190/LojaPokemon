@@ -246,20 +246,20 @@ const pageTitle = title === siteConfig.siteName ? title : `${title} | ${siteConf
       <button class="checkout-backdrop" type="button" data-checkout-close aria-label="Fechar proposta"></button>
       <section class="checkout-panel" role="dialog" aria-modal="true" aria-labelledby="checkout-title" tabindex="-1">
         <header class="checkout-header">
-          <div><span class="section-eyebrow">Proposta formal</span><h2 id="checkout-title">Mensagem pronta para enviar</h2></div>
+          <div><span class="section-eyebrow">Proposta enviada</span><h2 id="checkout-title">Proposta registrada no Vault</h2></div>
           <button class="modal-close-button" type="button" data-checkout-close aria-label="Fechar proposta">×</button>
         </header>
         <div class="checkout-content">
           <div class="checkout-instructions">
             <span aria-hidden="true">1</span>
-            <p>Confira o texto, copie a mensagem e envie no WhatsApp de <strong data-checkout-owner></strong> pelo número <strong data-checkout-phone></strong>.</p>
+            <p>Sua proposta para <strong data-checkout-owner></strong> já foi registrada. Se quiser, use o WhatsApp <strong data-checkout-phone></strong> apenas como contato complementar.</p>
           </div>
           <textarea readonly data-checkout-message aria-label="Mensagem da proposta pronta"></textarea>
           <div class="checkout-actions">
             <button class="copy-checkout-button" type="button" data-checkout-copy><span>▣</span> Copiar mensagem</button>
             <a class="whatsapp-checkout-button" href="#" target="_blank" rel="noopener noreferrer" data-checkout-whatsapp><span>↗</span> Abrir WhatsApp Web</a>
           </div>
-          <p class="checkout-note">A proposta continua salva neste navegador até você removê-la.</p>
+          <p class="checkout-note" data-checkout-note>Acompanhe a negociação em Meu Vault → Negociações.</p>
         </div>
       </section>
     </div>

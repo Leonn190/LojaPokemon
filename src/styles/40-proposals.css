@@ -713,3 +713,302 @@ body.checkout-open { overflow: hidden; }
 @media (max-width: 720px) {
   .proposal-auth-required { grid-column: 1 / -1; }
 }
+
+/* ========================================================================== 
+   Central de negociações — propostas reais, contrapropostas e histórico
+   ========================================================================== */
+.negotiation-center {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+}
+.negotiation-center-heading,
+.negotiation-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.negotiation-center-heading > div,
+.negotiation-list-heading > div { display: grid; gap: 4px; }
+.negotiation-center-heading h3 { margin: 0; font-size: 1rem; }
+.negotiation-center-heading p,
+.negotiation-list-heading small { margin: 0; color: var(--muted); font-size: .66rem; line-height: 1.55; }
+.negotiation-list-heading > span {
+  padding: 7px 10px;
+  border: 1px solid rgba(84,232,223,.14);
+  border-radius: 999px;
+  background: rgba(84,232,223,.055);
+  color: var(--cyan);
+  font-size: .58rem;
+  font-weight: 850;
+}
+.negotiation-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 7px;
+  overflow-x: auto;
+  padding: 5px;
+  border: 1px solid rgba(255,255,255,.065);
+  border-radius: 15px;
+  background: rgba(3,10,18,.48);
+  scrollbar-width: none;
+}
+.negotiation-tabs::-webkit-scrollbar { display: none; }
+.negotiation-tabs button {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1 0 max-content;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--muted);
+  font-size: .67rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+.negotiation-tabs button b {
+  min-width: 21px;
+  height: 21px;
+  display: grid;
+  place-items: center;
+  padding: 0 5px;
+  border-radius: 7px;
+  background: rgba(255,255,255,.055);
+  color: var(--muted-2);
+  font-size: .54rem;
+}
+.negotiation-tabs button.active {
+  border-color: rgba(84,232,223,.18);
+  background: linear-gradient(135deg, rgba(84,232,223,.105), rgba(84,232,223,.045));
+  color: var(--text);
+}
+.negotiation-tabs button.active b { background: rgba(84,232,223,.12); color: var(--cyan); }
+.negotiation-panel { display: grid; gap: 14px; }
+.negotiation-panel[hidden] { display: none !important; }
+.negotiation-panel[data-negotiation-panel="terms"] {
+  padding: 3px 0 0;
+}
+.negotiation-list { display: grid; gap: 10px; }
+.negotiation-card {
+  display: grid;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(11,23,38,.76), rgba(5,12,21,.72));
+  box-shadow: 0 16px 42px rgba(0,0,0,.14);
+}
+.negotiation-card.accepted { border-color: rgba(121,230,156,.18); }
+.negotiation-card.rejected { border-color: rgba(255,95,118,.16); }
+.negotiation-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.negotiation-party { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.negotiation-party > span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(84,232,223,.18);
+  border-radius: 11px;
+  background: rgba(84,232,223,.07);
+  color: var(--cyan);
+  font-size: .65rem;
+  font-weight: 950;
+}
+.negotiation-party > div { min-width: 0; display: grid; gap: 2px; }
+.negotiation-party small,
+.negotiation-current-offer small { color: var(--muted-2); font-size: .54rem; }
+.negotiation-party strong { overflow: hidden; color: var(--text); font-size: .72rem; text-overflow: ellipsis; white-space: nowrap; }
+.negotiation-current-offer { display: grid; justify-items: end; gap: 2px; flex: 0 0 auto; }
+.negotiation-current-offer strong { color: var(--text); font-size: .8rem; }
+.negotiation-current-offer em {
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: rgba(244,194,92,.075);
+  color: var(--gold);
+  font-size: .48rem;
+  font-style: normal;
+  font-weight: 850;
+}
+.negotiation-card.accepted .negotiation-current-offer em { background: rgba(121,230,156,.08); color: var(--success); }
+.negotiation-card.rejected .negotiation-current-offer em { background: rgba(255,95,118,.08); color: var(--danger); }
+.negotiation-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.negotiation-meta span {
+  padding: 5px 7px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.035);
+  color: var(--muted);
+  font-size: .53rem;
+}
+.negotiation-reason {
+  margin: 0;
+  padding: 9px 11px;
+  border-left: 2px solid rgba(244,194,92,.42);
+  border-radius: 0 9px 9px 0;
+  background: rgba(244,194,92,.035);
+  color: var(--muted);
+  font-size: .6rem;
+  line-height: 1.55;
+}
+.negotiation-reason strong { color: var(--text); }
+.negotiation-details {
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 11px;
+  background: rgba(255,255,255,.018);
+  overflow: hidden;
+}
+.negotiation-details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 38px;
+  padding: 0 11px;
+  color: var(--muted);
+  font-size: .58rem;
+  font-weight: 850;
+  cursor: pointer;
+  list-style: none;
+}
+.negotiation-details summary::-webkit-details-marker { display: none; }
+.negotiation-details[open] summary { border-bottom: 1px solid rgba(255,255,255,.055); color: var(--text); }
+.negotiation-details[open] summary b { transform: rotate(180deg); }
+.negotiation-details-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  gap: 10px;
+  padding: 11px;
+}
+.negotiation-details-grid section { display: grid; align-content: start; gap: 7px; }
+.negotiation-details-grid section > strong { color: var(--muted-2); font-size: .53rem; text-transform: uppercase; letter-spacing: .08em; }
+.negotiation-details-grid ul { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
+.negotiation-details-grid li {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: 3px 8px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.025);
+}
+.negotiation-details-grid li strong { min-width: 0; overflow: hidden; color: var(--text); font-size: .56rem; text-overflow: ellipsis; white-space: nowrap; }
+.negotiation-details-grid li span { color: var(--muted); font-size: .52rem; }
+.negotiation-details-grid li small { grid-column: 1 / -1; color: var(--muted-2); font-size: .48rem; line-height: 1.4; }
+.negotiation-history li > span { color: var(--text); font-weight: 760; }
+.negotiation-actions { display: grid; gap: 9px; padding-top: 2px; }
+.negotiation-action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.negotiation-action-row button,
+.negotiation-counter-box > button {
+  min-height: 40px;
+  border-radius: 10px;
+  font-size: .62rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+.proposal-accept { border: 1px solid rgba(121,230,156,.28); background: rgba(121,230,156,.095); color: var(--success); }
+.proposal-reject { border: 1px solid rgba(255,95,118,.24); background: rgba(255,95,118,.075); color: var(--danger); }
+.negotiation-counter-box {
+  display: grid;
+  grid-template-columns: minmax(140px,.45fr) minmax(0,1fr) auto;
+  align-items: end;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(84,232,223,.085);
+  border-radius: 12px;
+  background: rgba(84,232,223,.025);
+}
+.negotiation-counter-box label { display: grid; gap: 5px; }
+.negotiation-counter-box label > span { color: var(--muted); font-size: .52rem; font-weight: 760; }
+.negotiation-counter-box label > div {
+  min-height: 39px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(2,8,15,.56);
+}
+.negotiation-counter-box label > div b { color: var(--muted-2); font-size: .55rem; }
+.negotiation-counter-box input,
+.negotiation-counter-box textarea {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: .6rem;
+}
+.negotiation-counter-box input { min-width: 0; }
+.negotiation-counter-box textarea {
+  min-height: 39px;
+  max-height: 86px;
+  resize: vertical;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(2,8,15,.56);
+}
+.negotiation-counter-box > button { border: 1px solid rgba(84,232,223,.24); background: rgba(84,232,223,.095); color: var(--cyan); padding-inline: 13px; }
+.negotiation-waiting,
+.negotiation-finished {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 11px;
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 10px;
+  background: rgba(255,255,255,.022);
+}
+.negotiation-waiting > span { color: var(--gold); }
+.negotiation-waiting > div,
+.negotiation-finished { display: grid; gap: 2px; }
+.negotiation-waiting strong,
+.negotiation-finished strong { color: var(--text); font-size: .58rem; }
+.negotiation-waiting small,
+.negotiation-finished small { color: var(--muted); font-size: .5rem; }
+.negotiation-finished.accepted { border-color: rgba(121,230,156,.14); background: rgba(121,230,156,.04); }
+.negotiation-finished.accepted strong { color: var(--success); }
+.negotiation-finished.rejected { border-color: rgba(255,95,118,.13); background: rgba(255,95,118,.035); }
+.negotiation-finished.rejected strong { color: var(--danger); }
+.negotiation-feedback {
+  position: sticky;
+  bottom: 10px;
+  z-index: 4;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+  background: rgba(8,19,31,.96);
+  color: var(--muted);
+  font-size: .58rem;
+  box-shadow: 0 12px 34px rgba(0,0,0,.28);
+}
+.negotiation-feedback[data-state="success"] { border-color: rgba(121,230,156,.22); color: var(--success); }
+.negotiation-feedback[data-state="warning"] { border-color: rgba(244,194,92,.22); color: var(--gold); }
+.negotiation-feedback[data-state="error"] { border-color: rgba(255,95,118,.22); color: var(--danger); }
+
+@media (max-width: 850px) {
+  .negotiation-center { padding: 18px 14px; }
+  .negotiation-details-grid { grid-template-columns: 1fr; }
+  .negotiation-counter-box { grid-template-columns: 1fr 1fr; }
+  .negotiation-counter-box > button { grid-column: 1 / -1; }
+}
+@media (max-width: 560px) {
+  .negotiation-center-heading,
+  .negotiation-list-heading,
+  .negotiation-card > header { align-items: stretch; flex-direction: column; }
+  .negotiation-current-offer { justify-items: start; }
+  .negotiation-counter-box,
+  .negotiation-action-row { grid-template-columns: 1fr; }
+  .negotiation-counter-box > button { grid-column: auto; }
+}

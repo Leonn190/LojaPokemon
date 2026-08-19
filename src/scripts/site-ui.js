@@ -500,6 +500,7 @@
         const storageKey = 'nexus-tcg-proposals-v1';
         let proposals = [];
         let activeOwnerSlug = '';
+        let proposalSubmitBusy = false;
         try {
           const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
           if (Array.isArray(saved)) proposals = saved.filter((group) => group?.ownerSlug && Array.isArray(group.items));
@@ -526,6 +527,7 @@
         const checkoutCopy = checkoutModal?.querySelector('[data-checkout-copy]');
         const checkoutOwner = checkoutModal?.querySelector('[data-checkout-owner]');
         const checkoutPhone = checkoutModal?.querySelector('[data-checkout-phone]');
+        const checkoutNote = checkoutModal?.querySelector('[data-checkout-note]');
 
         const policyLabels = {
           flexible: 'Sou flexível quanto às regras',
@@ -748,7 +750,6 @@
           if (!String(group.buyerName || '').trim()) return 'Informe seu nome completo.';
           if (String(group.address || '').trim().length < 20) return 'Informe o endereço completo para entrega, incluindo número, cidade, estado e CEP.';
           if (Number(group.discount || 0) > 0 && !String(group.reason || '').trim()) return 'Explique o motivo do desconto solicitado.';
-          if (!normalizePhone(group.phone)) return 'O colecionador ainda não cadastrou um número de WhatsApp válido.';
           return '';
         };
         const lineForItem = (item) => {
@@ -779,26 +780,45 @@
           return lines.join('\n');
         };
         const openCheckout = async () => {
+          if (proposalSubmitBusy) return;
           const group = activeGroup();
           const error = validateGroup(group);
           if (error) { showProposalError(error); return; }
+          proposalSubmitBusy = true;
+          const reviewButton = document.querySelector('[data-proposal-review]');
+          if (reviewButton) reviewButton.disabled = true;
+          let submitted = null;
           try {
             await window.VaultCloud?.ready;
             const user = await window.VaultCloud?.currentUser?.();
             if (!user) { closeCheckout(); openProposalDrawer(); return; }
             group.publishedTotal = groupTotal(group);
             group.proposedTotal = finalTotalFor(group);
-            await window.VaultCloud?.submitProposal?.(group);
+            if (!window.VaultCloud?.submitProposal) throw new Error('O módulo de negociações do Vault não foi carregado. Atualize a página e tente novamente.');
+            submitted = await window.VaultCloud.submitProposal(group);
+            if (!submitted?.proposal?.id) throw new Error('O servidor não confirmou o registro da proposta. Tente novamente.');
           } catch (cloudError) {
             showProposalError(window.VaultCloud?.friendlyFirebaseError?.(cloudError) || cloudError?.message || 'Não foi possível registrar a proposta.');
             return;
+          } finally {
+            proposalSubmitBusy = false;
+            if (reviewButton) reviewButton.disabled = false;
           }
           const message = buildCheckoutMessage(group);
           const phone = normalizePhone(group.phone);
           if (checkoutMessage) checkoutMessage.value = message;
-          if (checkoutWhatsapp) checkoutWhatsapp.href = `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
+          if (checkoutWhatsapp) {
+            checkoutWhatsapp.hidden = !phone;
+            checkoutWhatsapp.href = phone ? `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}` : '#';
+          }
           if (checkoutOwner) checkoutOwner.textContent = group.owner;
-          if (checkoutPhone) checkoutPhone.textContent = group.phone;
+          if (checkoutPhone) checkoutPhone.textContent = group.phone || 'não informado';
+          if (checkoutNote) checkoutNote.textContent = submitted?.notification?.sent === false
+            ? 'A proposta foi registrada no Vault. O Gmail do vendedor não pôde ser enviado agora; a negociação continua disponível normalmente.'
+            : 'A proposta foi registrada no Vault e o vendedor recebeu uma notificação por Gmail. Acompanhe as respostas em Meu Vault → Negociações.';
+          proposals = proposals.filter((entry) => entry !== group);
+          activeOwnerSlug = proposals[0]?.ownerSlug || '';
+          renderProposals();
           closeProposalDrawer();
           checkoutModal.hidden = false; document.body.classList.add('checkout-open');
           requestAnimationFrame(() => checkoutModal.classList.add('open'));

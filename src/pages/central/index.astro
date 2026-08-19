@@ -243,19 +243,45 @@ const tcgConfigJson = JSON.stringify(TCG_CONFIG).replace(/</g, '\\u003c');
         </section>
       </section>
 
-      <section class="workspace-proposal-settings" aria-label="Termos de propostas" id="editor-proposals" data-admin-section="negotiations">
-        <header><div><h3>Negociações</h3><p>Propostas recebidas e regras comerciais da sua coleção.</p></div><span class="proposal-settings-badge">Pix após aceite</span></header>
-        <div class="workspace-proposal-grid">
-          <label><span>Regra principal</span><select data-proposal-policy><option value="flexible">Sou flexível quanto às regras</option><option value="none">Não aceito nenhuma proposta</option><option value="fixed_price_multi_only">Sem proposta para cartas precificadas e somente com mais de um produto</option><option value="no_defined_price">Sem proposta para cartas com preço definido</option><option value="multi_only">Propostas apenas com mais de um produto</option></select></label>
-          <label><span>Preço exibido quando “Preço” estiver vazio</span><select data-price-display-fallback><option value="league_average_then_lowest">Média de mercado; se faltar, menor preço</option><option value="league_lowest_then_average">Menor preço; se faltar, média de mercado</option><option value="consult">Mostrar “Consultar”</option></select></label>
-          <label class="proposal-flexible-check"><input type="checkbox" data-flexible-discounts /><span><strong>Descontos flexíveis</strong><small>Permite que o comprador sugira qualquer percentual.</small></span></label>
+      <section class="workspace-proposal-settings negotiation-center" aria-label="Negociações" id="editor-proposals" data-admin-section="negotiations">
+        <header class="negotiation-center-heading">
+          <div><h3>Negociações</h3><p>Gerencie regras, propostas enviadas, recebidas e negociações finalizadas.</p></div>
+          <button type="button" class="secondary-cta compact" data-refresh-negotiations><span>Atualizar</span><b>↻</b></button>
+        </header>
+
+        <nav class="negotiation-tabs" role="tablist" aria-label="Áreas de negociação">
+          <button type="button" class="active" data-negotiation-tab="terms"><span>Termos de negociação</span></button>
+          <button type="button" data-negotiation-tab="sent"><span>Suas propostas</span><b data-negotiation-count="sent">0</b></button>
+          <button type="button" data-negotiation-tab="received"><span>Propostas recebidas</span><b data-negotiation-count="received">0</b></button>
+          <button type="button" data-negotiation-tab="completed"><span>Realizadas</span><b data-negotiation-count="completed">0</b></button>
+        </nav>
+
+        <div class="negotiation-panel active" data-negotiation-panel="terms">
+          <div class="workspace-proposal-grid">
+            <label><span>Regra principal</span><select data-proposal-policy><option value="flexible">Sou flexível quanto às regras</option><option value="none">Não aceito nenhuma proposta</option><option value="fixed_price_multi_only">Sem proposta para cartas precificadas e somente com mais de um produto</option><option value="no_defined_price">Sem propostas para cartas com preço definido</option><option value="multi_only">Propostas apenas com mais de um produto</option></select></label>
+            <label><span>Preço exibido quando “Preço” estiver vazio</span><select data-price-display-fallback><option value="league_average_then_lowest">Média de mercado; se faltar, menor preço</option><option value="league_lowest_then_average">Menor preço; se faltar, média de mercado</option><option value="consult">Mostrar “Consultar”</option></select></label>
+            <label class="proposal-flexible-check"><input type="checkbox" data-flexible-discounts /><span><strong>Descontos flexíveis</strong><small>Permite que o comprador sugira qualquer percentual.</small></span></label>
+          </div>
+          <div class="workspace-tier-heading"><div><strong>Marcos máximos de desconto</strong><small>O maior marco alcançado pelo valor da proposta define o limite.</small></div><button type="button" data-add-discount-tier><span>＋</span> Adicionar marco</button></div>
+          <div class="workspace-tier-list" data-discount-tier-list></div>
         </div>
-        <div class="workspace-tier-heading"><div><strong>Marcos máximos de desconto</strong><small>O maior marco alcançado pelo valor da proposta define o limite.</small></div><button type="button" data-add-discount-tier><span>＋</span> Adicionar marco</button></div>
-        <div class="workspace-tier-list" data-discount-tier-list></div>
-        <section class="proposal-inbox-panel">
-          <header><div><strong>Propostas recebidas</strong><small>Visão rápida das propostas enviadas para sua coleção.</small></div><span data-proposal-inbox-count>Carregando…</span></header>
-          <div class="proposal-inbox-list" data-proposal-inbox><div class="proposal-inbox-loading">Buscando propostas…</div></div>
-        </section>
+
+        <div class="negotiation-panel" data-negotiation-panel="sent" hidden>
+          <div class="negotiation-list-heading"><div><strong>Suas propostas</strong><small>Negociações que você iniciou e que ainda estão em andamento.</small></div><span data-negotiation-state="sent">Carregando…</span></div>
+          <div class="negotiation-list" data-negotiation-list="sent"><div class="proposal-inbox-loading">Buscando propostas…</div></div>
+        </div>
+
+        <div class="negotiation-panel" data-negotiation-panel="received" hidden>
+          <div class="negotiation-list-heading"><div><strong>Propostas recebidas</strong><small>Propostas abertas para itens da sua coleção.</small></div><span data-negotiation-state="received">Carregando…</span></div>
+          <div class="negotiation-list" data-negotiation-list="received"><div class="proposal-inbox-loading">Buscando propostas…</div></div>
+        </div>
+
+        <div class="negotiation-panel" data-negotiation-panel="completed" hidden>
+          <div class="negotiation-list-heading"><div><strong>Realizadas</strong><small>Negociações aceitas ou recusadas, com o histórico preservado.</small></div><span data-negotiation-state="completed">Carregando…</span></div>
+          <div class="negotiation-list" data-negotiation-list="completed"><div class="proposal-inbox-loading">Buscando histórico…</div></div>
+        </div>
+
+        <div class="negotiation-feedback" data-negotiation-feedback hidden></div>
       </section>
 
       <section class="editor-inventory-shell" data-inventory-section id="editor-inventory" data-admin-section="inventory">

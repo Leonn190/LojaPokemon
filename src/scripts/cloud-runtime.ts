@@ -1,4 +1,5 @@
 import {
+  actOnProposal,
   createAccountWithCollection,
   currentUser,
   friendlyFirebaseError,
@@ -13,6 +14,7 @@ import {
   listPublicCollectionsPage,
   listPublicItems,
   listPublicItemsPage,
+  listMyProposals,
   listMyReceivedProposals,
   loadCollectionBySlug,
   loadMyCollection,
@@ -39,6 +41,7 @@ const ready = getCloud().then(() => true);
 
 window.VaultCloud = {
   ready,
+  actOnProposal,
   createAccountWithCollection,
   currentUser,
   friendlyFirebaseError,
@@ -52,6 +55,7 @@ window.VaultCloud = {
   listPublicCollectionsPage,
   listPublicItems,
   listPublicItemsPage,
+  listMyProposals,
   listMyReceivedProposals,
   loadCollectionBySlug,
   loadMyCollection,
