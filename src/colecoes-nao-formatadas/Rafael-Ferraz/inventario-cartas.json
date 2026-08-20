@@ -1,0 +1,719 @@
+[
+  {
+    "Nome": "Ghetsis",
+    "Número": "115/116",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Ghetsis+%28115%2F116%29&ed=PLF&num=115"
+  },
+  {
+    "Nome": "Groudon-EX",
+    "Número": "XY42",
+    "Idioma": "BR",
+    "Estado": "SP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Groudon-EX+%28XY42%2F%E2%88%9E%29&ed=XYPR&num=XY42"
+  },
+  {
+    "Nome": "Darkrai Estrela Prisma",
+    "Número": "77/156",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Darkrai+%E2%97%87+%2877%2F156%29&ed=UPR&num=77"
+  },
+  {
+    "Nome": "Mega Sableye e Tyranitar-GX",
+    "Número": "126/236",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Mega+Sableye+%26+Tyranitar-GX+%28126%2F236%29&ed=UNM&num=126"
+  },
+  {
+    "Nome": "Weavile-GX",
+    "Número": "132/236",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 2,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Weavile-GX+%28132%2F236%29&ed=UNM&num=132"
+  },
+  {
+    "Nome": "Incineroar-GX",
+    "Número": "188/181",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Incineroar-GX+%28188%2F181%29&ed=TEU&num=188"
+  },
+  {
+    "Nome": "Umbreon e Darkrai-GX",
+    "Número": "125/236",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 2,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Umbreon+%26+Darkrai-GX+%28125%2F236%29&ed=UNM&num=125"
+  },
+  {
+    "Nome": "Greninja e Zoroark-GX",
+    "Número": "107/214",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Greninja+%26+Zoroark-GX+%28107%2F214%29&ed=UNB&num=107"
+  },
+  {
+    "Nome": "Tyranitar-GX",
+    "Número": "121/214",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Tyranitar-GX+%28121%2F214%29&ed=LOT&num=121"
+  },
+  {
+    "Nome": "Aerodactyl-GX",
+    "Número": "224/236",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Aerodactyl-GX+%28224%2F236%29&ed=UNM&num=224"
+  },
+  {
+    "Nome": "M Mewtwo-EX",
+    "Número": "160/162",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Mewtwo-EX+%28160%2F162%29&ed=BKT&num=160"
+  },
+  {
+    "Nome": "M Mewtwo-EX",
+    "Número": "159/162",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Mewtwo-EX+%28159%2F162%29&ed=BKT&num=159"
+  },
+  {
+    "Nome": "Koffing",
+    "Número": "243/236",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Koffing+%28243%2F236%29&ed=CEC&num=243"
+  },
+  {
+    "Nome": "Mewtwo-EX",
+    "Número": "163/162",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Mewtwo-EX+%28163%2F162%29&ed=BKT&num=163"
+  },
+  {
+    "Nome": "Mew-EX",
+    "Número": "120/124",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Mew-EX+%28120%2F124%29&ed=DRX&num=120"
+  },
+  {
+    "Nome": "Pikachu",
+    "Número": "35/108",
+    "Idioma": "ING",
+    "Estado": "SP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Pikachu+%2835%2F108%29&ed=EVO&num=35"
+  },
+  {
+    "Nome": "Xerneas TURBO",
+    "Número": "82/114",
+    "Idioma": "BR",
+    "Estado": "HP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Xerneas+Break+%2882%2F114%29&ed=STS&num=82"
+  },
+  {
+    "Nome": "M Blastoise-EX",
+    "Número": "102/108",
+    "Idioma": "ING",
+    "Estado": "HP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Blastoise-EX+%28102%2F108%29&ed=EVO&num=102"
+  },
+  {
+    "Nome": "Kangaskhan-GX",
+    "Número": "SM188",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Kangaskhan-GX+%28SM188%2F250%29&ed=SMP&num=SM188"
+  },
+  {
+    "Nome": "Iris",
+    "Número": "101/101",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Iris+%28101%2F101%29&ed=PLB&num=101"
+  },
+  {
+    "Nome": "Sugestão da Sabrina",
+    "Número": "181/181",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Sabrina%27s+Suggestion+%28181%2F181%29&ed=TEU&num=181"
+  },
+  {
+    "Nome": "Kyurem Branco-GX",
+    "Número": "SM141",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=White+Kyurem-GX+%28SM141%2F250%29&ed=SMP&num=SM141"
+  },
+  {
+    "Nome": "Altaria-GX",
+    "Número": "41/70",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Altaria-GX+%2841%2F70%29&ed=DRM&num=41"
+  },
+  {
+    "Nome": "Heracross-EX",
+    "Número": "4/111",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Heracross-EX+%284%2F111%29&ed=FFI&num=4"
+  },
+  {
+    "Nome": "Xerosic",
+    "Número": "119/119",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Xerosic+%28119%2F119%29&ed=PHF&num=119"
+  },
+  {
+    "Nome": "Pandam / Hala",
+    "Número": "143/145",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Hala+%28143%2F145%29&ed=GRI&num=143"
+  },
+  {
+    "Nome": "Charizard",
+    "Número": "11/108",
+    "Idioma": "ING",
+    "Estado": "MP",
+    "Quantidade": 1,
+    "Ano": 2016,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Charizard+%2811%2F108%29&ed=EVO&num=11"
+  },
+  {
+    "Nome": "Blastoise-EX",
+    "Número": "XY122",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Blastoise-EX+%28XY122%2F%E2%88%9E%29&ed=XYPR&num=XY122"
+  },
+  {
+    "Nome": "Charizard",
+    "Número": "6/108",
+    "Idioma": "ING",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Ano": 2007,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Charizard+%286%2F108%29&ed=PK&num=6"
+  },
+  {
+    "Nome": "Hoopa-EX",
+    "Número": "XY85",
+    "Idioma": "BR",
+    "Estado": "HP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Hoopa-EX+%28XY85%2F%E2%88%9E%29&ed=XYPR&num=XY85"
+  },
+  {
+    "Nome": "Cobalion",
+    "Número": "100/101",
+    "Idioma": "BR",
+    "Estado": "SP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Cobalion+%28100%2F101%29&ed=NVI&num=100"
+  },
+  {
+    "Nome": "Xerneas-EX",
+    "Número": "XY07",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Xerneas-EX+%28XY07%2F%E2%88%9E%29&ed=XYPR&num=XY07"
+  },
+  {
+    "Nome": "Multissubstituição / Multi Switch",
+    "Número": "164/147",
+    "Idioma": "BR",
+    "Estado": "MP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Multi+Switch+%28164%2F147%29&ed=BUS&num=164"
+  },
+  {
+    "Nome": "Pikachu-EX",
+    "Número": "XY174",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Pikachu-EX+%28XY174%2F%E2%88%9E%29&ed=XYPR&num=XY174"
+  },
+  {
+    "Nome": "Magearna-EX",
+    "Número": "XY175",
+    "Idioma": "BR",
+    "Estado": "HP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Magearna-EX+%28XY175%2F%E2%88%9E%29&ed=XYPR&num=XY175"
+  },
+  {
+    "Nome": "Salamence-EX",
+    "Número": "XY170",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Salamence-EX+%28XY170%2F%E2%88%9E%29&ed=XYPR&num=XY170"
+  },
+  {
+    "Nome": "Beedrill-EX",
+    "Número": "XY157",
+    "Idioma": "BR",
+    "Estado": "HP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Beedrill-EX+%28XY157%2F%E2%88%9E%29&ed=XYPR&num=XY157"
+  },
+  {
+    "Nome": "Zygarde-EX",
+    "Número": "XY151",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Zygarde-EX+%28XY151%2F%E2%88%9E%29&ed=XYPR&num=XY151"
+  },
+  {
+    "Nome": "Companheiros de Equipe / Teammates",
+    "Número": "160/160",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Teammates+%28160%2F160%29&ed=PRC&num=160"
+  },
+  {
+    "Nome": "Empoleon TURBO / Empoleon BREAK",
+    "Número": "XY134",
+    "Idioma": "BR",
+    "Estado": "HP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Empoleon+BREAK+%28XY134%2F%E2%88%9E%29&ed=XYPR&num=XY134"
+  },
+  {
+    "Nome": "Rayquaza-EX",
+    "Número": "85/124",
+    "Idioma": "BR",
+    "Estado": "SP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Rayquaza-EX+%2885%2F124%29&ed=DRX&num=85"
+  },
+  {
+    "Nome": "Noctowl TURBO / Noctowl BREAK",
+    "Número": "XY136",
+    "Idioma": "BR",
+    "Estado": "SP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Noctowl+BREAK+%28XY136%2F%E2%88%9E%29&ed=XYPR&num=XY136"
+  },
+  {
+    "Nome": "Scizor-EX",
+    "Número": "119/122",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Scizor-EX+%28119%2F122%29&ed=BKP&num=119"
+  },
+  {
+    "Nome": "Crobat TURBO / Crobat BREAK",
+    "Número": "XY181",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Crobat+BREAK+%28XY181%2F%E2%88%9E%29&ed=XYPR&num=XY181",
+    "Observação": "Corrigido de XY118: Crobat TURBO/BREAK é XY181."
+  },
+  {
+    "Nome": "Kyogre-EX da Equipe Aqua / Team Aqua's Kyogre-EX",
+    "Número": "6/34",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Team+Aqua%27s+Kyogre-EX+%286%2F34%29&ed=DCR&num=6",
+    "Observação": "Corrigido de 6/14: a correspondência encontrada na LigaPokemon é 6/34 (Crise Dupla)."
+  },
+  {
+    "Nome": "Nihilego-GX",
+    "Número": "49/111",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Nihilego-GX+%2849%2F111%29&ed=CIN&num=49",
+    "Observação": "Numeração não informada pelo usuário; usada a versão base 49/111 de Invasão Carmim."
+  },
+  {
+    "Nome": "Mandibuzz TURBO / Mandibuzz BREAK",
+    "Número": "XY182",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Mandibuzz+BREAK+%28XY182%2F%E2%88%9E%29&ed=XYPR&num=XY182"
+  },
+  {
+    "Nome": "Gardevoir-EX",
+    "Número": "78/114",
+    "Idioma": "BR",
+    "Estado": "HP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Gardevoir-EX+%2878%2F114%29&ed=STS&num=78"
+  },
+  {
+    "Nome": "Mandibuzz TURBO",
+    "Número": "XY182",
+    "Idioma": "ING",
+    "Estado": "MP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Mandibuzz+BREAK+%28XY182%2F%E2%88%9E%29&ed=XYPR&num=XY182"
+  },
+  {
+    "Nome": "Steelix-EX",
+    "Número": "67/114",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Steelix-EX+%2867%2F114%29&ed=STS&num=67"
+  },
+  {
+    "Nome": "Ho-Oh-EX",
+    "Número": "121/122",
+    "Idioma": "ING",
+    "Estado": "MP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Ho-Oh-EX+%28121%2F122%29&ed=BKP&num=121"
+  },
+  {
+    "Nome": "Kangaskhan-EX",
+    "Número": "78/106",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Kangaskhan-EX+%2878%2F106%29&ed=FLF&num=78"
+  },
+  {
+    "Nome": "Lugia-EX",
+    "Número": "134/135",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Lugia-EX+%28134%2F135%29&ed=PLS&num=134"
+  },
+  {
+    "Nome": "Camerupt-EX",
+    "Número": "29/160",
+    "Idioma": "BR",
+    "Estado": "SP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Camerupt-EX+%2829%2F160%29&ed=PRC&num=29"
+  },
+  {
+    "Nome": "Sharpedo-EX",
+    "Número": "91/160",
+    "Idioma": "BR",
+    "Estado": "SP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Sharpedo-EX+%2891%2F160%29&ed=PRC&num=91"
+  },
+  {
+    "Nome": "M Gengar-EX",
+    "Número": "121/119",
+    "Idioma": "ING",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Gengar-EX+%28121%2F119%29&ed=PHF&num=121"
+  },
+  {
+    "Nome": "Yveltal TURBO",
+    "Número": "66/114",
+    "Idioma": "BR",
+    "Estado": "SP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Yveltal+Break+%2866%2F114%29&ed=STS&num=66"
+  },
+  {
+    "Nome": "M Steelix-EX",
+    "Número": "109/114",
+    "Idioma": "BR",
+    "Estado": "MP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Steelix-EX+%28109%2F114%29&ed=STS&num=109"
+  },
+  {
+    "Nome": "Lugia TURBO",
+    "Número": "79/124",
+    "Idioma": "BR",
+    "Estado": "SP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Lugia+Break+%2879%2F124%29&ed=FCO&num=79"
+  },
+  {
+    "Nome": "M Scizor-EX",
+    "Número": "120/122",
+    "Idioma": "ING",
+    "Estado": "MP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Scizor-EX+%28120%2F122%29&ed=BKP&num=120"
+  },
+  {
+    "Nome": "Arcanine TURBO",
+    "Número": "XY180",
+    "Idioma": "BR",
+    "Estado": "SP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Arcanine+BREAK+%28XY180%2F%E2%88%9E%29&ed=XYPR&num=XY180"
+  },
+  {
+    "Nome": "M Tyranitar-EX",
+    "Número": "92/98",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Tyranitar-EX+%2892%2F98%29&ed=AOR&num=92"
+  },
+  {
+    "Nome": "Piplup",
+    "Número": "239/236",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Piplup+%28239%2F236%29&ed=CEC&num=239"
+  },
+  {
+    "Nome": "M Sharpedo-EX",
+    "Número": "XY200",
+    "Idioma": "BR",
+    "Estado": "SP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Sharpedo-EX+%28XY200%2F%E2%88%9E%29&ed=XYPR&num=XY200"
+  },
+  {
+    "Nome": "M Rayquaza-EX",
+    "Número": "105/108",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Rayquaza-EX+%28105%2F108%29&ed=ROS&num=105"
+  },
+  {
+    "Nome": "Nidoking TURBO",
+    "Número": "46/108",
+    "Idioma": "ING",
+    "Estado": "MP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Nidoking+Break+%2846%2F108%29&ed=EVO&num=46"
+  },
+  {
+    "Nome": "M Kangaskhan-EX",
+    "Número": "109/106",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Kangaskhan-EX+%28109%2F106%29&ed=FLF&num=109"
+  },
+  {
+    "Nome": "M Salamence-EX",
+    "Número": "XY171",
+    "Idioma": "BR",
+    "Estado": "SP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Salamence-EX+%28XY171%2F%E2%88%9E%29&ed=XYPR&num=XY171"
+  },
+  {
+    "Nome": "Jirachi-EX",
+    "Número": "60/101",
+    "Idioma": "BR",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Jirachi-EX+%2860%2F101%29&ed=PLB&num=60"
+  },
+  {
+    "Nome": "M Camerupt-EX",
+    "Número": "XY198",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=M+Camerupt-EX+%28XY198%2F%E2%88%9E%29&ed=XYPR&num=XY198"
+  },
+  {
+    "Nome": "Marowak-GX de Alola",
+    "Número": "SM187",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Alolan+Marowak-GX+%28SM187%2F250%29&ed=SMP&num=SM187"
+  },
+  {
+    "Nome": "Lunala-GX",
+    "Número": "SM17",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Lunala-GX+%28SM17%2F250%29&ed=SMP&num=SM17"
+  },
+  {
+    "Nome": "Lugia-GX",
+    "Número": "207/214",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Lugia-GX+%28207%2F214%29&ed=LOT&num=207"
+  },
+  {
+    "Nome": "Marshadow e Machamp-GX",
+    "Número": "198/214",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Marshadow+%26+Machamp-GX+%28198%2F214%29&ed=UNB&num=198"
+  },
+  {
+    "Nome": "Machamp-GX",
+    "Número": "64/147",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Machamp-GX+%2864%2F147%29&ed=BUS&num=64"
+  },
+  {
+    "Nome": "Salazzle-GX",
+    "Número": "25/147",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Salazzle-GX+%2825%2F147%29&ed=BUS&num=25"
+  },
+  {
+    "Nome": "Wishiwashi-GX",
+    "Número": "38/145",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Wishiwashi-GX+%2838%2F145%29&ed=GRI&num=38"
+  },
+  {
+    "Nome": "Lycanroc-GX",
+    "Número": "138/145",
+    "Idioma": "ESP",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Lycanroc-GX+%28138%2F145%29&ed=GRI&num=138"
+  },
+  {
+    "Nome": "Darkrai-GX",
+    "Número": "139/147",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Darkrai-GX+%28139%2F147%29&ed=BUS&num=139"
+  },
+  {
+    "Nome": "Decidueye-GX",
+    "Número": "12/149",
+    "Idioma": "BR",
+    "Estado": "SP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Decidueye-GX+%2812%2F149%29&ed=SUM&num=12"
+  },
+  {
+    "Nome": "Primarina-GX",
+    "Número": "42/149",
+    "Idioma": "BR",
+    "Estado": "HP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Primarina-GX+%2842%2F149%29&ed=SUM&num=42"
+  },
+  {
+    "Nome": "Bewear-GX",
+    "Número": "SM34",
+    "Idioma": "ESP",
+    "Estado": "MP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Bewear-GX+%28SM34%2F250%29&ed=SMP&num=SM34"
+  },
+  {
+    "Nome": "Umbreon-GX",
+    "Número": "142/149",
+    "Idioma": "BR",
+    "Estado": "HP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Umbreon-GX+%28142%2F149%29&ed=SUM&num=142"
+  },
+  {
+    "Nome": "Volcanion-EX",
+    "Número": "107/114",
+    "Idioma": "BR",
+    "Estado": "HP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Volcanion-EX+%28107%2F114%29&ed=STS&num=107"
+  },
+  {
+    "Nome": "Solgaleo-GX",
+    "Número": "SM16",
+    "Idioma": "ING",
+    "Estado": "D",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Solgaleo-GX+%28SM16%2F250%29&ed=SMP&num=SM16"
+  },
+  {
+    "Nome": "Lunala-GX",
+    "Número": "66/149",
+    "Idioma": "ING",
+    "Estado": "MP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Lunala-GX+%2866%2F149%29&ed=SUM&num=66"
+  },
+  {
+    "Nome": "Machamp-GX",
+    "Número": "154/147",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Machamp-GX+%28154%2F147%29&ed=BUS&num=154"
+  },
+  {
+    "Nome": "Montanha Trovejante Prisma",
+    "Número": "191/214",
+    "Idioma": "BR",
+    "Estado": "NM",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Thunder+Mountain+%28191%2F214%29&ed=LOT&num=191"
+  },
+  {
+    "Nome": "Hydreigon",
+    "Número": "036/051",
+    "Idioma": "JAP",
+    "Estado": "MP",
+    "Quantidade": 1,
+    "Link Liga": "https://www.ligapokemon.com.br/?view=cards%2Fcard&card=Hydreigon+%2878%2F116%29&ed=PLF&num=78"
+  }
+]
