@@ -1,0 +1,31 @@
+---
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import TemporaryCollectionTable from '../../components/TemporaryCollectionTable.astro';
+
+const folderName = 'Arthur-Ramos';
+const inventoryPath = join(process.cwd(), 'src', 'colecoes', folderName, 'inventario-cartas.json');
+const available = existsSync(inventoryPath);
+let cards = [];
+if (available) {
+  try {
+    const parsed = JSON.parse(readFileSync(inventoryPath, 'utf8'));
+    cards = Array.isArray(parsed) ? parsed : [];
+  } catch (_) {
+    cards = [];
+  }
+}
+---
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="theme-color" content="#050a12" />
+    <title>Coleção de Ramos | Vault TCG</title>
+  </head>
+  <body>
+    <main><TemporaryCollectionTable owner="Ramos" folderName={folderName} cards={cards} available={available} /></main>
+  </body>
+</html>

@@ -1,0 +1,283 @@
+---
+interface CardRow {
+  [key: string]: any;
+}
+
+interface Props {
+  owner: string;
+  folderName: string;
+  cards: CardRow[];
+  available?: boolean;
+}
+
+const { owner, folderName, cards = [], available = true } = Astro.props;
+const rawBase = import.meta.env.BASE_URL || '/';
+const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
+
+const numberValue = (value: unknown): number | null => {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const money = (value: unknown) => {
+  const parsed = numberValue(value);
+  return parsed === null
+    ? '—'
+    : parsed.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+};
+
+const normalizedCards = cards
+  .map((card, sourceIndex) => {
+    const minimum = numberValue(card.Minimo ?? card['Mínimo']);
+    const quickSale = numberValue(card['Venda Rapida'] ?? card['Venda Rápida']);
+    const league = numberValue(card['Menor Liga']);
+    const manual = numberValue(card['Preço']);
+    const rankValue = minimum ?? quickSale ?? league ?? manual ?? 0;
+    const image = String(card.Imagem ?? '').trim();
+    const imageCandidates = image
+      ? image.includes('/')
+        ? [`${base}${image.replace(/^\/+/, '')}`]
+        : [
+            `${base}colecoes/${folderName}/imagens/${encodeURIComponent(image)}`,
+            `${base}imagens/${encodeURIComponent(image)}`,
+          ]
+      : [];
+
+    return {
+      sourceIndex,
+      name: String(card.Nome ?? 'Carta sem nome'),
+      number: String(card['Número'] ?? card['Numeração'] ?? '—'),
+      collection: String(card['Coleção'] ?? '—'),
+      language: String(card.Idioma ?? '—'),
+      condition: String(card.Estado ?? '—'),
+      quantity: Number(card.Quantidade ?? 1) || 1,
+      minimum,
+      quickSale,
+      league,
+      manual,
+      rankValue,
+      imageCandidates,
+    };
+  })
+  .sort((a, b) => b.rankValue - a.rankValue || a.name.localeCompare(b.name, 'pt-BR'));
+
+const totalMinimum = normalizedCards.reduce((sum, card) => sum + (card.minimum ?? 0) * card.quantity, 0);
+const totalQuickSale = normalizedCards.reduce((sum, card) => sum + (card.quickSale ?? 0) * card.quantity, 0);
+const totalLeague = normalizedCards.reduce((sum, card) => sum + (card.league ?? 0) * card.quantity, 0);
+---
+
+<section class="temporary-sheet" data-temporary-collection>
+  <header class="temporary-sheet__hero">
+    <div>
+      <span class="temporary-sheet__eyebrow">VAULT TCG · CONSULTA TEMPORÁRIA</span>
+      <h1>Coleção de {owner}</h1>
+      <p>Planilha visual das cartas, ordenada inicialmente pelo valor mínimo do maior para o menor.</p>
+    </div>
+    {available && normalizedCards.length > 0 && (
+      <div class="temporary-sheet__count"><strong>{normalizedCards.length}</strong><span>cartas</span></div>
+    )}
+  </header>
+
+  {!available ? (
+    <div class="temporary-sheet__empty">
+      <span>Em preparação</span>
+      <h2>A coleção de {owner} ainda não foi adicionada.</h2>
+      <p>Quando <code>src/colecoes/{folderName}/inventario-cartas.json</code> existir, esta página passa a exibir as cartas automaticamente.</p>
+    </div>
+  ) : normalizedCards.length === 0 ? (
+    <div class="temporary-sheet__empty">
+      <span>Sem cartas</span>
+      <h2>O inventário está vazio.</h2>
+      <p>Adicione cartas ao arquivo <code>inventario-cartas.json</code> dessa coleção.</p>
+    </div>
+  ) : (
+    <>
+      <div class="temporary-sheet__summary">
+        <article><span>Mínimo total</span><strong>{money(totalMinimum)}</strong></article>
+        <article><span>Venda rápida total</span><strong>{money(totalQuickSale)}</strong></article>
+        <article><span>Menor Liga total</span><strong>{money(totalLeague)}</strong></article>
+      </div>
+
+      <div class="temporary-sheet__tools">
+        <label>
+          <span>Buscar carta</span>
+          <input type="search" placeholder="Nome, número, coleção..." data-table-search />
+        </label>
+        <label>
+          <span>Ordenar</span>
+          <select data-table-sort>
+            <option value="minimum-desc">Mínimo: maior primeiro</option>
+            <option value="quick-desc">Venda rápida: maior primeiro</option>
+            <option value="league-desc">Liga: maior primeiro</option>
+            <option value="name-asc">Nome: A–Z</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="temporary-sheet__table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="rank-col">#</th>
+              <th class="image-col">Carta</th>
+              <th>Informações</th>
+              <th>Idioma</th>
+              <th>Estado</th>
+              <th>Qtd.</th>
+              <th>Mínimo</th>
+              <th>Venda rápida</th>
+              <th>Menor Liga</th>
+            </tr>
+          </thead>
+          <tbody data-table-body>
+            {normalizedCards.map((card, index) => (
+              <tr
+                data-row
+                data-name={`${card.name} ${card.number} ${card.collection}`.toLocaleLowerCase('pt-BR')}
+                data-minimum={card.minimum ?? -1}
+                data-quick={card.quickSale ?? -1}
+                data-league={card.league ?? -1}
+                data-card-name={card.name.toLocaleLowerCase('pt-BR')}
+              >
+                <td class="rank-col"><strong data-rank>{index + 1}</strong></td>
+                <td class="image-col">
+                  <div class="card-thumb">
+                    {card.imageCandidates[0] ? (
+                      <img
+                        src={card.imageCandidates[0]}
+                        alt={`${card.name} ${card.number}`}
+                        loading={index < 8 ? 'eager' : 'lazy'}
+                        decoding="async"
+                        data-image-candidates={JSON.stringify(card.imageCandidates.slice(1))}
+                      />
+                    ) : <span>Sem imagem</span>}
+                  </div>
+                </td>
+                <td class="info-col">
+                  <strong>{card.name}</strong>
+                  <span>{card.number}</span>
+                  <small>{card.collection}</small>
+                </td>
+                <td>{card.language}</td>
+                <td><span class="condition-chip">{card.condition}</span></td>
+                <td>{card.quantity}</td>
+                <td class="money-cell"><strong>{money(card.minimum)}</strong></td>
+                <td class="money-cell">{money(card.quickSale)}</td>
+                <td class="money-cell">{money(card.league)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="temporary-sheet__no-results" data-no-results hidden>Nenhuma carta encontrada nessa busca.</p>
+      </div>
+    </>
+  )}
+</section>
+
+<script>
+  document.querySelectorAll('[data-temporary-collection]').forEach((root) => {
+    const search = root.querySelector('[data-table-search]');
+    const sort = root.querySelector('[data-table-sort]');
+    const body = root.querySelector('[data-table-body]');
+    const noResults = root.querySelector('[data-no-results]');
+    if (!(search instanceof HTMLInputElement) || !(sort instanceof HTMLSelectElement) || !(body instanceof HTMLTableSectionElement)) return;
+
+    const rows = Array.from(body.querySelectorAll('[data-row]'));
+
+    const update = () => {
+      const query = search.value.trim().toLocaleLowerCase('pt-BR');
+      const visible = rows.filter((row) => (row.getAttribute('data-name') || '').includes(query));
+
+      const value = (row, key) => Number(row.getAttribute(key) || -1);
+      visible.sort((a, b) => {
+        if (sort.value === 'quick-desc') return value(b, 'data-quick') - value(a, 'data-quick');
+        if (sort.value === 'league-desc') return value(b, 'data-league') - value(a, 'data-league');
+        if (sort.value === 'name-asc') return (a.getAttribute('data-card-name') || '').localeCompare(b.getAttribute('data-card-name') || '', 'pt-BR');
+        return value(b, 'data-minimum') - value(a, 'data-minimum');
+      });
+
+      rows.forEach((row) => { row.hidden = true; });
+      visible.forEach((row, index) => {
+        row.hidden = false;
+        const rank = row.querySelector('[data-rank]');
+        if (rank) rank.textContent = String(index + 1);
+        body.append(row);
+      });
+      if (noResults instanceof HTMLElement) noResults.hidden = visible.length !== 0;
+    };
+
+    search.addEventListener('input', update);
+    sort.addEventListener('change', update);
+  });
+
+  document.querySelectorAll('img[data-image-candidates]').forEach((image) => {
+    if (!(image instanceof HTMLImageElement)) return;
+    let candidates = [];
+    try { candidates = JSON.parse(image.dataset.imageCandidates || '[]'); } catch (_) {}
+    image.addEventListener('error', () => {
+      const next = candidates.shift();
+      if (next) {
+        image.src = next;
+        return;
+      }
+      image.hidden = true;
+      const fallback = document.createElement('span');
+      fallback.textContent = 'Sem imagem';
+      image.parentElement?.append(fallback);
+    });
+  });
+</script>
+
+<style>
+  :global(html) { background: #050a12; color-scheme: dark; }
+  :global(body) { margin: 0; background: radial-gradient(circle at 12% 0%, rgba(48, 111, 188, .18), transparent 30rem), #050a12; color: #edf6ff; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .temporary-sheet { width: min(1500px, calc(100% - 32px)); margin: 0 auto; padding: 48px 0 72px; }
+  .temporary-sheet__hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; padding: 0 2px 28px; border-bottom: 1px solid rgba(151, 190, 226, .16); }
+  .temporary-sheet__eyebrow { display: block; margin-bottom: 11px; color: #86bfff; font-size: .73rem; font-weight: 800; letter-spacing: .16em; }
+  h1 { margin: 0; font-size: clamp(2rem, 5vw, 4rem); line-height: .98; letter-spacing: -.045em; }
+  .temporary-sheet__hero p { max-width: 760px; margin: 14px 0 0; color: #91a8bd; font-size: .98rem; }
+  .temporary-sheet__count { min-width: 105px; padding: 14px 18px; border: 1px solid rgba(133, 188, 240, .18); border-radius: 18px; background: rgba(11, 23, 38, .72); text-align: center; }
+  .temporary-sheet__count strong { display: block; font-size: 1.55rem; }
+  .temporary-sheet__count span { color: #87a0b8; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; }
+  .temporary-sheet__summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 22px 0; }
+  .temporary-sheet__summary article { padding: 18px 20px; border: 1px solid rgba(145, 190, 230, .14); border-radius: 18px; background: linear-gradient(145deg, rgba(13, 28, 45, .94), rgba(8, 17, 28, .86)); }
+  .temporary-sheet__summary span { display: block; margin-bottom: 5px; color: #7f99b2; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
+  .temporary-sheet__summary strong { font-size: clamp(1.25rem, 2.5vw, 1.85rem); letter-spacing: -.035em; }
+  .temporary-sheet__tools { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(220px, 300px); gap: 12px; margin-bottom: 14px; }
+  .temporary-sheet__tools label { display: grid; gap: 6px; color: #91a8bd; font-size: .75rem; font-weight: 700; }
+  input, select { width: 100%; box-sizing: border-box; min-height: 46px; padding: 0 14px; border: 1px solid rgba(145, 190, 230, .16); border-radius: 12px; outline: none; background: #09131f; color: #edf6ff; font: inherit; }
+  input:focus, select:focus { border-color: #5ca9ef; box-shadow: 0 0 0 3px rgba(92, 169, 239, .1); }
+  .temporary-sheet__table-wrap { overflow: auto; border: 1px solid rgba(145, 190, 230, .14); border-radius: 20px; background: rgba(7, 15, 25, .94); box-shadow: 0 26px 90px rgba(0,0,0,.26); }
+  table { width: 100%; min-width: 1040px; border-collapse: collapse; }
+  th { position: sticky; top: 0; z-index: 2; padding: 13px 12px; border-bottom: 1px solid rgba(145, 190, 230, .16); background: #0c1928; color: #89a4bc; text-align: left; font-size: .72rem; text-transform: uppercase; letter-spacing: .065em; white-space: nowrap; }
+  td { padding: 12px; border-bottom: 1px solid rgba(145, 190, 230, .09); color: #c8d8e7; font-size: .86rem; vertical-align: middle; }
+  tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: rgba(77, 147, 210, .075); }
+  .rank-col { width: 44px; text-align: center; }
+  .rank-col strong { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: rgba(81, 157, 226, .12); color: #9dccf7; }
+  .image-col { width: 74px; }
+  .card-thumb { display: grid; place-items: center; width: 58px; height: 80px; overflow: hidden; border-radius: 7px; background: #101b28; color: #6f8497; font-size: .62rem; text-align: center; }
+  .card-thumb img { width: 100%; height: 100%; object-fit: contain; }
+  .info-col { min-width: 210px; }
+  .info-col strong, .info-col span, .info-col small { display: block; }
+  .info-col strong { color: #f5f9fd; font-size: .92rem; }
+  .info-col span { margin-top: 3px; color: #a7bdd1; font-size: .79rem; }
+  .info-col small { margin-top: 4px; color: #718ba3; }
+  .condition-chip { display: inline-flex; min-width: 28px; justify-content: center; padding: 5px 8px; border-radius: 8px; background: rgba(153, 181, 206, .09); color: #c9d9e7; font-weight: 800; }
+  .money-cell { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .money-cell strong { color: #f7fbff; }
+  .temporary-sheet__empty { margin-top: 28px; padding: clamp(28px, 7vw, 72px); border: 1px solid rgba(145, 190, 230, .14); border-radius: 24px; background: rgba(8, 17, 28, .82); text-align: center; }
+  .temporary-sheet__empty > span { color: #80bafa; font-size: .75rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; }
+  .temporary-sheet__empty h2 { margin: 10px 0 8px; font-size: clamp(1.4rem, 3vw, 2.2rem); }
+  .temporary-sheet__empty p { margin: 0; color: #89a0b6; }
+  code { color: #b9daf7; }
+  .temporary-sheet__no-results { padding: 35px; color: #8ca3b7; text-align: center; }
+  [hidden] { display: none !important; }
+  @media (max-width: 760px) {
+    .temporary-sheet { width: min(100% - 20px, 1500px); padding-top: 28px; }
+    .temporary-sheet__hero { align-items: flex-start; flex-direction: column; }
+    .temporary-sheet__summary { grid-template-columns: 1fr; }
+    .temporary-sheet__tools { grid-template-columns: 1fr; }
+  }
+</style>
