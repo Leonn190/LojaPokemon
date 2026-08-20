@@ -1,0 +1,1562 @@
+{
+  "resumo": {
+    "iniciadoEm": "2026-08-20T09:23:37-03:00",
+    "finalizadoEm": "2026-08-20T09:27:04-03:00",
+    "modoVelocidade": "Normal",
+    "workers": 2,
+    "total": 8,
+    "concluidos": 8,
+    "sucessos": 8,
+    "erros": 0,
+    "duracaoSegundos": 207.736,
+    "duracaoFormatada": "3m 28s",
+    "mediaSegundosPorItem": 25.967,
+    "itensPorMinuto": 2.31,
+    "repeticoes": 0,
+    "tentativasConsultaItens": 8,
+    "operacao": "atualizacao",
+    "itensRegistrados": 8
+  },
+  "itens": [
+    {
+      "nome": "Ludicolo",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 34.721,
+      "precos": {
+        "menor": 5.5,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 5.5,
+        "mediana": 5.5,
+        "minimo": 2.75,
+        "buylist": 3.99
+      },
+      "mercado": {
+        "vendedoresGeral": 11,
+        "vendedoresEspecificos": 1,
+        "compradoresGeral": 13,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 13
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "marketplace_leitura_incompleta",
+            "mensagem": "Cotização incompleta: 8 de 21 ofertas de marketplace não puderam ter o preço lido",
+            "evidencia": {
+              "detectadas": 21,
+              "lidas": 13,
+              "falhas": 8,
+              "erros": [
+                {
+                  "ofertaId": "24020108",
+                  "loja": "O Reino Mágico",
+                  "idioma": "Inglês",
+                  "estado": "D",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=268092&tcg=24020108",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 24020108. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_e291cc5492e7.png"
+                },
+                {
+                  "ofertaId": "31902147",
+                  "loja": "Akagami",
+                  "idioma": "Português",
+                  "estado": "HP",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=231947&tcg=31902147",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 31902147. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_d3a5db5b902b.png"
+                },
+                {
+                  "ofertaId": "32289180",
+                  "loja": "Truques e Combos Geek",
+                  "idioma": "Português",
+                  "estado": "NM",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=725971&tcg=32289180",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 32289180. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_fc4ab93a3248.png"
+                },
+                {
+                  "ofertaId": "23186781",
+                  "loja": "Bazar de Bagdá",
+                  "idioma": "Inglês",
+                  "estado": "SP",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=23186781",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 23186781. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_0ee21db7d70b.png"
+                },
+                {
+                  "ofertaId": "21357716",
+                  "loja": "Bazar de Bagdá",
+                  "idioma": "Português",
+                  "estado": "SP",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=21357716",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 21357716. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_0ee21db7d70b.png"
+                },
+                {
+                  "ofertaId": "30291788",
+                  "loja": "Olho de Leão",
+                  "idioma": "Português",
+                  "estado": "SP",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=227786&tcg=30291788",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 30291788. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_0ee21db7d70b.png"
+                },
+                {
+                  "ofertaId": "31008174",
+                  "loja": "Nerdz Cards Floripa",
+                  "idioma": "Português",
+                  "estado": "SP",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=727418&tcg=31008174",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 31008174. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_0ee21db7d70b.png"
+                },
+                {
+                  "ofertaId": "13262738",
+                  "loja": "Bazar de Bagdá",
+                  "idioma": "Inglês",
+                  "estado": "SP",
+                  "extra": "Reverse Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=13262738",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 13262738. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_761919681ac7.png"
+                }
+              ]
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 21,
+            "lidas": 13,
+            "falhas": 8,
+            "erros": [
+              {
+                "ofertaId": "24020108",
+                "loja": "O Reino Mágico",
+                "idioma": "Inglês",
+                "estado": "D",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=268092&tcg=24020108",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 24020108. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_e291cc5492e7.png"
+              },
+              {
+                "ofertaId": "31902147",
+                "loja": "Akagami",
+                "idioma": "Português",
+                "estado": "HP",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=231947&tcg=31902147",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 31902147. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_d3a5db5b902b.png"
+              },
+              {
+                "ofertaId": "32289180",
+                "loja": "Truques e Combos Geek",
+                "idioma": "Português",
+                "estado": "NM",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=725971&tcg=32289180",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 32289180. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_fc4ab93a3248.png"
+              },
+              {
+                "ofertaId": "23186781",
+                "loja": "Bazar de Bagdá",
+                "idioma": "Inglês",
+                "estado": "SP",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=23186781",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 23186781. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_0ee21db7d70b.png"
+              },
+              {
+                "ofertaId": "21357716",
+                "loja": "Bazar de Bagdá",
+                "idioma": "Português",
+                "estado": "SP",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=21357716",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 21357716. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_0ee21db7d70b.png"
+              },
+              {
+                "ofertaId": "30291788",
+                "loja": "Olho de Leão",
+                "idioma": "Português",
+                "estado": "SP",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=227786&tcg=30291788",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 30291788. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_0ee21db7d70b.png"
+              },
+              {
+                "ofertaId": "31008174",
+                "loja": "Nerdz Cards Floripa",
+                "idioma": "Português",
+                "estado": "SP",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=727418&tcg=31008174",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 31008174. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_0ee21db7d70b.png"
+              },
+              {
+                "ofertaId": "13262738",
+                "loja": "Bazar de Bagdá",
+                "idioma": "Inglês",
+                "estado": "SP",
+                "extra": "Reverse Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=13262738",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 13262738. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_761919681ac7.png"
+              }
+            ]
+          },
+          "buylist": {
+            "detectadas": 13,
+            "lidas": 13,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 11,
+          "vendedoresEspecificos": 1,
+          "compradoresGeral": 13,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 5.5
+        }
+      },
+      "observacao": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%"
+    },
+    {
+      "nome": "Eelektrik",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 17.327,
+      "precos": {
+        "menor": 3.49,
+        "segundoMenor": 3.5,
+        "terceiroMenor": null,
+        "media": 3.5,
+        "mediana": 3.5,
+        "minimo": 1.74,
+        "buylist": 2.18
+      },
+      "mercado": {
+        "vendedoresGeral": 10,
+        "vendedoresEspecificos": 2,
+        "compradoresGeral": 10,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 2,
+        "buylistLida": 10
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "marketplace_leitura_incompleta",
+            "mensagem": "Cotização incompleta: 3 de 13 ofertas de marketplace não puderam ter o preço lido",
+            "evidencia": {
+              "detectadas": 13,
+              "lidas": 10,
+              "falhas": 3,
+              "erros": [
+                {
+                  "ofertaId": "27250637",
+                  "loja": "GG TCG",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=256298&tcg=27250637",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 27250637. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_3045af2c99ce.png"
+                },
+                {
+                  "ofertaId": "30342946",
+                  "loja": "NewStation",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=11408&tcg=30342946",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 30342946. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_d75e275ae19c.png"
+                },
+                {
+                  "ofertaId": "30342943",
+                  "loja": "NewStation",
+                  "idioma": "Português",
+                  "estado": "MP",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=11408&tcg=30342943",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 30342943. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_a1f91fe46c13.png"
+                }
+              ]
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 13,
+            "lidas": 10,
+            "falhas": 3,
+            "erros": [
+              {
+                "ofertaId": "27250637",
+                "loja": "GG TCG",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=256298&tcg=27250637",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 27250637. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_3045af2c99ce.png"
+              },
+              {
+                "ofertaId": "30342946",
+                "loja": "NewStation",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=11408&tcg=30342946",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 30342946. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_d75e275ae19c.png"
+              },
+              {
+                "ofertaId": "30342943",
+                "loja": "NewStation",
+                "idioma": "Português",
+                "estado": "MP",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=11408&tcg=30342943",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 30342943. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_a1f91fe46c13.png"
+              }
+            ]
+          },
+          "buylist": {
+            "detectadas": 10,
+            "lidas": 10,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 10,
+          "vendedoresEspecificos": 2,
+          "compradoresGeral": 10,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 3.5,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 3.5
+        }
+      },
+      "observacao": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%"
+    },
+    {
+      "nome": "Malamar",
+      "tipo": "carta",
+      "status": "Suspeita",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 53.066,
+      "precos": {
+        "menor": 6.0,
+        "segundoMenor": 7.5,
+        "terceiroMenor": 8.0,
+        "media": 9.98,
+        "mediana": 8.0,
+        "minimo": 3.0,
+        "buylist": 7.45
+      },
+      "mercado": {
+        "vendedoresGeral": 18,
+        "vendedoresEspecificos": 5,
+        "compradoresGeral": 11,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 5,
+        "buylistLida": 10
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita",
+        "motivos": [
+          {
+            "nivel": "suspeita",
+            "codigo": "estado_melhor_mais_barato",
+            "mensagem": "Suspeita de carta mais bem conservada por preço menor",
+            "evidencia": {
+              "referencia": {
+                "loja": "Supernova Hobby Store",
+                "preco": 6.0,
+                "idioma": "Português",
+                "estado": "MP",
+                "extra": "Foil",
+                "ofertaId": "25846859",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=104401&tcg=25846859"
+              },
+              "comparacao": {
+                "loja": "Banzai Cards",
+                "preco": 5.9,
+                "idioma": "Português",
+                "estado": "SP",
+                "extra": "Foil",
+                "ofertaId": "24632326",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=86963&tcg=24632326"
+              },
+              "diferenca": 0.1
+            }
+          },
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "marketplace_leitura_incompleta",
+            "mensagem": "Cotização incompleta: 5 de 28 ofertas de marketplace não puderam ter o preço lido",
+            "evidencia": {
+              "detectadas": 28,
+              "lidas": 23,
+              "falhas": 5,
+              "erros": [
+                {
+                  "ofertaId": "23184950",
+                  "loja": "Olho de Leão",
+                  "idioma": "Português",
+                  "estado": "SP",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=227786&tcg=23184950",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 23184950. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_d4a032b38764.png"
+                },
+                {
+                  "ofertaId": "27799038",
+                  "loja": "TESKO CARDS GAMES",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=553317&tcg=27799038",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 27799038. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_b8275674fb4d.png"
+                },
+                {
+                  "ofertaId": "14583740",
+                  "loja": "Magicdomain",
+                  "idioma": "Português / Inglês",
+                  "estado": "SP",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=90095&tcg=14583740",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 14583740. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_b8275674fb4d.png"
+                },
+                {
+                  "ofertaId": "8437867",
+                  "loja": "Bazar de Bagdá",
+                  "idioma": "Português",
+                  "estado": "SP",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=8437867",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 8437867. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_c45791dd0788.png"
+                },
+                {
+                  "ofertaId": "26273812",
+                  "loja": "Calm Mind",
+                  "idioma": "Português",
+                  "estado": "NM",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=700886&tcg=26273812",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 26273812. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_8603b465ff0f.png"
+                }
+              ]
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 28,
+            "lidas": 23,
+            "falhas": 5,
+            "erros": [
+              {
+                "ofertaId": "23184950",
+                "loja": "Olho de Leão",
+                "idioma": "Português",
+                "estado": "SP",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=227786&tcg=23184950",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 23184950. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_d4a032b38764.png"
+              },
+              {
+                "ofertaId": "27799038",
+                "loja": "TESKO CARDS GAMES",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=553317&tcg=27799038",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 27799038. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_b8275674fb4d.png"
+              },
+              {
+                "ofertaId": "14583740",
+                "loja": "Magicdomain",
+                "idioma": "Português / Inglês",
+                "estado": "SP",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=90095&tcg=14583740",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 14583740. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_b8275674fb4d.png"
+              },
+              {
+                "ofertaId": "8437867",
+                "loja": "Bazar de Bagdá",
+                "idioma": "Português",
+                "estado": "SP",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=8437867",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 8437867. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_c45791dd0788.png"
+              },
+              {
+                "ofertaId": "26273812",
+                "loja": "Calm Mind",
+                "idioma": "Português",
+                "estado": "NM",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=700886&tcg=26273812",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 26273812. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_8603b465ff0f.png"
+              }
+            ]
+          },
+          "buylist": {
+            "detectadas": 11,
+            "lidas": 11,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 18,
+          "vendedoresEspecificos": 5,
+          "compradoresGeral": 11,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 7.5,
+          "terceiroMenorLiga": 8.0,
+          "medianaLiga": 8.0
+        }
+      },
+      "observacao": "buylist: estado desejado MP; estado encontrado M; estimativa -25.00%; buylist: variante da buylist igualada ao marketplace: Foil"
+    },
+    {
+      "nome": "Torchic",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 13.61,
+      "precos": {
+        "menor": 15.52,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 15.52,
+        "mediana": 15.52,
+        "minimo": 4.28,
+        "buylist": 4.5
+      },
+      "mercado": {
+        "vendedoresGeral": 6,
+        "vendedoresEspecificos": 0,
+        "compradoresGeral": 3,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 3
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "marketplace_leitura_incompleta",
+            "mensagem": "Cotização incompleta: 6 de 12 ofertas de marketplace não puderam ter o preço lido",
+            "evidencia": {
+              "detectadas": 12,
+              "lidas": 6,
+              "falhas": 6,
+              "erros": [
+                {
+                  "ofertaId": "32383401",
+                  "loja": "SETOR7 GAMES",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=820952&tcg=32383401",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 32383401. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_ca646791c88a.png"
+                },
+                {
+                  "ofertaId": "30683286",
+                  "loja": "Bazar de Bagdá",
+                  "idioma": "Português",
+                  "estado": "HP",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=30683286",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 30683286. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_0ee21db7d70b.png"
+                },
+                {
+                  "ofertaId": "16869043",
+                  "loja": "Bazar de Bagdá",
+                  "idioma": "Inglês",
+                  "estado": "MP",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=16869043",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 16869043. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_fe63b2a694af.png"
+                },
+                {
+                  "ofertaId": "10419360",
+                  "loja": "Kanto TCG",
+                  "idioma": "Inglês",
+                  "estado": "MP",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=265437&tcg=10419360",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 10419360. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_fe63b2a694af.png"
+                },
+                {
+                  "ofertaId": "30609254",
+                  "loja": "Daiverso",
+                  "idioma": "Inglês",
+                  "estado": "SP",
+                  "extra": "Reverse Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=725995&tcg=30609254",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 30609254. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_6125a7fbcb13.png"
+                },
+                {
+                  "ofertaId": "19872723",
+                  "loja": "Bazar de Bagdá",
+                  "idioma": "Inglês",
+                  "estado": "SP",
+                  "extra": "Reverse Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=19872723",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 19872723. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_4c8f8adaf4d5.png"
+                }
+              ]
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 12,
+            "lidas": 6,
+            "falhas": 6,
+            "erros": [
+              {
+                "ofertaId": "32383401",
+                "loja": "SETOR7 GAMES",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=820952&tcg=32383401",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 32383401. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_ca646791c88a.png"
+              },
+              {
+                "ofertaId": "30683286",
+                "loja": "Bazar de Bagdá",
+                "idioma": "Português",
+                "estado": "HP",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=30683286",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 30683286. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_0ee21db7d70b.png"
+              },
+              {
+                "ofertaId": "16869043",
+                "loja": "Bazar de Bagdá",
+                "idioma": "Inglês",
+                "estado": "MP",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=16869043",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 16869043. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_fe63b2a694af.png"
+              },
+              {
+                "ofertaId": "10419360",
+                "loja": "Kanto TCG",
+                "idioma": "Inglês",
+                "estado": "MP",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=265437&tcg=10419360",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 10419360. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_fe63b2a694af.png"
+              },
+              {
+                "ofertaId": "30609254",
+                "loja": "Daiverso",
+                "idioma": "Inglês",
+                "estado": "SP",
+                "extra": "Reverse Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=725995&tcg=30609254",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 30609254. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_6125a7fbcb13.png"
+              },
+              {
+                "ofertaId": "19872723",
+                "loja": "Bazar de Bagdá",
+                "idioma": "Inglês",
+                "estado": "SP",
+                "extra": "Reverse Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=19872723",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 19872723. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_4c8f8adaf4d5.png"
+              }
+            ]
+          },
+          "buylist": {
+            "detectadas": 3,
+            "lidas": 3,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 6,
+          "vendedoresEspecificos": 0,
+          "compradoresGeral": 3,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 15.52
+        }
+      },
+      "observacao": "estado desejado SP; estado encontrado MP; estimativa +15.00%; buylist: estado desejado SP; estado encontrado M; estimativa -10.00%"
+    },
+    {
+      "nome": "Bola Mestra",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 76.849,
+      "precos": {
+        "menor": 48.9,
+        "segundoMenor": 49.99,
+        "terceiroMenor": 58.0,
+        "media": 61.7,
+        "mediana": 54.0,
+        "minimo": 24.45,
+        "buylist": 40.5
+      },
+      "mercado": {
+        "vendedoresGeral": 25,
+        "vendedoresEspecificos": 4,
+        "compradoresGeral": 3,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 4,
+        "buylistLida": 3
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "marketplace_leitura_incompleta",
+            "mensagem": "Cotização incompleta: 10 de 47 ofertas de marketplace não puderam ter o preço lido",
+            "evidencia": {
+              "detectadas": 47,
+              "lidas": 37,
+              "falhas": 10,
+              "erros": [
+                {
+                  "ofertaId": "32231690",
+                  "loja": "FREITAS TCG",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=464885&tcg=32231690",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 32231690. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_fe63b2a694af.png"
+                },
+                {
+                  "ofertaId": "30693388",
+                  "loja": "Akagami",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=231947&tcg=30693388",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 30693388. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_2a79db987a43.png"
+                },
+                {
+                  "ofertaId": "29060103",
+                  "loja": "Magicdomain",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=90095&tcg=29060103",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 29060103. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_720f191ee9df.png"
+                },
+                {
+                  "ofertaId": "26304411",
+                  "loja": "Bazar de Bagdá",
+                  "idioma": "Inglês",
+                  "estado": "D",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=26304411",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 26304411. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_17d2474d4685.png"
+                },
+                {
+                  "ofertaId": "30814016",
+                  "loja": "Bazar de Bagdá",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=30814016",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 30814016. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_17d2474d4685.png"
+                },
+                {
+                  "ofertaId": "30453997",
+                  "loja": "Casa de Ruter",
+                  "idioma": "Português",
+                  "estado": "SP",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=292333&tcg=30453997",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 30453997. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_f196f3f4f991.png"
+                },
+                {
+                  "ofertaId": "29948838",
+                  "loja": "Daiverso",
+                  "idioma": "Português",
+                  "estado": "SP",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=725995&tcg=29948838",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 29948838. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_bb7fb10cbaf9.png"
+                },
+                {
+                  "ofertaId": "28415636",
+                  "loja": "Elite TCG",
+                  "idioma": "Português",
+                  "estado": "NM",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=492648&tcg=28415636",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 28415636. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_d78932eb23f5.png"
+                },
+                {
+                  "ofertaId": "11203574",
+                  "loja": "Epic Game",
+                  "idioma": "Português",
+                  "estado": "SP",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=461&tcg=11203574",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 11203574. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_f4c224bdbeed.png"
+                },
+                {
+                  "ofertaId": "30672792",
+                  "loja": "Muito Colecionáveis Comercio",
+                  "idioma": "Inglês",
+                  "estado": "SP",
+                  "extra": "Reverse Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=22058&tcg=30672792",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 30672792. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_f4c224bdbeed.png"
+                }
+              ]
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 47,
+            "lidas": 37,
+            "falhas": 10,
+            "erros": [
+              {
+                "ofertaId": "32231690",
+                "loja": "FREITAS TCG",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=464885&tcg=32231690",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 32231690. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_fe63b2a694af.png"
+              },
+              {
+                "ofertaId": "30693388",
+                "loja": "Akagami",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=231947&tcg=30693388",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 30693388. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_2a79db987a43.png"
+              },
+              {
+                "ofertaId": "29060103",
+                "loja": "Magicdomain",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=90095&tcg=29060103",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 29060103. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_720f191ee9df.png"
+              },
+              {
+                "ofertaId": "26304411",
+                "loja": "Bazar de Bagdá",
+                "idioma": "Inglês",
+                "estado": "D",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=26304411",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 26304411. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_17d2474d4685.png"
+              },
+              {
+                "ofertaId": "30814016",
+                "loja": "Bazar de Bagdá",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=30814016",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 30814016. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_17d2474d4685.png"
+              },
+              {
+                "ofertaId": "30453997",
+                "loja": "Casa de Ruter",
+                "idioma": "Português",
+                "estado": "SP",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=292333&tcg=30453997",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 30453997. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_f196f3f4f991.png"
+              },
+              {
+                "ofertaId": "29948838",
+                "loja": "Daiverso",
+                "idioma": "Português",
+                "estado": "SP",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=725995&tcg=29948838",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 29948838. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_bb7fb10cbaf9.png"
+              },
+              {
+                "ofertaId": "28415636",
+                "loja": "Elite TCG",
+                "idioma": "Português",
+                "estado": "NM",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=492648&tcg=28415636",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 28415636. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_d78932eb23f5.png"
+              },
+              {
+                "ofertaId": "11203574",
+                "loja": "Epic Game",
+                "idioma": "Português",
+                "estado": "SP",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=461&tcg=11203574",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 11203574. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_f4c224bdbeed.png"
+              },
+              {
+                "ofertaId": "30672792",
+                "loja": "Muito Colecionáveis Comercio",
+                "idioma": "Inglês",
+                "estado": "SP",
+                "extra": "Reverse Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=22058&tcg=30672792",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 30672792. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_f4c224bdbeed.png"
+              }
+            ]
+          },
+          "buylist": {
+            "detectadas": 3,
+            "lidas": 3,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 25,
+          "vendedoresEspecificos": 4,
+          "compradoresGeral": 3,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 49.99,
+          "terceiroMenorLiga": 58.0,
+          "medianaLiga": 54.0
+        }
+      },
+      "observacao": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%"
+    },
+    {
+      "nome": "Wally",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 18.078,
+      "precos": {
+        "menor": 20.0,
+        "segundoMenor": 27.9,
+        "terceiroMenor": null,
+        "media": 23.95,
+        "mediana": 23.95,
+        "minimo": 10.0,
+        "buylist": 14.2
+      },
+      "mercado": {
+        "vendedoresGeral": 6,
+        "vendedoresEspecificos": 2,
+        "compradoresGeral": 5,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 2,
+        "buylistLida": 5
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "marketplace_leitura_incompleta",
+            "mensagem": "Cotização incompleta: 4 de 14 ofertas de marketplace não puderam ter o preço lido",
+            "evidencia": {
+              "detectadas": 14,
+              "lidas": 10,
+              "falhas": 4,
+              "erros": [
+                {
+                  "ofertaId": "30018900",
+                  "loja": "Seven Seas Cards",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "Reverse Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=172811&tcg=30018900",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 30018900. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_f5f207a43550.png"
+                },
+                {
+                  "ofertaId": "25010562",
+                  "loja": "Chuck TCG",
+                  "idioma": "Inglês",
+                  "estado": "HP",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=61249&tcg=25010562",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 25010562. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_fc4ab93a3248.png"
+                },
+                {
+                  "ofertaId": "27268984",
+                  "loja": "Bazar de Bagdá",
+                  "idioma": "Inglês",
+                  "estado": "MP",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=27268984",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 27268984. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_2a79db987a43.png"
+                },
+                {
+                  "ofertaId": "16275710",
+                  "loja": "Bazar de Bagdá",
+                  "idioma": "Português",
+                  "estado": "SP",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=16275710",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 16275710. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_720f191ee9df.png"
+                }
+              ]
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 14,
+            "lidas": 10,
+            "falhas": 4,
+            "erros": [
+              {
+                "ofertaId": "30018900",
+                "loja": "Seven Seas Cards",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "Reverse Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=172811&tcg=30018900",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 30018900. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_f5f207a43550.png"
+              },
+              {
+                "ofertaId": "25010562",
+                "loja": "Chuck TCG",
+                "idioma": "Inglês",
+                "estado": "HP",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=61249&tcg=25010562",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 25010562. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_fc4ab93a3248.png"
+              },
+              {
+                "ofertaId": "27268984",
+                "loja": "Bazar de Bagdá",
+                "idioma": "Inglês",
+                "estado": "MP",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=27268984",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 27268984. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_2a79db987a43.png"
+              },
+              {
+                "ofertaId": "16275710",
+                "loja": "Bazar de Bagdá",
+                "idioma": "Português",
+                "estado": "SP",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=16275710",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 16275710. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_720f191ee9df.png"
+              }
+            ]
+          },
+          "buylist": {
+            "detectadas": 5,
+            "lidas": 5,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 6,
+          "vendedoresEspecificos": 2,
+          "compradoresGeral": 5,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 27.9,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 23.95
+        }
+      },
+      "observacao": "buylist: estado desejado NM; estado encontrado M; estimativa +0.00%"
+    },
+    {
+      "nome": "Medicham",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 1,
+      "duracaoSegundos": 33.358,
+      "precos": {
+        "menor": 2.0,
+        "segundoMenor": 4.0,
+        "terceiroMenor": 5.0,
+        "media": 3.67,
+        "mediana": 4.0,
+        "minimo": 1.0,
+        "buylist": 2.12
+      },
+      "mercado": {
+        "vendedoresGeral": 15,
+        "vendedoresEspecificos": 3,
+        "compradoresGeral": 11,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 3,
+        "buylistLida": 11
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "marketplace_leitura_incompleta",
+            "mensagem": "Cotização incompleta: 8 de 26 ofertas de marketplace não puderam ter o preço lido",
+            "evidencia": {
+              "detectadas": 26,
+              "lidas": 18,
+              "falhas": 8,
+              "erros": [
+                {
+                  "ofertaId": "9259883",
+                  "loja": "Bazar de Bagdá",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=9259883",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 9259883. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_599f3a96086d.png"
+                },
+                {
+                  "ofertaId": "27708581",
+                  "loja": "Bruno Pokecartas",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=305666&tcg=27708581",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 27708581. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_2203e80d4000.png"
+                },
+                {
+                  "ofertaId": "28275265",
+                  "loja": "Batbanca",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=20513&tcg=28275265",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 28275265. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_5721774b2144.png"
+                },
+                {
+                  "ofertaId": "24166310",
+                  "loja": "D.A. Jogos LTDA",
+                  "idioma": "Português",
+                  "estado": "MP",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=87517&tcg=24166310",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 24166310. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_95879732af22.png"
+                },
+                {
+                  "ofertaId": "7970048",
+                  "loja": "Muito Colecionáveis Comercio",
+                  "idioma": "Inglês",
+                  "estado": "MP",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=22058&tcg=7970048",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 7970048. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_f5f207a43550.png"
+                },
+                {
+                  "ofertaId": "14490240",
+                  "loja": "Gods Geek",
+                  "idioma": "Português",
+                  "estado": "MP",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=328730&tcg=14490240",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 14490240. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_83a30d48f308.png"
+                },
+                {
+                  "ofertaId": "10719786",
+                  "loja": "Epic Game",
+                  "idioma": "Português / Inglês",
+                  "estado": "SP",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=461&tcg=10719786",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 10719786. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_d7cb2e4dbccb.png"
+                },
+                {
+                  "ofertaId": "19325627",
+                  "loja": "Low Profile",
+                  "idioma": "Inglês",
+                  "estado": "SP",
+                  "extra": "Reverse Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=104973&tcg=19325627",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 19325627. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_6125a7fbcb13.png"
+                }
+              ]
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 26,
+            "lidas": 18,
+            "falhas": 8,
+            "erros": [
+              {
+                "ofertaId": "9259883",
+                "loja": "Bazar de Bagdá",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=56925&tcg=9259883",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 9259883. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_599f3a96086d.png"
+              },
+              {
+                "ofertaId": "27708581",
+                "loja": "Bruno Pokecartas",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=305666&tcg=27708581",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 27708581. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_2203e80d4000.png"
+              },
+              {
+                "ofertaId": "28275265",
+                "loja": "Batbanca",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=20513&tcg=28275265",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 28275265. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_5721774b2144.png"
+              },
+              {
+                "ofertaId": "24166310",
+                "loja": "D.A. Jogos LTDA",
+                "idioma": "Português",
+                "estado": "MP",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=87517&tcg=24166310",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 24166310. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_95879732af22.png"
+              },
+              {
+                "ofertaId": "7970048",
+                "loja": "Muito Colecionáveis Comercio",
+                "idioma": "Inglês",
+                "estado": "MP",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=22058&tcg=7970048",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 7970048. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_f5f207a43550.png"
+              },
+              {
+                "ofertaId": "14490240",
+                "loja": "Gods Geek",
+                "idioma": "Português",
+                "estado": "MP",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=328730&tcg=14490240",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 14490240. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_83a30d48f308.png"
+              },
+              {
+                "ofertaId": "10719786",
+                "loja": "Epic Game",
+                "idioma": "Português / Inglês",
+                "estado": "SP",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=461&tcg=10719786",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 10719786. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_d7cb2e4dbccb.png"
+              },
+              {
+                "ofertaId": "19325627",
+                "loja": "Low Profile",
+                "idioma": "Inglês",
+                "estado": "SP",
+                "extra": "Reverse Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=104973&tcg=19325627",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 19325627. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_6125a7fbcb13.png"
+              }
+            ]
+          },
+          "buylist": {
+            "detectadas": 11,
+            "lidas": 11,
+            "falhas": 0,
+            "erros": []
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 15,
+          "vendedoresEspecificos": 3,
+          "compradoresGeral": 11,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": 4.0,
+          "terceiroMenorLiga": 5.0,
+          "medianaLiga": 4.0
+        }
+      },
+      "observacao": "buylist: estado desejado SP; estado encontrado M; estimativa -10.00%"
+    },
+    {
+      "nome": "Pikachu Libre",
+      "tipo": "carta",
+      "status": "Suspeita leve",
+      "erro": "",
+      "worker": 2,
+      "duracaoSegundos": 149.856,
+      "precos": {
+        "menor": 87.5,
+        "segundoMenor": null,
+        "terceiroMenor": null,
+        "media": 87.5,
+        "mediana": 87.5,
+        "minimo": 43.75,
+        "buylist": 87.5
+      },
+      "mercado": {
+        "vendedoresGeral": 6,
+        "vendedoresEspecificos": 0,
+        "compradoresGeral": 7,
+        "compradoresEspecificos": 0,
+        "ofertasLidas": 1,
+        "buylistLida": 1
+      },
+      "variacaoMenorLiga": null,
+      "statusDetalhes": {
+        "nível": "Suspeita leve",
+        "motivos": [
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "marketplace_leitura_incompleta",
+            "mensagem": "Cotização incompleta: 5 de 13 ofertas de marketplace não puderam ter o preço lido",
+            "evidencia": {
+              "detectadas": 13,
+              "lidas": 8,
+              "falhas": 5,
+              "erros": [
+                {
+                  "ofertaId": "26079400",
+                  "loja": "Geek Collections House",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=316637&tcg=26079400",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 26079400. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_6ab950f096c0.png"
+                },
+                {
+                  "ofertaId": "32396197",
+                  "loja": "LANZA TCG",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=801263&tcg=32396197",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 32396197. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_7ae6e87f9aa5.png"
+                },
+                {
+                  "ofertaId": "23642910",
+                  "loja": "Barão Geek House",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=27364&tcg=23642910",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 23642910. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_3634d74fb5e7.png"
+                },
+                {
+                  "ofertaId": "32389514",
+                  "loja": "Arcadia Games",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=862182&tcg=32389514",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 32389514. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_3634d74fb5e7.png"
+                },
+                {
+                  "ofertaId": "32092449",
+                  "loja": "Anny TCG",
+                  "idioma": "Português",
+                  "estado": "NM",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=794876&tcg=32092449",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 32092449. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_437dad28b474.png"
+                }
+              ]
+            }
+          },
+          {
+            "nivel": "suspeita_leve",
+            "codigo": "buylist_leitura_incompleta",
+            "mensagem": "Cotização incompleta: 4 de 13 ofertas de buylist não puderam ter o preço lido",
+            "evidencia": {
+              "detectadas": 13,
+              "lidas": 9,
+              "falhas": 4,
+              "erros": [
+                {
+                  "ofertaId": "26079400",
+                  "loja": "Geek Collections House",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=316637&tcg=26079400",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 26079400. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_6ab950f096c0.png"
+                },
+                {
+                  "ofertaId": "32396197",
+                  "loja": "LANZA TCG",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=801263&tcg=32396197",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 32396197. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_7ae6e87f9aa5.png"
+                },
+                {
+                  "ofertaId": "23642910",
+                  "loja": "Barão Geek House",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=27364&tcg=23642910",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 23642910. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_3634d74fb5e7.png"
+                },
+                {
+                  "ofertaId": "32389514",
+                  "loja": "Arcadia Games",
+                  "idioma": "Português",
+                  "estado": "D",
+                  "extra": "Foil",
+                  "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=862182&tcg=32389514",
+                  "erro": "Não foi possível reconhecer com segurança o preço da oferta 32389514. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_3634d74fb5e7.png"
+                }
+              ]
+            }
+          }
+        ],
+        "coleta": {
+          "marketplace": {
+            "detectadas": 13,
+            "lidas": 8,
+            "falhas": 5,
+            "erros": [
+              {
+                "ofertaId": "26079400",
+                "loja": "Geek Collections House",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=316637&tcg=26079400",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 26079400. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_6ab950f096c0.png"
+              },
+              {
+                "ofertaId": "32396197",
+                "loja": "LANZA TCG",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=801263&tcg=32396197",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 32396197. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_7ae6e87f9aa5.png"
+              },
+              {
+                "ofertaId": "23642910",
+                "loja": "Barão Geek House",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=27364&tcg=23642910",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 23642910. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_3634d74fb5e7.png"
+              },
+              {
+                "ofertaId": "32389514",
+                "loja": "Arcadia Games",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=862182&tcg=32389514",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 32389514. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_3634d74fb5e7.png"
+              },
+              {
+                "ofertaId": "32092449",
+                "loja": "Anny TCG",
+                "idioma": "Português",
+                "estado": "NM",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=794876&tcg=32092449",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 32092449. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_437dad28b474.png"
+              }
+            ]
+          },
+          "buylist": {
+            "detectadas": 13,
+            "lidas": 9,
+            "falhas": 4,
+            "erros": [
+              {
+                "ofertaId": "26079400",
+                "loja": "Geek Collections House",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=316637&tcg=26079400",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 26079400. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_6ab950f096c0.png"
+              },
+              {
+                "ofertaId": "32396197",
+                "loja": "LANZA TCG",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=801263&tcg=32396197",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 32396197. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_7ae6e87f9aa5.png"
+              },
+              {
+                "ofertaId": "23642910",
+                "loja": "Barão Geek House",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=27364&tcg=23642910",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 23642910. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_3634d74fb5e7.png"
+              },
+              {
+                "ofertaId": "32389514",
+                "loja": "Arcadia Games",
+                "idioma": "Português",
+                "estado": "D",
+                "extra": "Foil",
+                "linkLoja": "https://www.ligapokemon.com.br/?view=mp/showcase/home&id=862182&tcg=32389514",
+                "erro": "Não foi possível reconhecer com segurança o preço da oferta 32389514. Imagem de diagnóstico: c:\\Users\\Leon\\Documents\\GitHub\\LojaPokemon\\src\\Gerenciamento\\debug_precos\\falha_3634d74fb5e7.png"
+              }
+            ]
+          }
+        },
+        "mercado": {
+          "vendedoresGeral": 6,
+          "vendedoresEspecificos": 0,
+          "compradoresGeral": 7,
+          "compradoresEspecificos": 0,
+          "segundoMenorLiga": null,
+          "terceiroMenorLiga": null,
+          "medianaLiga": 87.5
+        }
+      },
+      "observacao": "estado desejado MP; estado encontrado HP; estimativa +25.00%; buylist: estado desejado MP; estado encontrado HP; estimativa +25.00%"
+    }
+  ],
+  "extras": {
+    "updateId": "Arthur-Ramos-2-20260820T091800-0300"
+  }
+}

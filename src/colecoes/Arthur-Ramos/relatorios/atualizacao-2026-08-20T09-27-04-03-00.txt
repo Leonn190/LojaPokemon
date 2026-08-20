@@ -1,0 +1,60 @@
+ATUALIZACAO — RELATÓRIO DE EXECUÇÃO
+========================================================================================
+Início: 2026-08-20T09:23:37-03:00
+Fim: 2026-08-20T09:27:04-03:00
+Modo: Normal | Workers: 2
+Tempo total: 3m 28s (207.736 s)
+Itens: 8 | Sucessos: 8 | Erros: 0
+Média por item concluído: 25.967 s | throughput: 2.31 itens/min
+Repetições por falha: 0 | tentativas de item: 8
+
+ITENS
+========================================================================================
+[Suspeita leve] CARTA | Ludicolo | W1 | 34.72s
+  Liga: menor R$ 5,50 | 2º — | 3º — | média R$ 5,50 | mediana R$ 5,50 | buylist R$ 3,99
+  Mercado: vendedores 11 geral / 1 específicos | compradores 13 geral / 0 específicos
+  - Cotização incompleta: 8 de 21 ofertas de marketplace não puderam ter o preço lido
+  Observação: buylist: estado desejado MP; estado encontrado M; estimativa -25.00%
+[Suspeita leve] CARTA | Eelektrik | W1 | 17.33s
+  Liga: menor R$ 3,49 | 2º R$ 3,50 | 3º — | média R$ 3,50 | mediana R$ 3,50 | buylist R$ 2,18
+  Mercado: vendedores 10 geral / 2 específicos | compradores 10 geral / 0 específicos
+  - Cotização incompleta: 3 de 13 ofertas de marketplace não puderam ter o preço lido
+  Observação: buylist: estado desejado SP; estado encontrado M; estimativa -10.00%
+[Suspeita] CARTA | Malamar | W2 | 53.07s
+  Liga: menor R$ 6,00 | 2º R$ 7,50 | 3º R$ 8,00 | média R$ 9,98 | mediana R$ 8,00 | buylist R$ 7,45
+  Mercado: vendedores 18 geral / 5 específicos | compradores 11 geral / 0 específicos
+  - Suspeita de carta mais bem conservada por preço menor
+  - Cotização incompleta: 5 de 28 ofertas de marketplace não puderam ter o preço lido
+  Observação: buylist: estado desejado MP; estado encontrado M; estimativa -25.00%; buylist: variante da buylist igualada ao marketplace: Foil
+[Suspeita leve] CARTA | Torchic | W1 | 13.61s
+  Liga: menor R$ 15,52 | 2º — | 3º — | média R$ 15,52 | mediana R$ 15,52 | buylist R$ 4,50
+  Mercado: vendedores 6 geral / 0 específicos | compradores 3 geral / 0 específicos
+  - Cotização incompleta: 6 de 12 ofertas de marketplace não puderam ter o preço lido
+  Observação: estado desejado SP; estado encontrado MP; estimativa +15.00%; buylist: estado desejado SP; estado encontrado M; estimativa -10.00%
+[Suspeita leve] CARTA | Bola Mestra | W1 | 76.85s
+  Liga: menor R$ 48,90 | 2º R$ 49,99 | 3º R$ 58,00 | média R$ 61,70 | mediana R$ 54,00 | buylist R$ 40,50
+  Mercado: vendedores 25 geral / 4 específicos | compradores 3 geral / 0 específicos
+  - Cotização incompleta: 10 de 47 ofertas de marketplace não puderam ter o preço lido
+  Observação: buylist: estado desejado SP; estado encontrado M; estimativa -10.00%
+[Suspeita leve] CARTA | Wally | W1 | 18.08s
+  Liga: menor R$ 20,00 | 2º R$ 27,90 | 3º — | média R$ 23,95 | mediana R$ 23,95 | buylist R$ 14,20
+  Mercado: vendedores 6 geral / 2 específicos | compradores 5 geral / 0 específicos
+  - Cotização incompleta: 4 de 14 ofertas de marketplace não puderam ter o preço lido
+  Observação: buylist: estado desejado NM; estado encontrado M; estimativa +0.00%
+[Suspeita leve] CARTA | Medicham | W1 | 33.36s
+  Liga: menor R$ 2,00 | 2º R$ 4,00 | 3º R$ 5,00 | média R$ 3,67 | mediana R$ 4,00 | buylist R$ 2,12
+  Mercado: vendedores 15 geral / 3 específicos | compradores 11 geral / 0 específicos
+  - Cotização incompleta: 8 de 26 ofertas de marketplace não puderam ter o preço lido
+  Observação: buylist: estado desejado SP; estado encontrado M; estimativa -10.00%
+[Suspeita leve] CARTA | Pikachu Libre | W2 | 149.86s
+  Liga: menor R$ 87,50 | 2º — | 3º — | média R$ 87,50 | mediana R$ 87,50 | buylist R$ 87,50
+  Mercado: vendedores 6 geral / 0 específicos | compradores 7 geral / 0 específicos
+  - Cotização incompleta: 5 de 13 ofertas de marketplace não puderam ter o preço lido
+  - Cotização incompleta: 4 de 13 ofertas de buylist não puderam ter o preço lido
+  Observação: estado desejado MP; estado encontrado HP; estimativa +25.00%; buylist: estado desejado MP; estado encontrado HP; estimativa +25.00%
+
+EXTRAS
+========================================================================================
+{
+  "updateId": "Arthur-Ramos-2-20260820T091800-0300"
+}

@@ -1,0 +1,12 @@
+{
+  "type": "collection-update",
+  "format": "json-v2",
+  "collectionId": "Arthur-Ramos",
+  "baseVersion": 1,
+  "version": 2,
+  "generatedAt": "2026-08-20T09:18:00-03:00",
+  "updateId": "Arthur-Ramos-2-20260820T091800-0300",
+  "includesProfile": false,
+  "includesMovementHistory": false,
+  "includesInitialPriceHistory": false
+}

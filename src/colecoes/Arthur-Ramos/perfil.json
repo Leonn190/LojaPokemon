@@ -5,10 +5,13 @@
   "email": "a.genji.ramos@gmail.com",
   "phone": "13 996164141",
   "password": "SenhaRamos",
-  "version": 1,
+  "version": 2,
   "showQuantity": false,
   "pricingMode": "menor",
-  "updatedAt": "2026-08-18T16:07:06-03:00",
+  "updatedAt": "2026-08-20T09:18:00-03:00",
   "formattingComplete": false,
-  "formattingPending": 1
+  "formattingPending": 1,
+  "appliedUpdates": [
+    "Arthur-Ramos-2-20260820T091800-0300"
+  ]
 }

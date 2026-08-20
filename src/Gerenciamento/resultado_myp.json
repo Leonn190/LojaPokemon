@@ -26,8 +26,8 @@
     "integridade"
   ],
   "precos_resumo_exibidos_myp": [
-    35.9,
-    57.34,
+    35.0,
+    57.07,
     13.9,
     40.0
   ],
@@ -36,14 +36,14 @@
     "menor": 10.0,
     "segundo_menor": 19.9,
     "terceiro_menor": 35.0,
-    "media": 51.59,
-    "mediana": 50.0,
+    "media": 51.05,
+    "mediana": 48.0,
     "por_estado": {
       "NM": {
         "quantidade_de_anuncios": 33,
         "menor": 10.0,
-        "media": 50.28,
-        "mediana": 50.0
+        "media": 49.67,
+        "mediana": 45.0
       },
       "SP": {
         "quantidade_de_anuncios": 4,
@@ -195,6 +195,13 @@
       "preco": 35.0
     },
     {
+      "vendedor": "VouDesafiarVc",
+      "acabamento": "",
+      "estado": "NM",
+      "quantidade": 1,
+      "preco": 35.0
+    },
+    {
       "vendedor": "ThiagoMatte",
       "acabamento": "",
       "estado": "NM",
@@ -223,17 +230,17 @@
       "preco": 38.99
     },
     {
-      "vendedor": "K00up",
-      "acabamento": "Foil",
+      "vendedor": "Luminor",
+      "acabamento": "",
       "estado": "NM",
-      "quantidade": 6,
+      "quantidade": 1,
       "preco": 40.0
     },
     {
-      "vendedor": "FernandoMMS",
+      "vendedor": "viktorgd",
       "acabamento": "",
       "estado": "NM",
-      "quantidade": 2,
+      "quantidade": 1,
       "preco": 40.0
     },
     {
@@ -251,17 +258,17 @@
       "preco": 40.0
     },
     {
-      "vendedor": "viktorgd",
+      "vendedor": "FernandoMMS",
       "acabamento": "",
       "estado": "NM",
-      "quantidade": 1,
+      "quantidade": 2,
       "preco": 40.0
     },
     {
-      "vendedor": "Luminor",
-      "acabamento": "",
+      "vendedor": "K00up",
+      "acabamento": "Foil",
       "estado": "NM",
-      "quantidade": 1,
+      "quantidade": 6,
       "preco": 40.0
     },
     {
@@ -286,15 +293,15 @@
       "preco": 50.0
     },
     {
-      "vendedor": "brunonasc",
-      "acabamento": "Foil",
+      "vendedor": "BrunoStark",
+      "acabamento": "",
       "estado": "NM",
       "quantidade": 1,
       "preco": 50.0
     },
     {
-      "vendedor": "BrunoStark",
-      "acabamento": "",
+      "vendedor": "brunonasc",
+      "acabamento": "Foil",
       "estado": "NM",
       "quantidade": 1,
       "preco": 50.0
@@ -305,13 +312,6 @@
       "estado": "NM",
       "quantidade": 1,
       "preco": 53.0
-    },
-    {
-      "vendedor": "KratosTCG",
-      "acabamento": "",
-      "estado": "NM",
-      "quantidade": 1,
-      "preco": 55.0
     }
   ]
 }
