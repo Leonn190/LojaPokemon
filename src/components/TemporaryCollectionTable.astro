@@ -103,6 +103,13 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
         <article><span>Preço médio total</span><strong>{money(totalAverage)}</strong></article>
       </div>
 
+      <aside class="temporary-sheet__notice" aria-label="Aviso sobre os valores">
+        <strong>Aviso sobre os valores</strong>
+        <p>O valor médio nunca será alcançado.</p>
+        <p>Dificilmente chega ao valor mais baixo da Liga.</p>
+        <p>Nunca aceite propostas abaixo do valor mínimo, a não ser em casos de cartas em estado D ou inferiores.</p>
+      </aside>
+
       <div class="temporary-sheet__tools">
         <label>
           <span>Buscar carta</span>
@@ -253,6 +260,9 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
   .temporary-sheet__summary article { padding: 18px 20px; border: 1px solid rgba(145, 190, 230, .14); border-radius: 18px; background: linear-gradient(145deg, rgba(13, 28, 45, .94), rgba(8, 17, 28, .86)); }
   .temporary-sheet__summary span { display: block; margin-bottom: 5px; color: #7f99b2; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
   .temporary-sheet__summary strong { font-size: clamp(1.25rem, 2.5vw, 1.85rem); letter-spacing: -.035em; }
+  .temporary-sheet__notice { margin: 0 0 18px; padding: 16px 18px; border: 1px solid rgba(145, 190, 230, .14); border-radius: 16px; background: rgba(10, 22, 36, .78); }
+  .temporary-sheet__notice strong { display: block; margin-bottom: 8px; color: #dcecff; font-size: .82rem; text-transform: uppercase; letter-spacing: .06em; }
+  .temporary-sheet__notice p { margin: 4px 0 0; color: #9eb2c5; font-size: .84rem; }
   .temporary-sheet__tools { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(220px, 300px); gap: 12px; margin-bottom: 14px; }
   .temporary-sheet__tools label { display: grid; gap: 6px; color: #91a8bd; font-size: .75rem; font-weight: 700; }
   input, select { width: 100%; box-sizing: border-box; min-height: 46px; padding: 0 14px; border: 1px solid rgba(145, 190, 230, .16); border-radius: 12px; outline: none; background: #09131f; color: #edf6ff; font: inherit; }
