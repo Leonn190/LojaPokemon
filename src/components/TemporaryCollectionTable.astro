@@ -32,6 +32,7 @@ const normalizedCards = cards
     const minimum = numberValue(card.Minimo ?? card['Mínimo']);
     const quickSale = numberValue(card['Venda Rapida'] ?? card['Venda Rápida']);
     const league = numberValue(card['Menor Liga']);
+    const average = numberValue(card['Media Liga'] ?? card['Média Liga']);
     const manual = numberValue(card['Preço']);
     const rankValue = minimum ?? quickSale ?? league ?? manual ?? 0;
     const image = String(card.Imagem ?? '').trim();
@@ -55,6 +56,7 @@ const normalizedCards = cards
       minimum,
       quickSale,
       league,
+      average,
       manual,
       rankValue,
       imageCandidates,
@@ -65,6 +67,7 @@ const normalizedCards = cards
 const totalMinimum = normalizedCards.reduce((sum, card) => sum + (card.minimum ?? 0) * card.quantity, 0);
 const totalQuickSale = normalizedCards.reduce((sum, card) => sum + (card.quickSale ?? 0) * card.quantity, 0);
 const totalLeague = normalizedCards.reduce((sum, card) => sum + (card.league ?? 0) * card.quantity, 0);
+const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?? 0) * card.quantity, 0);
 ---
 
 <section class="temporary-sheet" data-temporary-collection>
@@ -97,6 +100,7 @@ const totalLeague = normalizedCards.reduce((sum, card) => sum + (card.league ?? 
         <article><span>Mínimo total</span><strong>{money(totalMinimum)}</strong></article>
         <article><span>Venda rápida total</span><strong>{money(totalQuickSale)}</strong></article>
         <article><span>Menor Liga total</span><strong>{money(totalLeague)}</strong></article>
+        <article><span>Preço médio total</span><strong>{money(totalAverage)}</strong></article>
       </div>
 
       <div class="temporary-sheet__tools">
@@ -109,7 +113,8 @@ const totalLeague = normalizedCards.reduce((sum, card) => sum + (card.league ?? 
           <select data-table-sort>
             <option value="minimum-desc">Mínimo: maior primeiro</option>
             <option value="quick-desc">Venda rápida: maior primeiro</option>
-            <option value="league-desc">Liga: maior primeiro</option>
+            <option value="league-desc">Menor Liga: maior primeiro</option>
+            <option value="average-desc">Preço médio: maior primeiro</option>
             <option value="name-asc">Nome: A–Z</option>
           </select>
         </label>
@@ -128,6 +133,7 @@ const totalLeague = normalizedCards.reduce((sum, card) => sum + (card.league ?? 
               <th>Mínimo</th>
               <th>Venda rápida</th>
               <th>Menor Liga</th>
+              <th>Preço médio</th>
             </tr>
           </thead>
           <tbody data-table-body>
@@ -138,6 +144,7 @@ const totalLeague = normalizedCards.reduce((sum, card) => sum + (card.league ?? 
                 data-minimum={card.minimum ?? -1}
                 data-quick={card.quickSale ?? -1}
                 data-league={card.league ?? -1}
+                data-average={card.average ?? -1}
                 data-card-name={card.name.toLocaleLowerCase('pt-BR')}
               >
                 <td class="rank-col"><strong data-rank>{index + 1}</strong></td>
@@ -165,6 +172,7 @@ const totalLeague = normalizedCards.reduce((sum, card) => sum + (card.league ?? 
                 <td class="money-cell"><strong>{money(card.minimum)}</strong></td>
                 <td class="money-cell">{money(card.quickSale)}</td>
                 <td class="money-cell">{money(card.league)}</td>
+                <td class="money-cell">{money(card.average)}</td>
               </tr>
             ))}
           </tbody>
@@ -193,6 +201,7 @@ const totalLeague = normalizedCards.reduce((sum, card) => sum + (card.league ?? 
       visible.sort((a, b) => {
         if (sort.value === 'quick-desc') return value(b, 'data-quick') - value(a, 'data-quick');
         if (sort.value === 'league-desc') return value(b, 'data-league') - value(a, 'data-league');
+        if (sort.value === 'average-desc') return value(b, 'data-average') - value(a, 'data-average');
         if (sort.value === 'name-asc') return (a.getAttribute('data-card-name') || '').localeCompare(b.getAttribute('data-card-name') || '', 'pt-BR');
         return value(b, 'data-minimum') - value(a, 'data-minimum');
       });
@@ -240,7 +249,7 @@ const totalLeague = normalizedCards.reduce((sum, card) => sum + (card.league ?? 
   .temporary-sheet__count { min-width: 105px; padding: 14px 18px; border: 1px solid rgba(133, 188, 240, .18); border-radius: 18px; background: rgba(11, 23, 38, .72); text-align: center; }
   .temporary-sheet__count strong { display: block; font-size: 1.55rem; }
   .temporary-sheet__count span { color: #87a0b8; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; }
-  .temporary-sheet__summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 22px 0; }
+  .temporary-sheet__summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 22px 0; }
   .temporary-sheet__summary article { padding: 18px 20px; border: 1px solid rgba(145, 190, 230, .14); border-radius: 18px; background: linear-gradient(145deg, rgba(13, 28, 45, .94), rgba(8, 17, 28, .86)); }
   .temporary-sheet__summary span { display: block; margin-bottom: 5px; color: #7f99b2; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
   .temporary-sheet__summary strong { font-size: clamp(1.25rem, 2.5vw, 1.85rem); letter-spacing: -.035em; }
