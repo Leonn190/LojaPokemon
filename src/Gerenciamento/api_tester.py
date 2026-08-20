@@ -156,6 +156,10 @@ class VaultApiTester:
                 if isinstance(result.resposta, dict):
                     print(f"         E-mails de conta: {result.resposta.get('accountEmailDelivery', '—')}")
                     print(f"         Gmail personalizado: {result.resposta.get('gmailConfigured', '—')}")
+                    transports = result.resposta.get('mypTransports') or {}
+                    if transports:
+                        enabled = [name for name, active in transports.items() if active]
+                        print(f"         Transportes MYP da API: {', '.join(enabled) if enabled else '—'}")
                     if firebase.get('adminCredentialConfigured') is False:
                         print("         Admin ausente: propostas/Vault+/cotização em massa continuarão indisponíveis até configurar a credencial.")
                     if result.resposta.get('gmailConfigured') is False:
@@ -260,6 +264,8 @@ class VaultApiTester:
                 print("         O link está acessível localmente. A diferença está no caminho Render -> MYP/fallback, não no link digitado.")
                 if remote_code == "MYP_FALLBACK_PARSE_FAILED":
                     print("         O Render chegou ao fallback, mas o parser do fallback não reconheceu a página.")
+                elif remote_code == "MYP_ANTIBOT_CHALLENGE":
+                    print("         O Render e o Reader receberam uma tela anti-bot. A API nova tenta Python/requests e depois Reader em modo browser/no-cache.")
 
     def teste_autenticado_leitura(self) -> None:
         print("\nTESTES AUTENTICADOS / SEM ALTERAR DADOS")

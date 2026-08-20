@@ -60,6 +60,7 @@ const friendlyApiMessage = (error: any, fallback = 'Não foi possível concluir 
     MYP_FALLBACK_FAILED: 'A rota alternativa da MYP também não respondeu. Tente novamente em alguns segundos.',
     MYP_FALLBACK_INCOMPLETE: 'A rota alternativa da MYP retornou uma página incompleta.',
     MYP_FALLBACK_PARSE_FAILED: 'A rota alternativa recebeu a MYP, mas não conseguiu identificar esta carta.',
+    MYP_ANTIBOT_CHALLENGE: 'A MYP bloqueou também o navegador alternativo do servidor. Tente novamente em alguns segundos.',
     MYP_NO_PRICE: 'A MYP identificou a carta, mas não trouxe nenhum preço disponível agora.',
     MYP_INVALID_URL: 'Cole um link válido de produto da MYP.',
     EMAIL_NOT_VERIFIED: 'Verifique seu Gmail antes de solicitar a alteração de senha.',
@@ -203,7 +204,7 @@ export const fetchMypCardInfo = async (url: string) => {
   const payload = await vaultApiFetch('/api/myp/card', {
     method: 'POST',
     body: JSON.stringify({ url: link }),
-    timeoutMs: 65000,
+    timeoutMs: 75000,
     retries: 1,
   });
   if (!payload?.data) throw new Error('A MYP não retornou dados para esta carta.');

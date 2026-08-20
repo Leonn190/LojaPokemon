@@ -873,7 +873,12 @@ import { createBulkQuoteController } from './central/quote-modal.js';
         } catch (error) {
           console.warn('[Vault TCG] Não foi possível consultar o Vault+ agora:', error);
           const summary = root.querySelector('[data-vaultplus-quote-summary]');
-          if (summary) summary.textContent = 'Status do Vault+ indisponível no momento';
+          const code = clean(error?.code || '');
+          if (summary) summary.textContent = code === 'FIREBASE_ADMIN_NOT_CONFIGURED'
+            ? 'Vault+ aguardando a credencial Firebase Admin no Render'
+            : code === 'FIREBASE_PROJECT_MISMATCH'
+              ? 'Vault+ indisponível: site e API usam projetos Firebase diferentes'
+              : 'Status do Vault+ indisponível no momento';
           return null;
         }
       };
@@ -1051,7 +1056,15 @@ import { createBulkQuoteController } from './central/quote-modal.js';
           state.proposalsLoaded = true;
           state.proposalsUnavailable = true;
           renderNegotiations();
-          setNegotiationFeedback(error?.message || 'Não foi possível carregar as negociações agora.', 'error');
+          const code = clean(error?.code || '');
+          const message = code === 'FIREBASE_ADMIN_NOT_CONFIGURED'
+            ? 'As negociações estão sem acesso ao Firestore no Render porque a credencial Firebase Admin ainda não foi configurada. Isto não é sessão expirada.'
+            : code === 'FIREBASE_PROJECT_MISMATCH'
+              ? 'O site e a API estão apontando para projetos Firebase diferentes.'
+              : Number(error?.status || 0) === 401
+                ? 'Sua sessão realmente expirou. Entre novamente.'
+                : (error?.message || 'Não foi possível carregar as negociações agora.');
+          setNegotiationFeedback(message, 'error');
         }
       };
 

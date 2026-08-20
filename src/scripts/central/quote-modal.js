@@ -290,8 +290,12 @@ export const createBulkQuoteController = ({
       syncCloseAvailability();
       if (startButton) startButton.disabled = false;
       if (error?.nextResetDate && setVaultPlus) setVaultPlus({ ...plus, remaining: 0, nextResetDate: error.nextResetDate });
-      if (feedback) { feedback.textContent = error?.message || 'Não foi possível iniciar a cotização.'; feedback.dataset.state = 'error'; }
-      if (String(error?.code || '').includes('VAULT_PLUS')) { renderLocked(); setState('locked'); }
+      const code = String(error?.code || '');
+      const message = code === 'FIREBASE_ADMIN_NOT_CONFIGURED'
+        ? 'A cotização em massa precisa da credencial Firebase Admin no Render. Configure-a e faça um novo deploy da API.'
+        : (error?.message || 'Não foi possível iniciar a cotização.');
+      if (feedback) { feedback.textContent = message; feedback.dataset.state = 'error'; }
+      if (code.includes('VAULT_PLUS')) { renderLocked(); setState('locked'); }
     }
   };
 
