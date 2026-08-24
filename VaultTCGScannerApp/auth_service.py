@@ -7,6 +7,7 @@ import requests
 
 FIREBASE_API_KEY = "AIzaSyAH2-yNZl048tTL57BCq7gdh82YBZH7GmU"
 SIGN_IN_URL = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
+SECURE_TOKEN_URL = "https://securetoken.googleapis.com/v1/token"
 REQUEST_TIMEOUT = 18
 
 
@@ -71,4 +72,30 @@ def sign_in(email: str, password: str, session: Optional[requests.Session] = Non
         id_token=str(payload.get("idToken") or ""),
         refresh_token=str(payload.get("refreshToken") or ""),
         display_name=str(payload.get("displayName") or ""),
+    )
+
+
+def refresh_id_token(refresh_token: str, session: Optional[requests.Session] = None) -> VaultUser:
+    token = str(refresh_token or "").strip()
+    if not token:
+        raise AuthError("Sessão expirada. Entre novamente.")
+    http = session or requests.Session()
+    try:
+        response = http.post(
+            SECURE_TOKEN_URL,
+            params={"key": FIREBASE_API_KEY},
+            data={"grant_type": "refresh_token", "refresh_token": token},
+            timeout=REQUEST_TIMEOUT,
+        )
+    except requests.RequestException as exc:
+        raise AuthError("Não foi possível renovar sua sessão do Vault.") from exc
+    if not response.ok:
+        raise AuthError("Sua sessão expirou. Entre novamente.")
+    payload = response.json()
+    return VaultUser(
+        uid=str(payload.get("user_id") or ""),
+        email="",
+        id_token=str(payload.get("id_token") or ""),
+        refresh_token=str(payload.get("refresh_token") or token),
+        display_name="",
     )
