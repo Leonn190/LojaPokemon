@@ -8,9 +8,11 @@ interface Props {
   folderName: string;
   cards: CardRow[];
   available?: boolean;
+  marketplaceLabel?: string;
+  showSourceLinks?: boolean;
 }
 
-const { owner, folderName, cards = [], available = true } = Astro.props;
+const { owner, folderName, cards = [], available = true, marketplaceLabel = 'Liga', showSourceLinks = false } = Astro.props;
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
@@ -60,6 +62,9 @@ const normalizedCards = cards
       manual,
       rankValue,
       imageCandidates,
+      mypUrl: /^https:\/\/mypcards\.com\/pokemon\/produto\//i.test(String(card['Link MYP'] ?? ''))
+        ? String(card['Link MYP'])
+        : '',
     };
   })
   .sort((a, b) => b.rankValue - a.rankValue || a.name.localeCompare(b.name, 'pt-BR'));
@@ -99,14 +104,14 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
       <div class="temporary-sheet__summary">
         <article><span>Mínimo total</span><strong>{money(totalMinimum)}</strong></article>
         <article><span>Venda rápida total</span><strong>{money(totalQuickSale)}</strong></article>
-        <article><span>Menor Liga total</span><strong>{money(totalLeague)}</strong></article>
+        <article><span>Menor {marketplaceLabel} total</span><strong>{money(totalLeague)}</strong></article>
         <article><span>Preço médio total</span><strong>{money(totalAverage)}</strong></article>
       </div>
 
       <aside class="temporary-sheet__notice" aria-label="Aviso sobre os valores">
         <strong>Aviso sobre os valores</strong>
         <p>O valor médio nunca será alcançado.</p>
-        <p>Dificilmente chega ao valor mais baixo da Liga.</p>
+        <p>Dificilmente chega ao valor mais baixo da {marketplaceLabel}.</p>
         <p>Nunca aceite propostas abaixo do valor mínimo, a não ser em casos de cartas em estado D ou inferiores.</p>
       </aside>
 
@@ -120,7 +125,7 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
           <select data-table-sort>
             <option value="minimum-desc">Mínimo: maior primeiro</option>
             <option value="quick-desc">Venda rápida: maior primeiro</option>
-            <option value="league-desc">Menor Liga: maior primeiro</option>
+            <option value="league-desc">Menor {marketplaceLabel}: maior primeiro</option>
             <option value="average-desc">Preço médio: maior primeiro</option>
             <option value="name-asc">Nome: A–Z</option>
           </select>
@@ -139,7 +144,7 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
               <th>Qtd.</th>
               <th>Mínimo</th>
               <th>Venda rápida</th>
-              <th>Menor Liga</th>
+              <th>Menor {marketplaceLabel}</th>
               <th>Preço médio</th>
             </tr>
           </thead>
@@ -172,6 +177,7 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
                   <strong>{card.name}</strong>
                   <span>{card.number}</span>
                   <small>{card.collection}</small>
+                  {showSourceLinks && card.mypUrl && <a href={card.mypUrl} target="_blank" rel="noopener noreferrer" class="external-price-link">Ver carta na MYP ↗</a>}
                 </td>
                 <td>{card.language}</td>
                 <td><span class="condition-chip">{card.condition}</span></td>
@@ -283,6 +289,8 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
   .info-col strong { color: #f5f9fd; font-size: .92rem; }
   .info-col span { margin-top: 3px; color: #a7bdd1; font-size: .79rem; }
   .info-col small { margin-top: 4px; color: #718ba3; }
+  .info-col .external-price-link { display: inline-block; margin-top: 7px; color: #89c3ff; font-size: .76rem; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+  .info-col .external-price-link:hover { color: #c6e7ff; }
   .condition-chip { display: inline-flex; min-width: 28px; justify-content: center; padding: 5px 8px; border-radius: 8px; background: rgba(153, 181, 206, .09); color: #c9d9e7; font-weight: 800; }
   .money-cell { white-space: nowrap; font-variant-numeric: tabular-nums; }
   .money-cell strong { color: #f7fbff; }
