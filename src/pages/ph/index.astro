@@ -1,0 +1,60 @@
+---
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import TemporaryCollectionTable from '../../components/TemporaryCollectionTable.astro';
+
+const folderName = 'PH';
+const inventoryPath = join(process.cwd(), 'src', 'colecoes', folderName, 'inventario-cartas.json');
+const available = existsSync(inventoryPath);
+let cards = [];
+if (available) {
+  try {
+    const parsed = JSON.parse(readFileSync(inventoryPath, 'utf8'));
+    cards = Array.isArray(parsed) ? parsed : [];
+  } catch (_) {
+    cards = [];
+  }
+}
+---
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="theme-color" content="#050a12" />
+    <title>Coleção do PH | Vault TCG</title>
+  </head>
+  <body>
+    <main>
+      <div class="ph-pricing-note" role="note">
+        <strong>Critério da coleção do PH:</strong> mínimo = 51% do menor preço de referência da MYP no estado indicado (D/DM, SP, HP ou MP), arredondado a centavos.
+        Os preços são uma cotação manual de 12/11/2026, sem atualização automática. Quantidade: 1 por carta.
+      </div>
+      <TemporaryCollectionTable
+        owner="PH"
+        folderName={folderName}
+        cards={cards}
+        available={available}
+        marketplaceLabel="MYP"
+        showSourceLinks={true}
+      />
+    </main>
+  </body>
+</html>
+<style>
+  :global(html) { background: #050a12; }
+  .ph-pricing-note {
+    box-sizing: border-box;
+    width: min(1500px, calc(100% - 32px));
+    margin: 32px auto -18px;
+    padding: 14px 18px;
+    border: 1px solid rgba(133, 188, 240, .22);
+    border-radius: 14px;
+    background: #0b1b2c;
+    color: #cfe4f7;
+    font: 0.9rem/1.6 Inter, ui-sans-serif, system-ui, sans-serif;
+  }
+  .ph-pricing-note strong { color: #fff; }
+  @media (max-width: 760px) { .ph-pricing-note { width: calc(100% - 20px); margin-top: 16px; } }
+</style>
