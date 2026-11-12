@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import TemporaryCollectionTable from '../../components/TemporaryCollectionTable.astro';
 
 const folderName = 'PH';
-const inventoryPath = join(process.cwd(), 'src', 'colecoes', folderName, 'inventario-cartas.json');
+const inventoryPath = join(process.cwd(), 'src', 'consultas-temporarias', folderName, 'inventario-cartas.json');
 const available = existsSync(inventoryPath);
 let cards = [];
 if (available) {
