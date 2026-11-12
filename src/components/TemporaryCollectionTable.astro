@@ -69,6 +69,7 @@ const normalizedCards = cards
   })
   .sort((a, b) => b.rankValue - a.rankValue || a.name.localeCompare(b.name, 'pt-BR'));
 
+const hasQuickSale = normalizedCards.some((card) => card.quickSale !== null);
 const totalMinimum = normalizedCards.reduce((sum, card) => sum + (card.minimum ?? 0) * card.quantity, 0);
 const totalQuickSale = normalizedCards.reduce((sum, card) => sum + (card.quickSale ?? 0) * card.quantity, 0);
 const totalLeague = normalizedCards.reduce((sum, card) => sum + (card.league ?? 0) * card.quantity, 0);
@@ -101,9 +102,9 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
     </div>
   ) : (
     <>
-      <div class="temporary-sheet__summary">
+      <div class:list={['temporary-sheet__summary', !hasQuickSale && 'without-quick']}>
         <article><span>Mínimo total</span><strong>{money(totalMinimum)}</strong></article>
-        <article><span>Venda rápida total</span><strong>{money(totalQuickSale)}</strong></article>
+        {hasQuickSale && <article><span>Venda rápida total</span><strong>{money(totalQuickSale)}</strong></article>}
         <article><span>Menor {marketplaceLabel} total</span><strong>{money(totalLeague)}</strong></article>
         <article><span>Preço médio total</span><strong>{money(totalAverage)}</strong></article>
       </div>
@@ -124,7 +125,7 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
           <span>Ordenar</span>
           <select data-table-sort>
             <option value="minimum-desc">Mínimo: maior primeiro</option>
-            <option value="quick-desc">Venda rápida: maior primeiro</option>
+            {hasQuickSale && <option value="quick-desc">Venda rápida: maior primeiro</option>}
             <option value="league-desc">Menor {marketplaceLabel}: maior primeiro</option>
             <option value="average-desc">Preço médio: maior primeiro</option>
             <option value="name-asc">Nome: A–Z</option>
@@ -143,7 +144,7 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
               <th>Estado</th>
               <th>Qtd.</th>
               <th>Mínimo</th>
-              <th>Venda rápida</th>
+              {hasQuickSale && <th>Venda rápida</th>}
               <th>Menor {marketplaceLabel}</th>
               <th>Preço médio</th>
             </tr>
@@ -183,7 +184,7 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
                 <td><span class="condition-chip">{card.condition}</span></td>
                 <td>{card.quantity}</td>
                 <td class="money-cell"><strong>{money(card.minimum)}</strong></td>
-                <td class="money-cell">{money(card.quickSale)}</td>
+                {hasQuickSale && <td class="money-cell">{money(card.quickSale)}</td>}
                 <td class="money-cell">{money(card.league)}</td>
                 <td class="money-cell">{money(card.average)}</td>
               </tr>
@@ -263,6 +264,7 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
   .temporary-sheet__count strong { display: block; font-size: 1.55rem; }
   .temporary-sheet__count span { color: #87a0b8; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; }
   .temporary-sheet__summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 22px 0; }
+  .temporary-sheet__summary.without-quick { grid-template-columns: repeat(3, 1fr); }
   .temporary-sheet__summary article { padding: 18px 20px; border: 1px solid rgba(145, 190, 230, .14); border-radius: 18px; background: linear-gradient(145deg, rgba(13, 28, 45, .94), rgba(8, 17, 28, .86)); }
   .temporary-sheet__summary span { display: block; margin-bottom: 5px; color: #7f99b2; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
   .temporary-sheet__summary strong { font-size: clamp(1.25rem, 2.5vw, 1.85rem); letter-spacing: -.035em; }
@@ -304,7 +306,7 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
   @media (max-width: 760px) {
     .temporary-sheet { width: min(100% - 20px, 1500px); padding-top: 28px; }
     .temporary-sheet__hero { align-items: flex-start; flex-direction: column; }
-    .temporary-sheet__summary { grid-template-columns: 1fr; }
+    .temporary-sheet__summary, .temporary-sheet__summary.without-quick { grid-template-columns: 1fr; }
     .temporary-sheet__tools { grid-template-columns: 1fr; }
   }
 </style>
