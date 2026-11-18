@@ -10,7 +10,7 @@
     "Imagem": "",
     "Menor Liga": 79.5,
     "Media Liga": 107.5,
-    "Minimo": 39.75,
+    "Minimo": 40.55,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -26,7 +26,7 @@
     "Imagem": "",
     "Menor Liga": 30,
     "Media Liga": 53.5,
-    "Minimo": 15,
+    "Minimo": 15.3,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -42,7 +42,7 @@
     "Imagem": "Gardevoir-EX_RC30.jpg",
     "Menor Liga": 40,
     "Media Liga": 81.42,
-    "Minimo": 20,
+    "Minimo": 20.4,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -58,7 +58,7 @@
     "Imagem": "",
     "Menor Liga": 60,
     "Media Liga": 80,
-    "Minimo": 30,
+    "Minimo": 30.6,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -74,7 +74,7 @@
     "Imagem": "",
     "Menor Liga": 90,
     "Media Liga": 123.4,
-    "Minimo": 45,
+    "Minimo": 45.9,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -90,7 +90,7 @@
     "Imagem": "Mewtwo EX_62-162.png",
     "Menor Liga": 15,
     "Media Liga": 22.96,
-    "Minimo": 7.5,
+    "Minimo": 7.65,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -99,14 +99,14 @@
     "Id": "PH-07",
     "Nome": "M Lucario EX",
     "Número": "55/111",
-    "Coleção": "XY 3: Punhos Furiosos (borda normal)",
+    "Coleção": "XY 3: Punhos Furiosos",
     "Idioma": "Não informado",
     "Estado": "D",
     "Quantidade": 1,
     "Imagem": "",
     "Menor Liga": 30,
     "Media Liga": 30,
-    "Minimo": 15,
+    "Minimo": 15.3,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -122,7 +122,7 @@
     "Imagem": "M Latios EX_59-108.jpg",
     "Menor Liga": 45,
     "Media Liga": 56.25,
-    "Minimo": 22.5,
+    "Minimo": 22.95,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -131,14 +131,14 @@
     "Id": "PH-09",
     "Nome": "M Heracross EX",
     "Número": "5/111",
-    "Coleção": "XY 3: Punhos Furiosos (borda normal)",
+    "Coleção": "XY 3: Punhos Furiosos",
     "Idioma": "Não informado",
     "Estado": "D",
     "Quantidade": 1,
     "Imagem": "",
     "Menor Liga": 10,
     "Media Liga": 15,
-    "Minimo": 5,
+    "Minimo": 5.1,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -154,7 +154,7 @@
     "Imagem": "",
     "Menor Liga": 10.9,
     "Media Liga": 15.85,
-    "Minimo": 5.45,
+    "Minimo": 5.56,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -170,7 +170,7 @@
     "Imagem": "M Mewtwo-EX_159.png",
     "Menor Liga": 165,
     "Media Liga": 170,
-    "Minimo": 82.5,
+    "Minimo": 84.15,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -186,7 +186,7 @@
     "Imagem": "",
     "Menor Liga": 8,
     "Media Liga": 18.6,
-    "Minimo": 4,
+    "Minimo": 4.08,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -202,7 +202,7 @@
     "Imagem": "",
     "Menor Liga": 25,
     "Media Liga": 25,
-    "Minimo": 12.5,
+    "Minimo": 12.75,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -218,7 +218,7 @@
     "Imagem": "Kyogre-EX da Equipe Aqua_6.png",
     "Menor Liga": 88,
     "Media Liga": 110.8,
-    "Minimo": 44,
+    "Minimo": 44.88,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -234,7 +234,7 @@
     "Imagem": "",
     "Menor Liga": 16.99,
     "Media Liga": 24.98,
-    "Minimo": 8.49,
+    "Minimo": 8.66,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -250,7 +250,7 @@
     "Imagem": "",
     "Menor Liga": 15,
     "Media Liga": 30.82,
-    "Minimo": 7.5,
+    "Minimo": 7.65,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -266,7 +266,7 @@
     "Imagem": "",
     "Menor Liga": 15,
     "Media Liga": 20,
-    "Minimo": 7.5,
+    "Minimo": 7.65,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -282,7 +282,7 @@
     "Imagem": "",
     "Menor Liga": 8,
     "Media Liga": 13.13,
-    "Minimo": 4,
+    "Minimo": 4.08,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -298,7 +298,7 @@
     "Imagem": "",
     "Menor Liga": 19,
     "Media Liga": 19,
-    "Minimo": 9.5,
+    "Minimo": 9.69,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -314,7 +314,7 @@
     "Imagem": "",
     "Menor Liga": 25,
     "Media Liga": 34.33,
-    "Minimo": 12.5,
+    "Minimo": 12.75,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -328,9 +328,9 @@
     "Estado": "HP",
     "Quantidade": 1,
     "Imagem": "M Glalie EX_35-162.png",
-    "Menor Liga": 48.89,
+    "Menor Liga": 50.89,
     "Media Liga": 54.76,
-    "Minimo": 24.45,
+    "Minimo": 25.95,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -346,7 +346,7 @@
     "Imagem": "M Absol-EX_XY63.png",
     "Menor Liga": 39.9,
     "Media Liga": 66.4,
-    "Minimo": 19.95,
+    "Minimo": 20.35,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -362,7 +362,7 @@
     "Imagem": "",
     "Menor Liga": 19.5,
     "Media Liga": 21.82,
-    "Minimo": 9.75,
+    "Minimo": 9.95,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -378,7 +378,7 @@
     "Imagem": "",
     "Menor Liga": 79.99,
     "Media Liga": 79.99,
-    "Minimo": 39.99,
+    "Minimo": 40.79,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -394,7 +394,7 @@
     "Imagem": "",
     "Menor Liga": 24,
     "Media Liga": 24,
-    "Minimo": 12,
+    "Minimo": 12.24,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -410,7 +410,7 @@
     "Imagem": "",
     "Menor Liga": 85,
     "Media Liga": 85,
-    "Minimo": 42.5,
+    "Minimo": 43.35,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
@@ -426,7 +426,7 @@
     "Imagem": "Gardevoir GX_93-147.jpg",
     "Menor Liga": 39.99,
     "Media Liga": 39.99,
-    "Minimo": 20,
+    "Minimo": 20.39,
     "Venda Rapida": null,
     "Preço": null,
     "À venda": false
