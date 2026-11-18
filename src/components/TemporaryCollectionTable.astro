@@ -9,10 +9,12 @@ interface Props {
   cards: CardRow[];
   available?: boolean;
   marketplaceLabel?: string;
+  showLanguage?: boolean;
   showSourceLinks?: boolean;
 }
 
-const { owner, folderName, cards = [], available = true, marketplaceLabel = 'Liga', showSourceLinks = false } = Astro.props;
+const { owner, folderName, cards = [], available = true, marketplaceLabel = 'Liga', showLanguage = true, showSourceLinks = false } = Astro.props;
+const lowestPriceLabel = marketplaceLabel ? `Menor ${marketplaceLabel}` : 'Menor preço';
 const rawBase = import.meta.env.BASE_URL || '/';
 const base = rawBase.endsWith('/') ? rawBase : `${rawBase}/`;
 
@@ -105,14 +107,14 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
       <div class:list={['temporary-sheet__summary', !hasQuickSale && 'without-quick']}>
         <article><span>Mínimo total</span><strong>{money(totalMinimum)}</strong></article>
         {hasQuickSale && <article><span>Venda rápida total</span><strong>{money(totalQuickSale)}</strong></article>}
-        <article><span>Menor {marketplaceLabel} total</span><strong>{money(totalLeague)}</strong></article>
+        <article><span>{lowestPriceLabel} total</span><strong>{money(totalLeague)}</strong></article>
         <article><span>Preço médio total</span><strong>{money(totalAverage)}</strong></article>
       </div>
 
       <aside class="temporary-sheet__notice" aria-label="Aviso sobre os valores">
         <strong>Aviso sobre os valores</strong>
         <p>O valor médio nunca será alcançado.</p>
-        <p>Dificilmente chega ao valor mais baixo da {marketplaceLabel}.</p>
+        <p>Dificilmente chega ao {marketplaceLabel ? `valor mais baixo da ${marketplaceLabel}` : 'menor preço de referência'}.</p>
         <p>Nunca aceite propostas abaixo do valor mínimo, a não ser em casos de cartas em estado D ou inferiores.</p>
       </aside>
 
@@ -126,7 +128,7 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
           <select data-table-sort>
             <option value="minimum-desc">Mínimo: maior primeiro</option>
             {hasQuickSale && <option value="quick-desc">Venda rápida: maior primeiro</option>}
-            <option value="league-desc">Menor {marketplaceLabel}: maior primeiro</option>
+            <option value="league-desc">{lowestPriceLabel}: maior primeiro</option>
             <option value="average-desc">Preço médio: maior primeiro</option>
             <option value="name-asc">Nome: A–Z</option>
           </select>
@@ -140,12 +142,12 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
               <th class="rank-col">#</th>
               <th class="image-col">Carta</th>
               <th>Informações</th>
-              <th>Idioma</th>
+              {showLanguage && <th>Idioma</th>}
               <th>Estado</th>
               <th>Qtd.</th>
               <th>Mínimo</th>
               {hasQuickSale && <th>Venda rápida</th>}
-              <th>Menor {marketplaceLabel}</th>
+              <th>{lowestPriceLabel}</th>
               <th>Preço médio</th>
             </tr>
           </thead>
@@ -180,7 +182,7 @@ const totalAverage = normalizedCards.reduce((sum, card) => sum + (card.average ?
                   <small>{card.collection}</small>
                   {showSourceLinks && card.mypUrl && <a href={card.mypUrl} target="_blank" rel="noopener noreferrer" class="external-price-link">Ver carta na MYP ↗</a>}
                 </td>
-                <td>{card.language}</td>
+                {showLanguage && <td>{card.language}</td>}
                 <td><span class="condition-chip">{card.condition}</span></td>
                 <td>{card.quantity}</td>
                 <td class="money-cell"><strong>{money(card.minimum)}</strong></td>
